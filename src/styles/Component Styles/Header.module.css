@@ -1,0 +1,278 @@
+.header {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 10px 20px;
+  flex-direction: column;
+}
+
+.desktopMenu {
+  margin: auto 0;
+}
+
+.contactSection {
+  display: inline-block;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto;
+}
+
+.contactName {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.contactDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  /* Aligns items to the right within the container */
+  color: yellow;
+  width: 100%;
+  /* Ensures the container takes the full width of its parent */
+  font-size: 1rem;
+  box-sizing: border-box;
+  /* Ensures padding is included in the width */
+}
+
+.contactDetails div {
+  /* display: flex;          Use flex for individual items */
+  align-items: center;
+  /* Align icon and text vertically */
+  white-space: nowrap;
+  /* Prevent wrapping of text within the div */
+}
+
+.contactDetails a {
+  color: black;
+  text-decoration: none;
+  font-weight: 600;
+  /* Removed flex-wrap here since it's not needed */
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  /* Ensures icon and text are aligned horizontally */
+  gap: 8px;
+  /* Adjusts spacing between the icon and the text */
+}
+
+.contactDetails a:hover {
+  text-decoration: underline;
+}
+
+/* Icon size */
+.icon {
+  width: 20px;
+  /* Increase to 1rem for better visibility */
+  margin-right: 8px;
+  /* Adjust spacing if necessary */
+  color: black;
+}
+
+
+/* Navigation Bar Styling */
+.navBar {
+  display: flex;
+  /* Aligns items in a row */
+  align-items: flex-end;
+  /* Aligns items to the bottom of the container */
+  flex-wrap: wrap;
+  /* Allows wrapping if needed */
+  gap: 20px;
+  /* Space between navigation items */
+  width: 100%;
+  /* Takes full width of the parent */
+  justify-content: space-between;
+  /* Distributes items evenly across the width */
+}
+
+
+.navBar a,
+.websiteTitle {
+  font-weight: 700;
+  color: black;
+  text-decoration: none;
+  position: relative;
+}
+
+.navBar a {
+  margin-right: 20px;
+}
+
+.navBar a::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background-color: black;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.navBar a:hover {
+  color: black;
+}
+
+.navBar a:hover::after,
+.navBar a.active::after {
+  width: 100%;
+  opacity: 1;
+}
+
+.sticky {
+  position: fixed;
+  z-index: 9999;
+}
+
+.websiteTitle {
+  background-color: #F9F7F7;
+  margin-left: auto;
+  padding: 15px 15px 0 0;
+}
+
+.mobileMenu {
+  display: none;
+}
+
+.logo {
+  width: 20%;
+  max-width: 300px;
+  height: auto;
+  margin-right: auto;
+}
+
+
+
+/* Contact Section (Mobile Center Alignment) */
+@media (max-width: 767px) {
+  .contactSection {
+    display: flex;
+    justify-content: center;
+    /* Center the contact section horizontally */
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .contactDetails {
+    align-items: center;
+    /* Center icons and text vertically */
+    text-align: center;
+    /* Center align text */
+  }
+
+  .navBar {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .websiteTitle {
+    display: none;
+    /* Hide title on mobile */
+  }
+
+  .logo {
+    width: 175px;
+    margin-right: auto;
+  }
+
+  .mobileMenu {
+    display: inline;
+    width: 10%;
+    height: 10%;
+  }
+
+  .hamburgerMenu {
+    cursor: pointer;
+    color: black;
+    width: 10%;
+    display: inline;
+  }
+
+  .mobileNavLinks {
+    pointer-events: none;
+    visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 150px;
+    /* Adjust to position below the navbar */
+    left: 0;
+    right: 0;
+    background-color: white;
+    padding: 10px 0;
+    z-index: 1000;
+    opacity: 0;
+    width: 70%;
+    align-items: center;
+    margin: 0 auto;
+    border-radius: 10px;
+    /* Adds rounded corners */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    transform: translateY(0px);
+    transition: opacity 0.3s ease;
+    /* Smooth transition */
+  }
+
+  .mobileNavLinks.showMobileMenu {
+    display: flex;
+    /* Show links when menu is open */
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .mobileNavLinks a {
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  .desktopMenu {
+    display: none;
+  }
+}
+.langButton {
+  font-weight: 700;
+  color: black;
+  text-decoration: none;
+  position: relative;
+}
+
+.langButton:hover {
+  color: black;
+}
+.langButton::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background-color: black;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.langButton:hover {
+  color: black;
+}
+
+.langButton:hover::after,
+.langButton.active::after {
+  width: 100%;
+  opacity: 1;
+}
