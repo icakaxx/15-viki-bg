@@ -1,6 +1,5 @@
 import Header from './Layout Components/Header'
 //import Transition from './Layout Components/Transition'
-import Footer from './Layout Components/Footer'
 import styles from '../styles/Component Styles/Layout.module.css'
 import { Analytics } from "@vercel/analytics/react"
 
@@ -21,9 +20,6 @@ const Layout = ({ children }) => {
           {children}
         </main>
         {/* </Transition> */}
-        <div className={styles.footerWrapper}>
-          <Footer />
-        </div>
       </div>
     </>
   )

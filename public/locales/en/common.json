@@ -17,6 +17,10 @@
   },
   "nav": {
     "home": "Home",
+    "services": "Services",
+    "buy_air_conditioner": "Buy Air Conditioner",
+    "contacts": "Contacts",
+    "make_inquiry": "Make Inquiry",
     "details": "Details",
     "gallery": "Gallery",
     "dates": "Available Dates",

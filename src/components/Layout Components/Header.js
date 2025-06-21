@@ -1,124 +1,156 @@
 import React, { useState } from "react";
 import Link from "next/link";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPhone, faEnvelope, faBars } from "@fortawesome/free-solid-svg-icons";
+import Image from "next/image";
+import { FiSearch, FiShare2, FiMenu } from "react-icons/fi";
 import styles from "../../styles/Component Styles/Header.module.css";
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 
 /**
- * A navigation bar component for the website.
- * Includes responsive design with separate menus for desktop and mobile.
+ * Apple-inspired sticky header component with minimal design
+ * Features responsive navigation with hamburger menu for mobile
  */
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-
-  // Toggles the mobile menu visibility
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-  const { t } = useTranslation('common');
+  const [languageOpen, setLanguageOpen] = useState(false);
+  
+  const { t, ready } = useTranslation('common');
   const router = useRouter();
   const { locale } = router;
-  const { i18n } = useTranslation();
-  const isEnglish = i18n.language === 'en';
+
+  // Debug log
+  console.log('Translation ready:', ready, 'Locale:', locale);
+
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const toggleLanguage = () => setLanguageOpen(!languageOpen);
+
+  const navigationLinks = [
+    { href: "#", key: "nav.home" },
+    { href: "#", key: "nav.services" },
+    { href: "#", key: "nav.buy_air_conditioner" },
+    { href: "#", key: "nav.contacts" },
+    { href: "#", key: "nav.make_inquiry" }
+  ];
 
   return (
-    <div className={styles.header}>
-      {/* Contact Info Section */}
-      <div className={styles.contactSection}>
-        <div className={styles.contactDetails}>
-          <div className={styles.contactItem}>
-            <FontAwesomeIcon icon={faPhone} className={styles.icon} />
-            <a href="tel:+359886790681">+359886790681 - {t('contact.niki')}</a>
-          </div>
-          <div className={styles.contactItem}>
-            <FontAwesomeIcon icon={faPhone} className={styles.icon} />
-            <a href="tel:+359884535509">+359884535509 - {t('contact.kika')}</a>
-          </div>
-          <div className={styles.contactItem}>
-            <FontAwesomeIcon icon={faEnvelope} className={styles.icon} />
-            <a href="mailto:abstract.apartments@gmail.com">abstract.apartments@gmail.com</a>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation Bar */}
-      <div className={styles.navBar}>
+    <header className={styles.header}>
+      <div className={styles.container}>
         {/* Logo */}
         <div className={styles.logo}>
-          <Link href="/"><img src={isEnglish ? "/Images/Logo.png" : "/Images/Logo_Bulgarian.png"} alt="Logo" className={styles.logoImage} /></Link>
+          <Link href="/" aria-label="Home">
+            <Image
+              src="/favicon.ico"
+              alt="Logo"
+              width={32}
+              height={32}
+              className={styles.logoImage}
+            />
+          </Link>
         </div>
 
-        {/* Desktop Menu */}
-        <div className={styles.desktopMenu}>
-          <Link href="/" locale={i18n.language}>{t('nav.home')}</Link>
-          <Link href="/about" locale={i18n.language}>{t('nav.details')}</Link>
-          <Link href="/services" locale={i18n.language}>{t('nav.gallery')}</Link>
-          <Link href="/AvailableDates" locale={i18n.language}>{t('nav.dates')}</Link>
-          <Link href="/PriceList" locale={i18n.language}>{t('nav.pricelist')}</Link>
-          <Link href="/contact" locale={i18n.language}>{t('nav.contact')}</Link>
-          <Link href="/reviews" locale={i18n.language}>{t('nav.reviews')}</Link>
+        {/* Desktop Navigation */}
+        <nav className={styles.desktopNav} aria-label="Main navigation">
+          <ul className={styles.navList}>
+            {navigationLinks.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className={styles.navLink}>
+                  {ready ? t(link.key) : link.key}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-          <button
-            onClick={() =>
-              router.push(router.pathname, router.asPath, {
-                locale: locale === 'en' ? 'bg' : 'en',
-              })
-            }
-            className={styles.langButton}
+        {/* Desktop Actions */}
+        <div className={styles.desktopActions}>
+          <button 
+            className={styles.iconButton} 
+            aria-label="Search"
+            type="button"
           >
-            {locale === 'en' ? '🇧🇬 BG' : '🇬🇧 EN'}
+            <FiSearch className={styles.icon} />
           </button>
-
-        </div>
-
-        {/* Mobile Menu */}
-        <div className={styles.mobileMenu}>
-          <div className={styles.hamburgerMenu} onClick={toggleMenu}>
-            <FontAwesomeIcon icon={faBars} />
-          </div>
-          <div
-            className={`${styles.mobileNavLinks} ${menuOpen ? styles.showMobileMenu : ""
-              }`}
+          
+          <button 
+            className={styles.iconButton} 
+            aria-label="Share"
+            type="button"
           >
-            <Link href="/" locale={i18n.language} onClick={toggleMenu}>
-              {t('nav.home')}
-            </Link>
-            <Link href="/about" locale={i18n.language} onClick={toggleMenu}>
-              {t('nav.details')}
-            </Link>
-            <Link href="/services" locale={i18n.language} onClick={toggleMenu}>
-              {t('nav.gallery')}
-            </Link>
-            <Link href="/AvailableDates" locale={i18n.language} onClick={toggleMenu}>
-              {t('nav.dates')}
-            </Link>
-            <Link href="/PriceList" locale={i18n.language} onClick={toggleMenu}>
-              {t('nav.pricelist')}
-            </Link>
-            <Link href="/contact" locale={i18n.language} onClick={toggleMenu}>
-              {t('nav.contact')}
-            </Link>
-            <Link href="/reviews" locale={i18n.language} onClick={toggleMenu}>
-              {t('nav.reviews')}
-            </Link>
-            <button
-              onClick={() => {
-                router.push(router.pathname, router.asPath, {
-                  locale: locale === 'en' ? 'bg' : 'en',
-                });
-                toggleMenu();
-              }}              className={styles.langButton}
-            >
-              {locale === 'en' ? '🇧🇬 BG' : '🇬🇧 EN'}
-            </button>
-
-            {/* <button onClick={toggleLanguage} className={styles.langButton}>
-              {language === 'EN' ? 'BG' : 'EN'}
-            </button> */}
+            <FiShare2 className={styles.icon} />
+          </button>
+          
+          <div className={styles.languageSelector}>
+                         <button
+               className={styles.languageButton}
+               onClick={toggleLanguage}
+               aria-haspopup="listbox"
+               aria-expanded={languageOpen}
+               type="button"
+             >
+               🌐 {locale === 'en' ? 'English' : 'Български'} ▼
+             </button>
+             {languageOpen && (
+               <div className={styles.languageDropdown}>
+                 <button
+                   onClick={() => {
+                     router.push(router.pathname, router.asPath, { locale: 'en' });
+                     setLanguageOpen(false);
+                   }}
+                   className={`${styles.languageOption} ${locale === 'en' ? styles.activeLanguage : ''}`}
+                   type="button"
+                 >
+                   🇺🇸 English
+                 </button>
+                 <button
+                   onClick={() => {
+                     router.push(router.pathname, router.asPath, { locale: 'bg' });
+                     setLanguageOpen(false);
+                   }}
+                   className={`${styles.languageOption} ${locale === 'bg' ? styles.activeLanguage : ''}`}
+                   type="button"
+                 >
+                   🇧🇬 Български
+                 </button>
+               </div>
+             )}
           </div>
         </div>
+
+        {/* Mobile Hamburger Menu */}
+        <div className={styles.mobileActions}>
+          <button
+            className={styles.hamburgerButton}
+            onClick={toggleMenu}
+            aria-label="Toggle navigation menu"
+            aria-expanded={menuOpen}
+            type="button"
+          >
+            <FiMenu className={styles.hamburgerIcon} />
+          </button>
+        </div>
+
+        {/* Mobile Navigation Drawer - Placeholder for future implementation */}
+        {menuOpen && (
+          <div className={styles.mobileNav}>
+            <nav aria-label="Mobile navigation">
+              <ul className={styles.mobileNavList}>
+                                 {navigationLinks.map((link) => (
+                   <li key={link.href}>
+                     <Link 
+                       href={link.href} 
+                       className={styles.mobileNavLink}
+                       onClick={() => setMenuOpen(false)}
+                     >
+                       {ready ? t(link.key) : link.key}
+                     </Link>
+                   </li>
+                 ))}
+              </ul>
+            </nav>
+          </div>
+        )}
       </div>
-    </div>
+    </header>
   );
 };
 

@@ -17,6 +17,10 @@
   },
   "nav": {
     "home": "Начало",
+    "services": "Услуги",
+    "buy_air_conditioner": "Купи климатик",
+    "contacts": "Контакти",
+    "make_inquiry": "Направи запитване",
     "details": "Детайли",
     "gallery": "Галерия",
     "dates": "Налични Дати",
