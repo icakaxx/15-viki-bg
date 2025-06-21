@@ -10,6 +10,8 @@ export default function Home() {
     <div className={styles.container}>
       <h1 className={styles.title}>Welcome to Next.js!</h1>
       <p className={styles.subtitle}>This is the home page.</p>
+      <p className={styles.subtitle}>This is the home page.</p>
+      <p className={styles.subtitle}>This is the home page.</p>
     </div>
   );
 }
