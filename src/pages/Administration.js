@@ -166,24 +166,27 @@ const AdministrationProducts = () => {
         }
     };
 
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  
     const handleImageUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  
+  const file = e.target.files[0];
+  if (!file) return;
 
-        const { data, error } = await supabase
-            .storage
-            .from('product-images')
-            .upload(`product-${Date.now()}`, file);
+  const { data, error } = await supabase
+    .storage
+    .from('product-images')
+    .upload(`product-${Date.now()}`, file);
 
-        if (error) {
-            console.error('Image upload error:', error);
-            return;
-        }
+  if (error) {
+    console.error('Image upload error:', error);
+    return;
+  }
 
-        const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${data.path}`;
-        setFormData((prev) => ({ ...prev, ImageURL: imageUrl }));
-    };
+  const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${data.path}`;
+  setFormData((prev) => ({ ...prev, ImageURL: imageUrl }));
+};
+
 
     if (!isAuthenticated) {
         return (
