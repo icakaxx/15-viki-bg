@@ -2,15 +2,19 @@ import Link from 'next/link'
 import { FaFacebook, FaInstagram, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCalendarAlt, FaClock } from 'react-icons/fa'
 import styles from '../../styles/Component Styles/Footer.module.css'
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 
 /**
  * The Footer component displays the footer section of the website, including social icons, menu items, and a wave effect container.
  * @returns {JSX.Element} The JSX code for the Footer component.
  */
 const Footer = () => {
-  const { t } = useTranslation('common');
-  const { i18n } = useTranslation();
-  const isEnglish = i18n.language === 'en';
+  const { t, i18n } = useTranslation('common');
+  const router = useRouter();
+  
+  // Safe access to locale with fallback
+  const locale = router?.locale || i18n?.language || 'bg';
+  const isEnglish = locale === 'en';
 
   return (
     <>
@@ -48,13 +52,13 @@ const Footer = () => {
           </Link>
         </div>
         <div className={styles.menu}>
-          <Link href="/" locale={i18n.language}>{t('nav.home')}</Link>
-          <Link href="/about" locale={i18n.language}>{t('nav.details')}</Link>
-          <Link href="/services" locale={i18n.language}>{t('nav.gallery')}</Link>
-          <Link href="/AvailableDates" locale={i18n.language}>{t('nav.dates')}</Link>
-          <Link href="/PriceList" locale={i18n.language}>{t('nav.pricelist')}</Link>
-          <Link href="/contact" locale={i18n.language}>{t('nav.contact')}</Link>
-          <Link href="/reviews" locale={i18n.language}>{t('nav.reviews')}</Link>
+          <Link href="/" locale={locale}>{t('nav.home')}</Link>
+          <Link href="/about" locale={locale}>{t('nav.details')}</Link>
+          <Link href="/services" locale={locale}>{t('nav.gallery')}</Link>
+          <Link href="/AvailableDates" locale={locale}>{t('nav.dates')}</Link>
+          <Link href="/PriceList" locale={locale}>{t('nav.pricelist')}</Link>
+          <Link href="/contact" locale={locale}>{t('nav.contact')}</Link>
+          <Link href="/reviews" locale={locale}>{t('nav.reviews')}</Link>
         </div>
         <p className={styles.p} >{t('nav.АМА')}</p>
         <p className={styles.p} >{t('nav.creator')}</p>

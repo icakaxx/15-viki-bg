@@ -15,11 +15,21 @@ const Header = () => {
 
   // Toggles the mobile menu visibility
   const toggleMenu = () => setMenuOpen(!menuOpen);
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const router = useRouter();
-  const { locale } = router;
-  const { i18n } = useTranslation();
-  const isEnglish = i18n.language === 'en';
+  
+  // Safe access to router properties with fallbacks
+  const locale = router?.locale || 'bg';
+  const isEnglish = locale === 'en';
+
+  // Safe router navigation function
+  const handleLanguageSwitch = () => {
+    if (router && router.push) {
+      router.push(router.pathname, router.asPath, {
+        locale: locale === 'en' ? 'bg' : 'en',
+      });
+    }
+  };
 
   return (
     <div className={styles.header}>
@@ -50,20 +60,16 @@ const Header = () => {
 
         {/* Desktop Menu */}
         <div className={styles.desktopMenu}>
-          <Link href="/" locale={i18n.language}>{t('nav.home')}</Link>
-          <Link href="/about" locale={i18n.language}>{t('nav.details')}</Link>
-          <Link href="/services" locale={i18n.language}>{t('nav.gallery')}</Link>
-          <Link href="/AvailableDates" locale={i18n.language}>{t('nav.dates')}</Link>
-          <Link href="/PriceList" locale={i18n.language}>{t('nav.pricelist')}</Link>
-          <Link href="/contact" locale={i18n.language}>{t('nav.contact')}</Link>
-          <Link href="/reviews" locale={i18n.language}>{t('nav.reviews')}</Link>
+          <Link href="/" locale={locale}>{t('nav.home')}</Link>
+          <Link href="/about" locale={locale}>{t('nav.details')}</Link>
+          <Link href="/services" locale={locale}>{t('nav.gallery')}</Link>
+          <Link href="/AvailableDates" locale={locale}>{t('nav.dates')}</Link>
+          <Link href="/PriceList" locale={locale}>{t('nav.pricelist')}</Link>
+          <Link href="/contact" locale={locale}>{t('nav.contact')}</Link>
+          <Link href="/reviews" locale={locale}>{t('nav.reviews')}</Link>
 
           <button
-            onClick={() =>
-              router.push(router.pathname, router.asPath, {
-                locale: locale === 'en' ? 'bg' : 'en',
-              })
-            }
+            onClick={handleLanguageSwitch}
             className={styles.langButton}
           >
             {locale === 'en' ? '🇧🇬 BG' : '🇬🇧 EN'}
@@ -80,41 +86,36 @@ const Header = () => {
             className={`${styles.mobileNavLinks} ${menuOpen ? styles.showMobileMenu : ""
               }`}
           >
-            <Link href="/" locale={i18n.language} onClick={toggleMenu}>
+            <Link href="/" locale={locale} onClick={toggleMenu}>
               {t('nav.home')}
             </Link>
-            <Link href="/about" locale={i18n.language} onClick={toggleMenu}>
+            <Link href="/about" locale={locale} onClick={toggleMenu}>
               {t('nav.details')}
             </Link>
-            <Link href="/services" locale={i18n.language} onClick={toggleMenu}>
+            <Link href="/services" locale={locale} onClick={toggleMenu}>
               {t('nav.gallery')}
             </Link>
-            <Link href="/AvailableDates" locale={i18n.language} onClick={toggleMenu}>
+            <Link href="/AvailableDates" locale={locale} onClick={toggleMenu}>
               {t('nav.dates')}
             </Link>
-            <Link href="/PriceList" locale={i18n.language} onClick={toggleMenu}>
+            <Link href="/PriceList" locale={locale} onClick={toggleMenu}>
               {t('nav.pricelist')}
             </Link>
-            <Link href="/contact" locale={i18n.language} onClick={toggleMenu}>
+            <Link href="/contact" locale={locale} onClick={toggleMenu}>
               {t('nav.contact')}
             </Link>
-            <Link href="/reviews" locale={i18n.language} onClick={toggleMenu}>
+            <Link href="/reviews" locale={locale} onClick={toggleMenu}>
               {t('nav.reviews')}
             </Link>
             <button
               onClick={() => {
-                router.push(router.pathname, router.asPath, {
-                  locale: locale === 'en' ? 'bg' : 'en',
-                });
+                handleLanguageSwitch();
                 toggleMenu();
-              }}              className={styles.langButton}
+              }}
+              className={styles.langButton}
             >
               {locale === 'en' ? '🇧🇬 BG' : '🇬🇧 EN'}
             </button>
-
-            {/* <button onClick={toggleLanguage} className={styles.langButton}>
-              {language === 'EN' ? 'BG' : 'EN'}
-            </button> */}
           </div>
         </div>
       </div>
