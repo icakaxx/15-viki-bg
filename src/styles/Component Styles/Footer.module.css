@@ -807,7 +807,7 @@
 }
 
 /* Screen Reader Only Text */
-:global(.sr-only) {
+.sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
