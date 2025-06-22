@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import styles from '../styles/Page Styles/Administration.module.css';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+// import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { createClient } from '@supabase/supabase-js';
 
 const fetchProducts = async () => {
@@ -342,10 +342,10 @@ const AdministrationProducts = () => {
 
 export default AdministrationProducts;
 
-export async function getStaticProps({ locale }) {
-    return {
-        props: {
-            ...(await serverSideTranslations(locale, ['common'])),
-        },
-    };
-}
+// export async function getStaticProps({ locale }) {
+//     return {
+//         props: {
+//             ...(await serverSideTranslations(locale, ['common'])),
+//         },
+//     };
+// }
