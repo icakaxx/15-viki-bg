@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import styles from '../styles/Page Styles/Administration.module.css';
-// import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { createClient } from '@supabase/supabase-js';
 
 const fetchProducts = async () => {
