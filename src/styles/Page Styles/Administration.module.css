@@ -1,0 +1,291 @@
+.adminPage {
+  max-width: 1700px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: sans-serif;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  
+}
+
+.heading {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #333;
+}
+
+.formSection {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin: 0 auto 2rem auto; /* This centers it */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  max-width: 500px; /* Optional: Limit width for better alignment */
+}
+
+.formSection h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #444;
+}
+
+.formSection input {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.formSection button {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  background-color: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.formSection button:hover {
+  background-color: #005bb5;
+}
+.loginContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 20px;
+  background-color: #f2f2f2;
+  padding: 40px;
+  border-radius: 20px;
+  max-width: 400px;
+  margin: 60px auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.loginContainer h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.loginContainer input {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.3s;
+}
+
+.loginContainer input:focus {
+  border-color: #666;
+}
+
+.loginContainer button {
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s;
+}
+
+.loginContainer button:hover {
+  background-color: #555;
+}
+
+.bookingsList {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.bookingsList h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #444;
+}
+
+.bookingsList table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.bookingsList th,
+.bookingsList td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.bookingsList th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+}
+
+.bookingsList td {
+  background-color: #fff;
+}
+
+.bookingsList button {
+  margin-right: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bookingsList button:first-of-type {
+  background-color: #f0ad4e;
+  color: white;
+}
+
+.bookingsList button:last-of-type {
+  background-color: #d9534f;
+  color: white;
+}
+
+.bookingsList button:hover {
+  opacity: 0.85;
+}
+@media (max-width: 756px) {
+  .bookingsList td::before {
+  content: attr(data-label) ": ";
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #444;
+}
+  .adminPage {
+    padding: 1rem;
+  }
+
+  .formSection,
+  .bookingsList {
+    padding: 1rem;
+  }
+
+  .formSection input {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .formSection button {
+    width: 100%;
+    margin: 1rem auto 
+  }
+
+  .bookingsList table,
+  .bookingsList thead,
+  .bookingsList tbody,
+  .bookingsList th,
+  .bookingsList td,
+  .bookingsList tr {
+    display: block;
+    width: 100%;
+  }
+
+  .bookingsList thead {
+    display: none;
+  }
+
+  .bookingsList tr {
+    margin-bottom: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    background: #fff;
+  }
+
+  .bookingsList td {
+    display: block;
+    border: none;
+    padding: 0.4rem 0;
+    font-size: 1rem;
+  }
+
+  .bookingsList td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.2rem;
+    color: #333;
+  }
+
+  /* Grouped field spacing */
+  .bookingsList td.grouped {
+    margin-top: 0.75rem;
+  }
+
+  /* Center action buttons */
+  .bookingsList td:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .bookingsList button {
+    flex-shrink: 0;
+  }
+
+  .cancelButton {
+    display: block;
+    margin: 1rem auto 0 auto;
+    width: fit-content;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .cancelButton:hover {
+    background-color: #d32f2f;
+  }
+}
+
+.currentBookingBox {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+}
+.cancelButton {
+  margin-left: 1rem;
+  background-color: #f44336 ; /* red */
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background-color: #d32f2f;
+}
+.overlappingRow .overlappingRowData{
+  background-color: #ff0000 !important;
+}
+
+.sortable:hover {
+  cursor: pointer;
+}
