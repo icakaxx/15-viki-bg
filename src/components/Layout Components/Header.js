@@ -1,68 +1,7 @@
-import React, { useState, useContext, createContext } from "react";
+import React, { useState, useContext, createContext, useEffect } from "react";
 import { FiMenu } from "react-icons/fi";
 import styles from "../../styles/Component Styles/Header.module.css";
-
-// Complete translation data including header and footer
-const translations = {
-  bg: {
-    nav: {
-      about: "За нас",
-      products: "Продукти и решения", 
-      buy_air_conditioner: "Купи климатици",
-      make_inquiry: "Направи запитване",
-      contact: "Контакти"
-    },
-    footer: {
-      tagline: "Качество и надеждностни решения от 2000",
-      navigation: "Навигация",
-      home: "Начало",
-      services: "Услуги", 
-      buy_air_conditioner: "Купи климатици",
-      make_inquiry: "Направи запитване",
-      contact: "Контакти",
-      imprint: "Правни условия",
-      phone: "Телефон",
-      email: "Имейл",
-      follow_us: "Последвайте ни",
-      rights_reserved: "Всички права запазени",
-      company_full: "БГВИКИ15 ЕООД",
-      company_english: "БГVIKI15 Ltd",
-      designed_by: "Дизайн",
-      back_to_top: "Върни се нагоре",
-      admin_title: "Администрация",
-      copyright_full: "© 2025 БГВИКИ15 ЕООД. Всички права запазени. | Дизайн: H&M WSPro"
-    }
-  },
-  en: {
-    nav: {
-      about: "About",
-      products: "Products & Solutions",
-      buy_air_conditioner: "Buy ACs", 
-      make_inquiry: "Make an inquiry",
-      contact: "Contact"
-    },
-    footer: {
-      tagline: "Quality and reliable solutions since 2000",
-      navigation: "Navigation",
-      home: "Home",
-      services: "Services",
-      buy_air_conditioner: "Buy ACs", 
-      make_inquiry: "Make an inquiry",
-      contact: "Contact",
-      imprint: "Terms & Conditions",
-      phone: "Phone",
-      email: "Email", 
-      follow_us: "Follow Us",
-      rights_reserved: "All rights reserved",
-      company_full: "БГVIKI15 Ltd",
-      company_english: "БГVIKI15 Ltd",
-      designed_by: "Designed by",
-      back_to_top: "Back to top",
-      admin_title: "Go to Administration",
-      copyright_full: "© 2025 БГVIKI15 Ltd. All rights reserved. | Designed by H&M WSPro"
-    }
-  }
-};
+import { loadTranslations, getTranslation } from "../../lib/i18n";
 
 // Language Context
 const LanguageContext = createContext();
@@ -70,16 +9,29 @@ const LanguageContext = createContext();
 // Language Provider Component
 export const LanguageProvider = ({ children }) => {
   const [locale, setLocale] = useState('bg');
+  const [translations, setTranslations] = useState({});
+  const [loading, setLoading] = useState(true);
+  
+  // Load translations when locale changes
+  useEffect(() => {
+    const loadLocaleTranslations = async () => {
+      setLoading(true);
+      try {
+        const translationData = await loadTranslations(locale);
+        setTranslations(translationData);
+      } catch (error) {
+        console.error('Failed to load translations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadLocaleTranslations();
+  }, [locale]);
   
   const t = (key) => {
-    const keys = key.split('.');
-    let value = translations[locale];
-    
-    for (const k of keys) {
-      value = value?.[k];
-    }
-    
-    return value || key;
+    if (loading) return key;
+    return getTranslation(translations, key);
   };
   
   const switchLanguage = (newLocale) => {
@@ -87,7 +39,7 @@ export const LanguageProvider = ({ children }) => {
   };
   
   return (
-    <LanguageContext.Provider value={{ locale, t, switchLanguage }}>
+    <LanguageContext.Provider value={{ locale, t, switchLanguage, loading }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -105,13 +57,9 @@ const useLanguage = () => {
   return context;
 };
 
-/**
- * Multilingual Mitsubishi Electric inspired header component
- * Features clean corporate layout with BG/EN language switching
- */
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { locale, t, switchLanguage } = useLanguage();
+  const { locale, t, switchLanguage, loading } = useLanguage();
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
@@ -119,10 +67,40 @@ const Header = () => {
   const navigationItems = [
     { href: "#", translationKey: "nav.about" },
     { href: "#", translationKey: "nav.products" },
-    { href: "#", translationKey: "nav.buy_air_conditioner" },
-    { href: "#", translationKey: "nav.make_inquiry" },
+    { href: "#", translationKey: "nav.buy" },
+    { href: "#", translationKey: "nav.inquiry" },
     { href: "#", translationKey: "nav.contact" }
   ];
+
+  if (loading) {
+    return (
+      <header className={styles.header}>
+        <div className={styles.container}>
+          <div className={styles.leftSection}>
+            <h1 className={styles.logoContainer}>
+              <a href="/" aria-label="Homepage" className={styles.logoLink}>
+                <img 
+                  src="/images/bgVIKI15-eood.jpg" 
+                  alt="VIKI15 EOOD Logo" 
+                  className={styles.logoImage}
+                />
+              </a>
+            </h1>
+          </div>
+          <nav className={styles.centerNav}>
+            <div>Loading...</div>
+          </nav>
+          <div className={styles.rightSection}>
+            <div className={styles.languageSwitcher}>
+              <button className={styles.langOption}>BG</button>
+              <span className={styles.langSeparator}>|</span>
+              <button className={styles.langOption}>EN</button>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className={styles.header}>

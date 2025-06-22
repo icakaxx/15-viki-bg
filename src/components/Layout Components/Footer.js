@@ -16,10 +16,6 @@ const useLanguage = () => {
   };
 };
 
-/**
- * Enhanced Footer component for БГВИКИ15 ЕООД air conditioning company
- * Features responsive 3-column layout, language integration, accessibility improvements, and modern UX
- */
 const Footer = () => {
   const { locale, t } = useLanguage();
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -82,12 +78,11 @@ const Footer = () => {
   };
 
   const navigationItems = [
-    { href: "/", translationKey: "footer.home", title: t('footer.home') },
-    { href: "/services", translationKey: "footer.services", title: t('footer.services') },
-    { href: "/buy", translationKey: "footer.buy_air_conditioner", title: t('footer.buy_air_conditioner') },
-    { href: "/inquiry", translationKey: "footer.make_inquiry", title: t('footer.make_inquiry') },
-    { href: "/contact", translationKey: "footer.contact", title: t('footer.contact') },
-    { href: "/terms", translationKey: "footer.imprint", title: t('footer.imprint') }
+    { href: "/", translationKey: "footer.navigation.about", title: t('footer.navigation.about') },
+    { href: "/products", translationKey: "footer.navigation.products", title: t('footer.navigation.products') },
+    { href: "/buy", translationKey: "footer.navigation.buy", title: t('footer.navigation.buy') },
+    { href: "/inquiry", translationKey: "footer.navigation.inquiry", title: t('footer.navigation.inquiry') },
+    { href: "/contact", translationKey: "footer.navigation.contact", title: t('footer.navigation.contact') }
   ];
 
   const socialLinks = [
@@ -95,21 +90,23 @@ const Footer = () => {
       href: "https://facebook.com/bgviki15", 
       icon: FiFacebook, 
       label: "Facebook",
-      title: "Follow us on Facebook"
+      title: t('footer.socialLabels.facebook')
     },
     { 
       href: "https://instagram.com/bgviki15", 
       icon: FiInstagram, 
       label: "Instagram",
-      title: "Follow us on Instagram"
+      title: t('footer.socialLabels.instagram')
     },
     { 
       href: "https://wa.me/359888123456", 
       icon: FaWhatsapp, 
       label: "WhatsApp",
-      title: "Contact us on WhatsApp"
+      title: t('footer.socialLabels.whatsapp')
     }
   ];
+
+  const companyName = "БГВИКИ15 ЕООД";
 
   return (
     <>
@@ -122,7 +119,7 @@ const Footer = () => {
               {!logoError ? (
                 <img 
                   src="/images/bgVIKI15-footer.png" 
-                  alt={`${t('footer.company_full')} - ${t('footer.tagline')}`}
+                  alt={`${companyName} - ${t('footer.brandInfo.tagline')}`}
                   className={styles.footerLogo}
                   onLoad={handleLogoLoad}
                   onError={handleLogoError}
@@ -136,25 +133,25 @@ const Footer = () => {
                 <div 
                   className={styles.logoFallback}
                   role="img"
-                  aria-label={`${t('footer.company_full')} Logo`}
+                  aria-label={`${companyName} Logo`}
                 >
-                  {t('footer.company_full')}
+                  {companyName}
                 </div>
               )}
             </div>
             <h2 id="brand-heading" className={styles.companyName}>
-              {t('footer.company_full')}
+              {companyName}
             </h2>
-            <p className={styles.tagline}>{t('footer.tagline')}</p>
+            <p className={styles.tagline}>{t('footer.brandInfo.tagline')}</p>
             <div className={styles.countryLabel} aria-label="Company location">
-              Bulgaria
+              {t('country')}
             </div>
           </section>
 
           {/* Quick Navigation Section (Center) */}
           <section className={styles.navigationSection} aria-labelledby="nav-heading">
             <h3 id="nav-heading" className={styles.sectionTitle}>
-              {t('footer.navigation')}
+              {t('footer.navigation.title')}
             </h3>
             <nav aria-label="Footer navigation" role="navigation">
               <ul className={styles.navList}>
@@ -179,14 +176,14 @@ const Footer = () => {
           {/* Contact & Social Section (Right) */}
           <section className={styles.contactSection} aria-labelledby="contact-heading">
             <h3 id="contact-heading" className={styles.sectionTitle}>
-              {t('footer.contact')}
+              {t('footer.contact.title')}
             </h3>
             
             <div className={styles.contactInfo} role="group" aria-label="Contact information">
               <div className={styles.contactItem}>
                 <FiPhone className={styles.contactIcon} aria-hidden="true" />
-                <div>
-                  <span className={styles.contactLabel}>{t('footer.phone')}</span>
+                <div className={styles.contactDetails}>
+                  <span className={styles.contactLabel}>{t('footer.contact.phone')}</span>
                   <a 
                     href="tel:+359888123456" 
                     className={styles.contactLink}
@@ -200,8 +197,8 @@ const Footer = () => {
               
               <div className={styles.contactItem}>
                 <FiMail className={styles.contactIcon} aria-hidden="true" />
-                <div>
-                  <span className={styles.contactLabel}>{t('footer.email')}</span>
+                <div className={styles.contactDetails}>
+                  <span className={styles.contactLabel}>{t('footer.contact.email')}</span>
                   <a 
                     href="mailto:info@bgviki15.bg" 
                     className={styles.contactLink}
@@ -215,7 +212,7 @@ const Footer = () => {
             </div>
 
             <div className={styles.socialSection}>
-              <h4 className={styles.socialTitle}>{t('footer.follow_us')}</h4>
+              <h4 className={styles.socialTitle}>{t('footer.contact.social')}</h4>
               <div className={styles.socialIcons} role="list" aria-label="Social media links">
                 {socialLinks.map((social, index) => {
                   const IconComponent = social.icon;
@@ -246,7 +243,7 @@ const Footer = () => {
         <div className={styles.bottomBar}>
           <div className={styles.bottomContainer}>
             <p className={styles.copyright}>
-              {t('footer.copyright_full')} (
+              {t('footer.copyright')} | {t('footer.attribution')} (
               <a 
                 href="mailto:hm.websiteprovisioning@gmail.com" 
                 className={styles.emailLink}
@@ -260,8 +257,8 @@ const Footer = () => {
             <a 
               href="/Administration" 
               className={styles.adminLink} 
-              title={t('footer.admin_title')}
-              aria-label={t('footer.admin_title')}
+              title={t('footer.admin')}
+              aria-label={t('footer.admin')}
             >
               ⚙️
             </a>
@@ -274,12 +271,12 @@ const Footer = () => {
         <button
           onClick={scrollToTop}
           className={styles.backToTop}
-          aria-label={t('footer.back_to_top')}
-          title={t('footer.back_to_top')}
+          aria-label={t('footer.backToTop')}
+          title={t('footer.backToTop')}
           type="button"
         >
           <FiChevronUp className={styles.backToTopIcon} aria-hidden="true" />
-          <span className="sr-only">{t('footer.back_to_top')}</span>
+          <span className="sr-only">{t('footer.backToTop')}</span>
         </button>
       )}
     </>
