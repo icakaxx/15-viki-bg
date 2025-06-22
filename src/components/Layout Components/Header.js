@@ -29,6 +29,7 @@ const translations = {
       company_english: "БГVIKI15 Ltd",
       designed_by: "Дизайн",
       back_to_top: "Върни се нагоре",
+      admin_title: "Администрация",
       copyright_full: "© 2025 БГВИКИ15 ЕООД. Всички права запазени. | Дизайн: H&M WSPro"
     }
   },
@@ -57,6 +58,7 @@ const translations = {
       company_english: "БГVIKI15 Ltd",
       designed_by: "Designed by",
       back_to_top: "Back to top",
+      admin_title: "Go to Administration",
       copyright_full: "© 2025 БГVIKI15 Ltd. All rights reserved. | Designed by H&M WSPro"
     }
   }

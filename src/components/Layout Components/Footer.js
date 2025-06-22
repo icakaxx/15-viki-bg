@@ -257,6 +257,14 @@ const Footer = () => {
               </a>
               )
             </p>
+            <a 
+              href="/Administration" 
+              className={styles.adminLink} 
+              title={t('footer.admin_title')}
+              aria-label={t('footer.admin_title')}
+            >
+              ⚙️
+            </a>
           </div>
         </div>
       </footer>
