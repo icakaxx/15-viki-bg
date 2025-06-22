@@ -1,154 +1,236 @@
-import React, { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { FiSearch, FiShare2, FiMenu } from "react-icons/fi";
+import React, { useState, useContext, createContext } from "react";
+import { FiMenu } from "react-icons/fi";
 import styles from "../../styles/Component Styles/Header.module.css";
-import { useTranslation } from 'next-i18next';
-import { useRouter } from 'next/router';
+
+// Complete translation data including header and footer
+const translations = {
+  bg: {
+    nav: {
+      about: "За нас",
+      products: "Продукти и решения", 
+      buy_air_conditioner: "Купи климатици",
+      make_inquiry: "Направи запитване",
+      contact: "Контакти"
+    },
+    footer: {
+      tagline: "Качество и надеждностни решения от 2000",
+      navigation: "Навигация",
+      home: "Начало",
+      services: "Услуги", 
+      buy_air_conditioner: "Купи климатици",
+      make_inquiry: "Направи запитване",
+      contact: "Контакти",
+      imprint: "Правни условия",
+      phone: "Телефон",
+      email: "Имейл",
+      follow_us: "Последвайте ни",
+      rights_reserved: "Всички права запазени",
+      company_full: "БГВИКИ15 ЕООД",
+      company_english: "БГVIKI15 Ltd",
+      designed_by: "Дизайн",
+      back_to_top: "Върни се нагоре",
+      copyright_full: "© 2025 БГВИКИ15 ЕООД. Всички права запазени. | Дизайн: H&M WSPro"
+    }
+  },
+  en: {
+    nav: {
+      about: "About",
+      products: "Products & Solutions",
+      buy_air_conditioner: "Buy ACs", 
+      make_inquiry: "Make an inquiry",
+      contact: "Contact"
+    },
+    footer: {
+      tagline: "Quality and reliable solutions since 2000",
+      navigation: "Navigation",
+      home: "Home",
+      services: "Services",
+      buy_air_conditioner: "Buy ACs", 
+      make_inquiry: "Make an inquiry",
+      contact: "Contact",
+      imprint: "Terms & Conditions",
+      phone: "Phone",
+      email: "Email", 
+      follow_us: "Follow Us",
+      rights_reserved: "All rights reserved",
+      company_full: "БГVIKI15 Ltd",
+      company_english: "БГVIKI15 Ltd",
+      designed_by: "Designed by",
+      back_to_top: "Back to top",
+      copyright_full: "© 2025 БГVIKI15 Ltd. All rights reserved. | Designed by H&M WSPro"
+    }
+  }
+};
+
+// Language Context
+const LanguageContext = createContext();
+
+// Language Provider Component
+export const LanguageProvider = ({ children }) => {
+  const [locale, setLocale] = useState('bg');
+  
+  const t = (key) => {
+    const keys = key.split('.');
+    let value = translations[locale];
+    
+    for (const k of keys) {
+      value = value?.[k];
+    }
+    
+    return value || key;
+  };
+  
+  const switchLanguage = (newLocale) => {
+    setLocale(newLocale);
+  };
+  
+  return (
+    <LanguageContext.Provider value={{ locale, t, switchLanguage }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+// Export the context for use in Footer
+export { LanguageContext };
+
+// Custom hook to use language context
+const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};
 
 /**
- * Apple-inspired sticky header component with minimal design
- * Features responsive navigation with hamburger menu for mobile
+ * Multilingual Mitsubishi Electric inspired header component
+ * Features clean corporate layout with BG/EN language switching
  */
 const Header = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [languageOpen, setLanguageOpen] = useState(false);
-  
-  const { t, ready } = useTranslation('common');
-  const router = useRouter();
-  const { locale } = router;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { locale, t, switchLanguage } = useLanguage();
 
-  // Debug log
-  console.log('Translation ready:', ready, 'Locale:', locale);
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
-  const toggleMenu = () => setMenuOpen(!menuOpen);
-  const toggleLanguage = () => setLanguageOpen(!languageOpen);
-
-  const navigationLinks = [
-    { href: "#", key: "nav.home" },
-    { href: "#", key: "nav.services" },
-    { href: "#", key: "nav.buy_air_conditioner" },
-    { href: "#", key: "nav.contacts" },
-    { href: "#", key: "nav.make_inquiry" }
+  // Navigation items with translation keys
+  const navigationItems = [
+    { href: "#", translationKey: "nav.about" },
+    { href: "#", translationKey: "nav.products" },
+    { href: "#", translationKey: "nav.buy_air_conditioner" },
+    { href: "#", translationKey: "nav.make_inquiry" },
+    { href: "#", translationKey: "nav.contact" }
   ];
 
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        {/* Logo */}
-        <div className={styles.logo}>
-          <Link href="/" aria-label="Home">
-            <Image
-              src="/favicon.ico"
-              alt="Logo"
-              width={32}
-              height={32}
-              className={styles.logoImage}
-            />
-          </Link>
+        
+        {/* Left Section - Logo */}
+        <div className={styles.leftSection}>
+          <h1 className={styles.logoContainer}>
+            <a href="/" aria-label="Homepage" className={styles.logoLink}>
+              <img 
+                src="/images/bgVIKI15-eood.jpg" 
+                alt="VIKI15 EOOD Logo" 
+                className={styles.logoImage}
+              />
+            </a>
+          </h1>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className={styles.desktopNav} aria-label="Main navigation">
+        {/* Center Navigation */}
+        <nav className={styles.centerNav} aria-label="Main navigation">
           <ul className={styles.navList}>
-            {navigationLinks.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} className={styles.navLink}>
-                  {ready ? t(link.key) : link.key}
-                </Link>
+            {navigationItems.map((item, index) => (
+              <li key={index}>
+                <a href={item.href} className={styles.navLink}>
+                  {t(item.translationKey)}
+                </a>
               </li>
             ))}
           </ul>
         </nav>
 
-        {/* Desktop Actions */}
-        <div className={styles.desktopActions}>
-          <button 
-            className={styles.iconButton} 
-            aria-label="Search"
-            type="button"
-          >
-            <FiSearch className={styles.icon} />
-          </button>
-          
-          <button 
-            className={styles.iconButton} 
-            aria-label="Share"
-            type="button"
-          >
-            <FiShare2 className={styles.icon} />
-          </button>
-          
-          <div className={styles.languageSelector}>
-                         <button
-               className={styles.languageButton}
-               onClick={toggleLanguage}
-               aria-haspopup="listbox"
-               aria-expanded={languageOpen}
-               type="button"
-             >
-               🌐 {locale === 'en' ? 'English' : 'Български'} ▼
-             </button>
-             {languageOpen && (
-               <div className={styles.languageDropdown}>
-                 <button
-                   onClick={() => {
-                     router.push(router.pathname, router.asPath, { locale: 'en' });
-                     setLanguageOpen(false);
-                   }}
-                   className={`${styles.languageOption} ${locale === 'en' ? styles.activeLanguage : ''}`}
-                   type="button"
-                 >
-                   🇺🇸 English
-                 </button>
-                 <button
-                   onClick={() => {
-                     router.push(router.pathname, router.asPath, { locale: 'bg' });
-                     setLanguageOpen(false);
-                   }}
-                   className={`${styles.languageOption} ${locale === 'bg' ? styles.activeLanguage : ''}`}
-                   type="button"
-                 >
-                   🇧🇬 Български
-                 </button>
-               </div>
-             )}
+        {/* Right Section - Language & Utilities */}
+        <div className={styles.rightSection}>
+          {/* Language Switcher */}
+          <div className={styles.languageSwitcher}>
+            <button 
+              className={`${styles.langOption} ${locale === 'bg' ? styles.activeLang : ''}`}
+              onClick={() => switchLanguage('bg')}
+              type="button"
+            >
+              BG
+            </button>
+            <span className={styles.langSeparator}>|</span>
+            <button 
+              className={`${styles.langOption} ${locale === 'en' ? styles.activeLang : ''}`}
+              onClick={() => switchLanguage('en')}
+              type="button"
+            >
+              EN
+            </button>
           </div>
         </div>
 
-        {/* Mobile Hamburger Menu */}
-        <div className={styles.mobileActions}>
+        {/* Mobile Menu Toggle */}
+        <div className={styles.mobileMenuToggle}>
           <button
-            className={styles.hamburgerButton}
-            onClick={toggleMenu}
-            aria-label="Toggle navigation menu"
-            aria-expanded={menuOpen}
+            className={styles.mobileMenuButton}
+            onClick={toggleMobileMenu}
+            aria-label="Toggle mobile menu"
+            aria-expanded={mobileMenuOpen}
             type="button"
           >
-            <FiMenu className={styles.hamburgerIcon} />
+            <FiMenu className={styles.mobileIcon} />
           </button>
         </div>
 
-        {/* Mobile Navigation Drawer - Placeholder for future implementation */}
-        {menuOpen && (
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
           <div className={styles.mobileNav}>
             <nav aria-label="Mobile navigation">
               <ul className={styles.mobileNavList}>
-                                 {navigationLinks.map((link) => (
-                   <li key={link.href}>
-                     <Link 
-                       href={link.href} 
-                       className={styles.mobileNavLink}
-                       onClick={() => setMenuOpen(false)}
-                     >
-                       {ready ? t(link.key) : link.key}
-                     </Link>
-                   </li>
-                 ))}
+                {navigationItems.map((item, index) => (
+                  <li key={index}>
+                    <a 
+                      href={item.href} 
+                      className={styles.mobileNavLink}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {t(item.translationKey)}
+                    </a>
+                  </li>
+                ))}
               </ul>
+              {/* Mobile Language Switcher */}
+              <div className={styles.mobileLangSwitcher}>
+                <button 
+                  className={`${styles.mobileLangOption} ${locale === 'bg' ? styles.activeLang : ''}`}
+                  onClick={() => {
+                    switchLanguage('bg');
+                    setMobileMenuOpen(false);
+                  }}
+                  type="button"
+                >
+                  🇧🇬 Български
+                </button>
+                <button 
+                  className={`${styles.mobileLangOption} ${locale === 'en' ? styles.activeLang : ''}`}
+                  onClick={() => {
+                    switchLanguage('en');
+                    setMobileMenuOpen(false);
+                  }}
+                  type="button"
+                >
+                  🇺🇸 English
+                </button>
+              </div>
             </nav>
           </div>
         )}
+
       </div>
     </header>
   );

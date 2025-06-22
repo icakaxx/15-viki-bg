@@ -1,3 +1,17 @@
+/* CSS Custom Properties for Header */
+:root {
+  --primary-color: #333333;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --border-light: #e0e0e0;
+  --background-white: #ffffff;
+  --hover-color: #0066cc;
+  --active-color: #0066cc;
+  --transition-smooth: 0.2s ease;
+  --header-height: 72px;
+}
+
 html,
 body {
   background-color: #F9F7F7  ;
