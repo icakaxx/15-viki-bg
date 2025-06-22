@@ -25,6 +25,10 @@ const AdministrationProducts = () => {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const fileInputRef = useRef(null);
     const [imageFilename, setImageFilename] = useState('');
+    const [filters, setFilters] = useState({
+        Brand: '', Model: '', Colour: '', Type: '',
+        CapacityBTU: '', EnergyRating: '', Price: '', PreviousPrice: ''
+    });
 
     useEffect(() => {
         loadProducts();
@@ -33,6 +37,13 @@ const AdministrationProducts = () => {
     const loadProducts = async () => {
         const data = await fetchProducts();
         setProducts(data);
+    };
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters((prev) => ({ ...prev, [name]: value }));
+    };
+    const handleClearFilters = () => {
+        setFilters({});
     };
 
     const handleChange = (e) => {
@@ -70,7 +81,14 @@ const AdministrationProducts = () => {
         });
     };
 
-    const sortedProducts = [...products];
+    const filteredProducts = products.filter((p) =>
+        Object.entries(filters).every(([key, value]) =>
+            value === '' ? true : String(p[key]).toLowerCase().includes(value.toLowerCase())
+        )
+    );
+
+    const sortedProducts = [...filteredProducts];
+
     if (sortConfig.key && sortConfig.direction) {
         sortedProducts.sort((a, b) => {
             const aVal = a[sortConfig.key];
@@ -237,9 +255,35 @@ const AdministrationProducts = () => {
                     </button>
                 )}
             </div>
-
             <div className={styles.bookingsList}>
                 <h2>Продукти</h2>
+                <div className={styles.filters}>
+                    {[
+                        { key: 'Brand', label: 'Марка' },
+                        { key: 'Model', label: 'Модел' },
+                        { key: 'Colour', label: 'Цвят' },
+                        { key: 'Type', label: 'Тип' },
+                        { key: 'CapacityBTU', label: 'Капацитет (BTU)' },
+                        { key: 'EnergyRating', label: 'Енергиен Клас' },
+                        { key: 'Price', label: 'Цена (€)' },
+                        { key: 'PreviousPrice', label: 'Стара Цена (€)' },
+                    ].map(({ key, label }) => (
+                        <div key={key} className={styles.inputGroup}>
+                            <input
+                                type="text"
+                                id={key}
+                                value={filters[key] || ''}
+                                onChange={(e) => setFilters((prev) => ({ ...prev, [key]: e.target.value }))}
+                                required
+                            />
+                            <label htmlFor={key}>{label}</label>
+                        </div>
+                    ))}
+                </div>
+                <button onClick={handleClearFilters} className={styles.clearButton}>
+                    Изчисти Филтрите
+                </button>
+
                 <table>
                     <thead>
                         <tr>
@@ -292,8 +336,7 @@ const AdministrationProducts = () => {
                         ))}
                     </tbody>
                 </table>
-            </div>
-        </div>
+            </div ></div>
     );
 };
 

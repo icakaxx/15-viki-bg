@@ -289,3 +289,68 @@
 .sortable:hover {
   cursor: pointer;
 }
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 35px;
+  margin-bottom: 20px;
+}
+
+.filters input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.inputGroup {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 12px 8px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+
+.inputGroup label {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  color: #666;
+  background: #fff;
+  padding: 0 4px;
+  transition: 0.2s;
+  pointer-events: none;
+}
+
+.inputGroup input:focus + label,
+.inputGroup input:not(:placeholder-shown) + label {
+  top: -8px;
+  left: 8px;
+  font-size: 11px;
+  color: #0070f3;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.clearButton {
+  background: #0070f3 !important;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.clearButton:hover {
+  background: #0059c9;
+}
