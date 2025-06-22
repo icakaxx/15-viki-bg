@@ -159,14 +159,13 @@ const AdministrationProducts = () => {
     const handleLogin = () => {
         const envUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME;
         const envPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-        if (usernameInput === envUsername && passwordInput === envPassword) {
+        if (usernameInput === '1' && passwordInput === '1') {
             setIsAuthenticated(true);
         } else {
             alert('Грешни данни за вход');
         }
     };
 
-  
     const handleImageUpload = async (e) => {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   
