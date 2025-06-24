@@ -254,7 +254,7 @@ const Footer = () => {
           </section>
         </div>
 
-        {/* Bottom Bar with Attribution */}
+        {/* Bottom Bar with Atribution */}
         <div className={styles.bottomBar}>
           <div className={styles.bottomContainer}>
             <p className={styles.copyright}>
