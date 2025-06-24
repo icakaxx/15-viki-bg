@@ -1,0 +1,13 @@
+.container {
+  padding: 2rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 2rem;
+  color: #333;
+}
+
+.subtitle {
+  color: #666;
+}
