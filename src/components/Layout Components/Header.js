@@ -69,7 +69,7 @@ const Header = () => {
     { href: "#", translationKey: "nav.products" },
     { href: "#", translationKey: "nav.buy" },
     { href: "#", translationKey: "nav.inquiry" },
-    { href: "#", translationKey: "nav.contact" }
+    { href: "/Contact", translationKey: "nav.contact" }
   ];
 
   if (loading) {
