@@ -1,0 +1,222 @@
+.contactPage {
+  display: block;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 30px;
+  margin: auto;
+}
+
+.options {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin: 50px 0;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 200px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 20px;
+}
+
+.option:hover {
+  border-color: #333;
+  background: #f0f0f0;
+}
+
+.option svg {
+  font-size: 75px;
+  margin-bottom: 10px;
+}
+
+.active {
+  background: #d0eaff;
+  border-color: #007bff;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-basis: 200px;
+  justify-content: center;
+}
+
+.contactInfo a {
+  color: #007aff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.formWrapper {
+  flex: 0 0 60%;
+}
+
+
+.formWrapper form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 20px 20px 20px 20px;
+  column-gap: 40px;
+  border: 2px solid #515254;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px #515254;
+  background-color: #fff;
+}
+
+
+.formWrapper form input,
+.formWrapper form button {
+  padding: 12px 0px ;
+}
+
+.formWrapper button {
+  padding: 12px 20px;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.contactDetails {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.contactInfo {
+  flex: 0 0 35%;
+  /* or a fixed width */
+}
+
+.formWrapper {
+  flex: 0 0 60%;
+}
+
+.floatingInput {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.floatingInputFullWidth {
+  position: relative;
+  margin-bottom: 20px;
+  grid-column: span 2;
+}
+
+.floatingInput input,
+.floatingInputFullWidth input {
+  text-indent: 10px;
+  width: 100%;
+  padding: 12px 12px 12px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  font-size: 16px;
+  background: transparent;
+}
+
+.floatingInput label,
+.floatingInputFullWidth label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  padding: 0 5px;
+  color: #999;
+  font-size: 14px;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floatingInput input:focus+label,
+.floatingInput input:not(:placeholder-shown)+label,
+.floatingInputFullWidth input:focus+label,
+.floatingInputFullWidth input:not(:placeholder-shown)+label {
+  top: -8px;
+  left: 8px;
+  font-size: 12px;
+  color: #007aff;
+}
+
+.floatingInput select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+  appearance: none; /* removes default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  z-index: 1;
+}
+
+.floatingInput select:focus + label,
+.floatingInput select:not([value=""]) + label,
+.floatingInput select:valid + label {
+  top: -8px;
+  left: 8px;
+  font-size: 12px;
+  color: #007aff;
+  background: white;
+  padding: 0 5px;
+}
+
+/* To show the label when a value is selected */
+.floatingInput select:invalid + label {
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .contactPage {
+    flex-direction: column;
+  }
+
+  .options {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .option {
+    width: 140px;
+    height: 140px;
+    font-size: 16px;
+  }
+
+  .formWrapper {
+    flex: 1 1 100%;
+  }
+
+ .formWrapper form {
+    grid-template-columns: 1fr;
+    padding: 20px 10px;
+    row-gap: 12px;
+  }
+
+  .floatingInputFullWidth {
+    grid-column: span 1;
+  }
+
+  .formWrapper button {
+    width: 100%;
+    margin-top: 10px;
+  }
+}

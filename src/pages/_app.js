@@ -1,5 +1,5 @@
 import Layout from "@/components/Layout"
-// import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider} from "@chakra-ui/react";
 import { Nunito } from 'next/font/google'
 import '../styles/globals.css'
 // import BackToTop from "@/components/Page Components/BackToTop";
@@ -8,16 +8,15 @@ import '../styles/globals.css'
 const nunito = Nunito({
   subsets: ['latin'],
 })
-
 const MyApp = ({ Component, pageProps }) => (
-//   <ChakraProvider>
+<ChakraProvider >
     <main >
       <Layout>
         <Component {...pageProps} />
         {/* <BackToTop /> */}
       </Layout>
     </main>
-//   </ChakraProvider>
+ </ChakraProvider>
 )
 
 /**
