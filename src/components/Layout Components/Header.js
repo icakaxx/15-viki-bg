@@ -1,7 +1,10 @@
 import React, { useState, useContext, createContext, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { FiMenu } from "react-icons/fi";
 import styles from "../../styles/Component Styles/Header.module.css";
 import { loadTranslations, getTranslation } from "../../lib/i18n";
+import CartIcon from "../CartIcon";
 
 // Language Context
 const LanguageContext = createContext();
@@ -10,15 +13,28 @@ const LanguageContext = createContext();
 export const LanguageProvider = ({ children }) => {
   const [locale, setLocale] = useState('bg');
   const [translations, setTranslations] = useState({});
+  const [previousTranslations, setPreviousTranslations] = useState({});
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  
+  // Handle hydration safely
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // Load translations when locale changes
   useEffect(() => {
     const loadLocaleTranslations = async () => {
       setLoading(true);
       try {
+        // Keep previous translations for smooth transition
+        if (Object.keys(translations).length > 0) {
+          setPreviousTranslations(translations);
+        }
+        
         const translationData = await loadTranslations(locale);
         setTranslations(translationData);
+        setPreviousTranslations({}); // Clear previous once new ones are loaded
       } catch (error) {
         console.error('Failed to load translations:', error);
       } finally {
@@ -26,12 +42,28 @@ export const LanguageProvider = ({ children }) => {
       }
     };
     
-    loadLocaleTranslations();
-  }, [locale]);
+    // Only load translations after component is mounted (client-side)
+    if (mounted) {
+      loadLocaleTranslations();
+    }
+  }, [locale, mounted]);
   
   const t = (key) => {
-    if (loading) return key;
-    return getTranslation(translations, key);
+    // If not mounted yet (server-side), return the key
+    if (!mounted) {
+      return key;
+    }
+    
+    // During loading, use previous translations if available, otherwise use current
+    const activeTranslations = loading && Object.keys(previousTranslations).length > 0 
+      ? previousTranslations 
+      : translations;
+      
+    if (Object.keys(activeTranslations).length === 0) {
+      return key; // Only return key if no translations available at all
+    }
+    
+    return getTranslation(activeTranslations, key);
   };
   
   const switchLanguage = (newLocale) => {
@@ -39,7 +71,7 @@ export const LanguageProvider = ({ children }) => {
   };
   
   return (
-    <LanguageContext.Provider value={{ locale, t, switchLanguage, loading }}>
+    <LanguageContext.Provider value={{ locale, t, switchLanguage, loading: loading && mounted }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -60,16 +92,17 @@ const useLanguage = () => {
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { locale, t, switchLanguage, loading } = useLanguage();
+  const router = useRouter();
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
   // Navigation items with translation keys
   const navigationItems = [
-    { href: "#", translationKey: "nav.about" },
-    { href: "#", translationKey: "nav.products" },
-    { href: "#", translationKey: "nav.buy" },
-    { href: "#", translationKey: "nav.inquiry" },
-    { href: "#", translationKey: "nav.contact" }
+    { href: "/", translationKey: "nav.about" },
+    { href: "/products", translationKey: "nav.products" },
+    { href: "/buy", translationKey: "nav.buy" },
+    { href: "/inquiry", translationKey: "nav.inquiry" },
+    { href: "/contact", translationKey: "nav.contact" }
   ];
 
   if (loading) {
@@ -77,14 +110,17 @@ const Header = () => {
       <header className={styles.header}>
         <div className={styles.container}>
           <div className={styles.leftSection}>
+            <div className={styles.companyName}>
+              БГВИКИ15 ЕООД
+            </div>
             <h1 className={styles.logoContainer}>
-              <a href="/" aria-label="Homepage" className={styles.logoLink}>
+              <div className={styles.logoWrapper}>
                 <img 
                   src="/images/bgVIKI15-eood.jpg" 
                   alt="VIKI15 EOOD Logo" 
                   className={styles.logoImage}
                 />
-              </a>
+              </div>
             </h1>
           </div>
           <nav className={styles.centerNav}>
@@ -106,16 +142,19 @@ const Header = () => {
     <header className={styles.header}>
       <div className={styles.container}>
         
-        {/* Left Section - Logo */}
+        {/* Left Section - Company Name & Logo */}
         <div className={styles.leftSection}>
+          <div className={styles.companyName}>
+            БГВИКИ15 ЕООД
+          </div>
           <h1 className={styles.logoContainer}>
-            <a href="/" aria-label="Homepage" className={styles.logoLink}>
+            <div className={styles.logoWrapper}>
               <img 
                 src="/images/bgVIKI15-eood.jpg" 
                 alt="VIKI15 EOOD Logo" 
                 className={styles.logoImage}
               />
-            </a>
+            </div>
           </h1>
         </div>
 
@@ -124,16 +163,28 @@ const Header = () => {
           <ul className={styles.navList}>
             {navigationItems.map((item, index) => (
               <li key={index}>
-                <a href={item.href} className={styles.navLink}>
-                  {t(item.translationKey)}
-                </a>
+                {item.href.startsWith('#') ? (
+                  <a href={item.href} className={styles.navLink}>
+                    {t(item.translationKey)}
+                  </a>
+                ) : (
+                  <Link 
+                    href={item.href}
+                    className={`${styles.navLink} ${router.pathname === item.href ? styles.activeNavLink : ''}`}
+                  >
+                    {t(item.translationKey)}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
         </nav>
 
-        {/* Right Section - Language & Utilities */}
+        {/* Right Section - Cart, Language & Utilities */}
         <div className={styles.rightSection}>
+          {/* Cart Icon */}
+          <CartIcon />
+          
           {/* Language Switcher */}
           <div className={styles.languageSwitcher}>
             <button 
@@ -174,13 +225,23 @@ const Header = () => {
               <ul className={styles.mobileNavList}>
                 {navigationItems.map((item, index) => (
                   <li key={index}>
-                    <a 
-                      href={item.href} 
-                      className={styles.mobileNavLink}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {t(item.translationKey)}
-                    </a>
+                    {item.href.startsWith('#') ? (
+                      <a 
+                        href={item.href} 
+                        className={styles.mobileNavLink}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {t(item.translationKey)}
+                      </a>
+                    ) : (
+                      <Link 
+                        href={item.href}
+                        className={`${styles.mobileNavLink} ${router.pathname === item.href ? styles.activeMobileNavLink : ''}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {t(item.translationKey)}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

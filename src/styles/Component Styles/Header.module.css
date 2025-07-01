@@ -34,20 +34,22 @@
   font-weight: normal;
 }
 
-.logoLink {
+.logoWrapper {
   display: block;
-  text-decoration: none;
+  cursor: default;
 }
 
 .logoImage {
   width: 160px;
   height: 45px;
   object-fit: contain;
-  transition: opacity var(--transition-smooth);
+  transition: all var(--transition-smooth);
+  filter: brightness(1);
 }
 
-.logoLink:hover .logoImage {
-  opacity: 0.8;
+.logoWrapper:hover .logoImage {
+  transform: scale(1.05);
+  filter: brightness(1.1);
 }
 
 .countryLabel {
@@ -102,6 +104,15 @@
 }
 
 .navLink:hover::after {
+  width: 100%;
+}
+
+.activeNavLink {
+  color: var(--active-color, #2c5530);
+  font-weight: 600;
+}
+
+.activeNavLink::after {
   width: 100%;
 }
 
@@ -237,6 +248,12 @@
 
 .mobileNavLink:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.activeMobileNavLink {
+  background-color: rgba(44, 85, 48, 0.1);
+  color: #2c5530;
+  font-weight: 600;
 }
 
 /* Mobile Language Switcher */

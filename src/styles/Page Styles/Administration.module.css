@@ -9,12 +9,40 @@
   
 }
 
+.adminHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #eaeaea;
+}
+
 .heading {
   font-size: 2rem;
   font-weight: 600;
-  margin-bottom: 2rem;
+  margin: 0;
   text-align: center;
   color: #333;
+  flex: 1;
+}
+
+.logoutButton {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.logoutButton:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
 .formSection {
@@ -24,6 +52,44 @@
   margin: 0 auto 2rem auto; /* This centers it */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   max-width: 500px; /* Optional: Limit width for better alignment */
+  position: relative;
+}
+
+/* NEW: Form header with close button */
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.formHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #444;
+}
+
+.closeFormButton {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.closeFormButton:hover {
+  background-color: #f5f5f5;
+  color: #333;
+  border-color: #999;
 }
 
 .formSection h2 {
@@ -57,6 +123,26 @@
 .formSection button:hover {
   background-color: #005bb5;
 }
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.loadingText {
+  font-size: 1.2rem;
+  color: #666;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
 .loginContainer {
   display: flex;
   flex-direction: column;
@@ -173,6 +259,21 @@
 }
   .adminPage {
     padding: 1rem;
+  }
+
+  .adminHeader {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .heading {
+    font-size: 1.5rem;
+  }
+
+  .logoutButton {
+    width: auto;
+    align-self: center;
   }
 
   .formSection,
@@ -353,4 +454,779 @@
 
 .clearButton:hover {
   background: #0059c9;
+}
+
+/* Tab Navigation Styles */
+.tabNavigation {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #eaeaea;
+}
+
+.tab {
+  padding: 1rem 2rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  color: #0070f3;
+  border-bottom-color: #b3d9ff;
+}
+
+.activeTab {
+  color: #0070f3;
+  border-bottom-color: #0070f3;
+  font-weight: 600;
+}
+
+/* Orders Management Styles */
+.ordersSection {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.ordersSection h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #444;
+}
+
+.ordersContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.orderCard {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.orderCard:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.orderInfo h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.orderInfo p {
+  margin: 0.25rem 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.statusControls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.currentStatus {
+  text-align: right;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 120px;
+}
+
+.statusSelect {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.statusSelect:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.updating {
+  font-size: 0.8rem;
+  color: #666;
+  font-style: italic;
+}
+
+.orderActions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.historyButton {
+  padding: 0.5rem 1rem;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.historyButton:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+/* Order History Styles */
+.orderHistory {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.orderHistory h4 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.historyItem {
+  padding: 0.75rem;
+  background: white;
+  border-radius: 4px;
+  border-left: 4px solid #0070f3;
+}
+
+.historyTimestamp {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.historyChange {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.historyNotes {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive Design for Orders */
+@media (max-width: 768px) {
+  .tabNavigation {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .tab {
+    padding: 0.75rem 1rem;
+    text-align: center;
+  }
+  
+  .activeTab {
+    border-bottom: none;
+    background-color: #e3f2fd;
+  }
+  
+  .orderHeader {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .statusControls {
+    align-self: stretch;
+  }
+  
+  .statusBadge {
+    font-size: 0.75rem;
+  }
+  
+  .statusSelect {
+    width: 100%;
+  }
+  
+  .orderActions {
+    text-align: center;
+  }
+  
+  .historyButton {
+    width: 100%;
+    padding: 0.75rem;
+  }
+}
+
+/* Product Management Styles */
+.controlsSection {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.searchControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.searchInput {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  min-width: 300px;
+  font-size: 0.9rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.sortControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sortSelect {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.formGroup input,
+.formGroup select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.warningMessage {
+  background: #fff3cd;
+  color: #856404;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.imagePreview {
+  margin-top: 0.5rem;
+}
+
+.imagePreview img {
+  max-width: 100px;
+  max-height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.pricePreview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #e8f5e8;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.originalPrice {
+  text-decoration: line-through;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.discountedPricePreview {
+  font-weight: bold;
+  color: #28a745;
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.primaryButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.primaryButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: #545b62;
+}
+
+.productsList {
+  margin-top: 2rem;
+}
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* NEW: List actions with add button */
+.listActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.addActionButton {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.addActionButton:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* NEW: Pagination info and controls */
+.paginationInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.pageSizeControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pageSizeSelect {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background-color: white;
+}
+
+.paginationControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+}
+
+.paginationButton {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.paginationButton:disabled {
+  color: #ccc;
+  border-color: #e9ecef;
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.pageButton {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #666;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  text-align: center;
+}
+
+.pageButton:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.activePage {
+  background-color: #0070f3;
+  border-color: #0070f3;
+  color: white;
+}
+
+.activePage:hover {
+  background-color: #0051cc;
+  border-color: #0051cc;
+}
+
+.pageEllipsis {
+  padding: 0.5rem 0.25rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.errorMessage {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem 1rem;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}
+
+.loadingMessage {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.emptyMessage {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+.productsTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.productsTable th {
+  background: #f8f9fa;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.productsTable td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.archivedRow {
+  background: #f8f9fa;
+  opacity: 0.7;
+}
+
+.archivedBadge {
+  background: #6c757d;
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  margin-left: 0.5rem;
+}
+
+.priceCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.discountedPrice {
+  font-weight: bold;
+  color: #28a745;
+}
+
+.stockCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lowStock {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.lowStockBadge {
+  background: #dc3545;
+  color: white;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+}
+
+.productImage {
+  max-width: 60px;
+  max-height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.editButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.editButton:hover {
+  background: #0056b3;
+}
+
+.archiveButton {
+  background: #fd7e14;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.archiveButton:hover {
+  background: #e36209;
+}
+
+/* Mobile Product Management */
+@media (max-width: 768px) {
+  .controlsSection {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .searchInput {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .tableContainer {
+    font-size: 0.8rem;
+  }
+
+  .productsTable th,
+  .productsTable td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .controlsSection {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .listHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .addActionButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .formHeader {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .formHeader h2 {
+    font-size: 1.25rem;
+  }
+
+  .paginationInfo {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .paginationControls {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .pageNumbers {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .pageButton,
+  .paginationButton {
+    min-width: 36px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .pageEllipsis {
+    display: none;
+  }
 }

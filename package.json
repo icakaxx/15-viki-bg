@@ -14,12 +14,13 @@
     "@emotion/styled": "^11.14.0",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "@supabase/supabase-js": "^2.50.0",
+    "@supabase/supabase-js": "^2.50.2",
     "@vercel/analytics": "^1.5.0",
     "framer-motion": "^12.18.1",
     "next": "^15.3.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "node-fetch": "^3.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-icons": "^5.5.0"
   }
 }

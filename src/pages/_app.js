@@ -3,6 +3,8 @@ import Layout from "@/components/Layout"
 import { Nunito } from 'next/font/google'
 import '../styles/globals.css'
 // import BackToTop from "@/components/Page Components/BackToTop";
+import { CartProvider } from '../contexts/CartContext';
+import { LanguageProvider } from '../components/Layout Components/Header';
 
 //Changing subset of 'Nunito' font to latin and setting it to its own variable
 const nunito = Nunito({
@@ -12,10 +14,14 @@ const nunito = Nunito({
 const MyApp = ({ Component, pageProps }) => (
 //   <ChakraProvider>
     <main >
-      <Layout>
-        <Component {...pageProps} />
-        {/* <BackToTop /> */}
-      </Layout>
+      <LanguageProvider>
+        <CartProvider>
+          <Layout>
+            <Component {...pageProps} />
+            {/* <BackToTop /> */}
+          </Layout>
+        </CartProvider>
+      </LanguageProvider>
     </main>
 //   </ChakraProvider>
 )
