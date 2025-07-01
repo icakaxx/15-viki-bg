@@ -450,7 +450,9 @@
     },
     "tabs": {
       "products": "Управление на Продукти",
-      "orders": "Управление на Поръчки"
+      "orders": "Управление на Поръчки",
+      "orderHistory": "История на поръчки",
+      "installations": "Монтажи тази седмица"
     },
     "products": {
       "title": "Продукти",
@@ -517,6 +519,31 @@
       "errors": {
         "updateFailed": "Грешка при обновяване на статуса",
         "loadFailed": "Възникна грешка при зареждане"
+      },
+      "history": {
+        "title": "История на поръчки",
+        "description": "Всички инсталирани поръчки с филтриране, търсене и странициране",
+        "searchPlaceholder": "Търси по клиент, телефон, марка, модел...",
+        "dateRangePlaceholder": "Период (скоро)",
+        "productTypePlaceholder": "Тип продукт (скоро)",
+        "installationDate": "Инст. дата",
+        "customer": "Клиент",
+        "phone": "Телефон",
+        "products": "Продукти",
+        "total": "Общо (лв/€)",
+        "actions": "Действия",
+        "loading": "Зареждане...",
+        "error": "Грешка при зареждане",
+        "noOrders": "Няма намерени поръчки",
+        "detailsButton": "Детайли",
+        "previousPage": "Предишна",
+        "nextPage": "Следваща"
+      },
+      "installationDatePicker": {
+        "title": "Дата на инсталация",
+        "description": "Моля, въведете датата на инсталацията:",
+        "cancel": "Отказ",
+        "confirm": "Потвърди"
       }
     }
   }

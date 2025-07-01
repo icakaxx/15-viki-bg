@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef, useContext } from 'react';
 import styles from '../styles/Page Styles/Administration.module.css';
 import { LanguageContext } from '../components/Layout Components/Header';
+import AdminOrderHistoryTab from '../components/AdminOrderHistoryTab';
+import WeeklyInstallationsTab from '../components/WeeklyInstallationsTab';
 
 
 
@@ -54,7 +56,17 @@ const AdministrationProducts = () => {
     const [expandedOrderId, setExpandedOrderId] = useState(null);
     const [orderHistory, setOrderHistory] = useState({});
     const [updatingStatus, setUpdatingStatus] = useState(null);
-    const [activeTab, setActiveTab] = useState('products'); // 'products' or 'orders'
+    const [activeTab, setActiveTab] = useState('products'); // 'products', 'orders', 'orderHistory', or 'installations'
+    const [showInstallationDatePicker, setShowInstallationDatePicker] = useState(null);
+    const [installationDate, setInstallationDate] = useState('');
+    
+    // New state for status transition modals
+    const [showCallConfirmationModal, setShowCallConfirmationModal] = useState(null);
+    const [showCalendarModal, setShowCalendarModal] = useState(null);
+    const [availableSlots, setAvailableSlots] = useState({});
+    const [selectedSlot, setSelectedSlot] = useState(null);
+    const [calendarWeek, setCalendarWeek] = useState(new Date());
+    const [loadingSlots, setLoadingSlots] = useState(false);
 
     useEffect(() => {
         if (activeTab === 'products') {
@@ -137,6 +149,36 @@ const AdministrationProducts = () => {
     };
 
     const updateOrderStatus = async (orderId, newStatus) => {
+        const currentOrder = orders.find(order => order.order_id === orderId);
+        const currentStatus = currentOrder?.current_status;
+
+        // Handle status transition flows
+        if (currentStatus === 'new' && newStatus === 'confirmed') {
+            // Show call confirmation modal
+            setShowCallConfirmationModal(orderId);
+            return;
+        }
+
+        if (currentStatus === 'confirmed' && newStatus === 'installation_booked') {
+            // Show calendar overlay modal
+            setShowCalendarModal(orderId);
+            await loadAvailableSlots();
+            return;
+        }
+        
+        // If changing to 'installed', show date picker first
+        if (newStatus === 'installed') {
+            const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            setInstallationDate(today);
+            setShowInstallationDatePicker(orderId);
+            return;
+        }
+        
+        // For other status changes, proceed normally
+        await performStatusUpdate(orderId, newStatus, null);
+    };
+
+    const performStatusUpdate = async (orderId, newStatus, installDate) => {
         setUpdatingStatus(orderId);
         
         try {
@@ -147,7 +189,8 @@ const AdministrationProducts = () => {
                     orderId: orderId,
                     newStatus: newStatus,
                     adminId: null, // TODO: Add proper admin authentication
-                    notes: `Status changed to ${newStatus} by admin`
+                    notes: `Status changed to ${newStatus} by admin`,
+                    installationDate: installDate
                 })
             });
 
@@ -172,6 +215,10 @@ const AdministrationProducts = () => {
                 
                 console.log(`Order ${orderId} status updated to ${newStatus}`);
                 alert(t ? t('admin.orders.statusUpdated') : 'Status updated successfully');
+                
+                // Hide installation date picker
+                setShowInstallationDatePicker(null);
+                setInstallationDate('');
             } else {
                 console.error('Failed to update order status:', result.error);
                 const errorMsg = t ? t('admin.orders.errors.updateFailed') : 'Failed to update order status';
@@ -184,6 +231,19 @@ const AdministrationProducts = () => {
         } finally {
             setUpdatingStatus(null);
         }
+    };
+
+    const handleInstallationDateConfirm = () => {
+        if (showInstallationDatePicker && installationDate) {
+            performStatusUpdate(showInstallationDatePicker, 'installed', installationDate);
+        }
+    };
+
+    const handleInstallationDateCancel = () => {
+        setShowInstallationDatePicker(null);
+        setInstallationDate('');
+        // Reset the dropdown to previous value
+        setOrders(prevOrders => [...prevOrders]); // Force re-render
     };
 
     const loadOrderHistory = async (orderId) => {
@@ -502,6 +562,112 @@ const AdministrationProducts = () => {
         */
     };
 
+    // Handle call confirmation
+    const handleCallCompleted = async () => {
+        if (showCallConfirmationModal) {
+            await performStatusUpdate(showCallConfirmationModal, 'confirmed', null);
+            setShowCallConfirmationModal(null);
+        }
+    };
+
+    const handleCallCancelled = () => {
+        setShowCallConfirmationModal(null);
+        // Reset dropdown to previous value
+        setOrders(prevOrders => [...prevOrders]); // Force re-render
+    };
+
+    // Load available slots for calendar
+    const loadAvailableSlots = async () => {
+        setLoadingSlots(true);
+        try {
+            // Get Monday of current week
+            const monday = new Date(calendarWeek);
+            monday.setDate(monday.getDate() - monday.getDay() + 1);
+            
+            // Get Sunday of current week
+            const sunday = new Date(monday);
+            sunday.setDate(sunday.getDate() + 6);
+
+            const startDate = monday.toISOString().split('T')[0];
+            const endDate = sunday.toISOString().split('T')[0];
+
+            const response = await fetch(`/api/get-available-slots?startDate=${startDate}&endDate=${endDate}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                setAvailableSlots(data.availableSlots);
+            } else {
+                console.error('Failed to load available slots:', data.error);
+                alert('Failed to load available slots');
+            }
+        } catch (error) {
+            console.error('Error loading slots:', error);
+            alert('Error loading available slots');
+        } finally {
+            setLoadingSlots(false);
+        }
+    };
+
+    // Handle slot selection
+    const handleSlotSelection = (date, timeSlot) => {
+        const slot = availableSlots[date]?.[timeSlot];
+        // Only allow selection of available slots (not past, not booked)
+        if (slot?.available && !slot?.past && !slot?.booked) {
+            setSelectedSlot({ date, timeSlot });
+        }
+    };
+
+    // Book installation
+    const handleBookInstallation = async () => {
+        if (!showCalendarModal || !selectedSlot) return;
+
+        setUpdatingStatus(showCalendarModal);
+        try {
+            const response = await fetch('/api/book-installation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: showCalendarModal,
+                    scheduledDate: selectedSlot.date,
+                    timeSlot: selectedSlot.timeSlot,
+                    adminId: null, // TODO: Add proper admin ID
+                    notes: ''
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Update local state
+                setOrders(prevOrders => 
+                    prevOrders.map(order => 
+                        order.order_id === showCalendarModal 
+                            ? { ...order, current_status: 'installation_booked' }
+                            : order
+                    )
+                );
+
+                alert(`Installation scheduled for ${selectedSlot.date} at ${selectedSlot.timeSlot}`);
+                setShowCalendarModal(null);
+                setSelectedSlot(null);
+            } else {
+                console.error('Failed to book installation:', result.error);
+                alert(`Failed to book installation: ${result.error}`);
+            }
+        } catch (error) {
+            console.error('Error booking installation:', error);
+            alert('Error booking installation');
+        } finally {
+            setUpdatingStatus(null);
+        }
+    };
+
+    const handleCancelCalendar = () => {
+        setShowCalendarModal(null);
+        setSelectedSlot(null);
+        // Reset dropdown to previous value
+        setOrders(prevOrders => [...prevOrders]); // Force re-render
+    };
 
     // Show loading state until authentication check is complete
     if (isAuthLoading) {
@@ -552,13 +718,22 @@ const AdministrationProducts = () => {
                 </button>
                 <button 
                     className={`${styles.tab} ${activeTab === 'orders' ? styles.activeTab : ''}`}
-                    onClick={() => {
-                        console.log('Admin: Switching to orders tab');
-                        setActiveTab('orders');
-                    }}
+                    onClick={() => setActiveTab('orders')}
                 >
                     {t('admin.tabs.orders')}
-                    </button>
+                </button>
+                <button
+                    className={`${styles.tab} ${activeTab === 'orderHistory' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('orderHistory')}
+                >
+                    {t('admin.tabs.orderHistory')}
+                </button>
+                <button
+                    className={`${styles.tab} ${activeTab === 'installations' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('installations')}
+                >
+                    {t('admin.tabs.installations')}
+                </button>
             </div>
 
             {/* Products Management Section */}
@@ -1144,6 +1319,309 @@ const AdministrationProducts = () => {
                             ))}
                         </div>
                     )}
+                </div>
+            )}
+            
+            {/* Installation Date Picker Modal */}
+            {showInstallationDatePicker && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: 'white',
+                        padding: '2rem',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        minWidth: '300px'
+                    }}>
+                        <h3>{t('admin.orders.installationDatePicker.title')}</h3>
+                        <p>{t('admin.orders.installationDatePicker.description')}</p>
+                        <input
+                            type="date"
+                            value={installationDate}
+                            onChange={(e) => setInstallationDate(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                marginBottom: '1rem',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px'
+                            }}
+                        />
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={handleInstallationDateCancel}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    backgroundColor: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                                            {t('admin.orders.installationDatePicker.cancel')}
+                        </button>
+                        <button
+                            onClick={handleInstallationDateConfirm}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                border: 'none',
+                                borderRadius: '4px',
+                                backgroundColor: '#28a745',
+                                color: 'white',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {t('admin.orders.installationDatePicker.confirm')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Order History Section */}
+            {activeTab === 'orderHistory' && (
+                <AdminOrderHistoryTab />
+            )}
+
+            {/* Weekly Installations Section */}
+            {activeTab === 'installations' && (
+                <WeeklyInstallationsTab />
+            )}
+
+            {/* Call Confirmation Modal */}
+            {showCallConfirmationModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: 'white',
+                        padding: '2rem',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        minWidth: '400px'
+                    }}>
+                        <h3>Потвърждение на обаждане</h3>
+                        <p>Моля, обадете се на клиента по телефона преди да потвърдите тази поръчка.</p>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+                            <button
+                                onClick={handleCallCancelled}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    backgroundColor: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Отказ
+                            </button>
+                            <button
+                                onClick={handleCallCompleted}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    backgroundColor: '#28a745',
+                                    color: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Обаждането завършено
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Calendar Overlay Modal */}
+            {showCalendarModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: 'white',
+                        padding: '2rem',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        width: '90%',
+                        maxWidth: '800px',
+                        maxHeight: '80vh',
+                        overflow: 'auto'
+                    }}>
+                        <h3>Избор на дата и час за монтаж</h3>
+                        {loadingSlots ? (
+                            <p>Зареждане на свободни часове...</p>
+                        ) : (
+                            <>
+                                {/* Calendar Grid */}
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ backgroundColor: '#f5f5f5' }}>
+                                                <th style={{ padding: '0.5rem', border: '1px solid #ddd' }}>Час</th>
+                                                {['Понеделник', 'Вторник', 'Сряда', 'Четвъртък', 'Петък', 'Събота', 'Неделя'].map((day, index) => (
+                                                    <th key={day} style={{ padding: '0.5rem', border: '1px solid #ddd' }}>
+                                                        {day}
+                                                        <br />
+                                                        <small>
+                                                            {(() => {
+                                                                const monday = new Date(calendarWeek);
+                                                                monday.setDate(monday.getDate() - monday.getDay() + 1);
+                                                                const currentDay = new Date(monday);
+                                                                currentDay.setDate(currentDay.getDate() + index);
+                                                                return currentDay.toLocaleDateString('bg-BG', { month: 'short', day: 'numeric' });
+                                                            })()}
+                                                        </small>
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(timeSlot => (
+                                                <tr key={timeSlot}>
+                                                    <td style={{ padding: '0.5rem', border: '1px solid #ddd', fontWeight: 'bold' }}>
+                                                        {timeSlot}
+                                                    </td>
+                                                    {[0, 1, 2, 3, 4, 5, 6].map(dayOffset => {
+                                                        const monday = new Date(calendarWeek);
+                                                        monday.setDate(monday.getDate() - monday.getDay() + 1);
+                                                        const currentDay = new Date(monday);
+                                                        currentDay.setDate(currentDay.getDate() + dayOffset);
+                                                        const dateStr = currentDay.toISOString().split('T')[0];
+                                                        const slot = availableSlots[dateStr]?.[timeSlot];
+                                                        
+                                                        let backgroundColor = '#f9f9f9';
+                                                        let cursor = 'not-allowed';
+                                                        let color = '#999';
+                                                        
+                                                        if (slot?.past) {
+                                                            // Past slots - grey and disabled
+                                                            backgroundColor = '#6c757d';
+                                                            color = 'white';
+                                                            cursor = 'not-allowed';
+                                                        } else if (slot?.booked) {
+                                                            // Booked slots - red
+                                                            backgroundColor = '#dc3545';
+                                                            color = 'white';
+                                                            cursor = 'not-allowed';
+                                                        } else if (slot?.available) {
+                                                            // Available slots - green or blue if selected
+                                                            backgroundColor = selectedSlot?.date === dateStr && selectedSlot?.timeSlot === timeSlot 
+                                                                ? '#007bff' : '#28a745';
+                                                            cursor = 'pointer';
+                                                            color = 'white';
+                                                        }
+                                                        
+                                                        return (
+                                                            <td
+                                                                key={dayOffset}
+                                                                style={{
+                                                                    padding: '0.5rem',
+                                                                    border: '1px solid #ddd',
+                                                                    backgroundColor,
+                                                                    cursor,
+                                                                    color,
+                                                                    textAlign: 'center'
+                                                                }}
+                                                                onClick={() => handleSlotSelection(dateStr, timeSlot)}
+                                                            >
+                                                                {slot?.past ? 'Изминал' :
+                                                                 slot?.booked ? 'Заето' :
+                                                                 slot?.available ? 'Свободно' : 'Неизвестно'}
+                                                            </td>
+                                                        );
+                                                    })}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Legend */}
+                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <div style={{ width: '20px', height: '20px', backgroundColor: '#28a745' }}></div>
+                                        <span>Свободно</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <div style={{ width: '20px', height: '20px', backgroundColor: '#dc3545' }}></div>
+                                        <span>Заето</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <div style={{ width: '20px', height: '20px', backgroundColor: '#6c757d' }}></div>
+                                        <span>Изминал час</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <div style={{ width: '20px', height: '20px', backgroundColor: '#007bff' }}></div>
+                                        <span>Избрано</span>
+                                    </div>
+                                </div>
+
+                                {selectedSlot && (
+                                    <div style={{ padding: '1rem', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '1rem' }}>
+                                        <strong>Избран час:</strong> {selectedSlot.date} в {selectedSlot.timeSlot}
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={handleCancelCalendar}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '4px',
+                                    backgroundColor: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Отказ
+                            </button>
+                            <button
+                                onClick={handleBookInstallation}
+                                disabled={!selectedSlot || updatingStatus}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    backgroundColor: selectedSlot ? '#28a745' : '#ccc',
+                                    color: 'white',
+                                    cursor: selectedSlot ? 'pointer' : 'not-allowed'
+                                }}
+                            >
+                                {updatingStatus ? 'Записване...' : 'Запиши монтаж'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

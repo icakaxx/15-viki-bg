@@ -421,7 +421,9 @@
     },
     "tabs": {
       "products": "Product Management",
-      "orders": "Order Management"
+      "orders": "Order Management",
+      "orderHistory": "Order History",
+      "installations": "Installations This Week"
     },
     "products": {
       "title": "Products",
@@ -488,6 +490,31 @@
       "errors": {
         "updateFailed": "Error updating status",
         "loadFailed": "An error occurred while loading"
+      },
+      "history": {
+        "title": "Order History",
+        "description": "All installed orders with filtering, search and pagination",
+        "searchPlaceholder": "Search by customer, phone, brand, model...",
+        "dateRangePlaceholder": "Date range (coming soon)",
+        "productTypePlaceholder": "Product type (coming soon)",
+        "installationDate": "Inst. Date",
+        "customer": "Customer",
+        "phone": "Phone",
+        "products": "Products",
+        "total": "Total (BGN/€)",
+        "actions": "Actions",
+        "loading": "Loading...",
+        "error": "Error loading",
+        "noOrders": "No orders found",
+        "detailsButton": "Details",
+        "previousPage": "Previous",
+        "nextPage": "Next"
+      },
+      "installationDatePicker": {
+        "title": "Installation Date",
+        "description": "Please enter the installation date:",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
       }
     }
   }

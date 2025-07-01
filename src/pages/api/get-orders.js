@@ -26,13 +26,14 @@ export default async function handler(req, res) {
     let { data, error } = await supabase
       .from('order_status_view')
       .select('*')
+      .neq('current_status', 'installed')
       .order('order_created_at', { ascending: false });
 
     // If view doesn't exist, fall back to manual join
     if (error && error.code === '42P01') {
       console.log('API: Order status view not found, using manual join...');
       
-      // Get orders with payment info using manual join
+      // Get orders with payment info using manual join, excluding installed orders
       const { data: ordersData, error: ordersError } = await supabase
         .from('guest_orders')
         .select(`
@@ -41,11 +42,12 @@ export default async function handler(req, res) {
           last_name,
           phone,
           created_at,
-          payment_and_tracking (
+          payment_and_tracking!inner (
             payment_method,
             status
           )
         `)
+        .neq('payment_and_tracking.status', 'installed')
         .order('created_at', { ascending: false });
 
       if (ordersError) {
