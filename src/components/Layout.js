@@ -1,4 +1,4 @@
-import Header, { LanguageProvider } from './Layout Components/Header'
+import Header from './Layout Components/Header'
 import Footer from './Layout Components/Footer'
 //import Transition from './Layout Components/Transition'
 import styles from '../styles/Component Styles/Layout.module.css'
@@ -13,18 +13,16 @@ import { Analytics } from "@vercel/analytics/react"
 const Layout = ({ children }) => {
   return (
     <>
-      <LanguageProvider>
-        <div className={styles.layout}>
-        <Analytics/>
-          <Header />
-          {/* <Transition> */}
-          <main className={styles.main}>
-            {children}
-          </main>
-          {/* </Transition> */}
-          <Footer />
-        </div>
-      </LanguageProvider>
+      <div className={styles.layout}>
+      <Analytics/>
+        <Header />
+        {/* <Transition> */}
+        <main className={styles.main}>
+          {children}
+        </main>
+        {/* </Transition> */}
+        <Footer />
+      </div>
     </>
   )
 }

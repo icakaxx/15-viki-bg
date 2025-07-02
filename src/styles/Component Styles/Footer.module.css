@@ -254,84 +254,7 @@
   border-radius: 4px;
 }
 
-/* Social Section - Enhanced */
-.socialSection {
-  margin-top: 1rem;
-}
 
-.socialTitle {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 1.25rem 0;
-  color: var(--background-white);
-  position: relative;
-  padding-bottom: 0.5rem;
-}
-
-.socialTitle::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 25px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 1px;
-}
-
-.socialIcons {
-  display: flex;
-  gap: 1.25rem;
-  align-items: center;
-}
-
-.socialLink {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  border-radius: 50%;
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  transition: all var(--transition-smooth);
-  position: relative;
-  overflow: hidden;
-}
-
-.socialLink::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  transform: scale(0);
-  transition: transform var(--transition-smooth);
-}
-
-.socialLink:hover {
-  border-color: rgba(255, 255, 255, 0.6);
-  color: var(--background-white);
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.socialLink:hover::before {
-  transform: scale(1);
-}
-
-.socialLink:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.6);
-  outline-offset: 3px;
-}
-
-.socialIcon {
-  width: 1.2rem;
-  height: 1.2rem;
-  position: relative;
-  z-index: 1;
-}
 
 /* Bottom Bar - Enhanced */
 .bottomBar {
@@ -357,6 +280,48 @@
   margin: 0;
   line-height: 1.6;
   font-weight: 400;
+}
+
+/* Social Media Section */
+.socialSection {
+  margin-top: 1.5rem;
+}
+
+.socialTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--background-white);
+}
+
+.socialLinks {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.2rem;
+  text-decoration: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.socialLink:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.socialIcon {
+  width: 1.2rem;
+  height: 1.2rem;
+  /* Removed filter to preserve original SVG colors */
 }
 
 .emailLink {
@@ -500,9 +465,7 @@
     align-items: center;
   }
 
-  .socialIcons {
-    justify-content: center;
-  }
+
 
   .backToTop {
     bottom: 1.5rem;
@@ -608,20 +571,7 @@
     transform: none;
   }
   
-  .socialSection {
-    text-align: center;
-    margin-top: 1.5rem;
-  }
-  
-  .socialTitle::after {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  
-  .socialIcons {
-    justify-content: center;
-    gap: 1.5rem;
-  }
+
   
   .bottomBar {
     margin-top: 3rem;
@@ -693,14 +643,7 @@
     line-height: 1.8;
   }
   
-  .socialIcons {
-    gap: 1.25rem;
-  }
-  
-  .socialLink {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
+
 
   .navList {
     grid-template-columns: 1fr;
@@ -741,9 +684,7 @@
     border-top: 3px solid var(--background-white);
   }
   
-  .socialLink {
-    border-width: 2px;
-  }
+
   
   .backToTop {
     border-width: 3px;
@@ -755,19 +696,12 @@
 @media (prefers-reduced-motion: reduce) {
   .navLink,
   .contactLink,
-  .socialLink,
   .backToTop,
   .contactItem,
   .footerLogo,
   .emailLink,
-  .navLink::before,
-  .socialLink::before {
+  .navLink::before {
     transition: none;
-  }
-  
-  .socialLink:hover,
-  .backToTop:hover {
-    transform: none;
   }
 
   .navLink:hover,

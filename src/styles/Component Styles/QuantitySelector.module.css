@@ -1,0 +1,279 @@
+/* Quantity Selector Component Styles */
+.quantitySelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+/* Quantity Controls */
+.quantityControls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quantityLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+  margin: 0;
+}
+
+.quantityInputGroup {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 120px;
+  margin: 0 auto;
+}
+
+.quantityButton {
+  background: #f8f9fa;
+  border: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #333;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.quantityButton:hover:not(:disabled) {
+  background: #e9ecef;
+  color: #2c5530;
+}
+
+.quantityButton:active:not(:disabled) {
+  background: #dee2e6;
+  transform: scale(0.95);
+}
+
+.quantityButton:disabled {
+  background: #f8f9fa;
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.decreaseButton {
+  border-right: 1px solid #ddd;
+}
+
+.increaseButton {
+  border-left: 1px solid #ddd;
+}
+
+.quantityInput {
+  border: none;
+  background: white;
+  text-align: center;
+  width: 56px;
+  height: 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  outline: none;
+  padding: 0;
+}
+
+.quantityInput:focus {
+  background: #f8f9fa;
+}
+
+/* Remove number input arrows */
+.quantityInput::-webkit-outer-spin-button,
+.quantityInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.quantityInput[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Add to Cart Button */
+.addToCartButton {
+  width: 100%;
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  pointer-events: auto;
+  z-index: 2;
+  position: relative;
+}
+
+.addToCartButton:hover {
+  background: linear-gradient(135deg, #1e3a21 0%, #2c5530 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(44, 85, 48, 0.3);
+}
+
+.addToCartButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(44, 85, 48, 0.3);
+}
+
+/* Cart Indicator */
+.cartIndicator {
+  background: #e8f5e8;
+  color: #2c5530;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid #c8e6c8;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .quantitySelector {
+    gap: 0.5rem;
+  }
+  
+  .quantityLabel {
+    font-size: 0.85rem;
+  }
+  
+  .quantityInputGroup {
+    max-width: 110px;
+  }
+  
+  .quantityButton {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+  }
+  
+  .quantityInput {
+    width: 50px;
+    height: 30px;
+    font-size: 0.9rem;
+  }
+  
+  .addToCartButton {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .cartIndicator {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .quantityControls {
+    align-items: center;
+  }
+  
+  .quantityInputGroup {
+    max-width: 100px;
+  }
+  
+  .quantityButton {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+  
+  .quantityInput {
+    width: 44px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+  
+  .addToCartButton {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .quantityInputGroup {
+    border-width: 2px;
+  }
+  
+  .addToCartButton {
+    background: #000;
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .quantityButton,
+  .addToCartButton {
+    transition: none;
+  }
+  
+  .addToCartButton:hover,
+  .quantityButton:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Focus indicators for keyboard navigation */
+.quantityButton:focus,
+.addToCartButton:focus,
+.quantityInput:focus {
+  outline: 2px solid #2c5530;
+  outline-offset: 2px;
+}
+
+/* Out of Stock Quantity Selector */
+.quantitySelector.outOfStock {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.quantitySelector.outOfStock .quantityControls {
+  opacity: 0.5;
+}
+
+.quantitySelector.outOfStock .quantityInput {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.quantitySelector.outOfStock .quantityButton {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+  border-color: #dee2e6;
+}
+
+/* Disabled Add to Cart Button */
+.addToCartButton.disabled {
+  background: #6c757d !important;
+  color: #ffffff !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.addToCartButton.disabled:hover {
+  background: #6c757d !important;
+  transform: none !important;
+  box-shadow: none !important;
+} 

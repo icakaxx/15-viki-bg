@@ -1,12 +1,166 @@
 {
   "metaTitle": "BGVIKI15 Ltd - Air Conditioning & Climate Solutions",
   "metaDescription": "BGVIKI15 Ltd - Quality and reliable solutions since 2000. Air conditioning, climate control and energy efficient solutions in Bulgaria.",
+  "common": {
+    "close": "Close"
+  },
   "nav": {
     "about": "About",
     "products": "Products & Solutions",
     "buy": "Buy ACs",
     "inquiry": "Make an inquiry",
     "contact": "Contact"
+  },
+  "buyPage": {
+    "title": "Buy Air Conditioners",
+    "loading": "Loading products...",
+    "error": "Error loading products",
+    "noProducts": "No products found",
+    "buyButton": "Buy",
+    "addToCart": "Add to Cart",
+    "quantity": "Quantity",
+    "increaseQuantity": "Increase quantity",
+    "decreaseQuantity": "Decrease quantity", 
+    "inCart": "In cart",
+    "previousPrice": "Was:",
+    "energyRating": "Energy Rating:",
+    "capacity": "Capacity:",
+    "type": "Type:",
+    "discount": "Discount",
+    "btu": "BTU",
+    "color": "Color",
+    "priceNote": "EUR prices are approximate",
+    "filters": {
+      "title": "Filters",
+      "clearAll": "Clear All",
+      "brand": "Brand",
+      "type": "Type",
+      "capacity": "Capacity (BTU)",
+      "energyRating": "Energy Rating",
+      "color": "Color",
+      "priceRange": "Price Range",
+      "priceFrom": "From",
+      "priceTo": "To",
+      "from": "from",
+      "to": "to",
+      "bgn": "BGN",
+      "apply": "Apply",
+      "reset": "Reset",
+      "showingResults": "Showing",
+      "results": "results",
+      "noResults": "No products match the selected filters",
+      "invalidPriceRange": "Please enter a valid price range.",
+      "priceMinError": "Minimum price cannot be below {{min}} BGN.",
+      "priceMaxError": "Maximum price cannot be above {{max}} BGN.",
+      "priceHelp": "Enter a price between {{min}} BGN and {{max}} BGN.",
+      "close": "Close"
+    }
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "viewCart": "View cart",
+    "empty": "Your cart is empty",
+    "quantity": "Qty",
+    "total": "Total",
+    "checkout": "Checkout",
+    "remove": "Remove"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "productTitle": "Selected Product:",
+    "loadingProduct": "Loading product...",
+    "productNotFound": "Product not found",
+    "noProductSelected": "No product selected",
+    "emptyCart": "Your cart is empty. Add some products first!",
+    "continueShopping": "Continue Shopping",
+    "orderSummary": "Order Summary",
+    "items": "items",
+    "total": "Total",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "removeItem": "Remove",
+    "clearCart": "Clear Cart",
+    "nextSteps": "Next Steps",
+    "orderTotal": "Order Total",
+    "checkoutInfo": "Checkout page for product ID:",
+    "formComingSoon": "Contact form and payment processing will be implemented here.",
+    "formSubmitting": "Submitting...",
+    "formSuccess": "Thank you! We'll contact you soon.",
+    "formError": "An error occurred. Please try again.",
+    "form": {
+      "personalInfo": {
+        "title": "Personal Information",
+        "firstName": "First Name",
+        "middleName": "Middle Name",
+        "lastName": "Last Name",
+        "phone": "Mobile Phone",
+        "phoneHelp": "For contact regarding your order"
+      },
+      "services": {
+        "title": "Service Selection",
+        "subtitle": "For each AC unit, choose whether you want the product only or include installation",
+        "acOnly": "AC Only",
+        "acWithInstallation": "AC + Installation",
+        "installationFee": "Installation fee: +300 BGN / €153 per AC unit",
+        "totalInstallation": "Total installations",
+        "installations": "installations"
+      },
+      "invoice": {
+        "title": "Invoice Information",
+        "subtitle": "Fill out only if you want a company invoice",
+        "enable": "I want a company invoice",
+        "companyName": "Company Name",
+        "address": "Address",
+        "bulstat": "Bulstat",
+        "bulstatHelp": "9 digits",
+        "vatNumber": "VAT Number",
+        "mol": "MOL",
+        "molSuggestions": {
+          "manager": "Manager",
+          "director": "Director",
+          "owner": "Owner",
+          "representative": "Representative",
+          "custom": "Other..."
+        }
+      },
+      "payment": {
+        "title": "Payment Method",
+        "office": "Office Pickup",
+        "online": "Online Payment",
+        "cash": "Cash on Delivery",
+        "onlineHelp": "Bank transfer or card payment",
+        "officeHelp": "Free pickup from our office",
+        "cashHelp": "Payment upon delivery",
+        "officeDetails": "You'll receive an SMS with the address and pickup hours.",
+        "onlineDetails": "You'll receive a payment link after order confirmation.",
+        "cashDetails": "The courier will collect payment upon delivery."
+      },
+      "validation": {
+        "required": "This field is required",
+        "invalidPhone": "Please enter a valid phone number",
+        "invalidBulstat": "Bulstat must be exactly 9 digits",
+        "selectPayment": "Please select a payment method"
+      },
+      "submit": "Complete Order",
+      "submitting": "Processing...",
+      "next": "Next",
+      "back": "Back",
+      "review": "Review",
+      "shipping": {
+        "title": "Shipping Address",
+        "address": "Address",
+        "addressPlaceholder": "Street, number, entrance, apartment",
+        "city": "City",
+        "postalCode": "Postal Code"
+      },
+      "billing": {
+        "title": "Billing Information",
+        "needInvoice": "I need a company invoice"
+      },
+      "review": {
+        "title": "Review & Confirm"
+      }
+    }
   },
   "footer": {
     "brandInfo": {
@@ -36,5 +190,332 @@
     "attribution": "Design: H&M WSPro",
     "admin": "Go to Administration"
   },
-  "country": "🇧🇬 Bulgaria"
+  "country": "🇧🇬 Bulgaria",
+  "productsPage": {
+    "title": "Products & Solutions",
+    "metaDescription": "Complete range of air conditioners and climate solutions for home, office and industry. Professional services and maintenance.",
+    "hero": {
+      "title": "Complete Climate Solutions",
+      "subtitle": "From residential air conditioners to complex industrial systems - we offer quality products and professional services for all your needs.",
+      "cta": "View All Products"
+    },
+    "categories": {
+      "title": "Product Categories",
+      "residential": {
+        "title": "Residential Air Conditioners",
+        "description": "Energy-efficient solutions for home",
+        "features": {
+          "split": "Split systems",
+          "multiSplit": "Multi-split systems",
+          "inverter": "Inverter technology",
+          "wifi": "Wi-Fi control"
+        }
+      },
+      "commercial": {
+        "title": "Commercial Systems",
+        "description": "Professional solutions for business",
+        "features": {
+          "vrf": "VRF systems",
+          "cassette": "Cassette air conditioners",
+          "ducted": "Ducted systems",
+          "central": "Central control"
+        }
+      },
+      "industrial": {
+        "title": "Industrial Solutions",
+        "description": "Powerful systems for large facilities",
+        "features": {
+          "chillers": "Chillers",
+          "rooftop": "Rooftop units",
+          "precision": "Precision air conditioners",
+          "ventilation": "Ventilation systems"
+        }
+      }
+    },
+    "services": {
+      "title": "Our Services",
+      "consultation": {
+        "title": "Consultation & Design",
+        "description": "Professional needs assessment and project design"
+      },
+      "installation": {
+        "title": "Installation & Commissioning",
+        "description": "Quality installation by certified technicians"
+      },
+      "maintenance": {
+        "title": "Service & Maintenance",
+        "description": "Regular maintenance and quick repairs when needed"
+      },
+      "warranty": {
+        "title": "Warranty Service",
+        "description": "Full warranty and post-warranty service"
+      }
+    },
+    "cta": {
+      "title": "Need consultation?",
+      "subtitle": "Our experts will help you choose the most suitable solution for your needs.",
+      "inquiry": "Make an Inquiry",
+      "contact": "Contact Us"
+    }
+  },
+  "inquiryPage": {
+    "title": "Make an Inquiry",
+    "metaDescription": "Make an inquiry for air conditioners and climate solutions. Free consultation and quote from experts.",
+    "hero": {
+      "title": "Free Consultation & Quote",
+      "subtitle": "Share your needs with us and we'll offer you the most suitable solution. Our experts will contact you within 24 hours."
+    },
+    "form": {
+      "title": "Inquiry Form",
+      "success": "Thank you! Your inquiry has been sent successfully. We'll contact you soon.",
+      "name": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone",
+      "company": "Company/Organization",
+      "inquiryType": "Inquiry Type",
+      "budget": "Budget",
+      "message": "Message",
+      "messagePlaceholder": "Describe your needs, room dimensions, special requirements...",
+      "submit": "Send Inquiry",
+      "submitting": "Sending...",
+      "required": "*",
+      "selectType": "Select type...",
+      "selectBudget": "Select budget...",
+      "types": {
+        "residential": "Residential Air Conditioners",
+        "commercial": "Commercial Systems",
+        "industrial": "Industrial Solutions",
+        "service": "Service & Maintenance",
+        "consultation": "Consultation",
+        "other": "Other"
+      },
+      "budgetRanges": {
+        "under1000": "Up to 1000 BGN",
+        "1000to3000": "1000 - 3000 BGN",
+        "3000to5000": "3000 - 5000 BGN",
+        "5000to10000": "5000 - 10000 BGN",
+        "over10000": "Over 10000 BGN",
+        "unsure": "Not sure"
+      }
+    },
+    "contact": {
+      "title": "Contact Directly",
+      "phone": "Phone",
+      "email": "Email",
+      "hours": "Working Hours",
+      "hoursDetails": "Mon - Fri: 9:00 - 18:00\nSaturday: 9:00 - 14:00"
+    },
+    "whyChooseUs": {
+      "title": "Why Choose Us?",
+      "experience": "Over 20 years of industry experience",
+      "certified": "Certified technicians and installers",
+      "freeConsultation": "Free consultation and site visit",
+      "warranty": "Warranty and after-sales service",
+      "competitive": "Competitive prices"
+    },
+    "productsCta": {
+      "title": "Prefer to browse products first?",
+      "subtitle": "Explore our complete range of air conditioners and solutions.",
+      "button": "Browse Products"
+    }
+  },
+  "contactPage": {
+    "title": "Contact",
+    "metaDescription": "Contact BGVIKI15 Ltd for air conditioners and climate solutions. Address, phones, emails and working hours.",
+    "hero": {
+      "title": "Contact Us",
+      "subtitle": "We're here to answer all your questions and help you choose the most suitable climate solution."
+    },
+    "info": {
+      "phone": {
+        "title": "Phone",
+        "description": "Call for quick consultation"
+      },
+      "email": {
+        "title": "Email",
+        "description": "Send us an inquiry by email"
+      },
+      "address": {
+        "title": "Address",
+        "description": "Visit our office and showroom",
+        "details": {
+          "0": "15 Klimatici St.",
+          "1": "1000 Sofia, Bulgaria"
+        }
+      },
+      "hours": {
+        "title": "Working Hours",
+        "description": "We're available during business days",
+        "schedule": {
+          "0": "Mon - Fri: 9:00 - 18:00",
+          "1": "Saturday: 9:00 - 14:00",
+          "2": "Sunday: Closed"
+        }
+      }
+    },
+    "company": {
+      "title": "About the Company",
+      "name": "BGVIKI15 Ltd",
+      "description1": "Since 2000, we have been a leading supplier of climate solutions in Bulgaria. We specialize in the sale, installation and service of air conditioners for residential, commercial and industrial applications.",
+      "description2": "Our team of certified technicians and engineers has over 20 years of experience in the industry and is ready to offer you the most suitable solution for your needs.",
+      "businessInfo": {
+        "title": "Business Information:",
+        "eik": "UIC:",
+        "vat": "VAT Number:",
+        "headquarters": "Headquarters:",
+        "bank": "Bank:",
+        "iban": "IBAN:",
+        "bic": "BIC:"
+      },
+      "certificates": {
+        "title": "Licenses & Certificates:",
+        "trading": "License for trading climate equipment",
+        "refrigerant": "Certificate for working with refrigerants",
+        "iso": "ISO 9001:2015 - Quality Management System",
+        "partners": "Partner certificates from leading manufacturers"
+      }
+    },
+    "quickContact": {
+      "title": "Quick Contact",
+      "subtitle": "Need urgent help or consultation?",
+      "callNow": "Call Now",
+      "sendEmail": "Send Email"
+    },
+    "emergency": {
+      "title": "Emergency Line",
+      "description": "24/7 technical support for emergencies"
+    },
+    "departments": {
+      "title": "Departments & Specialists",
+      "sales": {
+        "name": "Sales",
+        "description": "For product and pricing inquiries"
+      },
+      "support": {
+        "name": "Technical Support",
+        "description": "For service and technical assistance"
+      },
+      "projects": {
+        "name": "Projects",
+        "description": "For large and corporate projects"
+      }
+    },
+    "cta": {
+      "title": "Ready for the next step?",
+      "subtitle": "Make an inquiry or browse our products today.",
+      "inquiry": "Make an Inquiry",
+      "products": "Browse Products"
+    }
+  },
+  "admin": {
+    "login": {
+      "title": "Admin Panel Login",
+      "username": "Username",
+      "password": "Password",
+      "loginButton": "Login",
+      "invalidCredentials": "Invalid login credentials"
+    },
+    "header": {
+      "title": "Admin Panel",
+      "logout": "Logout"
+    },
+    "tabs": {
+      "products": "Product Management",
+      "orders": "Order Management",
+      "orderHistory": "Order History",
+      "installations": "Installations This Week"
+    },
+    "products": {
+      "title": "Products",
+      "addNew": "Add New Product",
+      "edit": "Edit Product",
+      "brand": "Brand",
+      "model": "Model",
+      "color": "Color",
+      "type": "Type",
+      "capacity": "Capacity (BTU)",
+      "energyRating": "Energy Rating",
+      "price": "Price (€)",
+      "previousPrice": "Previous Price (€)",
+      "stock": "Stock Quantity",
+      "discount": "Discount (%)",
+      "discountedPrice": "Discounted Price",
+      "image": "Image",
+      "actions": "Actions",
+      "save": "Save",
+      "add": "Add",
+      "cancel": "Cancel",
+      "editButton": "Edit",
+      "archiveButton": "Archive",
+      "showArchived": "Show Archived",
+      "search": "Search (brand/model)",
+      "sortBy": "Sort By",
+      "lowStock": "Low Stock",
+      "archived": "Archived",
+      "addSuccess": "Product added successfully!",
+      "editSuccess": "Product edited successfully!",
+      "archiveSuccess": "Product archived successfully!",
+      "addError": "Error adding product",
+      "editError": "Error editing product",
+      "archiveError": "Error archiving product",
+      "duplicateError": "Product with these specifications already exists",
+      "confirmArchive": "Are you sure you want to archive '{product}'?",
+      "noProducts": "No products found",
+      "loading": "Loading..."
+    },
+    "orders": {
+      "title": "Order Management",
+      "noOrders": "No orders available",
+      "orderNumber": "Order #",
+      "phone": "Phone",
+      "created": "Created",
+      "payment": "Payment",
+      "showHistory": "Show History",
+      "hideHistory": "Hide History",
+      "statusHistory": "Status History",
+      "noHistory": "No history",
+      "updating": "Updating...",
+      "status": {
+        "new": "New",
+        "confirmed": "Confirmed",
+        "installation_booked": "Installation Scheduled",
+        "installed": "Installed",
+        "cancelled": "Cancelled"
+      },
+      "statusChanged": "Status changed from",
+      "to": "to",
+      "initialStatus": "Created as",
+      "statusUpdated": "Status updated successfully",
+      "unknownDate": "Unknown date",
+      "errors": {
+        "updateFailed": "Error updating status",
+        "loadFailed": "An error occurred while loading"
+      },
+      "history": {
+        "title": "Order History",
+        "description": "All installed orders with filtering, search and pagination",
+        "searchPlaceholder": "Search by customer, phone, brand, model...",
+        "dateRangePlaceholder": "Date range (coming soon)",
+        "productTypePlaceholder": "Product type (coming soon)",
+        "installationDate": "Inst. Date",
+        "customer": "Customer",
+        "phone": "Phone",
+        "products": "Products",
+        "total": "Total (BGN/€)",
+        "actions": "Actions",
+        "loading": "Loading...",
+        "error": "Error loading",
+        "noOrders": "No orders found",
+        "detailsButton": "Details",
+        "previousPage": "Previous",
+        "nextPage": "Next"
+      },
+      "installationDatePicker": {
+        "title": "Installation Date",
+        "description": "Please enter the installation date:",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      }
+    }
+  }
 } 

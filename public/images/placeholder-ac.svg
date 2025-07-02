@@ -1,0 +1,30 @@
+<svg width="280" height="200" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="280" height="200" fill="#f8f9fa"/>
+  
+  <!-- Air Conditioner Shape -->
+  <rect x="40" y="60" width="200" height="80" rx="8" fill="#e9ecef" stroke="#dee2e6" stroke-width="2"/>
+  
+  <!-- Display/Control Panel -->
+  <rect x="60" y="75" width="50" height="20" rx="4" fill="#6c757d"/>
+  <circle cx="70" r="3" fill="#28a745"/>
+  <rect x="80" y="77" width="25" height="4" rx="2" fill="#495057"/>
+  <rect x="80" y="83" width="15" height="4" rx="2" fill="#495057"/>
+  
+  <!-- Vents -->
+  <rect x="130" y="80" width="90" height="2" fill="#adb5bd"/>
+  <rect x="130" y="85" width="90" height="2" fill="#adb5bd"/>
+  <rect x="130" y="90" width="90" height="2" fill="#adb5bd"/>
+  <rect x="130" y="95" width="90" height="2" fill="#adb5bd"/>
+  <rect x="130" y="100" width="90" height="2" fill="#adb5bd"/>
+  <rect x="130" y="105" width="90" height="2" fill="#adb5bd"/>
+  <rect x="130" y="110" width="90" height="2" fill="#adb5bd"/>
+  <rect x="130" y="115" width="90" height="2" fill="#adb5bd"/>
+  
+  <!-- Brand Text -->
+  <text x="140" y="40" font-family="Arial, sans-serif" font-size="12" fill="#6c757d" text-anchor="middle">Климатик</text>
+  
+  <!-- Icon -->
+  <path d="M140 160 L160 175 L140 190 L120 175 Z" fill="#17a2b8" opacity="0.6"/>
+  <circle cx="140" cy="175" r="8" fill="none" stroke="#17a2b8" stroke-width="2" opacity="0.6"/>
+</svg> 

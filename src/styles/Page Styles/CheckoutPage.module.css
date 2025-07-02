@@ -1,0 +1,511 @@
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 200px);
+}
+
+.title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c5530;
+  margin-bottom: 2rem;
+}
+
+/* Empty Cart */
+.emptyCart {
+  text-align: center;
+  padding: 3rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.emptyCart p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: #2c5530;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.button:hover {
+  background: #1e3a21;
+}
+
+/* Order Summary - Full width at top */
+.orderSummary {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  height: fit-content;
+}
+
+.summaryTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2c5530;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+/* Cart Items */
+.cartItems {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.cartItem {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.cartItem:last-child {
+  border-bottom: none;
+}
+
+.itemImage {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #f0f0f0;
+}
+
+.itemDetails {
+  flex: 1;
+}
+
+.itemDetails h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.itemSpecs {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.itemQuantity {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.itemPrice {
+  text-align: right;
+  font-weight: 600;
+}
+
+.itemPriceEur {
+  font-size: 0.9rem;
+  color: #4a7c59;
+  margin-top: 0.1rem;
+}
+
+/* Totals */
+.totals {
+  border-top: 2px solid #e0e0e0;
+  padding-top: 1rem;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.grandTotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2c5530;
+  border-top: 1px solid #ddd;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Accordion Form */
+.accordionForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.accordionSection {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.accordionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.accordionHeader:hover {
+  background: #e9ecef;
+}
+
+.accordionTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c5530;
+  margin: 0;
+}
+
+.accordionIcon {
+  font-size: 1rem;
+  color: #666;
+  transition: transform 0.3s ease;
+  transform: rotate(-90deg);
+}
+
+.accordionIcon.expanded {
+  transform: rotate(0deg);
+}
+
+.accordionContent {
+  padding: 1.5rem;
+}
+
+.sectionSubtitle {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+/* Form Grid */
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+/* Personal Info - Vertical stack layout */
+.formSection:first-child {
+  padding: 1.25rem;
+}
+
+.formSection:first-child .formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  max-width: 350px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.formGroup input,
+.formGroup select {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #2c5530;
+  box-shadow: 0 0 0 2px rgba(44, 85, 48, 0.1);
+}
+
+.formGroup small {
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.inputError {
+  border-color: #dc3545 !important;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Checkbox Labels */
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+/* Service Selection */
+.servicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.serviceItem {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.serviceProduct {
+  margin-bottom: 0.75rem;
+}
+
+.serviceProduct strong {
+  color: #2c5530;
+}
+
+.serviceProduct span {
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+.serviceOptions {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.radioLabel input[type="radio"] {
+  width: auto;
+  margin: 0;
+}
+
+.installationInfo {
+  background: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+}
+
+.installationInfo small {
+  color: #0066cc;
+  font-weight: 500;
+}
+
+/* Invoice Section */
+.invoiceSection {
+  border-left: 4px solid #007bff;
+  padding-left: 1rem;
+  margin-left: 1rem;
+}
+
+/* Payment Options */
+.paymentOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.paymentOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.paymentOption:hover {
+  border-color: #2c5530;
+  background-color: #f8f9fa;
+}
+
+.paymentOption input[type="radio"] {
+  margin: 0;
+  margin-top: 0.1rem;
+}
+
+.paymentDetails {
+  flex: 1;
+}
+
+.paymentDetails strong {
+  display: block;
+  color: #2c5530;
+  margin-bottom: 0.25rem;
+}
+
+.paymentDetails small {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* Form Actions */
+.formActions {
+  margin-top: 1rem;
+  text-align: center;
+  padding: 1.5rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.submitButton {
+  background: #2c5530;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  min-width: 200px;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #1e3a21;
+}
+
+.submitButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 767px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .orderSummary {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+  }
+  
+  .cartItems {
+    max-height: 300px;
+  }
+  
+  .accordionForm {
+    gap: 0.75rem;
+  }
+  
+  .accordionHeader {
+    padding: 1rem;
+  }
+  
+  .accordionTitle {
+    font-size: 1.1rem;
+  }
+  
+  .accordionContent {
+    padding: 1rem;
+  }
+  
+  .serviceOptions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .paymentOptions {
+    gap: 0.75rem;
+  }
+  
+  .paymentOption {
+    padding: 0.75rem;
+  }
+}
+
+/* Focus States for Accessibility */
+.formGroup input:focus,
+.formGroup select:focus,
+.checkboxLabel:focus-within,
+.radioLabel:focus-within,
+.paymentOption:focus-within {
+  outline: 2px solid #2c5530;
+  outline-offset: 2px;
+}
+
+/* Loading States */
+.submitButton:disabled {
+  position: relative;
+  color: transparent;
+}
+
+.submitButton:disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 
