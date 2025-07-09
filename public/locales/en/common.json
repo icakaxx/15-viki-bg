@@ -2,7 +2,19 @@
   "metaTitle": "BGVIKI15 Ltd - Air Conditioning & Climate Solutions",
   "metaDescription": "BGVIKI15 Ltd - Quality and reliable solutions since 2000. Air conditioning, climate control and energy efficient solutions in Bulgaria.",
   "common": {
-    "close": "Close"
+    "close": "Close",
+    "today": "Today",
+    "weekdays": {
+      "monday": "Monday",
+      "tuesday": "Tuesday", 
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "error": "Error:",
+    "others": "others"
   },
   "nav": {
     "about": "About",
@@ -30,6 +42,13 @@
     "btu": "BTU",
     "color": "Color",
     "priceNote": "EUR prices are approximate",
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "page": "Page",
+      "previous": "Previous",
+      "next": "Next"
+    },
     "filters": {
       "title": "Filters",
       "clearAll": "Clear All",
@@ -94,7 +113,9 @@
         "middleName": "Middle Name",
         "lastName": "Last Name",
         "phone": "Mobile Phone",
-        "phoneHelp": "For contact regarding your order"
+        "phoneHelp": "For contact regarding your order",
+        "town": "Town/City",
+        "townPlaceholder": "e.g., Sofia, Plovdiv, Varna..."
       },
       "services": {
         "title": "Service Selection",
@@ -515,6 +536,89 @@
         "description": "Please enter the installation date:",
         "cancel": "Cancel",
         "confirm": "Confirm"
+      },
+      "callReminder": {
+        "message": "Please call the customer before confirming this order.",
+        "callCompleted": "Call completed"
+      },
+      "installationScheduling": {
+        "title": "Select installation date and time",
+        "loadingSlots": "Loading available slots..."
+      }
+    },
+    "installations": {
+      "title": "Installations This Week",
+      "loading": "Loading installations...",
+      "totalCount": "Total installations for the week:",
+      "noInstallations": "No installations scheduled for this week",
+      "previousWeek": "← Previous Week",
+      "nextWeek": "Next Week →",
+      "completedLabel": "[COMPLETED]",
+      "timeSlot": "Time",
+      "pastSlot": "Past",
+      "available": "Available",
+      "statusLabels": {
+        "completed": "Completed",
+        "scheduled": "Scheduled"
+      },
+      "details": {
+        "title": "Installation Details",
+        "dateTime": "Date & Time",
+        "customer": "Customer",
+        "phone": "Phone",
+        "town": "Town",
+        "orderId": "Order #",
+        "status": "Status",
+        "products": "Products",
+        "totalProducts": "Total Products",
+        "notes": "Notes",
+        "at": "at"
+      },
+      "actions": {
+        "cancel": "🗑️ Cancel",
+        "complete": "✅ Installation Completed",
+        "completed": "Installation Completed",
+        "markAsCompleted": "Mark as Completed",
+        "reschedule": "📅 Reschedule",
+        "close": "Close"
+      },
+      "reschedule": {
+        "title": "Reschedule Installation",
+        "currentTime": "Current Time",
+        "customer": "Customer",
+        "order": "Order",
+        "chooseNewTime": "Choose New Time",
+        "currentSlot": "Current",
+        "rescheduling": "Rescheduling...",
+        "cancel": "Cancel"
+      },
+      "confirmCancel": {
+        "title": "Cancellation Confirmation",
+        "message": "Are you sure you want to cancel this installation?",
+        "details": {
+          "date": "Date",
+          "customer": "Customer",
+          "order": "Order"
+        },
+        "note": "Note",
+        "noteMessage": "The order will be returned to \"confirmed\" status and can be rescheduled again.",
+        "cancelling": "Cancelling...",
+        "confirm": "🗑️ Cancel Installation",
+        "cancel": "Cancel"
+      },
+      "messages": {
+        "cancelSuccess": "Installation was successfully cancelled",
+        "cancelReason": "Cancelled by administrator",
+        "rescheduleReason": "Rescheduled by administrator",
+        "errorLoadingSlots": "Error loading available slots",
+        "rescheduleSuccess": "Installation was successfully rescheduled for {{date}} at {{time}}",
+        "rescheduleError": "Error: {{message}}",
+        "rescheduleErrorGeneric": "Error rescheduling installation",
+        "markAsInstalledSuccess": "Installation was successfully marked as completed",
+        "markAsInstalledError": "Error: {{error}}",
+        "markAsInstalledErrorGeneric": "Error marking installation as completed",
+        "cancelError": "Error: {{message}}",
+        "cancelErrorGeneric": "Error cancelling installation"
       }
     }
   }

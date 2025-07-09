@@ -17,6 +17,10 @@ const BuyPage = () => {
   const { t } = useContext(LanguageContext);
   const router = useRouter();
   
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 20;
+  
   // Handle hydration safely
   useEffect(() => {
     setMounted(true);
@@ -160,6 +164,17 @@ const BuyPage = () => {
       return true;
     });
   }, [products, filters, tempMobileFilters]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, tempMobileFilters]);
 
   const handleFilterChange = (filterType, value) => {
     const updateFunction = tempMobileFilters ? setTempMobileFilters : setFilters;
@@ -580,7 +595,21 @@ const BuyPage = () => {
             {/* Results Header */}
             <div className={styles.resultsHeader}>
               <div className={styles.resultsCount}>
-                {t ? `${t('buyPage.filters.showingResults')} ${filteredProducts.length} ${t('buyPage.filters.results')}` : `Showing ${filteredProducts.length} results`}
+                {filteredProducts.length > 0 ? (
+                  <>
+                    {t ? 
+                      `${t('buyPage.pagination.showing')} ${startIndex + 1}-${Math.min(endIndex, filteredProducts.length)} ${t('buyPage.pagination.of')} ${filteredProducts.length} ${t('buyPage.filters.results')}` :
+                      `Showing ${startIndex + 1}-${Math.min(endIndex, filteredProducts.length)} of ${filteredProducts.length} results`
+                    }
+                    {totalPages > 1 && (
+                      <span className={styles.pageInfo}>
+                        {t ? ` (${t('buyPage.pagination.page')} ${currentPage} ${t('buyPage.pagination.of')} ${totalPages})` : ` (Page ${currentPage} of ${totalPages})`}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  t ? `${t('buyPage.filters.showingResults')} 0 ${t('buyPage.filters.results')}` : 'Showing 0 results'
+                )}
               </div>
             </div>
             
@@ -591,8 +620,9 @@ const BuyPage = () => {
                   t('buyPage.noProducts')}
               </div>
             ) : (
-              <div className={styles.grid}>
-                {filteredProducts.map((product) => {
+              <>
+                <div className={styles.grid}>
+                  {currentProducts.map((product) => {
                   const discount = calculateDiscount(product.Price, product.PreviousPrice);
                   
                   return (
@@ -657,7 +687,62 @@ const BuyPage = () => {
                     </div>
                   );
                 })}
-              </div>
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className={styles.pagination}>
+                    <button
+                      className={`${styles.paginationButton} ${currentPage === 1 ? styles.disabled : ''}`}
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      {t ? t('buyPage.pagination.previous') : 'Previous'}
+                    </button>
+                    
+                    <div className={styles.pageNumbers}>
+                      {[...Array(totalPages)].map((_, index) => {
+                        const pageNumber = index + 1;
+                        const isCurrentPage = pageNumber === currentPage;
+                        
+                        // Show first page, last page, current page, and pages around current
+                        const showPage = pageNumber === 1 || 
+                                        pageNumber === totalPages || 
+                                        Math.abs(pageNumber - currentPage) <= 2;
+                        
+                        if (!showPage) {
+                          // Show ellipsis for gaps
+                          if (pageNumber === 2 && currentPage > 4) {
+                            return <span key={pageNumber} className={styles.ellipsis}>...</span>;
+                          }
+                          if (pageNumber === totalPages - 1 && currentPage < totalPages - 3) {
+                            return <span key={pageNumber} className={styles.ellipsis}>...</span>;
+                          }
+                          return null;
+                        }
+                        
+                        return (
+                          <button
+                            key={pageNumber}
+                            className={`${styles.pageNumber} ${isCurrentPage ? styles.active : ''}`}
+                            onClick={() => setCurrentPage(pageNumber)}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <button
+                      className={`${styles.paginationButton} ${currentPage === totalPages ? styles.disabled : ''}`}
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      {t ? t('buyPage.pagination.next') : 'Next'}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

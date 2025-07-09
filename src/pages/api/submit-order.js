@@ -81,6 +81,7 @@ export default async function handler(req, res) {
         middle_name: personalInfo.middleName,
         last_name: personalInfo.lastName,
         phone: personalInfo.phone,
+        town: personalInfo.town,
       }])
       .select()
       .single();

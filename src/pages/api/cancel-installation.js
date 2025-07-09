@@ -17,29 +17,40 @@ export default async function handler(req, res) {
   );
 
   try {
-    const { order_id, admin_id, reason } = req.body;
+    const { installation_id, order_id, admin_id, reason } = req.body;
 
-    // Validate required parameters
-    if (!order_id) {
+    // Validate required parameters - prefer installation_id, fallback to order_id
+    const searchId = installation_id || order_id;
+    const searchField = installation_id ? 'id' : 'order_id';
+
+    if (!searchId) {
       return res.status(400).json({ 
-        error: 'Missing required parameter: order_id is required' 
+        error: 'Missing required parameter: installation_id (or order_id) is required' 
       });
     }
 
-    console.log(`Cancelling installation for order ${order_id}`);
+    console.log(`Cancelling installation ${searchId}`);
 
     // 1. Fetch existing installation schedule
-    const { data: existingInstallation, error: fetchError } = await supabase
+    let query = supabase
       .from('installation_schedule')
       .select('id, order_id, scheduled_date, time_slot, notes')
-      .eq('order_id', order_id)
-      .single();
+      .eq(searchField, searchId);
 
-    if (fetchError) {
+    // If searching by order_id, get the most recent installation
+    if (searchField === 'order_id') {
+      query = query.order('created_at', { ascending: false }).limit(1);
+    }
+
+    const { data: existingInstallation, error: fetchError } = installation_id 
+      ? await query.single()  // Use .single() only when searching by installation_id
+      : await query.maybeSingle(); // Use .maybeSingle() when searching by order_id
+
+    if (fetchError || !existingInstallation) {
       console.error('Error fetching existing installation:', fetchError);
       return res.status(404).json({ 
         error: 'Installation not found',
-        message: `No installation schedule found for order ${order_id}`
+        message: `No installation schedule found for ${searchField} ${searchId}`
       });
     }
 
@@ -51,7 +62,7 @@ export default async function handler(req, res) {
     const { data: orderData, error: orderError } = await supabase
       .from('payment_and_tracking')
       .select('status')
-      .eq('order_id', order_id)
+      .eq('order_id', existingInstallation.order_id)
       .single();
 
     if (orderError) {
@@ -83,7 +94,7 @@ export default async function handler(req, res) {
     const { error: statusUpdateError } = await supabase
       .from('payment_and_tracking')
       .update({ status: newStatus })
-      .eq('order_id', order_id);
+      .eq('order_id', existingInstallation.order_id);
 
     if (statusUpdateError) {
       console.error('Error updating order status:', statusUpdateError);
@@ -92,7 +103,7 @@ export default async function handler(req, res) {
         .from('installation_schedule')
         .insert([{
           id: installationId,
-          order_id: order_id,
+          order_id: existingInstallation.order_id,
           scheduled_date: cancelledDate,
           time_slot: cancelledTime,
           notes: existingInstallation.notes
@@ -110,7 +121,7 @@ export default async function handler(req, res) {
     const { error: historyError } = await supabase
       .from('order_status_history')
       .insert([{
-        order_id: order_id,
+        order_id: existingInstallation.order_id,
         old_status: currentStatus,
         new_status: newStatus,
         changed_by: admin_id || null,
@@ -123,11 +134,11 @@ export default async function handler(req, res) {
       // Don't fail the entire request if history logging fails, but warn
     }
 
-    console.log(`Installation successfully cancelled for order ${order_id}. Schedule was: ${cancelledDate} ${cancelledTime}`);
+    console.log(`Installation successfully cancelled for order ${existingInstallation.order_id}. Schedule was: ${cancelledDate} ${cancelledTime}`);
 
     return res.status(200).json({
       success: true,
-      order_id: order_id,
+      order_id: existingInstallation.order_id,
       installation_id: installationId,
       cancelled_schedule: {
         date: cancelledDate,

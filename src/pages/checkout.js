@@ -16,6 +16,7 @@ const CheckoutPage = () => {
     middleName: '',
     lastName: '',
     phone: '',
+    town: '',
     
     // Service selections (per product)
     services: {},
@@ -105,6 +106,7 @@ const CheckoutPage = () => {
     } else if (formData.phone.length < 8) {
       errors.phone = t('checkout.form.validation.invalidPhone');
     }
+    if (!formData.town.trim()) errors.town = t('checkout.form.validation.required');
 
     // Invoice validation (if enabled)
     if (formData.invoiceEnabled) {
@@ -141,7 +143,8 @@ const CheckoutPage = () => {
           firstName: formData.firstName,
           middleName: formData.middleName,
           lastName: formData.lastName,
-          phone: formData.phone
+          phone: formData.phone,
+          town: formData.town
         },
         invoiceInfo: {
           invoiceEnabled: formData.invoiceEnabled,
@@ -342,6 +345,19 @@ const CheckoutPage = () => {
                     />
                     <small>{t('checkout.form.personalInfo.phoneHelp')}</small>
                     {formErrors.phone && <span className={styles.error}>{formErrors.phone}</span>}
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label htmlFor="town">{t('checkout.form.personalInfo.town')} *</label>
+                    <input
+                      type="text"
+                      id="town"
+                      value={formData.town}
+                      onChange={(e) => handleInputChange('town', e.target.value)}
+                      className={formErrors.town ? styles.inputError : ''}
+                      placeholder={t('checkout.form.personalInfo.townPlaceholder')}
+                    />
+                    {formErrors.town && <span className={styles.error}>{formErrors.town}</span>}
                   </div>
                 </div>
               </div>

@@ -3,6 +3,7 @@ import styles from '../styles/Page Styles/Administration.module.css';
 import { LanguageContext } from '../components/Layout Components/Header';
 import AdminOrderHistoryTab from '../components/AdminOrderHistoryTab';
 import WeeklyInstallationsTab from '../components/WeeklyInstallationsTab';
+import { TIME_SLOTS, areSlotsConsecutive } from '../lib/slotUtils';
 
 
 
@@ -59,22 +60,32 @@ const AdministrationProducts = () => {
     const [activeTab, setActiveTab] = useState('products'); // 'products', 'orders', 'orderHistory', or 'installations'
     const [showInstallationDatePicker, setShowInstallationDatePicker] = useState(null);
     const [installationDate, setInstallationDate] = useState('');
+    const [ordersNeedRefresh, setOrdersNeedRefresh] = useState(false);
     
     // New state for status transition modals
     const [showCallConfirmationModal, setShowCallConfirmationModal] = useState(null);
     const [showCalendarModal, setShowCalendarModal] = useState(null);
     const [availableSlots, setAvailableSlots] = useState({});
-    const [selectedSlot, setSelectedSlot] = useState(null);
+    const [selectedSlots, setSelectedSlots] = useState([]);
     const [calendarWeek, setCalendarWeek] = useState(new Date());
     const [loadingSlots, setLoadingSlots] = useState(false);
 
     useEffect(() => {
         if (activeTab === 'products') {
-        loadProducts();
+            loadProducts();
         } else if (activeTab === 'orders') {
             loadOrders();
+            // Clear the refresh flag after loading orders
+            if (ordersNeedRefresh) {
+                setOrdersNeedRefresh(false);
+            }
         }
-    }, [activeTab, showArchived, searchTerm, sortBy, sortOrder, currentPage, pageSize]);
+    }, [activeTab, showArchived, searchTerm, sortBy, sortOrder, currentPage, pageSize, ordersNeedRefresh]);
+
+    // Debug calendar modal state changes
+    useEffect(() => {
+        console.log('Calendar modal state changed:', showCalendarModal);
+    }, [showCalendarModal]);
     
     // Reset to first page when search/filter changes
     useEffect(() => {
@@ -152,22 +163,38 @@ const AdministrationProducts = () => {
         const currentOrder = orders.find(order => order.order_id === orderId);
         const currentStatus = currentOrder?.current_status;
 
+        console.log(`Status transition: ${currentStatus} → ${newStatus} for order ${orderId}`);
+
         // Handle status transition flows
         if (currentStatus === 'new' && newStatus === 'confirmed') {
+            console.log('Showing call confirmation modal');
             // Show call confirmation modal
             setShowCallConfirmationModal(orderId);
             return;
         }
 
         if (currentStatus === 'confirmed' && newStatus === 'installation_booked') {
+            console.log('Showing calendar modal for installation booking');
             // Show calendar overlay modal
             setShowCalendarModal(orderId);
-            await loadAvailableSlots();
+            try {
+                await loadAvailableSlots();
+                console.log('Calendar modal should now be visible');
+                // Show a brief notification that calendar is ready
+                setTimeout(() => {
+                    console.log('Calendar ready - user can now select installation time');
+                }, 100);
+            } catch (error) {
+                console.error('Error loading available slots:', error);
+                alert('Error loading calendar. Please try again.');
+                setShowCalendarModal(null); // Hide modal on error
+            }
             return;
         }
         
         // If changing to 'installed', show date picker first
         if (newStatus === 'installed') {
+            console.log('Showing installation date picker');
             const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
             setInstallationDate(today);
             setShowInstallationDatePicker(orderId);
@@ -175,6 +202,7 @@ const AdministrationProducts = () => {
         }
         
         // For other status changes, proceed normally
+        console.log('Proceeding with normal status update');
         await performStatusUpdate(orderId, newStatus, null);
     };
 
@@ -319,6 +347,17 @@ const AdministrationProducts = () => {
         }
         
         return translatedValue;
+    };
+
+    const getStatusWorkflowHint = (currentStatus) => {
+        const hints = {
+            'new': 'Workflow: New → Confirmed → Schedule Installation → Installed',
+            'confirmed': 'Next: Schedule Installation (opens calendar)',
+            'installation_booked': 'Next: Mark as Installed when work is complete',
+            'installed': 'Order is complete',
+            'cancelled': 'Order is cancelled'
+        };
+        return hints[currentStatus] || '';
     };
 
     // Product management helper functions
@@ -580,9 +619,15 @@ const AdministrationProducts = () => {
     const loadAvailableSlots = async () => {
         setLoadingSlots(true);
         try {
-            // Get Monday of current week
-            const monday = new Date(calendarWeek);
+            // Get Monday of current week (or next week if it's weekend)
+            const today = new Date();
+            const monday = new Date(today);
             monday.setDate(monday.getDate() - monday.getDay() + 1);
+            
+            // If today is weekend, start from next Monday
+            if (today.getDay() === 0 || today.getDay() === 6) {
+                monday.setDate(monday.getDate() + 7);
+            }
             
             // Get Sunday of current week
             const sunday = new Date(monday);
@@ -591,47 +636,85 @@ const AdministrationProducts = () => {
             const startDate = monday.toISOString().split('T')[0];
             const endDate = sunday.toISOString().split('T')[0];
 
+            console.log('Loading available slots for period:', startDate, 'to', endDate);
+
             const response = await fetch(`/api/get-available-slots?startDate=${startDate}&endDate=${endDate}`);
             const data = await response.json();
 
+            console.log('Available slots response:', data);
+
             if (response.ok) {
-                setAvailableSlots(data.availableSlots);
+                setAvailableSlots(data.availableSlots || {});
+                setCalendarWeek(monday); // Update calendar week state
             } else {
                 console.error('Failed to load available slots:', data.error);
-                alert('Failed to load available slots');
+                alert('Failed to load available slots: ' + (data.error || 'Unknown error'));
             }
         } catch (error) {
             console.error('Error loading slots:', error);
-            alert('Error loading available slots');
+            alert('Error loading available slots: ' + error.message);
         } finally {
             setLoadingSlots(false);
         }
     };
 
-    // Handle slot selection
+    // Handle individual slot selection with toggle functionality
     const handleSlotSelection = (date, timeSlot) => {
         const slot = availableSlots[date]?.[timeSlot];
-        // Only allow selection of available slots (not past, not booked)
-        if (slot?.available && !slot?.past && !slot?.booked) {
-            setSelectedSlot({ date, timeSlot });
+        // Only allow interaction with available slots (not past, not booked)
+        if (!slot?.available || slot?.past || slot?.booked) {
+            return;
+        }
+
+        // Check if this slot is already selected
+        const isAlreadySelected = selectedSlots.some(
+            selectedSlot => selectedSlot.date === date && selectedSlot.timeSlot === timeSlot
+        );
+
+        if (isAlreadySelected) {
+            // Deselect the slot
+            setSelectedSlots(prev => 
+                prev.filter(selectedSlot => 
+                    !(selectedSlot.date === date && selectedSlot.timeSlot === timeSlot)
+                )
+            );
+        } else {
+            // Select the slot (add to existing selections)
+            setSelectedSlots(prev => [...prev, { date, timeSlot }]);
         }
     };
 
-    // Book installation
+    // Book installation with multiple slots
     const handleBookInstallation = async () => {
-        if (!showCalendarModal || !selectedSlot) return;
+        if (!showCalendarModal || !selectedSlots || selectedSlots.length === 0) {
+            alert('Please select at least one time slot');
+            return;
+        }
+
+        // Ensure all slots are for the same date
+        const dates = [...new Set(selectedSlots.map(slot => slot.date))];
+        if (dates.length !== 1) {
+            alert('All selected slots must be on the same date');
+            return;
+        }
 
         setUpdatingStatus(showCalendarModal);
         try {
+            const installationDate = selectedSlots[0].date;
+            const timeSlots = selectedSlots.map(slot => slot.timeSlot).sort();
+            const duration = selectedSlots.length * 0.5; // Each slot is 30 minutes
+
             const response = await fetch('/api/book-installation', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     orderId: showCalendarModal,
-                    scheduledDate: selectedSlot.date,
-                    timeSlot: selectedSlot.timeSlot,
+                    scheduledDate: installationDate,
+                    timeSlots: timeSlots, // Multiple slots
+                    timeSlot: timeSlots[0], // Primary slot for backward compatibility
+                    duration: duration,
                     adminId: null, // TODO: Add proper admin ID
-                    notes: ''
+                    notes: `Installation slots: ${timeSlots.join(', ')} (${duration} hours total)`
                 })
             });
 
@@ -647,12 +730,25 @@ const AdministrationProducts = () => {
                     )
                 );
 
-                alert(`Installation scheduled for ${selectedSlot.date} at ${selectedSlot.timeSlot}`);
+                alert(`Installation scheduled for ${installationDate} at ${timeSlots.join(', ')} (${duration} hours total)`);
                 setShowCalendarModal(null);
-                setSelectedSlot(null);
+                setSelectedSlots([]);
+                setAvailableSlots({});
             } else {
-                console.error('Failed to book installation:', result.error);
-                alert(`Failed to book installation: ${result.error}`);
+                console.error('Failed to book installation:', result);
+                
+                // Handle specific error types
+                if (result.error === 'Time slot conflict') {
+                    alert(`${result.message}\n\nThe selected time slots are no longer available. Please refresh the calendar and select different slots.`);
+                    // Optionally reload available slots
+                    await loadAvailableSlots();
+                } else if (result.error === 'Time slots not available') {
+                    alert(`Some time slots are no longer available: ${result.unavailableSlots?.join(', ')}\n\nPlease select different time slots.`);
+                    // Optionally reload available slots  
+                    await loadAvailableSlots();
+                } else {
+                    alert(`Failed to book installation: ${result.message || result.error}`);
+                }
             }
         } catch (error) {
             console.error('Error booking installation:', error);
@@ -664,9 +760,28 @@ const AdministrationProducts = () => {
 
     const handleCancelCalendar = () => {
         setShowCalendarModal(null);
-        setSelectedSlot(null);
+        setSelectedSlots([]);
+        setAvailableSlots({});
         // Reset dropdown to previous value
         setOrders(prevOrders => [...prevOrders]); // Force re-render
+    };
+
+    // Handle installation cancellation from Weekly Installations tab
+    const handleInstallationCancelled = () => {
+        console.log('Installation cancelled - marking orders for refresh');
+        setOrdersNeedRefresh(true);
+    };
+
+    // Handle installation rescheduling from Weekly Installations tab
+    const handleInstallationRescheduled = () => {
+        console.log('Installation rescheduled - marking orders for refresh');
+        setOrdersNeedRefresh(true);
+    };
+
+    // Handle installation completion from Weekly Installations tab
+    const handleInstallationCompleted = () => {
+        console.log('Installation completed - marking orders for refresh');
+        setOrdersNeedRefresh(true);
     };
 
     // Show loading state until authentication check is complete
@@ -1259,10 +1374,17 @@ const AdministrationProducts = () => {
                                                 onChange={(e) => updateOrderStatus(order.order_id, e.target.value)}
                                                 disabled={updatingStatus === order.order_id}
                                                 className={styles.statusSelect}
+                                                title={getStatusWorkflowHint(order.current_status)}
                                             >
                                                 <option value="new">{t('admin.orders.status.new')}</option>
                                                 <option value="confirmed">{t('admin.orders.status.confirmed')}</option>
-                                                <option value="installation_booked">{t('admin.orders.status.installation_booked')}</option>
+                                                <option 
+                                                    value="installation_booked"
+                                                    disabled={order.current_status === 'new'}
+                                                >
+                                                    {t('admin.orders.status.installation_booked')}
+                                                    {order.current_status === 'new' ? ' (Confirm first)' : ''}
+                                                </option>
                                                 <option value="installed">{t('admin.orders.status.installed')}</option>
                                                 <option value="cancelled">{t('admin.orders.status.cancelled')}</option>
                                             </select>
@@ -1395,7 +1517,11 @@ const AdministrationProducts = () => {
 
             {/* Weekly Installations Section */}
             {activeTab === 'installations' && (
-                <WeeklyInstallationsTab />
+                <WeeklyInstallationsTab 
+                    onInstallationCancelled={handleInstallationCancelled}
+                    onInstallationRescheduled={handleInstallationRescheduled}
+                    onInstallationCompleted={handleInstallationCompleted}
+                />
             )}
 
             {/* Call Confirmation Modal */}
@@ -1420,7 +1546,7 @@ const AdministrationProducts = () => {
                         minWidth: '400px'
                     }}>
                         <h3>Потвърждение на обаждане</h3>
-                        <p>Моля, обадете се на клиента по телефона преди да потвърдите тази поръчка.</p>
+                        <p>{t('admin.orders.callReminder.message')}</p>
                         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
                             <button
                                 onClick={handleCallCancelled}
@@ -1445,7 +1571,7 @@ const AdministrationProducts = () => {
                                     cursor: 'pointer'
                                 }}
                             >
-                                Обаждането завършено
+                                {t('admin.orders.callReminder.callCompleted')}
                             </button>
                         </div>
                     </div>
@@ -1476,9 +1602,25 @@ const AdministrationProducts = () => {
                         maxHeight: '80vh',
                         overflow: 'auto'
                     }}>
-                        <h3>Избор на дата и час за монтаж</h3>
+                        <h3>{t('admin.orders.installationScheduling.title')}</h3>
+                        
+                        {/* Duration Selector */}
+                        <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                            <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                                Select Installation Time Slots
+                            </div>
+                            <small style={{ color: '#666' }}>
+                                Click individual time slots to select them. Click again to deselect. 
+                                {selectedSlots.length > 0 && (
+                                    <span style={{ fontWeight: 'bold', color: '#28a745' }}>
+                                        {' '}Selected: {selectedSlots.length} slots ({selectedSlots.length * 0.5} hours)
+                                    </span>
+                                )}
+                            </small>
+                        </div>
+
                         {loadingSlots ? (
-                            <p>Зареждане на свободни часове...</p>
+                            <p>{t('admin.orders.installationScheduling.loadingSlots')}</p>
                         ) : (
                             <>
                                 {/* Calendar Grid */}
@@ -1505,7 +1647,7 @@ const AdministrationProducts = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(timeSlot => (
+                                            {TIME_SLOTS.map(timeSlot => (
                                                 <tr key={timeSlot}>
                                                     <td style={{ padding: '0.5rem', border: '1px solid #ddd', fontWeight: 'bold' }}>
                                                         {timeSlot}
@@ -1533,9 +1675,12 @@ const AdministrationProducts = () => {
                                                             color = 'white';
                                                             cursor = 'not-allowed';
                                                         } else if (slot?.available) {
+                                                            // Check if this slot is selected
+                                                            const isSelected = selectedSlots.some(selectedSlot => 
+                                                                selectedSlot.date === dateStr && selectedSlot.timeSlot === timeSlot
+                                                            );
                                                             // Available slots - green or blue if selected
-                                                            backgroundColor = selectedSlot?.date === dateStr && selectedSlot?.timeSlot === timeSlot 
-                                                                ? '#007bff' : '#28a745';
+                                                            backgroundColor = isSelected ? '#007bff' : '#28a745';
                                                             cursor = 'pointer';
                                                             color = 'white';
                                                         }
@@ -1585,9 +1730,12 @@ const AdministrationProducts = () => {
                                     </div>
                                 </div>
 
-                                {selectedSlot && (
+                                {selectedSlots.length > 0 && (
                                     <div style={{ padding: '1rem', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '1rem' }}>
-                                        <strong>Избран час:</strong> {selectedSlot.date} в {selectedSlot.timeSlot}
+                                        <strong>Selected time slots:</strong><br/>
+                                        <strong>Date:</strong> {selectedSlots[0].date}<br/>
+                                        <strong>Time slots:</strong> {selectedSlots.map(s => s.timeSlot).sort().join(', ')}<br/>
+                                        <strong>Total duration:</strong> {selectedSlots.length * 0.5} hours ({selectedSlots.length} slots)
                                     </div>
                                 )}
                             </>
@@ -1608,14 +1756,14 @@ const AdministrationProducts = () => {
                             </button>
                             <button
                                 onClick={handleBookInstallation}
-                                disabled={!selectedSlot || updatingStatus}
+                                disabled={selectedSlots.length === 0 || updatingStatus}
                                 style={{
                                     padding: '0.5rem 1rem',
                                     border: 'none',
                                     borderRadius: '4px',
-                                    backgroundColor: selectedSlot ? '#28a745' : '#ccc',
+                                    backgroundColor: selectedSlots.length > 0 ? '#28a745' : '#ccc',
                                     color: 'white',
-                                    cursor: selectedSlot ? 'pointer' : 'not-allowed'
+                                    cursor: selectedSlots.length > 0 ? 'pointer' : 'not-allowed'
                                 }}
                             >
                                 {updatingStatus ? 'Записване...' : 'Запиши монтаж'}
