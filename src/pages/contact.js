@@ -234,7 +234,7 @@ const ContactPage = () => {
                 <p style={{ color: '#666', marginBottom: '1.5rem', lineHeight: '1.6' }}>{dept.description}</p>
                 <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: '1rem' }}>
                   <p style={{ marginBottom: '0.5rem' }}>
-                    <strong>Телефон:</strong> {dept.phone}
+                    <strong>{t('contactPage.info.phone.title')}:</strong> {dept.phone}
                   </p>
                   <p style={{ marginBottom: '0' }}>
                     <strong>Имейл:</strong> {dept.email}

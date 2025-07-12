@@ -2,7 +2,19 @@
   "metaTitle": "BGVIKI15 Ltd - Air Conditioning & Climate Solutions",
   "metaDescription": "BGVIKI15 Ltd - Quality and reliable solutions since 2000. Air conditioning, climate control and energy efficient solutions in Bulgaria.",
   "common": {
-    "close": "Close"
+    "close": "Close",
+    "today": "Today",
+    "weekdays": {
+      "monday": "Monday",
+      "tuesday": "Tuesday", 
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "error": "Error:",
+    "others": "others"
   },
   "nav": {
     "about": "About",
@@ -26,10 +38,34 @@
     "energyRating": "Energy Rating:",
     "capacity": "Capacity:",
     "type": "Type:",
+    "brand": "Brand:",
+    "model": "Model:",
+    "price": "Price:",
+    "installationCost": "Installation:",
+    "stockStatus": "Stock:",
+    "roomSize": "Room Size:",
+    "noiseLevel": "Noise:",
+    "warranty": "Warranty:",
     "discount": "Discount",
     "btu": "BTU",
     "color": "Color",
     "priceNote": "EUR prices are approximate",
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "features": {
+      "wifi": "WiFi Control",
+      "inverter": "Inverter",
+      "heatPump": "Heat Pump",
+      "eco": "Eco Mode"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "page": "Page",
+      "previous": "Previous",
+      "next": "Next"
+    },
     "filters": {
       "title": "Filters",
       "clearAll": "Clear All",
@@ -80,6 +116,9 @@
     "unitPrice": "Unit price",
     "removeItem": "Remove",
     "clearCart": "Clear Cart",
+    "confirmRemove": "Are you sure you want to remove this item from your cart?",
+    "confirmRemoveInstallation": "Are you sure you want to remove the installation service?",
+    "removeInstallation": "Remove Installation",
     "nextSteps": "Next Steps",
     "orderTotal": "Order Total",
     "checkoutInfo": "Checkout page for product ID:",
@@ -94,7 +133,9 @@
         "middleName": "Middle Name",
         "lastName": "Last Name",
         "phone": "Mobile Phone",
-        "phoneHelp": "For contact regarding your order"
+        "phoneHelp": "For contact regarding your order",
+        "town": "Town/City",
+        "townPlaceholder": "e.g., Sofia, Plovdiv, Varna..."
       },
       "services": {
         "title": "Service Selection",
@@ -421,12 +462,14 @@
     },
     "tabs": {
       "products": "Product Management",
-      "orders": "Order Management"
+      "orders": "Order Management",
+      "orderHistory": "Order History",
+      "installations": "Installations This Week"
     },
     "products": {
       "title": "Products",
       "addNew": "Add New Product",
-      "edit": "Edit Product",
+      "edit": "Edit Product", 
       "brand": "Brand",
       "model": "Model",
       "color": "Color",
@@ -459,7 +502,172 @@
       "duplicateError": "Product with these specifications already exists",
       "confirmArchive": "Are you sure you want to archive '{product}'?",
       "noProducts": "No products found",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "tabs": {
+        "basic": "Basic Info",
+        "technical": "Technical Specs",
+        "physical": "Physical Details",
+        "installation": "Installation & Warranty",
+        "features": "Features & Accessories",
+        "description": "Description & Promo"
+      },
+      "technical": {
+        "cop": "COP (Coefficient of Performance)",
+        "scop": "SCOP (Seasonal COP)",
+        "powerConsumption": "Power Consumption",
+        "refrigerantType": "Refrigerant Type",
+        "operatingTempRange": "Operating Temperature Range",
+        "copHint": "Higher is better (typically 3.5 - 5.0)",
+        "scopHint": "Seasonal performance rating",
+        "powerHint": "e.g., \"2.1 kW\" or \"1800W\"",
+        "refrigerantHint": "R32 is most eco-friendly",
+        "tempRangeHint": "e.g., \"-15°C to +50°C\""
+      },
+      "physical": {
+        "dimensions": "Dimensions (H×W×D)",
+        "weight": "Weight",
+        "noiseLevel": "Noise Level",
+        "airFlow": "Air Flow Rate",
+        "dimensionsHint": "Height × Width × Depth",
+        "weightHint": "Indoor unit weight",
+        "noiseHint": "Indoor unit noise level",
+        "airFlowHint": "Maximum air flow rate"
+      },
+      "features": {
+        "warrantyPeriod": "Warranty Period",
+        "roomSizeRecommendation": "Room Size Recommendation",
+        "installationType": "Installation Type",
+        "description": "Product Description",
+        "productFeatures": "Product Features",
+        "addFeature": "Add",
+        "roomSizeHint": "Recommended room size",
+        "featuresHint": "Common features: Wi-Fi Control, Timer, Sleep Mode, Auto Restart, etc."
+      },
+      "placeholders": {
+        "brandExample": "e.g., Daikin, Mitsubishi",
+        "modelExample": "e.g., FTXS35K",
+        "priceExample": "599.99",
+        "previousPriceExample": "699.99",
+        "stockExample": "10",
+        "discountExample": "10",
+        "copExample": "4.2",
+        "scopExample": "4.0",
+        "powerExample": "2.1 kW",
+        "tempRangeExample": "-15°C to +50°C",
+        "dimensionsExample": "795 x 295 x 203 mm",
+        "weightExample": "9.5 kg",
+        "noiseExample": "19-23 dB",
+        "airFlowExample": "540 m³/h",
+        "roomSizeExample": "15-25 m²",
+        "descriptionExample": "Detailed product description...",
+        "featureExample": "Add a feature...",
+        "imageUrlExample": "https://example.com/image.jpg"
+      },
+      "sections": {
+        "basic": "Basic Information",
+        "technical": "Technical Specifications", 
+        "physical": "Physical Characteristics",
+        "installation": "Installation & Warranty",
+        "features": "Features & Promotions",
+        "description": "Description"
+      },
+      "fields": {
+        "previousPrice": "Previous Price",
+        "stockQuantity": "Stock Quantity",
+        "imageUrl": "Image URL",
+        "imageUpload": "Product Image",
+        "scop": "SCOP (Seasonal COP)",
+        "powerConsumption": "Power Consumption",
+        "operatingTempRange": "Operating Temperature Range",
+        "dimensions": "Dimensions",
+        "weight": "Weight",
+        "noiseLevel": "Noise Level",
+        "airFlow": "Air Flow",
+        "installationType": "Installation Type",
+        "roomSizeRecommendation": "Room Size Recommendation",
+        "warrantyPeriod": "Warranty Period",
+        "isFeatured": "Featured Product",
+        "isBestseller": "Bestseller",
+        "isNew": "New Product",
+        "description": "Description"
+      },
+      "hints": {
+        "copHint": "Higher is better (typically 3-6)",
+        "scopHint": "For heating efficiency",
+        "powerHint": "e.g. 2.5 kW",
+        "tempRangeHint": "e.g. -15°C to +50°C",
+        "dimensionsHint": "e.g. 890×295×204 mm",
+        "weightHint": "e.g. 12.5 kg",
+        "noiseHint": "e.g. 22 dB",
+        "airFlowHint": "e.g. 780 m³/h",
+        "roomSizeHint": "e.g. 25-35 m²"
+      },
+      "dropdowns": {
+        "selectType": "Select type...",
+        "selectRating": "Select rating...",
+        "selectPeriod": "Select period...",
+        "types": {
+          "split": "Split",
+          "multiSplit": "Multi-Split",
+          "cassette": "Cassette",
+          "ducted": "Ducted",
+          "portable": "Portable"
+        },
+        "energyRatings": {
+          "aPlusPlus": "A+++",
+          "aPlus": "A++",
+          "a": "A+",
+          "b": "A",
+          "c": "B",
+          "d": "C"
+        },
+        "refrigerantTypes": {
+          "r32": "R32",
+          "r410a": "R410A",
+          "r134a": "R134a",
+          "r290": "R290"
+        },
+        "installationTypes": {
+          "wallMounted": "Wall-mounted",
+          "ceilingMounted": "Ceiling-mounted",
+          "floorStanding": "Floor-standing",
+          "ducted": "Ducted",
+          "cassette": "Cassette"
+        },
+        "warrantyPeriods": {
+          "1year": "1 year",
+          "2years": "2 years",
+          "3years": "3 years",
+          "5years": "5 years",
+          "7years": "7 years",
+          "10years": "10 years"
+        }
+      },
+      "formCards": {
+        "productIdentity": "Product Identity",
+        "productDetails": "Product Details",
+        "performanceMetrics": "Performance Metrics",
+        "physicalSpecs": "Physical Specifications",
+        "installationDetails": "Installation Details",
+        "promotionalTags": "Promotional Tags",
+        "productDescription": "Product Description"
+      },
+      "status": {
+        "completed": "Completed",
+        "inProgress": "In Progress",
+        "pending": "Pending",
+        "required": "Required",
+        "optional": "Optional"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "addProduct": "Add Product",
+        "updateProduct": "Update Product",
+        "edit": "Edit"
+      },
+      "selectImage": "Select Image",
+      "uploading": "Uploading...",
+      "currentImage": "Current Image"
     },
     "orders": {
       "title": "Order Management",
@@ -488,7 +696,225 @@
       "errors": {
         "updateFailed": "Error updating status",
         "loadFailed": "An error occurred while loading"
+      },
+      "history": {
+        "title": "Order History",
+        "description": "All installed orders with filtering, search and pagination",
+        "searchPlaceholder": "Search by customer, phone, brand, model...",
+        "dateRangePlaceholder": "Date range (coming soon)",
+        "productTypePlaceholder": "Product type (coming soon)",
+        "installationDate": "Inst. Date",
+        "customer": "Customer",
+        "phone": "Phone",
+        "products": "Products",
+        "total": "Total (BGN/€)",
+        "actions": "Actions",
+        "loading": "Loading...",
+        "error": "Error loading",
+        "noOrders": "No orders found",
+        "detailsButton": "Details",
+        "previousPage": "Previous",
+        "nextPage": "Next"
+      },
+      "installationDatePicker": {
+        "title": "Installation Date",
+        "description": "Please enter the installation date:",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      },
+      "callReminder": {
+        "message": "Please call the customer before confirming this order.",
+        "callCompleted": "Call completed"
+      },
+      "installationScheduling": {
+        "title": "Select installation date and time",
+        "loadingSlots": "Loading available slots..."
       }
+    },
+    "installations": {
+      "title": "Installations This Week",
+      "loading": "Loading installations...",
+      "totalCount": "Total installations for the week:",
+      "noInstallations": "No installations scheduled for this week",
+      "previousWeek": "← Previous Week",
+      "nextWeek": "Next Week →",
+      "completedLabel": "[COMPLETED]",
+      "timeSlot": "Time",
+      "pastSlot": "Past",
+      "available": "Available",
+      "statusLabels": {
+        "completed": "Completed",
+        "scheduled": "Scheduled"
+      },
+      "details": {
+        "title": "Installation Details",
+        "dateTime": "Date & Time",
+        "customer": "Customer",
+        "phone": "Phone",
+        "town": "Town",
+        "orderId": "Order #",
+        "status": "Status",
+        "products": "Products",
+        "totalProducts": "Total Products",
+        "notes": "Notes",
+        "at": "at"
+      },
+      "actions": {
+        "cancel": "🗑️ Cancel",
+        "complete": "✅ Installation Completed",
+        "completed": "Installation Completed",
+        "markAsCompleted": "Mark as Completed",
+        "reschedule": "📅 Reschedule",
+        "close": "Close"
+      },
+      "reschedule": {
+        "title": "Reschedule Installation",
+        "currentTime": "Current Time",
+        "customer": "Customer",
+        "order": "Order",
+        "chooseNewTime": "Choose New Time",
+        "currentSlot": "Current",
+        "rescheduling": "Rescheduling...",
+        "cancel": "Cancel"
+      },
+      "confirmCancel": {
+        "title": "Cancellation Confirmation",
+        "message": "Are you sure you want to cancel this installation?",
+        "details": {
+          "date": "Date",
+          "customer": "Customer",
+          "order": "Order"
+        },
+        "note": "Note",
+        "noteMessage": "The order will be returned to \"confirmed\" status and can be rescheduled again.",
+        "cancelling": "Cancelling...",
+        "confirm": "🗑️ Cancel Installation",
+        "cancel": "Cancel"
+      },
+      "messages": {
+        "cancelSuccess": "Installation was successfully cancelled",
+        "cancelReason": "Cancelled by administrator",
+        "rescheduleReason": "Rescheduled by administrator",
+        "errorLoadingSlots": "Error loading available slots",
+        "rescheduleSuccess": "Installation was successfully rescheduled for {{date}} at {{time}}",
+        "rescheduleError": "Error: {{message}}",
+        "rescheduleErrorGeneric": "Error rescheduling installation",
+        "markAsInstalledSuccess": "Installation was successfully marked as completed",
+        "markAsInstalledError": "Error: {{error}}",
+        "markAsInstalledErrorGeneric": "Error marking installation as completed",
+        "cancelError": "Error: {{message}}",
+        "cancelErrorGeneric": "Error cancelling installation"
+      }
+    },
+    "analytics": {
+      "title": "Analytics Dashboard",
+      "loading": "Loading analytics...",
+      "refresh": "Refresh Data",
+      "totalOrders": "Total Orders",
+      "totalRevenue": "Total Revenue",
+      "installationRate": "Installation Rate",
+      "accessoryOrders": "Accessory Orders",
+      "installationStats": "Installation Statistics",
+      "withInstallation": "With Installation",
+      "withoutInstallation": "Without Installation",
+      "accessoryUsage": "Accessory Usage",
+      "accessoryName": "Accessory Name",
+      "timesOrdered": "Times Ordered",
+      "percentage": "Percentage",
+      "chart": "Chart",
+      "noAccessoryData": "No accessory data available",
+      "topSellingByBTU": "Top Selling by BTU Capacity",
+      "btuCapacity": "BTU Capacity",
+      "unitsSold": "Units Sold",
+      "noBTUData": "No BTU data available",
+      "topSellingByEnergyRating": "Top Selling by Energy Rating",
+      "energyRating": "Energy Rating",
+      "noEnergyRatingData": "No energy rating data available",
+      "salesOverTime": "Sales Over Time",
+      "noTimeData": "No sales data available"
+    }
+  },
+  "productDetail": {
+    "loading": "Loading",
+    "notFound": "Product not found",
+    "backToBuy": "Back to Products",
+    "technicalSpecs": "Technical Specifications",
+    "features": "Features",
+    "options": "Options & Accessories",
+    "accessories": "Accessories",
+    "total": "Total",
+    "addToCart": "Add to Cart",
+    "outOfStock": "Out of Stock",
+    "metaTitle": "Air Conditioner",
+    "metaDescription": "Professional air conditioner with installation and warranty",
+    "stock": {
+      "inStock": "In Stock",
+      "lowStock": "Low Stock",
+      "outOfStock": "Out of Stock"
+    },
+    "specs": {
+      "capacity": "Capacity",
+      "energyRating": "Energy Rating",
+      "type": "Type",
+      "warranty": "Warranty",
+      "noise": "Noise Level",
+      "power": "Power Consumption",
+      "airflow": "Air Flow",
+      "dimensions": "Dimensions",
+      "weight": "Weight",
+      "color": "Color"
+    },
+    "tooltips": {
+      "cop": "Coefficient of Performance - Higher values mean better energy efficiency for cooling",
+      "scop": "Seasonal COP - Average efficiency throughout the year including heating mode",
+      "powerConsumption": "Maximum electrical power consumption when the unit is running at full capacity",
+      "refrigerantType": "Type of refrigerant gas used - R32 is more eco-friendly than older types",
+      "operatingTempRange": "Temperature range within which the unit can operate effectively",
+      "dimensions": "Physical dimensions of the indoor unit: Width × Height × Depth",
+      "weight": "Weight of the indoor unit - important for wall mounting considerations",
+      "noiseLevel": "Sound level during operation - lower values mean quieter operation",
+      "airFlow": "Maximum air circulation capacity - higher values cool larger spaces faster",
+      "installationType": "Recommended installation method for optimal performance",
+      "stock": "Current availability - shows how many units are in stock",
+      "color": "Available color options for the unit casing",
+      "roomSizeRecommendation": "Recommended room size for optimal cooling efficiency"
+    },
+    "installation": {
+      "title": "Professional Installation",
+      "description": "Professional installation by certified technicians with warranty. Price includes transport, materials and commissioning."
+    },
+    "loadingAccessories": "Loading accessories",
+    "noAccessories": "No accessories available for this product",
+    "warranty": {
+      "default": "2 years",
+      "years": "years"
+    },
+    "currency": {
+      "bgn": "BGN",
+      "eur": "EUR"
+    },
+    "pricing": {
+      "was": "Was:",
+      "save": "Save",
+      "discount": "Discount"
+    },
+    "quantity": {
+      "label": "Quantity",
+      "min": "Minimum quantity: 1",
+      "max": "Maximum quantity: 10"
+    },
+    "priceBreakdown": {
+      "product": "Product",
+      "accessories": "Accessories",
+      "installation": "Installation",
+      "subtotal": "Subtotal",
+      "each": "each",
+      "perUnit": "per unit"
+    },
+    "accessoryNames": {
+      "Condensate Tray": "Condensate Tray",
+      "Condensate Tray with Heater and Thermostat": "Condensate Tray with Heater and Thermostat",
+      "Anti-vibration Mount Kit": "Anti-vibration Mount Kit"
     }
   }
 } 

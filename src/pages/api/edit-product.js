@@ -10,9 +10,11 @@ if (supabaseUrl && supabaseKey) {
 }
 
 export default async function handler(req, res) {
-    if (req.method !== 'PUT') {
+    if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
+
+    console.log('Edit product API received data:', req.body);
 
     // Validate required fields
     const { 
@@ -28,19 +30,45 @@ export default async function handler(req, res) {
         image_url,
         stock,
         discount,
-        is_archived
+        is_archived,
+        // Technical Performance
+        cop,
+        scop,
+        power_consumption,
+        refrigerant_type,
+        operating_temp_range,
+        // Physical Characteristics
+        dimensions,
+        weight,
+        noise_level,
+        air_flow,
+        // Features & Usability
+        warranty_period,
+        room_size_recommendation,
+        installation_type,
+        description,
+        features
     } = req.body;
 
     // Server-side validation
+    console.log('Validation check - id:', id, 'brand:', brand, 'model:', model, 'price:', price);
+    
     if (!id) {
+        console.log('Validation failed: Missing id');
         return res.status(400).json({ 
             error: 'Missing required field: id' 
         });
     }
 
     if (!brand || !model || price === undefined) {
+        console.log('Validation failed: Missing required fields. brand:', !!brand, 'model:', !!model, 'price defined:', price !== undefined);
         return res.status(400).json({ 
-            error: 'Missing required fields: brand, model, price' 
+            error: 'Missing required fields: brand, model, price',
+            details: {
+                brand: !!brand,
+                model: !!model,
+                priceProvided: price !== undefined
+            }
         });
     }
 
@@ -68,6 +96,26 @@ export default async function handler(req, res) {
         });
     }
 
+    // Validate technical performance fields
+    if (cop !== undefined && cop !== null && (cop < 0 || cop > 10)) {
+        return res.status(400).json({ 
+            error: 'COP must be between 0 and 10' 
+        });
+    }
+
+    if (scop !== undefined && scop !== null && (scop < 0 || scop > 10)) {
+        return res.status(400).json({ 
+            error: 'SCOP must be between 0 and 10' 
+        });
+    }
+
+    // Validate features array
+    if (features !== undefined && features !== null && !Array.isArray(features)) {
+        return res.status(400).json({ 
+            error: 'Features must be an array' 
+        });
+    }
+
     // Mock mode - if Supabase is not configured
     if (!supabase) {
         console.log('⚠️  Supabase not configured, simulating product update');
@@ -85,6 +133,23 @@ export default async function handler(req, res) {
             stock: stock !== undefined ? parseInt(stock) : 0,
             discount: discount !== undefined ? parseFloat(discount) : 0,
             is_archived: is_archived !== undefined ? is_archived : false,
+            // Technical Performance
+            cop: cop !== undefined ? (cop ? parseFloat(cop) : null) : null,
+            scop: scop !== undefined ? (scop ? parseFloat(scop) : null) : null,
+            power_consumption,
+            refrigerant_type,
+            operating_temp_range,
+            // Physical Characteristics
+            dimensions,
+            weight,
+            noise_level,
+            air_flow,
+            // Features & Usability
+            warranty_period,
+            room_size_recommendation,
+            installation_type,
+            description,
+            features,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -129,6 +194,26 @@ export default async function handler(req, res) {
         if (stock !== undefined) updateData.stock = parseInt(stock);
         if (discount !== undefined) updateData.discount = parseFloat(discount);
         if (is_archived !== undefined) updateData.is_archived = is_archived;
+
+        // Technical Performance
+        if (cop !== undefined) updateData.cop = cop ? parseFloat(cop) : null;
+        if (scop !== undefined) updateData.scop = scop ? parseFloat(scop) : null;
+        if (power_consumption !== undefined) updateData.power_consumption = power_consumption;
+        if (refrigerant_type !== undefined) updateData.refrigerant_type = refrigerant_type;
+        if (operating_temp_range !== undefined) updateData.operating_temp_range = operating_temp_range;
+
+        // Physical Characteristics
+        if (dimensions !== undefined) updateData.dimensions = dimensions;
+        if (weight !== undefined) updateData.weight = weight;
+        if (noise_level !== undefined) updateData.noise_level = noise_level;
+        if (air_flow !== undefined) updateData.air_flow = air_flow;
+
+        // Features & Usability
+        if (warranty_period !== undefined) updateData.warranty_period = warranty_period;
+        if (room_size_recommendation !== undefined) updateData.room_size_recommendation = room_size_recommendation;
+        if (installation_type !== undefined) updateData.installation_type = installation_type;
+        if (description !== undefined) updateData.description = description;
+        if (features !== undefined) updateData.features = features && features.length > 0 ? JSON.stringify(features) : null;
 
         // The updated_at field will be automatically handled by the database trigger
 

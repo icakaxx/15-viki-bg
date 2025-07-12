@@ -73,15 +73,24 @@
   margin-bottom: 1rem;
 }
 
+.cartItemGroup {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.cartItemGroup:last-child {
+  margin-bottom: 0;
+}
+
 .cartItem {
   display: flex;
   gap: 1rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.cartItem:last-child {
-  border-bottom: none;
+  padding: 1rem;
+  background: white;
+  align-items: flex-start;
 }
 
 .itemImage {
@@ -94,6 +103,8 @@
 
 .itemDetails {
   flex: 1;
+  max-width: calc(100% - 200px);
+  margin-right: 1rem;
 }
 
 .itemDetails h4 {
@@ -109,20 +120,238 @@
   margin-bottom: 0.25rem;
 }
 
-.itemQuantity {
-  font-size: 0.8rem;
-  color: #888;
+.quantityControls {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  max-width: 100%;
+  justify-content: space-between;
+}
+
+.quantityLabel {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.quantitySelector {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Group quantity controls together */
+.quantityControlsGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.quantityButton {
+  background: #f8f9fa;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-width: 28px;
+  height: 28px;
+}
+
+.quantityButton:hover:not(:disabled) {
+  background: #e9ecef;
+}
+
+.quantityButton:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.quantityValue {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 24px;
+  text-align: center;
+  background: white;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
 }
 
 .itemPrice {
   text-align: right;
   font-weight: 600;
+  min-width: 140px;
+  flex-shrink: 0;
 }
 
 .itemPriceEur {
   font-size: 0.9rem;
   color: #4a7c59;
   margin-top: 0.1rem;
+}
+
+/* Accessories Section */
+.accessoriesSection {
+  border-top: 1px solid #e0e0e0;
+  background: #ffffff;
+  padding: 0.75rem 1rem;
+}
+
+.accessoriesTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.accessoryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.accessoryItem:last-child {
+  border-bottom: none;
+}
+
+.accessoryDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.accessoryName {
+  color: #555;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.accessoryQuantityControls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-right: 1.5rem;
+}
+
+.accessoryQuantityControls .quantitySelector {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.removeButton {
+  background: #dc3545;
+  border: none;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  margin-left: 0rem;
+  transition: background-color 0.2s ease;
+}
+
+.removeButton:hover {
+  background: #c82333;
+}
+
+/* Product Remove Button */
+.removeProductButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-left: 0.75rem;
+  margin-right: 1rem;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.removeProductButton:hover {
+  background: #c82333;
+}
+
+/* Installation Remove Button */
+.removeInstallationButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.removeInstallationButton:hover {
+  background: #c82333;
+}
+
+.accessoryPrice {
+  text-align: right;
+  font-weight: 500;
+  color: #2c5530;
+  font-size: 0.9rem;
+}
+
+/* Installation Section */
+.installationSection {
+  border-top: 1px solid #e0e0e0;
+  background: #e8f5e8;
+  padding: 0.75rem 1rem;
+}
+
+.installationItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.installationDetails {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.installationName {
+  color: #155724;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.installationPrice {
+  text-align: right;
+  font-weight: 600;
+  color: #155724;
+  font-size: 0.9rem;
 }
 
 /* Totals */
@@ -442,6 +671,87 @@
   
   .cartItems {
     max-height: 300px;
+  }
+  
+  .cartItem {
+    padding: 0.75rem;
+  }
+  
+  .itemImage {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .accessoriesSection,
+  .installationSection {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .quantityControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    justify-content: flex-start;
+  }
+  
+  .quantityControlsGroup {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .quantitySelector {
+    align-self: flex-start;
+  }
+  
+  .removeProductButton {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    align-self: flex-start;
+  }
+  
+  .itemDetails {
+    max-width: none;
+    margin-right: 0;
+  }
+  
+  .itemPrice {
+    min-width: auto;
+  }
+  
+  .installationDetails {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .removeInstallationButton {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+  
+  .accessoryDetails {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .accessoryQuantityControls {
+    align-self: flex-start;
+  }
+  
+  .accessoryItem {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .accessoryPrice,
+  .installationPrice {
+    text-align: left;
   }
   
   .accordionForm {

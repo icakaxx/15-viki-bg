@@ -1,8 +1,18 @@
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
-  // i18n configuration removed - not supported in App Router
-  // Using custom internationalization approach instead
+  // Force Pages Router mode
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'nticlbmuetfeuwkkukwz.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

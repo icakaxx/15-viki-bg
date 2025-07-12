@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Link from 'next/link';
 import { LanguageContext } from '../components/Layout Components/Header';
 import PriceFilter from '../components/PriceFilter';
 import QuantitySelector from '../components/QuantitySelector';
@@ -16,6 +17,10 @@ const BuyPage = () => {
   const [mounted, setMounted] = useState(false);
   const { t } = useContext(LanguageContext);
   const router = useRouter();
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 20;
   
   // Handle hydration safely
   useEffect(() => {
@@ -160,6 +165,17 @@ const BuyPage = () => {
       return true;
     });
   }, [products, filters, tempMobileFilters]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, tempMobileFilters]);
 
   const handleFilterChange = (filterType, value) => {
     const updateFunction = tempMobileFilters ? setTempMobileFilters : setFilters;
@@ -501,24 +517,8 @@ const BuyPage = () => {
     );
   };
 
-  // Show loading only when actually fetching products (not during initial mount)
-  if (mounted && loading) {
-    return (
-      <>
-        <Head>
-          <title>{`${t('buyPage.title')} - ${t('metaTitle')}`}</title>
-          <meta name="description" content={t('metaDescription')} />
-        </Head>
-        <div className={styles.container}>
-          <h1 className={styles.title}>{t('buyPage.title')}</h1>
-          <div className={styles.loading}>{t('buyPage.loading')}</div>
-        </div>
-      </>
-    );
-  }
-
-  // Show initial loading/hydration state
-  if (!mounted) {
+  // Show loading state during hydration or when fetching
+  if (!mounted || loading) {
     return (
       <>
         <Head>
@@ -580,7 +580,21 @@ const BuyPage = () => {
             {/* Results Header */}
             <div className={styles.resultsHeader}>
               <div className={styles.resultsCount}>
-                {t ? `${t('buyPage.filters.showingResults')} ${filteredProducts.length} ${t('buyPage.filters.results')}` : `Showing ${filteredProducts.length} results`}
+                {filteredProducts.length > 0 ? (
+                  <>
+                    {t ? 
+                      `${t('buyPage.pagination.showing')} ${startIndex + 1}-${Math.min(endIndex, filteredProducts.length)} ${t('buyPage.pagination.of')} ${filteredProducts.length} ${t('buyPage.filters.results')}` :
+                      `Showing ${startIndex + 1}-${Math.min(endIndex, filteredProducts.length)} of ${filteredProducts.length} results`
+                    }
+                    {totalPages > 1 && (
+                      <span className={styles.pageInfo}>
+                        {t ? ` (${t('buyPage.pagination.page')} ${currentPage} ${t('buyPage.pagination.of')} ${totalPages})` : ` (Page ${currentPage} of ${totalPages})`}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  t ? `${t('buyPage.filters.showingResults')} 0 ${t('buyPage.filters.results')}` : 'Showing 0 results'
+                )}
               </div>
             </div>
             
@@ -591,8 +605,9 @@ const BuyPage = () => {
                   t('buyPage.noProducts')}
               </div>
             ) : (
-              <div className={styles.grid}>
-                {filteredProducts.map((product) => {
+              <>
+                <div className={styles.grid}>
+                  {currentProducts.map((product) => {
                   const discount = calculateDiscount(product.Price, product.PreviousPrice);
                   
                   return (
@@ -606,58 +621,188 @@ const BuyPage = () => {
                         </div>
                       )}
                       
-                      <div className={styles.imageContainer}>
-                        <Image
-                          src={product.ImageURL || '/images/placeholder-ac.svg'}
-                          alt={`${product.Brand} ${product.Model}`}
-                          fill
-                          className={styles.image}
-                        />
-                      </div>
-                      
-                      <div className={styles.productInfo}>
-                        <h2 className={styles.brandModel}>
-                          {product.Brand} {product.Model}
-                        </h2>
+                      {/* Clickable Product Info Section */}
+                      <Link href={`/buy/${product.ProductID}`} className={styles.productLink}>
+                        <div className={styles.imageContainer}>
+                          <Image
+                            src={product.ImageURL || '/images/placeholder-ac.svg'}
+                            alt={`${product.Brand} ${product.Model}`}
+                            fill
+                            className={styles.image}
+                          />
+                        </div>
                         
-                        <div className={styles.specs}>
-                          <div className={styles.spec}>
-                            <span className={styles.specLabel}>{t('buyPage.type')}:</span> {product.Type}
-                          </div>
-                          <div className={styles.spec}>
-                            <span className={styles.specLabel}>{t('buyPage.capacity')}:</span> {product.CapacityBTU} {t('buyPage.btu')}
-                          </div>
-                          <div className={styles.spec}>
-                            <span className={styles.specLabel}>{t('buyPage.energyRating')}:</span> {product.EnergyRating}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className={styles.pricing}>
-                        <div className={styles.priceContainer}>
-                          <span className={styles.price}>
-                            {formatPrice(product.Price)} / {formatPriceEUR(product.Price)}
-                          </span>
-                        </div>
-                        {product.PreviousPrice && product.PreviousPrice > product.Price && (
-                          <>
-                            <div className={styles.previousPriceContainer}>
-                              <span className={styles.previousPrice}>
-                                {formatPrice(product.PreviousPrice)} / {formatPriceEUR(product.PreviousPrice)}
-                              </span>
+                        <div className={styles.productInfo}>
+                          <h2 className={styles.brandModel}>
+                            {product.Brand} {product.Model}
+                          </h2>
+                          
+                          <div className={styles.specs}>
+                            <div className={styles.spec}>
+                              <span className={styles.specLabel}>{t('buyPage.type')}:</span> {product.Type}
                             </div>
-                            {discount && (
-                              <span className={styles.discount}>-{discount}%</span>
+                            <div className={styles.spec}>
+                              <span className={styles.specLabel}>{t('buyPage.capacity')}:</span> {product.CapacityBTU} {t('buyPage.btu')}
+                            </div>
+                            <div className={styles.spec}>
+                              <span className={styles.specLabel}>{t('buyPage.energyRating')}:</span> {product.EnergyRating}
+                            </div>
+                            {product.Colour && (
+                              <div className={styles.spec}>
+                                <span className={styles.specLabel}>{t('buyPage.color')}:</span> {product.Colour}
+                              </div>
                             )}
-                          </>
-                        )}
-                      </div>
+                            {product.NoiseLevel && (
+                              <div className={styles.spec}>
+                                <span className={styles.specLabel}>{t('buyPage.noiseLevel')}:</span> {product.NoiseLevel}
+                              </div>
+                            )}
+                            {product.WarrantyPeriod && (
+                              <div className={styles.spec}>
+                                <span className={styles.specLabel}>{t('buyPage.warranty')}:</span> {product.WarrantyPeriod}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Feature Icons */}
+                          <div className={styles.featureIcons}>
+                            {product.Features && product.Features.some(feature => 
+                              feature.toLowerCase().includes('wifi') || 
+                              feature.toLowerCase().includes('smart')
+                            ) && (
+                              <span className={styles.featureIcon} title={t('buyPage.features.wifi')}>
+                                📱
+                              </span>
+                            )}
+                            {product.Features && product.Features.some(feature => 
+                              feature.toLowerCase().includes('inverter')
+                            ) && (
+                              <span className={styles.featureIcon} title={t('buyPage.features.inverter')}>
+                                ⚡
+                              </span>
+                            )}
+                            {product.Features && product.Features.some(feature => 
+                              feature.toLowerCase().includes('heat') || 
+                              feature.toLowerCase().includes('heating')
+                            ) && (
+                              <span className={styles.featureIcon} title={t('buyPage.features.heatPump')}>
+                                🔥
+                              </span>
+                            )}
+                            {product.Features && product.Features.some(feature => 
+                              feature.toLowerCase().includes('eco') || 
+                              feature.toLowerCase().includes('energy')
+                            ) && (
+                              <span className={styles.featureIcon} title={t('buyPage.features.eco')}>
+                                🌱
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Stock Status */}
+                          <div className={styles.stockStatus}>
+                            {product.IsArchived ? (
+                              <span className={`${styles.stockBadge} ${styles.outOfStock}`}>
+                                {t('buyPage.outOfStock')}
+                              </span>
+                            ) : product.Stock <= 3 && product.Stock > 0 ? (
+                              <span className={`${styles.stockBadge} ${styles.lowStock}`}>
+                                {t('buyPage.lowStock')}
+                              </span>
+                            ) : (
+                              <span className={`${styles.stockBadge} ${styles.inStock}`}>
+                                {t('buyPage.inStock')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className={styles.pricing}>
+                          <div className={styles.priceContainer}>
+                            <span className={styles.price}>
+                              {formatPrice(product.Price)} / {formatPriceEUR(product.Price)}
+                            </span>
+                          </div>
+                          {product.PreviousPrice && product.PreviousPrice > product.Price && (
+                            <>
+                              <div className={styles.previousPriceContainer}>
+                                <span className={styles.previousPrice}>
+                                  {formatPrice(product.PreviousPrice)} / {formatPriceEUR(product.PreviousPrice)}
+                                </span>
+                              </div>
+                              {discount && (
+                                <span className={styles.discount}>-{discount}%</span>
+                              )}
+                            </>
+                          )}
+                          <div className={styles.installationInfo}>
+                            <span className={styles.installationLabel}>{t('buyPage.installationCost')}</span>
+                            <span className={styles.installationPrice}>+300 BGN / €153</span>
+                          </div>
+                        </div>
+                      </Link>
                       
+                      {/* Quantity Selector stays outside Link to maintain functionality */}
                       <QuantitySelector product={product} />
                     </div>
                   );
                 })}
-              </div>
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className={styles.pagination}>
+                    <button
+                      className={`${styles.paginationButton} ${currentPage === 1 ? styles.disabled : ''}`}
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      {t ? t('buyPage.pagination.previous') : 'Previous'}
+                    </button>
+                    
+                    <div className={styles.pageNumbers}>
+                      {[...Array(totalPages)].map((_, index) => {
+                        const pageNumber = index + 1;
+                        const isCurrentPage = pageNumber === currentPage;
+                        
+                        // Show first page, last page, current page, and pages around current
+                        const showPage = pageNumber === 1 || 
+                                        pageNumber === totalPages || 
+                                        Math.abs(pageNumber - currentPage) <= 2;
+                        
+                        if (!showPage) {
+                          // Show ellipsis for gaps
+                          if (pageNumber === 2 && currentPage > 4) {
+                            return <span key={pageNumber} className={styles.ellipsis}>...</span>;
+                          }
+                          if (pageNumber === totalPages - 1 && currentPage < totalPages - 3) {
+                            return <span key={pageNumber} className={styles.ellipsis}>...</span>;
+                          }
+                          return null;
+                        }
+                        
+                        return (
+                          <button
+                            key={pageNumber}
+                            className={`${styles.pageNumber} ${isCurrentPage ? styles.active : ''}`}
+                            onClick={() => setCurrentPage(pageNumber)}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <button
+                      className={`${styles.paginationButton} ${currentPage === totalPages ? styles.disabled : ''}`}
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      {t ? t('buyPage.pagination.next') : 'Next'}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

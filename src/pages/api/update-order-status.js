@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
+  console.log('=== UPDATE ORDER STATUS API CALLED ===');
+  
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -14,14 +16,15 @@ export default async function handler(req, res) {
     });
   }
 
-  // Initialize Supabase client with service role key for admin operations
+  // Initialize Supabase client
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
   try {
-    const { orderId, newStatus, adminId, notes } = req.body;
+    const { orderId, newStatus, adminId, notes, installationDate } = req.body;
+    console.log('Request data:', { orderId, newStatus, adminId, notes, installationDate });
 
     // Validate required parameters
     if (!orderId || !newStatus) {
@@ -38,23 +41,65 @@ export default async function handler(req, res) {
       });
     }
 
-    // Fetch current status for the order
+    // Fetch current status - first check if payment tracking exists
     console.log(`Fetching current status for order ${orderId}...`);
-    const { data: currentOrder, error: fetchError } = await supabase
+    let { data: currentOrder, error: fetchError } = await supabase
       .from('payment_and_tracking')
       .select('status, order_id')
       .eq('order_id', orderId)
       .single();
 
-    if (fetchError) {
+    let oldStatus = 'new'; // Default status for new orders
+
+    if (fetchError && fetchError.code === 'PGRST116') {
+      // No payment tracking record exists yet - this is a new order
+      console.log(`No payment tracking found for order ${orderId}, treating as new order`);
+      
+      // Verify the order exists in guest_orders
+      const { data: guestOrder, error: guestError } = await supabase
+        .from('guest_orders')
+        .select('id')
+        .eq('id', orderId)
+        .single();
+
+      if (guestError) {
+        console.error('Error fetching guest order:', guestError);
+        return res.status(404).json({ 
+          error: 'Order not found',
+          details: 'Order does not exist in guest_orders table'
+        });
+      }
+
+      // Create payment tracking record
+      const { data: newTracking, error: createError } = await supabase
+        .from('payment_and_tracking')
+        .insert([{ 
+          order_id: orderId, 
+          status: 'new',
+          payment_method: null 
+        }])
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Error creating payment tracking:', createError);
+        return res.status(500).json({ 
+          error: 'Failed to create payment tracking record',
+          details: createError.message
+        });
+      }
+
+      currentOrder = newTracking;
+      oldStatus = 'new';
+    } else if (fetchError) {
       console.error('Error fetching current order status:', fetchError);
       return res.status(404).json({ 
-        error: 'Order not found or unable to fetch current status',
+        error: 'Order not found',
         details: fetchError.message
       });
+    } else {
+      oldStatus = currentOrder.status;
     }
-
-    const oldStatus = currentOrder.status;
 
     // Check if status is actually changing
     if (oldStatus === newStatus) {
@@ -81,19 +126,23 @@ export default async function handler(req, res) {
 
     // Insert status change into history
     console.log('Inserting status change into history...');
+    const historyData = {
+      order_id: orderId,
+      old_status: oldStatus,
+      new_status: newStatus,
+      changed_by: adminId || null,
+      changed_at: installationDate && newStatus === 'installed' 
+        ? new Date(installationDate).toISOString() 
+        : new Date().toISOString(),
+      notes: notes || `Status updated from ${oldStatus} to ${newStatus} by admin`
+    };
+    
     const { error: historyError } = await supabase
       .from('order_status_history')
-      .insert([{
-        order_id: orderId,
-        old_status: oldStatus,
-        new_status: newStatus,
-        changed_by: adminId || null, // UUID of admin (null if system change)
-        notes: notes || `Status updated from ${oldStatus} to ${newStatus} by admin`
-      }]);
+      .insert([historyData]);
 
     if (historyError) {
       console.error('Error inserting status history:', historyError);
-      // Don't fail the entire request if history insert fails
       console.warn('Status history insert failed, but order status was updated successfully');
     }
 
@@ -110,7 +159,8 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Order status update error:', error);
+    console.error('=== CATCH BLOCK ERROR ===');
+    console.error('Error:', error);
     
     return res.status(500).json({
       error: 'Internal server error',
