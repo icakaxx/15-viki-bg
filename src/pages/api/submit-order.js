@@ -45,6 +45,8 @@ export default async function handler(req, res) {
       invoiceInfo,
       paymentInfo,
       cartItems,
+      selectedAccessories = [],
+      installationData = null
     } = req.body;
 
     // Debug request data
@@ -70,6 +72,40 @@ export default async function handler(req, res) {
     if (!paymentInfo || !paymentInfo.paymentMethod) {
       console.error('Missing payment info');
       return res.status(400).json({ error: 'Missing payment information' });
+    }
+
+    // Calculate and validate total price independently on backend
+    let calculatedTotal = 0;
+    
+    // Calculate cart items total
+    for (const item of cartItems) {
+      const basePrice = item.product?.Price || 0;
+      let itemTotal = basePrice * item.quantity;
+      
+      // Add accessories for this item
+      if (item.accessories && item.accessories.length > 0) {
+        const accessoryTotal = item.accessories.reduce((sum, acc) => sum + (acc.Price || 0), 0);
+        itemTotal += accessoryTotal * item.quantity;
+      }
+      
+      // Add installation (per cart item, not per quantity)
+      if (item.installation && item.installationPrice) {
+        itemTotal += item.installationPrice;
+      }
+      
+      calculatedTotal += itemTotal;
+    }
+
+    console.log('Backend calculated total:', calculatedTotal);
+    console.log('Frontend reported total:', paymentInfo.totalAmount);
+
+    // Optional: Validate total (with small tolerance for floating point differences)
+    if (paymentInfo.totalAmount && Math.abs(calculatedTotal - paymentInfo.totalAmount) > 0.01) {
+      console.warn('Price mismatch detected:', {
+        calculated: calculatedTotal,
+        reported: paymentInfo.totalAmount,
+        difference: Math.abs(calculatedTotal - paymentInfo.totalAmount)
+      });
     }
 
     // Insert into guest_orders table
@@ -128,10 +164,16 @@ export default async function handler(req, res) {
 
     // Insert payment and tracking information with initial status
     console.log('Inserting payment info...');
+    
+    // Check if any cart item has installation
+    const hasInstallation = cartItems.some(item => item.installation);
+    
     const paymentData = {
       order_id: orderId,
       payment_method: paymentInfo.paymentMethod,
       status: 'new', // Updated to use new status system
+      includes_installation: hasInstallation,
+      total_amount: calculatedTotal
     };
     console.log('Payment data to insert:', paymentData);
     
@@ -214,6 +256,49 @@ export default async function handler(req, res) {
     } catch (insertError) {
       console.error('Order items insert try-catch error:', insertError);
       console.warn('Order items table insert failed - continuing without item tracking for now');
+    }
+
+    // Insert order accessories (new functionality)
+    console.log('Inserting order accessories...');
+    const allAccessories = [];
+    
+    cartItems.forEach(item => {
+      if (item.accessories && item.accessories.length > 0) {
+        item.accessories.forEach(accessory => {
+          // Add one accessory entry per quantity of the item
+          for (let i = 0; i < item.quantity; i++) {
+            allAccessories.push({
+              order_id: orderId,
+              accessory_id: accessory.AccessoryID,
+              price_at_order: accessory.Price
+            });
+          }
+        });
+      }
+    });
+
+    if (allAccessories.length > 0) {
+      console.log('Accessories to insert:', allAccessories);
+      
+      try {
+        const { data: accessoriesResult, error: accessoriesError } = await supabase
+          .from('order_accessories')
+          .insert(allAccessories);
+        
+        console.log('Order accessories insert result:', { accessoriesResult, accessoriesError });
+        
+        if (accessoriesError) {
+          console.error('Order accessories insert error:', accessoriesError);
+          console.warn('Order accessories table insert failed - continuing without accessory tracking');
+        } else {
+          console.log('Order accessories inserted successfully');
+        }
+      } catch (insertError) {
+        console.error('Order accessories insert try-catch error:', insertError);
+        console.warn('Order accessories table insert failed - continuing without accessory tracking');
+      }
+    } else {
+      console.log('No accessories to insert');
     }
 
     console.log('Order successfully created with ID:', orderId);

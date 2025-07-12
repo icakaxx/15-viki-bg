@@ -26,7 +26,24 @@ export default async function handler(req, res) {
         previous_price = null,
         image_url = null,
         stock = 0,
-        discount = 0
+        discount = 0,
+        // Technical Performance
+        cop = null,
+        scop = null,
+        power_consumption = null,
+        refrigerant_type = 'R32',
+        operating_temp_range = null,
+        // Physical Characteristics
+        dimensions = null,
+        weight = null,
+        noise_level = null,
+        air_flow = null,
+        // Features & Usability
+        warranty_period = '2 years',
+        room_size_recommendation = null,
+        installation_type = 'Wall Mount',
+        description = null,
+        features = []
     } = req.body;
 
     // Server-side validation
@@ -60,6 +77,26 @@ export default async function handler(req, res) {
         });
     }
 
+    // Validate technical performance fields
+    if (cop !== null && (cop < 0 || cop > 10)) {
+        return res.status(400).json({ 
+            error: 'COP must be between 0 and 10' 
+        });
+    }
+
+    if (scop !== null && (scop < 0 || scop > 10)) {
+        return res.status(400).json({ 
+            error: 'SCOP must be between 0 and 10' 
+        });
+    }
+
+    // Validate features array
+    if (features && !Array.isArray(features)) {
+        return res.status(400).json({ 
+            error: 'Features must be an array' 
+        });
+    }
+
     // Mock mode - if Supabase is not configured
     if (!supabase) {
         console.log('⚠️  Supabase not configured, simulating product creation');
@@ -77,6 +114,23 @@ export default async function handler(req, res) {
             stock: parseInt(stock),
             discount: parseFloat(discount),
             is_archived: false,
+            // Technical Performance
+            cop: cop ? parseFloat(cop) : null,
+            scop: scop ? parseFloat(scop) : null,
+            power_consumption,
+            refrigerant_type,
+            operating_temp_range,
+            // Physical Characteristics
+            dimensions,
+            weight,
+            noise_level,
+            air_flow,
+            // Features & Usability
+            warranty_period,
+            room_size_recommendation,
+            installation_type,
+            description,
+            features,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -126,7 +180,24 @@ export default async function handler(req, res) {
             image_url,
             stock: parseInt(stock),
             discount: parseFloat(discount),
-            is_archived: false
+            is_archived: false,
+            // Technical Performance
+            cop: cop ? parseFloat(cop) : null,
+            scop: scop ? parseFloat(scop) : null,
+            power_consumption,
+            refrigerant_type,
+            operating_temp_range,
+            // Physical Characteristics
+            dimensions,
+            weight,
+            noise_level,
+            air_flow,
+            // Features & Usability
+            warranty_period,
+            room_size_recommendation,
+            installation_type,
+            description,
+            features: features && features.length > 0 ? JSON.stringify(features) : null
         };
 
         const { data, error } = await supabase

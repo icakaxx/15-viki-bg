@@ -67,10 +67,27 @@
     "energyRating": "Енергиен клас:",
     "capacity": "Мощност:",
     "type": "Тип:",
+    "brand": "Марка:",
+    "model": "Модел:",
+    "price": "Цена:",
+    "installationCost": "Монтаж:",
+    "stockStatus": "Наличност:",
+    "roomSize": "Размер на стая:",
+    "noiseLevel": "Шум:",
+    "warranty": "Гаранция:",
     "discount": "Отстъпка",
     "btu": "БТЕ",
     "color": "Цвят",
     "priceNote": "Цените в евро са приблизителни",
+    "inStock": "В наличност",
+    "lowStock": "Ограничена наличност",
+    "outOfStock": "Изчерпан",
+    "features": {
+      "wifi": "WiFi управление",
+      "inverter": "Инвертор",
+      "heatPump": "Топлинна помпа",
+      "eco": "Еко режим"
+    },
     "pagination": {
       "showing": "Показване на",
       "of": "от",
@@ -128,6 +145,9 @@
     "unitPrice": "Единична цена",
     "removeItem": "Премахни",
     "clearCart": "Изчисти количката",
+    "confirmRemove": "Сигурни ли сте, че искате да премахнете този артикул от количката?",
+    "confirmRemoveInstallation": "Сигурни ли сте, че искате да премахнете услугата монтаж?",
+    "removeInstallation": "Премахни монтаж",
     "nextSteps": "Следващи стъпки",
     "orderTotal": "Общо за поръчката",
     "checkoutInfo": "Страница за поръчка на продукт ID:",
@@ -511,7 +531,172 @@
       "duplicateError": "Продукт с тези характеристики вече съществува",
       "confirmArchive": "Сигурни ли сте, че искате да архивирате '{product}'?",
       "noProducts": "Няма намерени продукти",
-      "loading": "Зареждане..."
+      "loading": "Зареждане...",
+      "tabs": {
+        "basic": "Основна информация",
+        "technical": "Технически спецификации",
+        "physical": "Физически характеристики",
+        "installation": "Монтаж и гаранция",
+        "features": "Функции и аксесоари",
+        "description": "Описание и промоция"
+      },
+      "technical": {
+        "cop": "COP (Коефициент на производителност)",
+        "scop": "SCOP (Сезонен COP)",
+        "powerConsumption": "Консумация на енергия",
+        "refrigerantType": "Тип хладилен агент",
+        "operatingTempRange": "Работен температурен диапазон",
+        "copHint": "По-високо е по-добре (обикновено 3,5 - 5,0)",
+        "scopHint": "Сезонна оценка на производителност",
+        "powerHint": "напр. \"2,1 kW\" или \"1800W\"",
+        "refrigerantHint": "R32 е най-екологичен",
+        "tempRangeHint": "напр. \"-15°C до +50°C\""
+      },
+      "physical": {
+        "dimensions": "Размери (В×Ш×Д)",
+        "weight": "Тегло",
+        "noiseLevel": "Ниво на шум",
+        "airFlow": "Въздушен поток",
+        "dimensionsHint": "Височина × Ширина × Дълбочина",
+        "weightHint": "Тегло на вътрешното тяло",
+        "noiseHint": "Ниво на шум на вътрешното тяло",
+        "airFlowHint": "Максимален въздушен поток"
+      },
+      "features": {
+        "warrantyPeriod": "Гаранционен период",
+        "roomSizeRecommendation": "Препоръчителен размер на помещението",
+        "installationType": "Тип монтаж",
+        "description": "Описание на продукта",
+        "productFeatures": "Функции на продукта",
+        "addFeature": "Добави",
+        "roomSizeHint": "Препоръчителен размер на помещението",
+        "featuresHint": "Често срещани функции: Wi-Fi управление, таймер, нощен режим, автоматично възстановяване и т.н."
+      },
+      "placeholders": {
+        "brandExample": "напр. Daikin, Mitsubishi",
+        "modelExample": "напр. FTXS35K",
+        "priceExample": "599,99",
+        "previousPriceExample": "699,99",
+        "stockExample": "10",
+        "discountExample": "10",
+        "copExample": "4,2",
+        "scopExample": "4,0",
+        "powerExample": "2,1 kW",
+        "tempRangeExample": "-15°C до +50°C",
+        "dimensionsExample": "795 x 295 x 203 mm",
+        "weightExample": "9,5 kg",
+        "noiseExample": "19-23 dB",
+        "airFlowExample": "540 m³/h",
+        "roomSizeExample": "15-25 m²",
+        "descriptionExample": "Детайлно описание на продукта...",
+        "featureExample": "Добави функция...",
+        "imageUrlExample": "https://example.com/image.jpg"
+      },
+      "sections": {
+        "basic": "Основна информация",
+        "technical": "Технически спецификации", 
+        "physical": "Физически характеристики",
+        "installation": "Монтаж и гаранция",
+        "features": "Функции и промоции",
+        "description": "Описание"
+      },
+      "fields": {
+        "previousPrice": "Предишна цена",
+        "stockQuantity": "Количество в наличност",
+        "imageUrl": "URL на снимка",
+        "imageUpload": "Снимка на продукт",
+        "scop": "SCOP (Сезонен COP)",
+        "powerConsumption": "Консумация на мощност",
+        "operatingTempRange": "Работен температурен диапазон",
+        "dimensions": "Размери",
+        "weight": "Тегло",
+        "noiseLevel": "Ниво на шум",
+        "airFlow": "Въздушен поток",
+        "installationType": "Тип монтаж",
+        "roomSizeRecommendation": "Препоръка за размер на стаята",
+        "warrantyPeriod": "Гаранционен период",
+        "isFeatured": "Препоръчан продукт",
+        "isBestseller": "Най-продаван",
+        "isNew": "Нов продукт",
+        "description": "Описание"
+      },
+      "hints": {
+        "copHint": "По-високо е по-добре (обикновено 3-6)",
+        "scopHint": "За ефективност на отопление",
+        "powerHint": "напр. 2,5 kW",
+        "tempRangeHint": "напр. -15°C до +50°C",
+        "dimensionsHint": "напр. 890×295×204 mm",
+        "weightHint": "напр. 12,5 kg",
+        "noiseHint": "напр. 22 dB",
+        "airFlowHint": "напр. 780 m³/h",
+        "roomSizeHint": "напр. 25-35 m²"
+      },
+      "dropdowns": {
+        "selectType": "Избери тип...",
+        "selectRating": "Избери рейтинг...",
+        "selectPeriod": "Избери период...",
+        "types": {
+          "split": "Сплит",
+          "multiSplit": "Мулти-сплит",
+          "cassette": "Касетъчен",
+          "ducted": "Канален",
+          "portable": "Преносим"
+        },
+        "energyRatings": {
+          "aPlusPlus": "A+++",
+          "aPlus": "A++",
+          "a": "A+",
+          "b": "A",
+          "c": "B",
+          "d": "C"
+        },
+        "refrigerantTypes": {
+          "r32": "R32",
+          "r410a": "R410A",
+          "r134a": "R134a",
+          "r290": "R290"
+        },
+        "installationTypes": {
+          "wallMounted": "Стенен монтаж",
+          "ceilingMounted": "Таванен монтаж",
+          "floorStanding": "Подов",
+          "ducted": "Канален",
+          "cassette": "Касетъчен"
+        },
+        "warrantyPeriods": {
+          "1year": "1 година",
+          "2years": "2 години",
+          "3years": "3 години",
+          "5years": "5 години",
+          "7years": "7 години",
+          "10years": "10 години"
+        }
+      },
+      "formCards": {
+        "productIdentity": "Идентификация на продукт",
+        "productDetails": "Детайли за продукт",
+        "performanceMetrics": "Показатели за производителност",
+        "physicalSpecs": "Физически спецификации",
+        "installationDetails": "Детайли за монтаж",
+        "promotionalTags": "Промоционални етикети",
+        "productDescription": "Описание на продукт"
+      },
+      "status": {
+        "completed": "Завършен",
+        "inProgress": "В процес",
+        "pending": "Изчакване",
+        "required": "Задължителен",
+        "optional": "Незадължителен"
+      },
+      "actions": {
+        "cancel": "Отказ",
+        "addProduct": "Добави продукт",
+        "updateProduct": "Обнови продукт",
+        "edit": "Редактирай"
+      },
+      "selectImage": "Избери снимка",
+      "uploading": "Качване...",
+      "currentImage": "Текуща снимка"
     },
     "orders": {
       "title": "Управление на Поръчки",
@@ -649,6 +834,116 @@
         "cancelError": "Грешка: {{message}}",
         "cancelErrorGeneric": "Грешка при отменяне на монтажа"
       }
+    },
+    "analytics": {
+      "title": "Табло за анализи",
+      "loading": "Зареждане на анализи...",
+      "refresh": "Обнови данните",
+      "totalOrders": "Общо поръчки",
+      "totalRevenue": "Общ оборот",
+      "installationRate": "Процент монтажи",
+      "accessoryOrders": "Поръчки за аксесоари",
+      "installationStats": "Статистика за монтажи",
+      "withInstallation": "С монтаж",
+      "withoutInstallation": "Без монтаж",
+      "accessoryUsage": "Използване на аксесоари",
+      "accessoryName": "Име на аксесоар",
+      "timesOrdered": "Брой поръчки",
+      "percentage": "Процент",
+      "chart": "Графика",
+      "noAccessoryData": "Няма данни за аксесоари",
+      "topSellingByBTU": "Най-продавани по BTU капацитет",
+      "btuCapacity": "BTU капацитет",
+      "unitsSold": "Продадени единици",
+      "noBTUData": "Няма BTU данни",
+      "topSellingByEnergyRating": "Най-продавани по енергиен клас",
+      "energyRating": "Енергиен клас",
+      "noEnergyRatingData": "Няма данни за енергийни класове",
+      "salesOverTime": "Продажби във времето",
+      "noTimeData": "Няма данни за продажби"
+    }
+  },
+  "productDetail": {
+    "loading": "Зареждане",
+    "notFound": "Продуктът не е намерен",
+    "backToBuy": "Назад към продукти",
+    "technicalSpecs": "Технически спецификации",
+    "features": "Функции",
+    "options": "Опции и аксесоари",
+    "accessories": "Аксесоари",
+    "total": "Общо",
+    "addToCart": "Добави в количката",
+    "outOfStock": "Няма в наличност",
+    "metaTitle": "Климатик",
+    "metaDescription": "Професионален климатик с монтаж и гаранция",
+    "stock": {
+      "inStock": "В наличност",
+      "lowStock": "Малко количество",
+      "outOfStock": "Няма в наличност"
+    },
+    "specs": {
+      "capacity": "Капацитет",
+      "energyRating": "Енергиен клас",
+      "type": "Тип",
+      "warranty": "Гаранция",
+      "noise": "Ниво на шум",
+      "power": "Консумация на енергия",
+      "airflow": "Въздушен поток",
+      "dimensions": "Размери",
+      "weight": "Тегло",
+      "color": "Цвят"
+    },
+    "tooltips": {
+      "cop": "Коефициент на производителност - По-високи стойности означават по-добра енергийна ефективност за охлаждане",
+      "scop": "Сезонен COP - Средна ефективност през цялата година включително отоплителен режим",
+      "powerConsumption": "Максимална консумация на електроенергия при работа с пълен капацитет",
+      "refrigerantType": "Вид на хладилния агент - R32 е по-екологичен от по-старите типове",
+      "operatingTempRange": "Температурен диапазон в който уредът може да работи ефективно",
+      "dimensions": "Физически размери на вътрешното тяло: Ширина × Височина × Дълбочина",
+      "weight": "Тегло на вътрешното тяло - важно при стенен монтаж",
+      "noiseLevel": "Ниво на звука по време на работа - по-ниски стойности означават по-тиха работа",
+      "airFlow": "Максимален капацитет за циркулация на въздуха - по-високи стойности охлаждат по-големи пространства по-бързо",
+      "installationType": "Препоръчителен метод на монтаж за оптимална производителност",
+      "stock": "Текуща наличност - показва колко бройки са на склад",
+      "color": "Налични опции за цвят на корпуса на уреда",
+      "roomSizeRecommendation": "Препоръчителен размер на стаята за оптимална ефективност на охлаждането"
+    },
+    "installation": {
+      "title": "Професионален монтаж",
+      "description": "Професионален монтаж от сертифицирани техници с гаранция. Цената включва транспорт, материали и въвеждане в експлоатация."
+    },
+    "loadingAccessories": "Зареждане на аксесоари",
+    "noAccessories": "Няма налични аксесоари за този продукт",
+    "warranty": {
+      "default": "2 години",
+      "years": "години"
+    },
+    "currency": {
+      "bgn": "лв.",
+      "eur": "€"
+    },
+    "pricing": {
+      "was": "Беше:",
+      "save": "Спестявате",
+      "discount": "Отстъпка"
+    },
+    "quantity": {
+      "label": "Количество",
+      "min": "Минимално количество: 1",
+      "max": "Максимално количество: 10"
+    },
+    "priceBreakdown": {
+      "product": "Продукт",
+      "accessories": "Аксесоари",
+      "installation": "Монтаж",
+      "subtotal": "Междинна сума",
+      "each": "за броя",
+      "perUnit": "на единица"
+    },
+    "accessoryNames": {
+      "Condensate Tray": "Кондензна вана",
+      "Condensate Tray with Heater and Thermostat": "Кондензна вана с нагревател и термостат",
+      "Anti-vibration Mount Kit": "Комплект антивибрационни тампони"
     }
   }
 } 

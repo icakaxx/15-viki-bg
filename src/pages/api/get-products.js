@@ -17,7 +17,28 @@ const transformProduct = (product) => {
         Discount: product.discount,
         IsArchived: product.is_archived,
         CreatedAt: product.created_at,
-        UpdatedAt: product.updated_at
+        UpdatedAt: product.updated_at,
+        // Technical Performance (with defaults for missing columns)
+        COP: product.cop || null,
+        SCOP: product.scop || null,
+        PowerConsumption: product.power_consumption || null,
+        RefrigerantType: product.refrigerant_type || 'R32',
+        OperatingTempRange: product.operating_temp_range || null,
+        // Physical Characteristics (with defaults for missing columns)
+        Dimensions: product.dimensions || null,
+        Weight: product.weight || null,
+        NoiseLevel: product.noise_level || null,
+        AirFlow: product.air_flow || null,
+        // Features & Usability (with defaults for missing columns)
+        WarrantyPeriod: product.warranty_period || null,
+        RoomSizeRecommendation: product.room_size_recommendation || null,
+        InstallationType: product.installation_type || null,
+        Description: product.description || '',
+        Features: product.features ? (typeof product.features === 'string' ? JSON.parse(product.features) : product.features) : [],
+        // Promotional flags (with defaults for missing columns)
+        IsFeatured: product.is_featured || false,
+        IsBestseller: product.is_bestseller || false,
+        IsNew: product.is_new || false
     };
 };
 
@@ -187,6 +208,7 @@ export default async function handler(req, res) {
 
     // Use Supabase if configured
     try {
+        // Start with basic columns that should always exist
         let query = supabase.from('products').select(`
             id,
             brand,
@@ -203,7 +225,7 @@ export default async function handler(req, res) {
             is_archived,
             created_at,
             updated_at
-        `);
+        `)
 
         // Apply archived filter
         if (showArchived === 'false') {

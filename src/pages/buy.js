@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import Link from 'next/link';
 import { LanguageContext } from '../components/Layout Components/Header';
 import PriceFilter from '../components/PriceFilter';
 import QuantitySelector from '../components/QuantitySelector';
@@ -516,24 +517,8 @@ const BuyPage = () => {
     );
   };
 
-  // Show loading only when actually fetching products (not during initial mount)
-  if (mounted && loading) {
-    return (
-      <>
-        <Head>
-          <title>{`${t('buyPage.title')} - ${t('metaTitle')}`}</title>
-          <meta name="description" content={t('metaDescription')} />
-        </Head>
-        <div className={styles.container}>
-          <h1 className={styles.title}>{t('buyPage.title')}</h1>
-          <div className={styles.loading}>{t('buyPage.loading')}</div>
-        </div>
-      </>
-    );
-  }
-
-  // Show initial loading/hydration state
-  if (!mounted) {
+  // Show loading state during hydration or when fetching
+  if (!mounted || loading) {
     return (
       <>
         <Head>
@@ -636,53 +621,128 @@ const BuyPage = () => {
                         </div>
                       )}
                       
-                      <div className={styles.imageContainer}>
-                        <Image
-                          src={product.ImageURL || '/images/placeholder-ac.svg'}
-                          alt={`${product.Brand} ${product.Model}`}
-                          fill
-                          className={styles.image}
-                        />
-                      </div>
-                      
-                      <div className={styles.productInfo}>
-                        <h2 className={styles.brandModel}>
-                          {product.Brand} {product.Model}
-                        </h2>
+                      {/* Clickable Product Info Section */}
+                      <Link href={`/buy/${product.ProductID}`} className={styles.productLink}>
+                        <div className={styles.imageContainer}>
+                          <Image
+                            src={product.ImageURL || '/images/placeholder-ac.svg'}
+                            alt={`${product.Brand} ${product.Model}`}
+                            fill
+                            className={styles.image}
+                          />
+                        </div>
                         
-                        <div className={styles.specs}>
-                          <div className={styles.spec}>
-                            <span className={styles.specLabel}>{t('buyPage.type')}:</span> {product.Type}
-                          </div>
-                          <div className={styles.spec}>
-                            <span className={styles.specLabel}>{t('buyPage.capacity')}:</span> {product.CapacityBTU} {t('buyPage.btu')}
-                          </div>
-                          <div className={styles.spec}>
-                            <span className={styles.specLabel}>{t('buyPage.energyRating')}:</span> {product.EnergyRating}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className={styles.pricing}>
-                        <div className={styles.priceContainer}>
-                          <span className={styles.price}>
-                            {formatPrice(product.Price)} / {formatPriceEUR(product.Price)}
-                          </span>
-                        </div>
-                        {product.PreviousPrice && product.PreviousPrice > product.Price && (
-                          <>
-                            <div className={styles.previousPriceContainer}>
-                              <span className={styles.previousPrice}>
-                                {formatPrice(product.PreviousPrice)} / {formatPriceEUR(product.PreviousPrice)}
-                              </span>
+                        <div className={styles.productInfo}>
+                          <h2 className={styles.brandModel}>
+                            {product.Brand} {product.Model}
+                          </h2>
+                          
+                          <div className={styles.specs}>
+                            <div className={styles.spec}>
+                              <span className={styles.specLabel}>{t('buyPage.type')}:</span> {product.Type}
                             </div>
-                            {discount && (
-                              <span className={styles.discount}>-{discount}%</span>
+                            <div className={styles.spec}>
+                              <span className={styles.specLabel}>{t('buyPage.capacity')}:</span> {product.CapacityBTU} {t('buyPage.btu')}
+                            </div>
+                            <div className={styles.spec}>
+                              <span className={styles.specLabel}>{t('buyPage.energyRating')}:</span> {product.EnergyRating}
+                            </div>
+                            {product.Colour && (
+                              <div className={styles.spec}>
+                                <span className={styles.specLabel}>{t('buyPage.color')}:</span> {product.Colour}
+                              </div>
                             )}
-                          </>
-                        )}
-                      </div>
+                            {product.NoiseLevel && (
+                              <div className={styles.spec}>
+                                <span className={styles.specLabel}>{t('buyPage.noiseLevel')}:</span> {product.NoiseLevel}
+                              </div>
+                            )}
+                            {product.WarrantyPeriod && (
+                              <div className={styles.spec}>
+                                <span className={styles.specLabel}>{t('buyPage.warranty')}:</span> {product.WarrantyPeriod}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Feature Icons */}
+                          <div className={styles.featureIcons}>
+                            {product.Features && product.Features.some(feature => 
+                              feature.toLowerCase().includes('wifi') || 
+                              feature.toLowerCase().includes('smart')
+                            ) && (
+                              <span className={styles.featureIcon} title={t('buyPage.features.wifi')}>
+                                📱
+                              </span>
+                            )}
+                            {product.Features && product.Features.some(feature => 
+                              feature.toLowerCase().includes('inverter')
+                            ) && (
+                              <span className={styles.featureIcon} title={t('buyPage.features.inverter')}>
+                                ⚡
+                              </span>
+                            )}
+                            {product.Features && product.Features.some(feature => 
+                              feature.toLowerCase().includes('heat') || 
+                              feature.toLowerCase().includes('heating')
+                            ) && (
+                              <span className={styles.featureIcon} title={t('buyPage.features.heatPump')}>
+                                🔥
+                              </span>
+                            )}
+                            {product.Features && product.Features.some(feature => 
+                              feature.toLowerCase().includes('eco') || 
+                              feature.toLowerCase().includes('energy')
+                            ) && (
+                              <span className={styles.featureIcon} title={t('buyPage.features.eco')}>
+                                🌱
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Stock Status */}
+                          <div className={styles.stockStatus}>
+                            {product.IsArchived ? (
+                              <span className={`${styles.stockBadge} ${styles.outOfStock}`}>
+                                {t('buyPage.outOfStock')}
+                              </span>
+                            ) : product.Stock <= 3 && product.Stock > 0 ? (
+                              <span className={`${styles.stockBadge} ${styles.lowStock}`}>
+                                {t('buyPage.lowStock')}
+                              </span>
+                            ) : (
+                              <span className={`${styles.stockBadge} ${styles.inStock}`}>
+                                {t('buyPage.inStock')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className={styles.pricing}>
+                          <div className={styles.priceContainer}>
+                            <span className={styles.price}>
+                              {formatPrice(product.Price)} / {formatPriceEUR(product.Price)}
+                            </span>
+                          </div>
+                          {product.PreviousPrice && product.PreviousPrice > product.Price && (
+                            <>
+                              <div className={styles.previousPriceContainer}>
+                                <span className={styles.previousPrice}>
+                                  {formatPrice(product.PreviousPrice)} / {formatPriceEUR(product.PreviousPrice)}
+                                </span>
+                              </div>
+                              {discount && (
+                                <span className={styles.discount}>-{discount}%</span>
+                              )}
+                            </>
+                          )}
+                          <div className={styles.installationInfo}>
+                            <span className={styles.installationLabel}>{t('buyPage.installationCost')}</span>
+                            <span className={styles.installationPrice}>+300 BGN / €153</span>
+                          </div>
+                        </div>
+                      </Link>
                       
+                      {/* Quantity Selector stays outside Link to maintain functionality */}
                       <QuantitySelector product={product} />
                     </div>
                   );

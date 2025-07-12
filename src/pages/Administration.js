@@ -1,815 +1,578 @@
-import { useEffect, useState, useRef, useContext } from 'react';
-import styles from '../styles/Page Styles/Administration.module.css';
+import { useState, useEffect, useRef } from 'react';
 import { LanguageContext } from '../components/Layout Components/Header';
+import { useContext } from 'react';
+import styles from '../styles/Page Styles/Administration.module.css';
 import AdminOrderHistoryTab from '../components/AdminOrderHistoryTab';
 import WeeklyInstallationsTab from '../components/WeeklyInstallationsTab';
-import { TIME_SLOTS, areSlotsConsecutive } from '../lib/slotUtils';
 
-
-
-const AdministrationProducts = () => {
-    const { t } = useContext(LanguageContext);
-    const [products, setProducts] = useState([]);
-    const [formData, setFormData] = useState({
-        brand: '', model: '', colour: '', type: '',
-        capacity_btu: '', energy_rating: '', price: '', previous_price: '', image_url: '',
-        stock: '0', discount: '0'
-    });
-
-    const [isEditing, setIsEditing] = useState(false);
-    const [editProductId, setEditProductId] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isAuthLoading, setIsAuthLoading] = useState(true);
+export default function Administration() {
+    const { t, locale, switchLanguage } = useContext(LanguageContext);
+    
+    // Debug info
+    console.log('Admin Panel - Current locale:', locale);
+    console.log('Admin Panel - Test translation:', t('admin.header.title'));
+    
+    // Authentication state
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [usernameInput, setUsernameInput] = useState('');
     const [passwordInput, setPasswordInput] = useState('');
-
-    // Check authentication status on component mount
-    useEffect(() => {
-        const authStatus = localStorage.getItem('adminAuthenticated');
-        if (authStatus === 'true') {
-            setIsAuthenticated(true);
-        }
-        setIsAuthLoading(false);
-    }, []);
     
-    // Product management state
-    const formRef = useRef(null);
-    const fileInputRef = useRef(null);
-    const [showArchived, setShowArchived] = useState(false);
+    // Main tabs state
+    const [activeTab, setActiveTab] = useState('products');
+    
+    // Products state
+    const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showArchived, setShowArchived] = useState(false);
     const [sortBy, setSortBy] = useState('updated_at');
     const [sortOrder, setSortOrder] = useState('desc');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    
+    // Form state
+    const [showForm, setShowForm] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const [duplicateWarning, setDuplicateWarning] = useState(null);
     
-    // NEW: Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(20);
-    const [totalProducts, setTotalProducts] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
+    // Form section state - accordion style
+    const [expandedSections, setExpandedSections] = useState(['basic']);
     
-    // NEW: Form visibility state
-    const [showForm, setShowForm] = useState(false);
-
-    // Order management state
-    const [orders, setOrders] = useState([]);
-    const [expandedOrderId, setExpandedOrderId] = useState(null);
-    const [orderHistory, setOrderHistory] = useState({});
-    const [updatingStatus, setUpdatingStatus] = useState(null);
-    const [activeTab, setActiveTab] = useState('products'); // 'products', 'orders', 'orderHistory', or 'installations'
-    const [showInstallationDatePicker, setShowInstallationDatePicker] = useState(null);
-    const [installationDate, setInstallationDate] = useState('');
-    const [ordersNeedRefresh, setOrdersNeedRefresh] = useState(false);
-    
-    // New state for status transition modals
-    const [showCallConfirmationModal, setShowCallConfirmationModal] = useState(null);
-    const [showCalendarModal, setShowCalendarModal] = useState(null);
-    const [availableSlots, setAvailableSlots] = useState({});
-    const [selectedSlots, setSelectedSlots] = useState([]);
-    const [calendarWeek, setCalendarWeek] = useState(new Date());
-    const [loadingSlots, setLoadingSlots] = useState(false);
-
-    useEffect(() => {
-        if (activeTab === 'products') {
-            loadProducts();
-        } else if (activeTab === 'orders') {
-            loadOrders();
-            // Clear the refresh flag after loading orders
-            if (ordersNeedRefresh) {
-                setOrdersNeedRefresh(false);
-            }
-        }
-    }, [activeTab, showArchived, searchTerm, sortBy, sortOrder, currentPage, pageSize, ordersNeedRefresh]);
-
-    // Debug calendar modal state changes
-    useEffect(() => {
-        console.log('Calendar modal state changed:', showCalendarModal);
-    }, [showCalendarModal]);
-    
-    // Reset to first page when search/filter changes
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, showArchived, sortBy, sortOrder]);
-
-    const loadProducts = async () => {
-        setLoading(true);
-        setError(null);
+    // Form validation helpers
+    const getSectionStatus = (sectionName) => {
+        const requiredFields = {
+            basic: ['brand', 'model', 'price'],
+            technical: [],
+            physical: [],
+            installation: [],
+            features: [],
+            description: []
+        };
         
-        try {
-            const offset = (currentPage - 1) * pageSize;
-            const params = new URLSearchParams({
-                showArchived: showArchived.toString(),
-                search: searchTerm,
-                sortBy,
-                sortOrder,
-                limit: pageSize.toString(),
-                offset: offset.toString()
-            });
-            
-            const response = await fetch(`/api/get-products?${params}`);
-            const data = await response.json();
-            
-            if (response.ok) {
-                setProducts(data.products || []);
-                setTotalProducts(data.total || 0);
-                setTotalPages(Math.ceil((data.total || 0) / pageSize));
+        const fields = requiredFields[sectionName] || [];
+        const isComplete = fields.every(field => formData[field] && formData[field].trim() !== '');
+        const hasContent = fields.some(field => formData[field] && formData[field].trim() !== '') || 
+                          Object.keys(formData).some(key => 
+                              !requiredFields.basic.includes(key) && 
+                              formData[key] && 
+                              (typeof formData[key] === 'string' ? formData[key].trim() !== '' : 
+                               Array.isArray(formData[key]) ? formData[key].length > 0 : 
+                               formData[key] !== false)
+                          );
+        
+        if (isComplete) return 'completed';
+        if (hasContent) return 'in_progress';
+        return 'pending';
+    };
+
+    const toggleSection = (sectionName) => {
+        setExpandedSections(prev => {
+            if (prev.includes(sectionName)) {
+                return prev.filter(s => s !== sectionName);
             } else {
-                setError(data.error || 'Failed to load products');
-                setProducts([]);
-                setTotalProducts(0);
-                setTotalPages(0);
+                return [...prev, sectionName];
             }
+        });
+    };
+
+    const isSectionExpanded = (sectionName) => {
+        return expandedSections.includes(sectionName);
+    };
+    
+    // Form data state
+    const [formData, setFormData] = useState({
+        brand: '',
+        model: '',
+        type: '',
+        capacity_btu: '',
+        energy_rating: '',
+        colour: '',
+        price: '',
+        previous_price: '', // Will be auto-calculated
+        stock: '',
+        discount: '',
+        image_url: '',
+        is_featured: false,
+        is_bestseller: false,
+        is_new: false,
+        cop: '',
+        scop: '',
+        power_consumption: '',
+        refrigerant_type: 'R32',
+        operating_temp_range: '',
+        dimensions: '',
+        weight: '',
+        noise_level: '',
+        air_flow: '',
+        room_size_recommendation: '',
+        installation_type: '',
+        warranty_period: '',
+        features: [],
+        description: ''
+    });
+
+    // Calculate final price for preview
+    const calculateFinalPrice = () => {
+        const price = parseFloat(formData.price) || 0;
+        const discount = parseFloat(formData.discount) || 0;
+        if (price > 0 && discount > 0) {
+            return price - (price * discount / 100);
+        }
+        return price;
+    };
+
+    // Helper function to get proper image URL
+    const getImageUrl = (imageUrl) => {
+        if (!imageUrl) return '/images/placeholder-ac.svg';
+        
+        // If it's already a Supabase URL, use it as is
+        if (imageUrl.includes('supabase.co') || imageUrl.includes('supabase.')) {
+            return imageUrl;
+        }
+        
+        // If it's a local path that doesn't exist, use placeholder
+        if (imageUrl.startsWith('/images/products/')) {
+            console.warn('Using placeholder for old local image path:', imageUrl);
+            return '/images/placeholder-ac.svg';
+        }
+        
+        // Default fallback
+        return imageUrl || '/images/placeholder-ac.svg';
+    };
+    
+    const fileInputRef = useRef(null);
+    const formRef = useRef(null);
+    
+    // Image upload state
+    const [uploading, setUploading] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+
+    // Load products from API
+    const loadProducts = async () => {
+        try {
+            console.log('Loading products...');
+            const response = await fetch('/api/get-products');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('API Response:', data);
+            
+            // Extract products array from API response
+            const productsArray = Array.isArray(data.products) ? data.products : [];
+            console.log('Raw products array:', productsArray);
+            
+            // Transform API response to match admin panel expected format
+            const transformedProducts = productsArray.map(product => ({
+                id: product.ProductID || product.id,
+                brand: product.Brand || product.brand,
+                model: product.Model || product.model,
+                type: product.Type || product.type,
+                capacity_btu: product.CapacityBTU || product.capacity_btu,
+                energy_rating: product.EnergyRating || product.energy_rating,
+                colour: product.Colour || product.colour,
+                price: product.Price || product.price,
+                previous_price: product.PreviousPrice || product.previous_price,
+                stock: product.Stock || product.stock,
+                discount: product.Discount || product.discount,
+                image_url: product.ImageURL || product.image_url,
+                is_featured: product.IsFeatured || product.is_featured,
+                is_bestseller: product.IsBestseller || product.is_bestseller,
+                is_new: product.IsNew || product.is_new,
+                is_archived: product.IsArchived || product.is_archived,
+                cop: product.COP || product.cop,
+                scop: product.SCOP || product.scop,
+                power_consumption: product.PowerConsumption || product.power_consumption,
+                refrigerant_type: product.RefrigerantType || product.refrigerant_type,
+                operating_temp_range: product.OperatingTempRange || product.operating_temp_range,
+                dimensions: product.Dimensions || product.dimensions,
+                weight: product.Weight || product.weight,
+                noise_level: product.NoiseLevel || product.noise_level,
+                air_flow: product.AirFlow || product.air_flow,
+                room_size_recommendation: product.RoomSizeRecommendation || product.room_size_recommendation,
+                installation_type: product.InstallationType || product.installation_type,
+                warranty_period: product.WarrantyPeriod || product.warranty_period,
+                features: product.Features || product.features || [],
+                description: product.Description || product.description,
+                created_at: product.CreatedAt || product.created_at,
+                updated_at: product.UpdatedAt || product.updated_at
+            }));
+            
+            console.log('Transformed products:', transformedProducts);
+            
+            setProducts(transformedProducts);
+            setFilteredProducts(transformedProducts);
         } catch (error) {
             console.error('Error loading products:', error);
-            setError('Failed to load products');
+            // Set empty arrays on error
             setProducts([]);
-            setTotalProducts(0);
-            setTotalPages(0);
-        } finally {
-            setLoading(false);
+            setFilteredProducts([]);
         }
     };
 
-    // Order management functions
-    const loadOrders = async () => {
-        setLoading(true);
-        setError(null);
-        
-        try {
-            console.log('Admin: Loading orders via API...');
-            
-            const response = await fetch('/api/get-orders');
-            const result = await response.json();
-            
-            if (response.ok && result.success) {
-                console.log('Admin: Orders loaded successfully:', result.orders);
-                setOrders(result.orders || []);
-            } else {
-                console.error('Admin: Failed to load orders:', result.error);
-                setError(result.error || 'Failed to load orders');
-                setOrders([]);
-            }
-        } catch (error) {
-            console.error('Admin: Error loading orders:', error);
-            setError('Failed to load orders');
-            setOrders([]);
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        if (isLoggedIn) {
+            loadProducts();
         }
-    };
-
-    const updateOrderStatus = async (orderId, newStatus) => {
-        const currentOrder = orders.find(order => order.order_id === orderId);
-        const currentStatus = currentOrder?.current_status;
-
-        console.log(`Status transition: ${currentStatus} → ${newStatus} for order ${orderId}`);
-
-        // Handle status transition flows
-        if (currentStatus === 'new' && newStatus === 'confirmed') {
-            console.log('Showing call confirmation modal');
-            // Show call confirmation modal
-            setShowCallConfirmationModal(orderId);
-            return;
-        }
-
-        if (currentStatus === 'confirmed' && newStatus === 'installation_booked') {
-            console.log('Showing calendar modal for installation booking');
-            // Show calendar overlay modal
-            setShowCalendarModal(orderId);
-            try {
-                await loadAvailableSlots();
-                console.log('Calendar modal should now be visible');
-                // Show a brief notification that calendar is ready
-                setTimeout(() => {
-                    console.log('Calendar ready - user can now select installation time');
-                }, 100);
-            } catch (error) {
-                console.error('Error loading available slots:', error);
-                alert('Error loading calendar. Please try again.');
-                setShowCalendarModal(null); // Hide modal on error
-            }
-            return;
-        }
-        
-        // If changing to 'installed', show date picker first
-        if (newStatus === 'installed') {
-            console.log('Showing installation date picker');
-            const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-            setInstallationDate(today);
-            setShowInstallationDatePicker(orderId);
-            return;
-        }
-        
-        // For other status changes, proceed normally
-        console.log('Proceeding with normal status update');
-        await performStatusUpdate(orderId, newStatus, null);
-    };
-
-    const performStatusUpdate = async (orderId, newStatus, installDate) => {
-        setUpdatingStatus(orderId);
-        
-        try {
-            const response = await fetch('/api/update-order-status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    orderId: orderId,
-                    newStatus: newStatus,
-                    adminId: null, // TODO: Add proper admin authentication
-                    notes: `Status changed to ${newStatus} by admin`,
-                    installationDate: installDate
-                })
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                // Update local state
-                setOrders(prevOrders => 
-                    prevOrders.map(order => 
-                        order.order_id === orderId 
-                            ? { ...order, current_status: newStatus }
-                            : order
-                    )
-                );
-                
-                // Clear any cached history for this order to force refresh
-                setOrderHistory(prev => {
-                    const updated = { ...prev };
-                    delete updated[orderId];
-                    return updated;
-                });
-                
-                console.log(`Order ${orderId} status updated to ${newStatus}`);
-                alert(t ? t('admin.orders.statusUpdated') : 'Status updated successfully');
-                
-                // Hide installation date picker
-                setShowInstallationDatePicker(null);
-                setInstallationDate('');
-            } else {
-                console.error('Failed to update order status:', result.error);
-                const errorMsg = t ? t('admin.orders.errors.updateFailed') : 'Failed to update order status';
-                alert(`${errorMsg}: ${result.error}`);
-            }
-        } catch (error) {
-            console.error('Error updating order status:', error);
-            const errorMsg = t ? t('admin.orders.errors.updateFailed') : 'Failed to update order status';
-            alert(errorMsg);
-        } finally {
-            setUpdatingStatus(null);
-        }
-    };
-
-    const handleInstallationDateConfirm = () => {
-        if (showInstallationDatePicker && installationDate) {
-            performStatusUpdate(showInstallationDatePicker, 'installed', installationDate);
-        }
-    };
-
-    const handleInstallationDateCancel = () => {
-        setShowInstallationDatePicker(null);
-        setInstallationDate('');
-        // Reset the dropdown to previous value
-        setOrders(prevOrders => [...prevOrders]); // Force re-render
-    };
-
-    const loadOrderHistory = async (orderId) => {
-        if (orderHistory[orderId]) {
-            return; // Already loaded
-        }
-
-        try {
-            console.log('Loading order history for order:', orderId);
-            
-            const response = await fetch(`/api/get-order-history?orderId=${orderId}`);
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                console.log(`Successfully loaded ${result.count} history entries for order ${orderId}`);
-                setOrderHistory(prev => ({
-                    ...prev,
-                    [orderId]: result.history || []
-                }));
-            } else {
-                console.error('Error loading order history:', result.error);
-                // Set empty history on error
-                setOrderHistory(prev => ({
-                    ...prev,
-                    [orderId]: []
-                }));
-            }
-        } catch (error) {
-            console.error('Error loading order history:', error);
-            // Set empty history on error
-            setOrderHistory(prev => ({
-                ...prev,
-                [orderId]: []
-            }));
-        }
-    };
-
-    const toggleOrderHistory = (orderId) => {
-        if (expandedOrderId === orderId) {
-            setExpandedOrderId(null);
-        } else {
-            setExpandedOrderId(orderId);
-            loadOrderHistory(orderId);
-        }
-    };
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'new': return '#6c757d';
-            case 'confirmed': return '#007bff';
-            case 'installation_booked': return '#fd7e14';
-            case 'installed': return '#28a745';
-            case 'cancelled': return '#dc3545';
-            default: return '#6c757d';
-        }
-    };
-
-    const getStatusLabel = (status) => {
-        // Try to get translation first
-        const translationKey = `admin.orders.status.${status}`;
-        const translatedValue = t(translationKey);
-        
-        // If translation failed (returns the key), use hardcoded fallbacks
-        if (translatedValue === translationKey) {
-            const fallbacks = {
-                'new': 'Нова',
-                'confirmed': 'Потвърдена',
-                'installation_booked': 'Насрочен монтаж',
-                'installed': 'Инсталирана',
-                'cancelled': 'Отказана'
-            };
-            return fallbacks[status] || status;
-        }
-        
-        return translatedValue;
-    };
-
-    const getStatusWorkflowHint = (currentStatus) => {
-        const hints = {
-            'new': 'Workflow: New → Confirmed → Schedule Installation → Installed',
-            'confirmed': 'Next: Schedule Installation (opens calendar)',
-            'installation_booked': 'Next: Mark as Installed when work is complete',
-            'installed': 'Order is complete',
-            'cancelled': 'Order is cancelled'
-        };
-        return hints[currentStatus] || '';
-    };
-
-    // Product management helper functions
-    const calculateDiscountedPrice = (price, discount) => {
-        if (!price || !discount) return price;
-        return (parseFloat(price) * (1 - parseFloat(discount) / 100)).toFixed(2);
-    };
-
-    const isLowStock = (stock) => {
-        return parseInt(stock) < 5;
-    };
+    }, [isLoggedIn]);
     
-    // NEW: Pagination helper functions
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
-    
-    const handlePageSizeChange = (newSize) => {
-        setPageSize(newSize);
-        setCurrentPage(1); // Reset to first page when changing page size
-    };
-    
-    // NEW: Form visibility helpers
-    const showAddForm = () => {
-        setShowForm(true);
-        setIsEditing(false);
-        setEditProductId(null);
-        clearForm();
-        // Scroll to form after a brief delay to allow rendering
-        setTimeout(() => {
-            formRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    };
-    
-    const hideForm = () => {
-        setShowForm(false);
-        setIsEditing(false);
-        setEditProductId(null);
-        clearForm();
-    };
-
     const clearForm = () => {
         setFormData({
-            brand: '', model: '', colour: '', type: '',
-            capacity_btu: '', energy_rating: '', price: '', previous_price: '', image_url: '',
-            stock: '0', discount: '0'
+            brand: '',
+            model: '',
+            type: '',
+            capacity_btu: '',
+            energy_rating: '',
+            colour: '',
+            price: '',
+            previous_price: '', // Will be auto-calculated
+            stock: '',
+            discount: '',
+            image_url: '',
+            is_featured: false,
+            is_bestseller: false,
+            is_new: false,
+            cop: '',
+            scop: '',
+            power_consumption: '',
+            refrigerant_type: 'R32',
+            operating_temp_range: '',
+            dimensions: '',
+            weight: '',
+            noise_level: '',
+            air_flow: '',
+            room_size_recommendation: '',
+            installation_type: '',
+            warranty_period: '',
+            features: [],
+            description: ''
         });
         setDuplicateWarning(null);
+        setExpandedSections(['basic']);
+        setImagePreview(null);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-        setDuplicateWarning(null); // Clear warning when user changes input
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
     };
 
-    const handleCancelEdit = () => {
-        hideForm();
-    };
+    // Handle image upload to Supabase storage
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-    const handleSort = (field) => {
-        if (sortBy === field) {
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-        } else {
-            setSortBy(field);
-            setSortOrder('asc');
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file');
+            return;
         }
-        setCurrentPage(1); // Reset to first page when sorting
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image size should be less than 5MB');
+            return;
+        }
+
+        setUploading(true);
+        
+        try {
+            // Create a unique filename
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            
+            // REAL SUPABASE IMPLEMENTATION:
+            // Check if we have Supabase configured
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+            
+            if (supabaseUrl && supabaseAnonKey) {
+                // Use real Supabase Storage
+                const { createClient } = await import('@supabase/supabase-js');
+                const supabase = createClient(supabaseUrl, supabaseAnonKey);
+                
+                const { data, error } = await supabase.storage
+                    .from('images-viki15bg')
+                    .upload(`products/${fileName}`, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+                
+                if (error) {
+                    console.error('Supabase upload error:', error);
+                    throw new Error('Failed to upload to Supabase: ' + error.message);
+                }
+                
+                const { data: { publicUrl } } = supabase.storage
+                    .from('images-viki15bg')
+                    .getPublicUrl(`products/${fileName}`);
+                
+                // Set image preview
+                setImagePreview(publicUrl);
+                
+                // Update form data with the Supabase public URL
+                setFormData(prev => ({
+                    ...prev,
+                    image_url: publicUrl
+                }));
+                
+                console.log('✅ Image uploaded to Supabase:', publicUrl);
+            } else {
+                // FALLBACK MOCK IMPLEMENTATION (when Supabase not configured):
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Create a preview URL for the uploaded file
+                const previewUrl = URL.createObjectURL(file);
+                setImagePreview(previewUrl);
+                
+                // Mock Supabase URL structure for consistency
+                const mockSupabaseUrl = `https://mock.supabase.co/storage/v1/object/public/images-viki15bg/products/${fileName}`;
+                
+                // Update form data with the mock URL
+                setFormData(prev => ({
+                    ...prev,
+                    image_url: mockSupabaseUrl
+                }));
+                
+                console.log('⚠️ Using mock upload (Supabase not configured):', mockSupabaseUrl);
+            }
+
+            alert('Image uploaded successfully!');
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            alert('Error uploading image. Please try again.');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const showAddForm = () => {
+        clearForm();
+        setIsEditing(false);
+        setEditingId(null);
+        setShowForm(true);
+        setExpandedSections(['basic']);
+    };
+
+    const hideForm = () => {
+        setShowForm(false);
+        clearForm();
+        setIsEditing(false);
+        setEditingId(null);
     };
 
     const handleAdd = async () => {
-        setLoading(true);
-        setDuplicateWarning(null);
-        
         try {
+            // Validate required fields
+            if (!formData.brand || !formData.model || !formData.price) {
+                alert('Please fill in all required fields: Brand, Model, and Price');
+                return;
+            }
+
+            // Clean and validate data before sending
+            const cleanedData = {
+                ...formData,
+                // Convert empty strings to null for numeric fields
+                price: formData.price ? parseFloat(formData.price) : null,
+                previous_price: formData.discount > 0 ? parseFloat(formData.price) : (formData.previous_price ? parseFloat(formData.previous_price) : null),
+                stock: formData.stock ? parseInt(formData.stock) : 0,
+                discount: formData.discount ? parseFloat(formData.discount) : 0,
+                capacity_btu: formData.capacity_btu ? parseInt(formData.capacity_btu) : null,
+                cop: formData.cop ? parseFloat(formData.cop) : null,
+                scop: formData.scop ? parseFloat(formData.scop) : null,
+                power_consumption: formData.power_consumption ? parseFloat(formData.power_consumption) : null,
+                weight: formData.weight ? parseFloat(formData.weight) : null,
+                noise_level: formData.noise_level ? parseInt(formData.noise_level) : null,
+                air_flow: formData.air_flow ? parseInt(formData.air_flow) : null,
+                // Convert empty strings to null for text fields
+                colour: formData.colour || null,
+                type: formData.type || null,
+                energy_rating: formData.energy_rating || null,
+                image_url: formData.image_url || null,
+                dimensions: formData.dimensions || null,
+                operating_temp_range: formData.operating_temp_range || null,
+                room_size_recommendation: formData.room_size_recommendation || null,
+                installation_type: formData.installation_type || null,
+                warranty_period: formData.warranty_period || null,
+                description: formData.description || null
+            };
+
+            console.log('Sending product data:', cleanedData);
+
             const response = await fetch('/api/add-product', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-        });
-            
-            const result = await response.json();
-            
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cleanedData),
+            });
+
             if (response.ok) {
+                loadProducts();
                 hideForm();
-                await loadProducts();
-                alert(t('admin.products.addSuccess'));
-            } else if (response.status === 409) {
-                // Duplicate product
-                setDuplicateWarning(result.message || t('admin.products.duplicateError'));
+                alert('Product added successfully!');
             } else {
-                alert(t('admin.products.addError') + ': ' + (result.error || result.message));
+                const error = await response.json();
+                console.error('API Error:', error);
+                alert('Error: ' + error.message);
             }
         } catch (error) {
             console.error('Error adding product:', error);
-            alert(t('admin.products.addError'));
-        } finally {
-            setLoading(false);
+            alert('Error adding product: ' + error.message);
         }
     };
 
     const handleEdit = (product) => {
-        setShowForm(true);
-        setIsEditing(true);
-        setEditProductId(product.ProductID);
-        // Map PascalCase API response to lowercase form field names
         setFormData({
-            brand: product.Brand || '',
-            model: product.Model || '',
-            colour: product.Colour || '',
-            type: product.Type || '',
-            capacity_btu: product.CapacityBTU || '',
-            energy_rating: product.EnergyRating || '',
-            price: product.Price || '',
-            previous_price: product.PreviousPrice || '',
-            image_url: product.ImageURL || '',
-            stock: product.Stock || '',
-            discount: product.Discount || ''
+            brand: product.brand || '',
+            model: product.model || '',
+            type: product.type || '',
+            capacity_btu: product.capacity_btu ? product.capacity_btu.toString() : '',
+            energy_rating: product.energy_rating || '',
+            colour: product.colour || '',
+            price: product.price ? product.price.toString() : '',
+            previous_price: product.previous_price ? product.previous_price.toString() : '', // Keep existing previous_price
+            stock: product.stock ? product.stock.toString() : '',
+            discount: product.discount ? product.discount.toString() : '',
+            image_url: product.image_url || '',
+            is_featured: product.is_featured || false,
+            is_bestseller: product.is_bestseller || false,
+            is_new: product.is_new || false,
+            cop: product.cop ? product.cop.toString() : '',
+            scop: product.scop ? product.scop.toString() : '',
+            power_consumption: product.power_consumption ? product.power_consumption.toString() : '',
+            refrigerant_type: product.refrigerant_type || 'R32',
+            operating_temp_range: product.operating_temp_range || '',
+            dimensions: product.dimensions || '',
+            weight: product.weight ? product.weight.toString() : '',
+            noise_level: product.noise_level ? product.noise_level.toString() : '',
+            air_flow: product.air_flow ? product.air_flow.toString() : '',
+            room_size_recommendation: product.room_size_recommendation || '',
+            installation_type: product.installation_type || '',
+            warranty_period: product.warranty_period || '',
+            features: product.features || [],
+            description: product.description || ''
         });
-        setDuplicateWarning(null);
-        setTimeout(() => {
-            formRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+        setIsEditing(true);
+        setEditingId(product.id);
+        setShowForm(true);
+        setExpandedSections(['basic']);
+        
+        // Set image preview if product has an image
+        if (product.image_url) {
+            setImagePreview(product.image_url);
+        }
     };
 
     const handleSaveEdit = async () => {
-        setLoading(true);
-        setDuplicateWarning(null);
-        
         try {
+            // Validate required fields
+            if (!formData.brand || !formData.model || !formData.price) {
+                alert('Please fill in all required fields: Brand, Model, and Price');
+                return;
+            }
+
+            // Clean and validate data before sending
+            const cleanedData = {
+                ...formData,
+                // Convert empty strings to null for numeric fields
+                price: formData.price ? parseFloat(formData.price) : null,
+                previous_price: formData.discount > 0 ? parseFloat(formData.price) : (formData.previous_price ? parseFloat(formData.previous_price) : null),
+                stock: formData.stock ? parseInt(formData.stock) : 0,
+                discount: formData.discount ? parseFloat(formData.discount) : 0,
+                capacity_btu: formData.capacity_btu ? parseInt(formData.capacity_btu) : null,
+                cop: formData.cop ? parseFloat(formData.cop) : null,
+                scop: formData.scop ? parseFloat(formData.scop) : null,
+                power_consumption: formData.power_consumption ? parseFloat(formData.power_consumption) : null,
+                weight: formData.weight ? parseFloat(formData.weight) : null,
+                noise_level: formData.noise_level ? parseInt(formData.noise_level) : null,
+                air_flow: formData.air_flow ? parseInt(formData.air_flow) : null,
+                // Convert empty strings to null for text fields
+                colour: formData.colour || null,
+                type: formData.type || null,
+                energy_rating: formData.energy_rating || null,
+                image_url: formData.image_url || null,
+                dimensions: formData.dimensions || null,
+                operating_temp_range: formData.operating_temp_range || null,
+                room_size_recommendation: formData.room_size_recommendation || null,
+                installation_type: formData.installation_type || null,
+                warranty_period: formData.warranty_period || null,
+                description: formData.description || null
+            };
+
+            console.log('Updating product data:', cleanedData);
+
             const response = await fetch('/api/edit-product', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: editProductId, ...formData }),
-        });
-            
-            const result = await response.json();
-            
-            if (response.ok) {
-                hideForm();
-                await loadProducts();
-                alert(t('admin.products.editSuccess'));
-            } else if (response.status === 409) {
-                // Duplicate product
-                setDuplicateWarning(result.message || t('admin.products.duplicateError'));
-            } else {
-                alert(t('admin.products.editError') + ': ' + (result.error || result.message));
-            }
-        } catch (error) {
-            console.error('Error editing product:', error);
-            alert(t('admin.products.editError'));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleArchive = async (productId, productName) => {
-        if (!confirm(t('admin.products.confirmArchive').replace('{product}', productName))) {
-            return;
-        }
-        
-        setLoading(true);
-        
-        try {
-            const response = await fetch('/api/archive-product', {
-                method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: productId }),
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok) {
-                await loadProducts();
-                
-                // Check if current page is now empty and adjust if needed
-                const newTotal = totalProducts - 1;
-                const newTotalPages = Math.ceil(newTotal / pageSize);
-                if (currentPage > newTotalPages && newTotalPages > 0) {
-                    setCurrentPage(newTotalPages);
-                }
-                
-                alert(t('admin.products.archiveSuccess'));
-            } else {
-                alert(t('admin.products.archiveError') + ': ' + (result.error || result.message));
-            }
-        } catch (error) {
-            console.error('Error archiving product:', error);
-            alert(t('admin.products.archiveError'));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleLogin = () => {
-        const envUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME;
-        const envPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-        if (usernameInput === '1' && passwordInput === '1') {
-            setIsAuthenticated(true);
-            localStorage.setItem('adminAuthenticated', 'true');
-        } else {
-            alert(t('admin.login.invalidCredentials'));
-        }
-    };
-
-    const handleLogout = () => {
-        setIsAuthenticated(false);
-        localStorage.removeItem('adminAuthenticated');
-        setUsernameInput('');
-        setPasswordInput('');
-    };
-
-    const handleImageUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-        // For now, just set the file name as placeholder
-        // In production, you would upload to Supabase Storage or another service
-        const fileName = `/images/${file.name}`;
-        setFormData((prev) => ({ ...prev, image_url: fileName }));
-        
-        // Optional: Real file upload to Supabase Storage
-        /*
-        const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-
-  const { data, error } = await supabase
-    .storage
-    .from('product-images')
-            .upload(`product-${Date.now()}-${file.name}`, file);
-
-  if (error) {
-    console.error('Image upload error:', error);
-    return;
-  }
-
-  const imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${data.path}`;
-        setFormData((prev) => ({ ...prev, image_url: imageUrl }));
-        */
-    };
-
-    // Handle call confirmation
-    const handleCallCompleted = async () => {
-        if (showCallConfirmationModal) {
-            await performStatusUpdate(showCallConfirmationModal, 'confirmed', null);
-            setShowCallConfirmationModal(null);
-        }
-    };
-
-    const handleCallCancelled = () => {
-        setShowCallConfirmationModal(null);
-        // Reset dropdown to previous value
-        setOrders(prevOrders => [...prevOrders]); // Force re-render
-    };
-
-    // Load available slots for calendar
-    const loadAvailableSlots = async () => {
-        setLoadingSlots(true);
-        try {
-            // Get Monday of current week (or next week if it's weekend)
-            const today = new Date();
-            const monday = new Date(today);
-            monday.setDate(monday.getDate() - monday.getDay() + 1);
-            
-            // If today is weekend, start from next Monday
-            if (today.getDay() === 0 || today.getDay() === 6) {
-                monday.setDate(monday.getDate() + 7);
-            }
-            
-            // Get Sunday of current week
-            const sunday = new Date(monday);
-            sunday.setDate(sunday.getDate() + 6);
-
-            const startDate = monday.toISOString().split('T')[0];
-            const endDate = sunday.toISOString().split('T')[0];
-
-            console.log('Loading available slots for period:', startDate, 'to', endDate);
-
-            const response = await fetch(`/api/get-available-slots?startDate=${startDate}&endDate=${endDate}`);
-            const data = await response.json();
-
-            console.log('Available slots response:', data);
-
-            if (response.ok) {
-                setAvailableSlots(data.availableSlots || {});
-                setCalendarWeek(monday); // Update calendar week state
-            } else {
-                console.error('Failed to load available slots:', data.error);
-                alert('Failed to load available slots: ' + (data.error || 'Unknown error'));
-            }
-        } catch (error) {
-            console.error('Error loading slots:', error);
-            alert('Error loading available slots: ' + error.message);
-        } finally {
-            setLoadingSlots(false);
-        }
-    };
-
-    // Handle individual slot selection with toggle functionality
-    const handleSlotSelection = (date, timeSlot) => {
-        const slot = availableSlots[date]?.[timeSlot];
-        // Only allow interaction with available slots (not past, not booked)
-        if (!slot?.available || slot?.past || slot?.booked) {
-            return;
-        }
-
-        // Check if this slot is already selected
-        const isAlreadySelected = selectedSlots.some(
-            selectedSlot => selectedSlot.date === date && selectedSlot.timeSlot === timeSlot
-        );
-
-        if (isAlreadySelected) {
-            // Deselect the slot
-            setSelectedSlots(prev => 
-                prev.filter(selectedSlot => 
-                    !(selectedSlot.date === date && selectedSlot.timeSlot === timeSlot)
-                )
-            );
-        } else {
-            // Select the slot (add to existing selections)
-            setSelectedSlots(prev => [...prev, { date, timeSlot }]);
-        }
-    };
-
-    // Book installation with multiple slots
-    const handleBookInstallation = async () => {
-        if (!showCalendarModal || !selectedSlots || selectedSlots.length === 0) {
-            alert('Please select at least one time slot');
-            return;
-        }
-
-        // Ensure all slots are for the same date
-        const dates = [...new Set(selectedSlots.map(slot => slot.date))];
-        if (dates.length !== 1) {
-            alert('All selected slots must be on the same date');
-            return;
-        }
-
-        setUpdatingStatus(showCalendarModal);
-        try {
-            const installationDate = selectedSlots[0].date;
-            const timeSlots = selectedSlots.map(slot => slot.timeSlot).sort();
-            const duration = selectedSlots.length * 0.5; // Each slot is 30 minutes
-
-            const response = await fetch('/api/book-installation', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    orderId: showCalendarModal,
-                    scheduledDate: installationDate,
-                    timeSlots: timeSlots, // Multiple slots
-                    timeSlot: timeSlots[0], // Primary slot for backward compatibility
-                    duration: duration,
-                    adminId: null, // TODO: Add proper admin ID
-                    notes: `Installation slots: ${timeSlots.join(', ')} (${duration} hours total)`
-                })
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: editingId, ...cleanedData }),
             });
 
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                // Update local state
-                setOrders(prevOrders => 
-                    prevOrders.map(order => 
-                        order.order_id === showCalendarModal 
-                            ? { ...order, current_status: 'installation_booked' }
-                            : order
-                    )
-                );
-
-                alert(`Installation scheduled for ${installationDate} at ${timeSlots.join(', ')} (${duration} hours total)`);
-                setShowCalendarModal(null);
-                setSelectedSlots([]);
-                setAvailableSlots({});
+            if (response.ok) {
+                loadProducts();
+                hideForm();
+                alert('Product updated successfully!');
             } else {
-                console.error('Failed to book installation:', result);
-                
-                // Handle specific error types
-                if (result.error === 'Time slot conflict') {
-                    alert(`${result.message}\n\nThe selected time slots are no longer available. Please refresh the calendar and select different slots.`);
-                    // Optionally reload available slots
-                    await loadAvailableSlots();
-                } else if (result.error === 'Time slots not available') {
-                    alert(`Some time slots are no longer available: ${result.unavailableSlots?.join(', ')}\n\nPlease select different time slots.`);
-                    // Optionally reload available slots  
-                    await loadAvailableSlots();
-                } else {
-                    alert(`Failed to book installation: ${result.message || result.error}`);
-                }
+                const error = await response.json();
+                console.error('API Error:', error);
+                alert('Error: ' + error.message);
             }
         } catch (error) {
-            console.error('Error booking installation:', error);
-            alert('Error booking installation');
-        } finally {
-            setUpdatingStatus(null);
+            console.error('Error updating product:', error);
+            alert('Error updating product: ' + error.message);
         }
     };
 
-    const handleCancelCalendar = () => {
-        setShowCalendarModal(null);
-        setSelectedSlots([]);
-        setAvailableSlots({});
-        // Reset dropdown to previous value
-        setOrders(prevOrders => [...prevOrders]); // Force re-render
-    };
+    // Basic authentication check
+    if (!isLoggedIn) {
+        const handleLogin = () => {
+            if (usernameInput === '1' && passwordInput === '1') {
+                setIsLoggedIn(true);
+            } else {
+                alert('Incorrect username or password');
+            }
+        };
 
-    // Handle installation cancellation from Weekly Installations tab
-    const handleInstallationCancelled = () => {
-        console.log('Installation cancelled - marking orders for refresh');
-        setOrdersNeedRefresh(true);
-    };
-
-    // Handle installation rescheduling from Weekly Installations tab
-    const handleInstallationRescheduled = () => {
-        console.log('Installation rescheduled - marking orders for refresh');
-        setOrdersNeedRefresh(true);
-    };
-
-    // Handle installation completion from Weekly Installations tab
-    const handleInstallationCompleted = () => {
-        console.log('Installation completed - marking orders for refresh');
-        setOrdersNeedRefresh(true);
-    };
-
-    // Show loading state until authentication check is complete
-    if (isAuthLoading) {
-        return (
-            <div className={styles.loadingContainer}>
-                <div className={styles.loadingText}>Loading...</div>
-            </div>
-        );
-    }
-
-    if (!isAuthenticated) {
         return (
             <div className={styles.loginContainer}>
-                <h1>{t('admin.login.title')}</h1>
+                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🕵️</div>
+                <h1>Admin Login</h1>
                 <input
                     type="text"
                     placeholder={t('admin.login.username')}
                     value={usernameInput}
                     onChange={(e) => setUsernameInput(e.target.value)}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                            handleLogin();
+                        }
+                    }}
                 />
                 <input
                     type="password"
                     placeholder={t('admin.login.password')}
                     value={passwordInput}
                     onChange={(e) => setPasswordInput(e.target.value)}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                            handleLogin();
+                        }
+                    }}
                 />
-                <button onClick={handleLogin}>{t('admin.login.loginButton')}</button>
+                <button onClick={handleLogin}>
+                    {t('admin.login.loginButton')}
+                </button>
             </div>
         );
     }
@@ -818,9 +581,11 @@ const AdministrationProducts = () => {
         <div className={styles.adminPage}>
             <div className={styles.adminHeader}>
                 <h1 className={styles.heading}>{t('admin.header.title')}</h1>
-                <button onClick={handleLogout} className={styles.logoutButton}>
-                    {t('admin.header.logout')}
-                </button>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <button onClick={() => setIsLoggedIn(false)} className={styles.logoutButton}>
+                        {t('admin.header.logout')}
+                    </button>
+                </div>
             </div>
             
             {/* Tab Navigation */}
@@ -854,53 +619,7 @@ const AdministrationProducts = () => {
             {/* Products Management Section */}
             {activeTab === 'products' && (
                 <>
-                    {/* Search and Controls */}
-                    <div className={styles.controlsSection}>
-                        <div className={styles.searchControls}>
-                            <input
-                                type="text"
-                                placeholder={t('admin.products.search')}
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className={styles.searchInput}
-                            />
-                            <label className={styles.checkboxLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={showArchived}
-                                    onChange={(e) => setShowArchived(e.target.checked)}
-                                />
-                                {t('admin.products.showArchived')}
-                            </label>
-                        </div>
-                        <div className={styles.sortControls}>
-                            <label>
-                                {t('admin.products.sortBy')}:
-                                <select 
-                                    value={sortBy} 
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className={styles.sortSelect}
-                                >
-                                    <option value="updated_at">Updated</option>
-                                    <option value="brand">Brand</option>
-                                    <option value="model">Model</option>
-                                    <option value="price">Price</option>
-                                    <option value="stock">Stock</option>
-                                    <option value="discount">Discount</option>
-                                </select>
-                                <select 
-                                    value={sortOrder} 
-                                    onChange={(e) => setSortOrder(e.target.value)}
-                                    className={styles.sortSelect}
-                                >
-                                    <option value="desc">↓ Descending</option>
-                                    <option value="asc">↑ Ascending</option>
-                                </select>
-                            </label>
-                        </div>
-                    </div>
-
-                    {/* Add/Edit Product Form - Now conditionally shown */}
+                    {/* Accordion Form */}
                     {showForm && (
                         <div className={styles.formSection} ref={formRef}>
                             <div className={styles.formHeader}>
@@ -920,868 +639,687 @@ const AdministrationProducts = () => {
                                 </div>
                             )}
 
-                            <div className={styles.formGrid}>
-                                {/* Required Fields */}
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.brand')} *:
-                                        <input
-                                            type="text"
-                                            name="brand"
-                                            value={formData.brand}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </label>
-                                </div>
+                            {/* Accordion Form Sections */}
+                            <div className={styles.accordionContainer}>
+                                
+                                {/* Basic Information Section */}
+                                <div className={styles.accordionSection}>
+                                    <div 
+                                        className={`${styles.accordionHeader} ${styles[getSectionStatus('basic')]}`}
+                                        onClick={() => toggleSection('basic')}
+                                    >
+                                        <div className={styles.sectionInfo}>
+                                            <span className={styles.sectionIcon}>📋</span>
+                                            <span className={styles.sectionTitle}>{t('admin.products.sections.basic')}</span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatus('basic') === 'completed' && '✅ ' + t('admin.products.status.completed')}
+                                                {getSectionStatus('basic') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
+                                                {getSectionStatus('basic') === 'pending' && '⭕ ' + t('admin.products.status.required')}
+                                            </span>
+                                        </div>
+                                        <span className={styles.expandIcon}>
+                                            {isSectionExpanded('basic') ? '▼' : '▶'}
+                                        </span>
+                                    </div>
+                                    
+                                    {isSectionExpanded('basic') && (
+                                        <div className={styles.sectionContent}>
+                                            <div className={styles.formCard}>
+                                                <h3 className={styles.cardTitle}>📦 {t('admin.products.formCards.productIdentity')}</h3>
+                                                <div className={styles.formGrid}>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.brand')} *:
+                                                            <input
+                                                                type="text"
+                                                                name="brand"
+                                                                value={formData.brand}
+                                                                onChange={handleChange}
+                                                                required
+                                                                placeholder={t('admin.products.placeholders.brandExample')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.model')} *:
+                                                            <input
+                                                                type="text"
+                                                                name="model"
+                                                                value={formData.model}
+                                                                onChange={handleChange}
+                                                                required
+                                                                placeholder={t('admin.products.placeholders.modelExample')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.price')} * (€):
+                                                            <input
+                                                                type="number"
+                                                                name="price"
+                                                                value={formData.price}
+                                                                onChange={handleChange}
+                                                                step="0.01"
+                                                                min="0"
+                                                                required
+                                                                placeholder={t('admin.products.placeholders.priceExample')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className={styles.formCard}>
+                                                <h3 className={styles.cardTitle}>🏷️ {t('admin.products.formCards.productDetails')}</h3>
+                                                <div className={styles.formGrid}>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.type')}:
+                                                            <select
+                                                                name="type"
+                                                                value={formData.type}
+                                                                onChange={handleChange}
+                                                            >
+                                                                <option value="">{t('admin.products.dropdowns.selectType')}</option>
+                                                                <option value="Split">{t('admin.products.dropdowns.types.split')}</option>
+                                                                <option value="Multi-Split">{t('admin.products.dropdowns.types.multiSplit')}</option>
+                                                                <option value="Cassette">{t('admin.products.dropdowns.types.cassette')}</option>
+                                                                <option value="Ducted">{t('admin.products.dropdowns.types.ducted')}</option>
+                                                                <option value="Portable">{t('admin.products.dropdowns.types.portable')}</option>
+                                                            </select>
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.capacity')} (BTU):
+                                                            <input
+                                                                type="number"
+                                                                name="capacity_btu"
+                                                                value={formData.capacity_btu}
+                                                                onChange={handleChange}
+                                                                placeholder="e.g. 12000"
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.energyRating')}:
+                                                            <select
+                                                                name="energy_rating"
+                                                                value={formData.energy_rating}
+                                                                onChange={handleChange}
+                                                            >
+                                                                <option value="">{t('admin.products.dropdowns.selectRating')}</option>
+                                                                <option value="A+++">{t('admin.products.dropdowns.energyRatings.aPlusPlus')}</option>
+                                                                <option value="A++">{t('admin.products.dropdowns.energyRatings.aPlus')}</option>
+                                                                <option value="A+">{t('admin.products.dropdowns.energyRatings.a')}</option>
+                                                                <option value="A">{t('admin.products.dropdowns.energyRatings.b')}</option>
+                                                                <option value="B">{t('admin.products.dropdowns.energyRatings.c')}</option>
+                                                                <option value="C">{t('admin.products.dropdowns.energyRatings.d')}</option>
+                                                            </select>
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.color')}:
+                                                            <input
+                                                                type="text"
+                                                                name="colour"
+                                                                value={formData.colour}
+                                                                onChange={handleChange}
+                                                                placeholder="e.g. White, Black"
+                                                            />
+                                                        </label>
+                                                    </div>
 
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.model')} *:
-                                        <input
-                                            type="text"
-                                            name="model"
-                                            value={formData.model}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </label>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.price')} * (€):
-                                        <input
-                                            type="number"
-                                            name="price"
-                                            value={formData.price}
-                                            onChange={handleChange}
-                                            step="0.01"
-                                            min="0"
-                                            required
-                                        />
-                                    </label>
-                                </div>
-
-                                {/* Optional Fields */}
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.color')}:
-                                        <input
-                                            type="text"
-                                            name="colour"
-                                            value={formData.colour}
-                                            onChange={handleChange}
-                                        />
-                                    </label>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.type')}:
-                                        <input
-                                            type="text"
-                                            name="type"
-                                            value={formData.type}
-                                            onChange={handleChange}
-                                        />
-                                    </label>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.capacity')}:
-                                        <input
-                                            type="number"
-                                            name="capacity_btu"
-                                            value={formData.capacity_btu}
-                                            onChange={handleChange}
-                                            min="0"
-                                        />
-                                    </label>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.energyRating')}:
-                                        <select
-                                            name="energy_rating"
-                                            value={formData.energy_rating}
-                                            onChange={handleChange}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="A+++">A+++</option>
-                                            <option value="A++">A++</option>
-                                            <option value="A+">A+</option>
-                                            <option value="A">A</option>
-                                            <option value="B">B</option>
-                                            <option value="C">C</option>
-                                        </select>
-                                    </label>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.previousPrice')} (€):
-                                        <input
-                                            type="number"
-                                            name="previous_price"
-                                            value={formData.previous_price}
-                                            onChange={handleChange}
-                                            step="0.01"
-                                            min="0"
-                                        />
-                                    </label>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.stock')}:
-                                        <input
-                                            type="number"
-                                            name="stock"
-                                            value={formData.stock}
-                                            onChange={handleChange}
-                                            min="0"
-                                        />
-                                    </label>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.discount')} (%):
-                                        <input
-                                            type="number"
-                                            name="discount"
-                                            value={formData.discount}
-                                            onChange={handleChange}
-                                            step="0.01"
-                                            min="0"
-                                            max="100"
-                                        />
-                                    </label>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>
-                                        {t('admin.products.image')}:
-                                        <input 
-                                            type="file" 
-                                            ref={fileInputRef} 
-                                            onChange={handleImageUpload} 
-                                            accept="image/*"
-                                        />
-                                    </label>
-                                    {formData.image_url && (
-                                        <div className={styles.imagePreview}>
-                                            <img src={formData.image_url} alt="Product" />
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.stockQuantity')}:
+                                                            <input
+                                                                type="number"
+                                                                name="stock"
+                                                                value={formData.stock}
+                                                                onChange={handleChange}
+                                                                min="0"
+                                                                placeholder={t('admin.products.placeholders.stockExample')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.discount')} (%):
+                                                            <input
+                                                                type="number"
+                                                                name="discount"
+                                                                value={formData.discount}
+                                                                onChange={handleChange}
+                                                                min="0"
+                                                                max="100"
+                                                                step="0.1"
+                                                                placeholder={t('admin.products.placeholders.discountExample')}
+                                                            />
+                                                            {formData.price && formData.discount > 0 && (
+                                                                <div style={{ 
+                                                                    marginTop: '8px', 
+                                                                    padding: '8px 12px', 
+                                                                    backgroundColor: '#e8f5e8',
+                                                                    border: '1px solid #4caf50',
+                                                                    borderRadius: '4px',
+                                                                    fontSize: '14px',
+                                                                    color: '#2e7d32'
+                                                                }}>
+                                                                    💰 Final Price: €{calculateFinalPrice().toFixed(2)}
+                                                                    <small style={{ display: 'block', marginTop: '4px', opacity: 0.8 }}>
+                                                                        Original: €{formData.price} - {formData.discount}% discount
+                                                                    </small>
+                                                                </div>
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.imageUpload')}:
+                                                            <div className={styles.imageUploadContainer}>
+                                                                <input
+                                                                    type="file"
+                                                                    ref={fileInputRef}
+                                                                    accept="image/*"
+                                                                    onChange={handleImageUpload}
+                                                                    disabled={uploading}
+                                                                    className={styles.fileInput}
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => fileInputRef.current?.click()}
+                                                                    disabled={uploading}
+                                                                    className={styles.uploadButton}
+                                                                >
+                                                                    {uploading ? t('admin.products.uploading') : t('admin.products.selectImage')}
+                                                                </button>
+                                                            </div>
+                                                            {imagePreview && (
+                                                                <div className={styles.imagePreview}>
+                                                                    <img src={imagePreview} alt="Preview" />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setImagePreview(null);
+                                                                            setFormData(prev => ({ ...prev, image_url: '' }));
+                                                                            if (fileInputRef.current) fileInputRef.current.value = '';
+                                                                        }}
+                                                                        className={styles.removeImageButton}
+                                                                    >
+                                                                        ✕
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                            {formData.image_url && !imagePreview && (
+                                                                <div className={styles.currentImage}>
+                                                                    <p>{t('admin.products.currentImage')}: {formData.image_url}</p>
+                                                                </div>
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
+
+                                {/* Technical Specifications Section */}
+                                <div className={styles.accordionSection}>
+                                    <div 
+                                        className={`${styles.accordionHeader} ${styles[getSectionStatus('technical')]}`}
+                                        onClick={() => toggleSection('technical')}
+                                    >
+                                        <div className={styles.sectionInfo}>
+                                            <span className={styles.sectionIcon}>⚡</span>
+                                            <span className={styles.sectionTitle}>{t('admin.products.sections.technical')}</span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatus('technical') === 'completed' && '✅ ' + t('admin.products.status.completed')}
+                                                {getSectionStatus('technical') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
+                                                {getSectionStatus('technical') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            </span>
+                                        </div>
+                                        <span className={styles.expandIcon}>
+                                            {isSectionExpanded('technical') ? '▼' : '▶'}
+                                        </span>
+                                    </div>
+                                    
+                                    {isSectionExpanded('technical') && (
+                                        <div className={styles.sectionContent}>
+                                            <div className={styles.formCard}>
+                                                <h3 className={styles.cardTitle}>📊 {t('admin.products.formCards.performanceMetrics')}</h3>
+                                                <div className={styles.formGrid}>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            COP (Coefficient of Performance):
+                                                            <input
+                                                                type="number"
+                                                                name="cop"
+                                                                value={formData.cop}
+                                                                onChange={handleChange}
+                                                                step="0.1"
+                                                                min="0"
+                                                                max="10"
+                                                                placeholder="e.g. 4.2"
+                                                            />
+                                                            <small>{t('admin.products.hints.copHint')}</small>
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.scop')}:
+                                                            <input
+                                                                type="number"
+                                                                name="scop"
+                                                                value={formData.scop}
+                                                                onChange={handleChange}
+                                                                step="0.1"
+                                                                min="0"
+                                                                max="10"
+                                                                placeholder={t('admin.products.hints.scopHint')}
+                                                            />
+                                                            <small>{t('admin.products.hints.scopHint')}</small>
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.powerConsumption')} (kW):
+                                                            <input
+                                                                type="number"
+                                                                name="power_consumption"
+                                                                value={formData.power_consumption}
+                                                                onChange={handleChange}
+                                                                step="0.1"
+                                                                min="0"
+                                                                placeholder={t('admin.products.hints.powerHint')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            Refrigerant Type:
+                                                            <select
+                                                                name="refrigerant_type"
+                                                                value={formData.refrigerant_type}
+                                                                onChange={handleChange}
+                                                            >
+                                                                <option value="R32">{t('admin.products.dropdowns.refrigerantTypes.r32')}</option>
+                                                                <option value="R410A">{t('admin.products.dropdowns.refrigerantTypes.r410a')}</option>
+                                                                <option value="R134a">{t('admin.products.dropdowns.refrigerantTypes.r134a')}</option>
+                                                                <option value="R290">{t('admin.products.dropdowns.refrigerantTypes.r290')}</option>
+                                                            </select>
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.operatingTempRange')}:
+                                                            <input
+                                                                type="text"
+                                                                name="operating_temp_range"
+                                                                value={formData.operating_temp_range}
+                                                                onChange={handleChange}
+                                                                placeholder={t('admin.products.hints.tempRangeHint')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Physical Characteristics Section */}
+                                <div className={styles.accordionSection}>
+                                    <div 
+                                        className={`${styles.accordionHeader} ${styles[getSectionStatus('physical')]}`}
+                                        onClick={() => toggleSection('physical')}
+                                    >
+                                        <div className={styles.sectionInfo}>
+                                            <span className={styles.sectionIcon}>📏</span>
+                                            <span className={styles.sectionTitle}>{t('admin.products.sections.physical')}</span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatus('physical') === 'completed' && '✅ ' + t('admin.products.status.completed')}
+                                                {getSectionStatus('physical') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
+                                                {getSectionStatus('physical') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            </span>
+                                        </div>
+                                        <span className={styles.expandIcon}>
+                                            {isSectionExpanded('physical') ? '▼' : '▶'}
+                                        </span>
+                                    </div>
+                                    
+                                    {isSectionExpanded('physical') && (
+                                        <div className={styles.sectionContent}>
+                                            <div className={styles.formCard}>
+                                                <h3 className={styles.cardTitle}>📐 {t('admin.products.formCards.physicalSpecs')}</h3>
+                                                <div className={styles.formGrid}>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.dimensions')} (W×H×D):
+                                                            <input
+                                                                type="text"
+                                                                name="dimensions"
+                                                                value={formData.dimensions}
+                                                                onChange={handleChange}
+                                                                placeholder={t('admin.products.hints.dimensionsHint')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.weight')} (kg):
+                                                            <input
+                                                                type="number"
+                                                                name="weight"
+                                                                value={formData.weight}
+                                                                onChange={handleChange}
+                                                                step="0.1"
+                                                                min="0"
+                                                                placeholder={t('admin.products.hints.weightHint')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.noiseLevel')} (dB):
+                                                            <input
+                                                                type="number"
+                                                                name="noise_level"
+                                                                value={formData.noise_level}
+                                                                onChange={handleChange}
+                                                                min="0"
+                                                                max="100"
+                                                                placeholder={t('admin.products.hints.noiseHint')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.airFlow')} (m³/h):
+                                                            <input
+                                                                type="number"
+                                                                name="air_flow"
+                                                                value={formData.air_flow}
+                                                                onChange={handleChange}
+                                                                min="0"
+                                                                placeholder={t('admin.products.hints.airFlowHint')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Installation & Warranty Section */}
+                                <div className={styles.accordionSection}>
+                                    <div 
+                                        className={`${styles.accordionHeader} ${styles[getSectionStatus('installation')]}`}
+                                        onClick={() => toggleSection('installation')}
+                                    >
+                                        <div className={styles.sectionInfo}>
+                                            <span className={styles.sectionIcon}>🔧</span>
+                                            <span className={styles.sectionTitle}>{t('admin.products.sections.installation')}</span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatus('installation') === 'completed' && '✅ ' + t('admin.products.status.completed')}
+                                                {getSectionStatus('installation') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
+                                                {getSectionStatus('installation') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            </span>
+                                        </div>
+                                        <span className={styles.expandIcon}>
+                                            {isSectionExpanded('installation') ? '▼' : '▶'}
+                                        </span>
+                                    </div>
+                                    
+                                    {isSectionExpanded('installation') && (
+                                        <div className={styles.sectionContent}>
+                                            <div className={styles.formCard}>
+                                                <h3 className={styles.cardTitle}>🏠 {t('admin.products.formCards.installationDetails')}</h3>
+                                                <div className={styles.formGrid}>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.installationType')}:
+                                                            <select
+                                                                name="installation_type"
+                                                                value={formData.installation_type}
+                                                                onChange={handleChange}
+                                                            >
+                                                                <option value="">{t('admin.products.dropdowns.selectType')}</option>
+                                                                <option value="Wall-mounted">{t('admin.products.dropdowns.installationTypes.wallMounted')}</option>
+                                                                <option value="Ceiling-mounted">{t('admin.products.dropdowns.installationTypes.ceilingMounted')}</option>
+                                                                <option value="Floor-standing">{t('admin.products.dropdowns.installationTypes.floorStanding')}</option>
+                                                                <option value="Ducted">{t('admin.products.dropdowns.installationTypes.ducted')}</option>
+                                                                <option value="Cassette">{t('admin.products.dropdowns.installationTypes.cassette')}</option>
+                                                            </select>
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.roomSizeRecommendation')} (m²):
+                                                            <input
+                                                                type="text"
+                                                                name="room_size_recommendation"
+                                                                value={formData.room_size_recommendation}
+                                                                onChange={handleChange}
+                                                                placeholder={t('admin.products.hints.roomSizeHint')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.warrantyPeriod')}:
+                                                            <select
+                                                                name="warranty_period"
+                                                                value={formData.warranty_period}
+                                                                onChange={handleChange}
+                                                            >
+                                                                <option value="">{t('admin.products.dropdowns.selectPeriod')}</option>
+                                                                <option value="1 year">{t('admin.products.dropdowns.warrantyPeriods.1year')}</option>
+                                                                <option value="2 years">{t('admin.products.dropdowns.warrantyPeriods.2years')}</option>
+                                                                <option value="3 years">{t('admin.products.dropdowns.warrantyPeriods.3years')}</option>
+                                                                <option value="5 years">{t('admin.products.dropdowns.warrantyPeriods.5years')}</option>
+                                                                <option value="7 years">{t('admin.products.dropdowns.warrantyPeriods.7years')}</option>
+                                                                <option value="10 years">{t('admin.products.dropdowns.warrantyPeriods.10years')}</option>
+                                                            </select>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Features & Promotions Section */}
+                                <div className={styles.accordionSection}>
+                                    <div 
+                                        className={`${styles.accordionHeader} ${styles[getSectionStatus('features')]}`}
+                                        onClick={() => toggleSection('features')}
+                                    >
+                                        <div className={styles.sectionInfo}>
+                                            <span className={styles.sectionIcon}>⭐</span>
+                                            <span className={styles.sectionTitle}>{t('admin.products.sections.features')}</span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatus('features') === 'completed' && '✅ ' + t('admin.products.status.completed')}
+                                                {getSectionStatus('features') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
+                                                {getSectionStatus('features') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            </span>
+                                        </div>
+                                        <span className={styles.expandIcon}>
+                                            {isSectionExpanded('features') ? '▼' : '▶'}
+                                        </span>
+                                    </div>
+                                    
+                                    {isSectionExpanded('features') && (
+                                        <div className={styles.sectionContent}>
+                                            <div className={styles.formCard}>
+                                                <h3 className={styles.cardTitle}>🎯 {t('admin.products.formCards.promotionalTags')}</h3>
+                                                <div className={styles.formGrid}>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            <input
+                                                                type="checkbox"
+                                                                name="is_featured"
+                                                                checked={formData.is_featured}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {t('admin.products.fields.isFeatured')}
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            <input
+                                                                type="checkbox"
+                                                                name="is_bestseller"
+                                                                checked={formData.is_bestseller}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {t('admin.products.fields.isBestseller')}
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            <input
+                                                                type="checkbox"
+                                                                name="is_new"
+                                                                checked={formData.is_new}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {t('admin.products.fields.isNew')}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Description Section */}
+                                <div className={styles.accordionSection}>
+                                    <div 
+                                        className={`${styles.accordionHeader} ${styles[getSectionStatus('description')]}`}
+                                        onClick={() => toggleSection('description')}
+                                    >
+                                        <div className={styles.sectionInfo}>
+                                            <span className={styles.sectionIcon}>📝</span>
+                                            <span className={styles.sectionTitle}>{t('admin.products.sections.description')}</span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatus('description') === 'completed' && '✅ ' + t('admin.products.status.completed')}
+                                                {getSectionStatus('description') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
+                                                {getSectionStatus('description') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            </span>
+                                        </div>
+                                        <span className={styles.expandIcon}>
+                                            {isSectionExpanded('description') ? '▼' : '▶'}
+                                        </span>
+                                    </div>
+                                    
+                                    {isSectionExpanded('description') && (
+                                        <div className={styles.sectionContent}>
+                                            <div className={styles.formCard}>
+                                                <h3 className={styles.cardTitle}>📄 {t('admin.products.formCards.productDescription')}</h3>
+                                                <div className={styles.formGroup}>
+                                                    <label>
+                                                        {t('admin.products.fields.description')}:
+                                                        <textarea
+                                                            name="description"
+                                                            value={formData.description}
+                                                            onChange={handleChange}
+                                                            rows="5"
+                                                            placeholder={t('admin.products.placeholders.descriptionExample')}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                             </div>
 
-                            {/* Live Price Preview */}
-                            {formData.price && formData.discount > 0 && (
-                                <div className={styles.pricePreview}>
-                                    <span className={styles.originalPrice}>€{formData.price}</span>
-                                    <span className={styles.discountedPricePreview}>
-                                        {t('admin.products.discountedPrice')}: €{calculateDiscountedPrice(formData.price, formData.discount)}
-                                    </span>
-                                    <span className={styles.discountBadge}>-{formData.discount}%</span>
-                                </div>
-                            )}
-
+                            {/* Form Actions */}
                             <div className={styles.formActions}>
                                 <button 
-                                    onClick={isEditing ? handleSaveEdit : handleAdd}
-                                    disabled={loading}
-                                    className={styles.primaryButton}
+                                    type="button" 
+                                    onClick={hideForm}
+                                    className={styles.cancelButton}
                                 >
-                                    {loading ? t('admin.products.loading') : 
-                                     isEditing ? t('admin.products.save') : t('admin.products.add')}
+                                    {t('admin.products.actions.cancel')}
                                 </button>
-
                                 <button 
-                                    onClick={handleCancelEdit} 
-                                    className={styles.secondaryButton}
-                                    disabled={loading}
+                                    type="button" 
+                                    onClick={isEditing ? handleSaveEdit : handleAdd}
+                                    className={styles.saveButton}
                                 >
-                                    {t('admin.products.cancel')}
+                                    {isEditing ? t('admin.products.actions.updateProduct') : t('admin.products.actions.addProduct')}
                                 </button>
                             </div>
                         </div>
                     )}
-                    
-                    {/* Products List */}
-                    <div className={styles.productsList}>
-                        <div className={styles.listHeader}>
-                            <h2>{t('admin.products.title')}</h2>
-                            <div className={styles.listActions}>
-                                <button 
-                                    onClick={showAddForm}
-                                    className={styles.addActionButton}
-                                    aria-label="Add new product"
-                                >
-                                    ➕ {t('admin.products.add')}
-                                </button>
-                            </div>
-                            {error && (
-                                <div className={styles.errorMessage}>
-                                    ❌ {error}
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Pagination Info */}
-                        <div className={styles.paginationInfo}>
-                            <span>
-                                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalProducts)} of {totalProducts} products
-                            </span>
-                            <div className={styles.pageSizeControl}>
-                                <label>
-                                    Per page:
-                                    <select 
-                                        value={pageSize} 
-                                        onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
-                                        className={styles.pageSizeSelect}
-                                    >
-                                        <option value={10}>10</option>
-                                        <option value={20}>20</option>
-                                        <option value={50}>50</option>
-                                        <option value={100}>100</option>
-                                    </select>
-                                </label>
-                            </div>
-                        </div>
 
-                        {loading ? (
-                            <div className={styles.loadingMessage}>
-                                🔄 {t('admin.products.loading')}
-                            </div>
-                        ) : products.length === 0 ? (
-                            <div className={styles.emptyMessage}>
-                                📦 {t('admin.products.noProducts')}
-                            </div>
-                        ) : (
-                            <>
-                                <div className={styles.tableContainer}>
-                                    <table className={styles.productsTable}>
-                                        <thead>
-                                            <tr>
-                                                <th className={styles.sortable} onClick={() => handleSort('brand')}>
-                                                    {t('admin.products.brand')} {sortBy === 'brand' && (sortOrder === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th className={styles.sortable} onClick={() => handleSort('model')}>
-                                                    {t('admin.products.model')} {sortBy === 'model' && (sortOrder === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th>{t('admin.products.color')}</th>
-                                                <th>{t('admin.products.type')}</th>
-                                                <th className={styles.sortable} onClick={() => handleSort('price')}>
-                                                    {t('admin.products.price')} {sortBy === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th className={styles.sortable} onClick={() => handleSort('stock')}>
-                                                    {t('admin.products.stock')} {sortBy === 'stock' && (sortOrder === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th className={styles.sortable} onClick={() => handleSort('discount')}>
-                                                    {t('admin.products.discount')} {sortBy === 'discount' && (sortOrder === 'asc' ? '↑' : '↓')}
-                                                </th>
-                                                <th>{t('admin.products.image')}</th>
-                                                <th>{t('admin.products.actions')}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {products.map((product) => (
-                                                <tr key={product.ProductID} className={product.IsArchived ? styles.archivedRow : ''}>
-                                                    <td>
-                                                        {product.Brand}
-                                                        {product.IsArchived && <span className={styles.archivedBadge}>{t('admin.products.archived')}</span>}
-                                                    </td>
-                                                    <td>{product.Model}</td>
-                                                    <td>{product.Colour}</td>
-                                                    <td>{product.Type}</td>
-                                                    <td>
-                                                        <div className={styles.priceCell}>
-                                                            {product.Discount > 0 ? (
-                                                                <>
-                                                                    <span className={styles.originalPrice}>€{product.Price}</span>
-                                                                    <span className={styles.discountedPrice}>
-                                                                        €{calculateDiscountedPrice(product.Price, product.Discount)}
-                                                                    </span>
-                                                                    <span className={styles.discountBadge}>-{product.Discount}%</span>
-                                                                </>
-                                                            ) : (
-                                                                <span>€{product.Price}</span>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div className={styles.stockCell}>
-                                                            <span className={isLowStock(product.Stock) ? styles.lowStock : ''}>
-                                                                {product.Stock}
-                                                            </span>
-                                                            {isLowStock(product.Stock) && (
-                                                                <span className={styles.lowStockBadge}>{t('admin.products.lowStock')}</span>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td>{product.Discount}%</td>
-                                                    <td>
-                                                        {product.ImageURL && (
-                                                            <img 
-                                                                src={product.ImageURL} 
-                                                                alt={`${product.Brand} ${product.Model}`}
-                                                                className={styles.productImage}
-                                                            />
-                                                        )}
-                                                    </td>
-                                                    <td>
-                                                        <div className={styles.actionButtons}>
-                                                            <button 
-                                                                onClick={() => handleEdit(product)}
-                                                                className={styles.editButton}
-                                                            >
-                                                                {t('admin.products.editButton')}
-                                                            </button>
-                                                            {!product.IsArchived && (
-                                                                <button 
-                                                                    onClick={() => handleArchive(product.ProductID, `${product.Brand} ${product.Model}`)}
-                                                                    className={styles.archiveButton}
-                                                                >
-                                                                    {t('admin.products.archiveButton')}
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
-                                {/* Pagination Controls */}
-                                {totalPages > 1 && (
-                                    <div className={styles.paginationControls}>
-                                        <button 
-                                            onClick={() => handlePageChange(currentPage - 1)}
-                                            disabled={currentPage === 1}
-                                            className={styles.paginationButton}
-                                        >
-                                            ‹ Previous
-                                        </button>
-                                        
-                                        <div className={styles.pageNumbers}>
-                                            {/* Show first page */}
-                                            {currentPage > 3 && (
-                                                <>
-                                                    <button 
-                                                        onClick={() => handlePageChange(1)}
-                                                        className={styles.pageButton}
-                                                    >
-                                                        1
-                                                    </button>
-                                                    {currentPage > 4 && <span className={styles.pageEllipsis}>...</span>}
-                                                </>
-                                            )}
-                                            
-                                            {/* Show current page and surrounding pages */}
-                                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                                                const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                                                if (pageNum <= totalPages) {
-                                                    return (
-                                                        <button
-                                                            key={pageNum}
-                                                            onClick={() => handlePageChange(pageNum)}
-                                                            className={`${styles.pageButton} ${currentPage === pageNum ? styles.activePage : ''}`}
-                                                        >
-                                                            {pageNum}
-                                                        </button>
-                                                    );
-                                                }
-                                                return null;
-                                            })}
-                                            
-                                            {/* Show last page */}
-                                            {currentPage < totalPages - 2 && (
-                                                <>
-                                                    {currentPage < totalPages - 3 && <span className={styles.pageEllipsis}>...</span>}
-                                                    <button 
-                                                        onClick={() => handlePageChange(totalPages)}
-                                                        className={styles.pageButton}
-                                                    >
-                                                        {totalPages}
-                                                    </button>
-                                                </>
-                                            )}
+                    {/* Add Product Button */}
+                    {!showForm && (
+                        <div className={styles.addProductSection}>
+                            <button 
+                                onClick={showAddForm}
+                                className={styles.addButton}
+                            >
+                                + {t('admin.products.addNew')}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Products List */}
+                    {!showForm && (
+                        <div className={styles.productsSection}>
+                            <h3>Products ({products.length})</h3>
+                            <div className={styles.productsList}>
+                                {products.map(product => (
+                                    <div key={product.id} className={styles.productCard}>
+                                        <div className={styles.productInfo}>
+                                            <h4>{product.brand} {product.model}</h4>
+                                            <p>Price: €{product.price}</p>
+                                            <p>Type: {product.type || 'Not specified'}</p>
                                         </div>
-                                        
-                                        <button 
-                                            onClick={() => handlePageChange(currentPage + 1)}
-                                            disabled={currentPage === totalPages}
-                                            className={styles.paginationButton}
-                                        >
-                                            Next ›
-                                        </button>
+                                        <div className={styles.productActions}>
+                                            <button 
+                                                onClick={() => handleEdit(product)}
+                                                className={styles.editButton}
+                                            >
+                                                Edit
+                                            </button>
+                                        </div>
                                     </div>
-                                )}
-                            </>
-                        )}
-                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
 
-            {/* Orders Management Section */}
+            {/* Orders Tab */}
             {activeTab === 'orders' && (
                 <div className={styles.ordersSection}>
-                    <h2>{t('admin.orders.title')}</h2>
-                    
-                    {error && (
-                        <div className={styles.errorMessage}>
-                            ❌ {error}
-                        </div>
-                    )}
-                    
-                    {loading ? (
-                        <div className={styles.loadingMessage}>
-                            🔄 {t('admin.products.loading')}
-                        </div>
-                    ) : orders.length === 0 ? (
-                        <p>{t('admin.orders.noOrders')}</p>
-                    ) : (
-                        <div className={styles.ordersContainer}>
-                            {orders.map((order) => (
-                                <div key={order.order_id} className={styles.orderCard}>
-                                    <div className={styles.orderHeader}>
-                                        <div className={styles.orderInfo}>
-                                            <h3>{t('admin.orders.orderNumber')}{order.order_id}</h3>
-                                            <p><strong>{order.first_name} {order.last_name}</strong></p>
-                                            <p>{t('admin.orders.phone')}: {order.phone}</p>
-                                            <p>{t('admin.orders.created')}: {order.order_created_at ? new Date(order.order_created_at).toLocaleString('bg-BG') : t('admin.orders.unknownDate')}</p>
-                                            <p>{t('admin.orders.payment')}: {order.payment_method}</p>
-                                        </div>
-                                        
-                                        <div className={styles.statusControls}>
-                                            <div className={styles.currentStatus}>
-                                                <span 
-                                                    className={styles.statusBadge}
-                                                    style={{ backgroundColor: getStatusColor(order.current_status) }}
-                                                >
-                                                    {getStatusLabel(order.current_status)}
-                                                </span>
-                                            </div>
-                                            
-                                            <select
-                                                value={order.current_status}
-                                                onChange={(e) => updateOrderStatus(order.order_id, e.target.value)}
-                                                disabled={updatingStatus === order.order_id}
-                                                className={styles.statusSelect}
-                                                title={getStatusWorkflowHint(order.current_status)}
-                                            >
-                                                <option value="new">{t('admin.orders.status.new')}</option>
-                                                <option value="confirmed">{t('admin.orders.status.confirmed')}</option>
-                                                <option 
-                                                    value="installation_booked"
-                                                    disabled={order.current_status === 'new'}
-                                                >
-                                                    {t('admin.orders.status.installation_booked')}
-                                                    {order.current_status === 'new' ? ' (Confirm first)' : ''}
-                                                </option>
-                                                <option value="installed">{t('admin.orders.status.installed')}</option>
-                                                <option value="cancelled">{t('admin.orders.status.cancelled')}</option>
-                                            </select>
-                                            
-                                            {updatingStatus === order.order_id && (
-                                                <span className={styles.updating}>{t('admin.orders.updating')}</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    
-                                    <div className={styles.orderActions}>
-                                        <button
-                                            onClick={() => toggleOrderHistory(order.order_id)}
-                                            className={styles.historyButton}
-                                        >
-                                            {expandedOrderId === order.order_id ? t('admin.orders.hideHistory') : t('admin.orders.showHistory')}
-                                        </button>
-                                    </div>
-                                    
-                                    {/* Order History Section */}
-                                    {expandedOrderId === order.order_id && (
-                                        <div className={styles.orderHistory}>
-                                            <h4>{t('admin.orders.statusHistory')}</h4>
-                                            {orderHistory[order.order_id] && orderHistory[order.order_id].length > 0 ? (
-                                                <div className={styles.historyList}>
-                                                    {orderHistory[order.order_id].map((historyItem, index) => (
-                                                        <div key={historyItem.id || index} className={styles.historyItem}>
-                                                                                                        <div className={styles.historyTimestamp}>
-                                                {historyItem.changed_at ? new Date(historyItem.changed_at).toLocaleString('bg-BG') : t('admin.orders.unknownDate')}
-                                            </div>
-                                                            <div className={styles.historyChange}>
-                                                                {historyItem.old_status ? (
-                                                                    <span>
-                                                                        {getStatusLabel(historyItem.old_status)} → {getStatusLabel(historyItem.new_status)}
-                                                                    </span>
-                                                                ) : (
-                                                                    <span>{t('admin.orders.initialStatus')}: {getStatusLabel(historyItem.new_status)}</span>
-                                                                )}
-                                                            </div>
-                                                            {historyItem.notes && (
-                                                                <div className={styles.historyNotes}>
-                                                                    {historyItem.notes}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <p>{t('admin.orders.noHistory')}</p>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
-            
-            {/* Installation Date Picker Modal */}
-            {showInstallationDatePicker && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        backgroundColor: 'white',
-                        padding: '2rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                        minWidth: '300px'
-                    }}>
-                        <h3>{t('admin.orders.installationDatePicker.title')}</h3>
-                        <p>{t('admin.orders.installationDatePicker.description')}</p>
-                        <input
-                            type="date"
-                            value={installationDate}
-                            onChange={(e) => setInstallationDate(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '0.5rem',
-                                marginBottom: '1rem',
-                                border: '1px solid #ccc',
-                                borderRadius: '4px'
-                            }}
-                        />
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <button
-                                onClick={handleInstallationDateCancel}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '4px',
-                                    backgroundColor: 'white',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                                            {t('admin.orders.installationDatePicker.cancel')}
-                        </button>
-                        <button
-                            onClick={handleInstallationDateConfirm}
-                            style={{
-                                padding: '0.5rem 1rem',
-                                border: 'none',
-                                borderRadius: '4px',
-                                backgroundColor: '#28a745',
-                                color: 'white',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            {t('admin.orders.installationDatePicker.confirm')}
-                            </button>
-                        </div>
-                    </div>
+                    <h3>Orders Management</h3>
+                    <p>Orders functionality will be implemented here...</p>
                 </div>
             )}
 
-            {/* Order History Section */}
+            {/* Order History Tab */}
             {activeTab === 'orderHistory' && (
                 <AdminOrderHistoryTab />
             )}
 
-            {/* Weekly Installations Section */}
+            {/* Installations Tab */}
             {activeTab === 'installations' && (
-                <WeeklyInstallationsTab 
-                    onInstallationCancelled={handleInstallationCancelled}
-                    onInstallationRescheduled={handleInstallationRescheduled}
-                    onInstallationCompleted={handleInstallationCompleted}
-                />
-            )}
-
-            {/* Call Confirmation Modal */}
-            {showCallConfirmationModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        backgroundColor: 'white',
-                        padding: '2rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                        minWidth: '400px'
-                    }}>
-                        <h3>Потвърждение на обаждане</h3>
-                        <p>{t('admin.orders.callReminder.message')}</p>
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-                            <button
-                                onClick={handleCallCancelled}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '4px',
-                                    backgroundColor: 'white',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Отказ
-                            </button>
-                            <button
-                                onClick={handleCallCompleted}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    backgroundColor: '#28a745',
-                                    color: 'white',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                {t('admin.orders.callReminder.callCompleted')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Calendar Overlay Modal */}
-            {showCalendarModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        backgroundColor: 'white',
-                        padding: '2rem',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                        width: '90%',
-                        maxWidth: '800px',
-                        maxHeight: '80vh',
-                        overflow: 'auto'
-                    }}>
-                        <h3>{t('admin.orders.installationScheduling.title')}</h3>
-                        
-                        {/* Duration Selector */}
-                        <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-                            <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                                Select Installation Time Slots
-                            </div>
-                            <small style={{ color: '#666' }}>
-                                Click individual time slots to select them. Click again to deselect. 
-                                {selectedSlots.length > 0 && (
-                                    <span style={{ fontWeight: 'bold', color: '#28a745' }}>
-                                        {' '}Selected: {selectedSlots.length} slots ({selectedSlots.length * 0.5} hours)
-                                    </span>
-                                )}
-                            </small>
-                        </div>
-
-                        {loadingSlots ? (
-                            <p>{t('admin.orders.installationScheduling.loadingSlots')}</p>
-                        ) : (
-                            <>
-                                {/* Calendar Grid */}
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                        <thead>
-                                            <tr style={{ backgroundColor: '#f5f5f5' }}>
-                                                <th style={{ padding: '0.5rem', border: '1px solid #ddd' }}>Час</th>
-                                                {['Понеделник', 'Вторник', 'Сряда', 'Четвъртък', 'Петък', 'Събота', 'Неделя'].map((day, index) => (
-                                                    <th key={day} style={{ padding: '0.5rem', border: '1px solid #ddd' }}>
-                                                        {day}
-                                                        <br />
-                                                        <small>
-                                                            {(() => {
-                                                                const monday = new Date(calendarWeek);
-                                                                monday.setDate(monday.getDate() - monday.getDay() + 1);
-                                                                const currentDay = new Date(monday);
-                                                                currentDay.setDate(currentDay.getDate() + index);
-                                                                return currentDay.toLocaleDateString('bg-BG', { month: 'short', day: 'numeric' });
-                                                            })()}
-                                                        </small>
-                                                    </th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {TIME_SLOTS.map(timeSlot => (
-                                                <tr key={timeSlot}>
-                                                    <td style={{ padding: '0.5rem', border: '1px solid #ddd', fontWeight: 'bold' }}>
-                                                        {timeSlot}
-                                                    </td>
-                                                    {[0, 1, 2, 3, 4, 5, 6].map(dayOffset => {
-                                                        const monday = new Date(calendarWeek);
-                                                        monday.setDate(monday.getDate() - monday.getDay() + 1);
-                                                        const currentDay = new Date(monday);
-                                                        currentDay.setDate(currentDay.getDate() + dayOffset);
-                                                        const dateStr = currentDay.toISOString().split('T')[0];
-                                                        const slot = availableSlots[dateStr]?.[timeSlot];
-                                                        
-                                                        let backgroundColor = '#f9f9f9';
-                                                        let cursor = 'not-allowed';
-                                                        let color = '#999';
-                                                        
-                                                        if (slot?.past) {
-                                                            // Past slots - grey and disabled
-                                                            backgroundColor = '#6c757d';
-                                                            color = 'white';
-                                                            cursor = 'not-allowed';
-                                                        } else if (slot?.booked) {
-                                                            // Booked slots - red
-                                                            backgroundColor = '#dc3545';
-                                                            color = 'white';
-                                                            cursor = 'not-allowed';
-                                                        } else if (slot?.available) {
-                                                            // Check if this slot is selected
-                                                            const isSelected = selectedSlots.some(selectedSlot => 
-                                                                selectedSlot.date === dateStr && selectedSlot.timeSlot === timeSlot
-                                                            );
-                                                            // Available slots - green or blue if selected
-                                                            backgroundColor = isSelected ? '#007bff' : '#28a745';
-                                                            cursor = 'pointer';
-                                                            color = 'white';
-                                                        }
-                                                        
-                                                        return (
-                                                            <td
-                                                                key={dayOffset}
-                                                                style={{
-                                                                    padding: '0.5rem',
-                                                                    border: '1px solid #ddd',
-                                                                    backgroundColor,
-                                                                    cursor,
-                                                                    color,
-                                                                    textAlign: 'center'
-                                                                }}
-                                                                onClick={() => handleSlotSelection(dateStr, timeSlot)}
-                                                            >
-                                                                {slot?.past ? 'Изминал' :
-                                                                 slot?.booked ? 'Заето' :
-                                                                 slot?.available ? 'Свободно' : 'Неизвестно'}
-                                                            </td>
-                                                        );
-                                                    })}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {/* Legend */}
-                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{ width: '20px', height: '20px', backgroundColor: '#28a745' }}></div>
-                                        <span>Свободно</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{ width: '20px', height: '20px', backgroundColor: '#dc3545' }}></div>
-                                        <span>Заето</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{ width: '20px', height: '20px', backgroundColor: '#6c757d' }}></div>
-                                        <span>Изминал час</span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{ width: '20px', height: '20px', backgroundColor: '#007bff' }}></div>
-                                        <span>Избрано</span>
-                                    </div>
-                                </div>
-
-                                {selectedSlots.length > 0 && (
-                                    <div style={{ padding: '1rem', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '1rem' }}>
-                                        <strong>Selected time slots:</strong><br/>
-                                        <strong>Date:</strong> {selectedSlots[0].date}<br/>
-                                        <strong>Time slots:</strong> {selectedSlots.map(s => s.timeSlot).sort().join(', ')}<br/>
-                                        <strong>Total duration:</strong> {selectedSlots.length * 0.5} hours ({selectedSlots.length} slots)
-                                    </div>
-                                )}
-                            </>
-                        )}
-
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <button
-                                onClick={handleCancelCalendar}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    border: '1px solid #ccc',
-                                    borderRadius: '4px',
-                                    backgroundColor: 'white',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Отказ
-                            </button>
-                            <button
-                                onClick={handleBookInstallation}
-                                disabled={selectedSlots.length === 0 || updatingStatus}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    backgroundColor: selectedSlots.length > 0 ? '#28a745' : '#ccc',
-                                    color: 'white',
-                                    cursor: selectedSlots.length > 0 ? 'pointer' : 'not-allowed'
-                                }}
-                            >
-                                {updatingStatus ? 'Записване...' : 'Запиши монтаж'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <WeeklyInstallationsTab />
             )}
         </div>
     );
-};
+}
 
-export default AdministrationProducts;
-
-// export async function getStaticProps({ locale }) {
-//     return {
-//         props: {
-//             ...(await serverSideTranslations(locale, ['common'])),
-//         },
-//     };
-// }
+ 

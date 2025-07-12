@@ -6,7 +6,7 @@ import { useCart } from '../contexts/CartContext';
 import styles from '../styles/Page Styles/CheckoutPage.module.css';
 
 const CheckoutPage = () => {
-  const { cart, updateQuantity, removeFromCart, clearCart, formatPrice, formatPriceEUR } = useCart();
+  const { cart, updateQuantity, removeFromCart, updateItemAccessories, updateItemInstallation, clearCart, formatPrice, formatPriceEUR } = useCart();
   const { t } = useContext(LanguageContext);
 
   // Form state
@@ -67,6 +67,56 @@ const CheckoutPage = () => {
       }));
     }
   }, [cart.items]);
+
+  // Handle quantity changes for main product
+  const handleProductQuantityChange = (cartItemId, productId, newQuantity) => {
+    if (newQuantity < 1) {
+      if (confirm(t('checkout.confirmRemove'))) {
+        removeFromCart(productId, cartItemId);
+      }
+    } else {
+      updateQuantity(productId, newQuantity, cartItemId);
+    }
+  };
+
+  // Handle removing the entire product from cart
+  const handleRemoveProduct = (cartItemId, productId) => {
+    if (confirm(t('checkout.confirmRemove'))) {
+      removeFromCart(productId, cartItemId);
+    }
+  };
+
+  // Handle removing installation service
+  const handleRemoveInstallation = (cartItemId) => {
+    const item = cart.items.find(item => item.cartItemId === cartItemId);
+    if (!item) return;
+
+    if (confirm(t('checkout.confirmRemoveInstallation'))) {
+      // Update the cart item to remove installation
+      updateCartItemInstallation(cartItemId, false);
+    }
+  };
+
+  // Helper function to update installation status
+  const updateCartItemInstallation = (cartItemId, installationStatus) => {
+    updateItemInstallation(cartItemId, installationStatus);
+  };
+
+  // Handle removing accessories (no individual quantity changes needed)
+  const handleRemoveAccessory = (cartItemId, accessoryIndex) => {
+    const item = cart.items.find(item => item.cartItemId === cartItemId);
+    if (!item) return;
+
+    if (confirm('Are you sure you want to remove this accessory?')) {
+      const updatedAccessories = item.accessories.filter((_, index) => index !== accessoryIndex);
+      updateCartItemAccessories(cartItemId, updatedAccessories);
+    }
+  };
+
+  // Helper function to update cart item accessories
+  const updateCartItemAccessories = (cartItemId, updatedAccessories) => {
+    updateItemAccessories(cartItemId, updatedAccessories);
+  };
 
   // Calculate installation costs (300 BGN per AC unit)
   const installationCost = 300;
@@ -238,26 +288,111 @@ const CheckoutPage = () => {
           {/* Cart Items */}
           <div className={styles.cartItems}>
             {cart.items.map((item) => (
-              <div key={item.productId} className={styles.cartItem}>
-                <img
-                  src={item.product.ImageURL || '/images/placeholder-ac.svg'}
-                  alt={`${item.product.Brand} ${item.product.Model}`}
-                  className={styles.itemImage}
-                  onError={(e) => { e.target.src = '/images/placeholder-ac.svg'; }}
-                />
-                <div className={styles.itemDetails}>
-                  <h4>{item.product.Brand} {item.product.Model}</h4>
-                  <div className={styles.itemSpecs}>
-                    {item.product.CapacityBTU} {t('buyPage.btu')} • {item.product.EnergyRating}
+              <div key={item.cartItemId || item.productId} className={styles.cartItemGroup}>
+                {/* Main Product */}
+                <div className={styles.cartItem}>
+                  <img
+                    src={item.product.ImageURL || '/images/placeholder-ac.svg'}
+                    alt={`${item.product.Brand} ${item.product.Model}`}
+                    className={styles.itemImage}
+                    onError={(e) => { e.target.src = '/images/placeholder-ac.svg'; }}
+                  />
+                  <div className={styles.itemDetails}>
+                    <h4>{item.product.Brand} {item.product.Model}</h4>
+                    <div className={styles.itemSpecs}>
+                      {item.product.CapacityBTU} {t('buyPage.btu')} • {item.product.EnergyRating}
+                    </div>
+                    <div className={styles.quantityControls}>
+                      <div className={styles.quantityControlsGroup}>
+                        <span className={styles.quantityLabel}>{t('checkout.quantity')}:</span>
+                        <div className={styles.quantitySelector}>
+                          <button
+                            className={styles.quantityButton}
+                            onClick={() => handleProductQuantityChange(item.cartItemId, item.productId, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
+                            aria-label="Decrease quantity"
+                          >
+                            −
+                          </button>
+                          <span className={styles.quantityValue}>{item.quantity}</span>
+                          <button
+                            className={styles.quantityButton}
+                            onClick={() => handleProductQuantityChange(item.cartItemId, item.productId, item.quantity + 1)}
+                            disabled={item.quantity >= 10}
+                            aria-label="Increase quantity"
+                          >
+                            +
+                          </button>
+                        </div>
+                        <button
+                          className={styles.removeProductButton}
+                          onClick={() => handleRemoveProduct(item.cartItemId, item.productId)}
+                          aria-label="Remove product from cart"
+                          title="Remove product"
+                        >
+                          🗑️ {t('checkout.removeItem')}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className={styles.itemQuantity}>
-                    {t('checkout.quantity')}: {item.quantity}
+                  <div className={styles.itemPrice}>
+                    <div>{formatPrice(item.product.Price * item.quantity)}</div>
+                    <div className={styles.itemPriceEur}>{formatPriceEUR(item.product.Price * item.quantity)}</div>
                   </div>
                 </div>
-                <div className={styles.itemPrice}>
-                  <div>{formatPrice(item.product.Price * item.quantity)}</div>
-                  <div className={styles.itemPriceEur}>{formatPriceEUR(item.product.Price * item.quantity)}</div>
-                </div>
+
+                {/* Accessories */}
+                {item.accessories && item.accessories.length > 0 && (
+                  <div className={styles.accessoriesSection}>
+                    <div className={styles.accessoriesTitle}>{t('productDetail.accessories')}:</div>
+                    {item.accessories.map((accessory, index) => (
+                      <div key={index} className={styles.accessoryItem}>
+                        <div className={styles.accessoryDetails}>
+                          <span className={styles.accessoryName}>
+                            • {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name} × {item.quantity}
+                          </span>
+                          <button
+                            className={styles.removeButton}
+                            onClick={() => handleRemoveAccessory(item.cartItemId, index)}
+                            aria-label="Remove accessory"
+                            title="Remove accessory"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                        <div className={styles.accessoryPrice}>
+                          <div>{formatPrice(accessory.Price * item.quantity)}</div>
+                          <div className={styles.itemPriceEur}>{formatPriceEUR(accessory.Price * item.quantity)}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Installation */}
+                {item.installation && (
+                  <div className={styles.installationSection}>
+                    <div className={styles.installationItem}>
+                      <div className={styles.installationDetails}>
+                        <span className={styles.installationName}>
+                          • {t('productDetail.installation.title')}
+                        </span>
+                        <button
+                          className={styles.removeInstallationButton}
+                          onClick={() => handleRemoveInstallation(item.cartItemId)}
+                          aria-label="Remove installation service"
+                          title="Remove installation"
+                        >
+                          🗑️ {t('checkout.removeInstallation')}
+                        </button>
+                      </div>
+                      <div className={styles.installationPrice}>
+                        <div>{formatPrice(item.installationPrice || 0)}</div>
+                        <div className={styles.itemPriceEur}>{formatPriceEUR(item.installationPrice || 0)}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
