@@ -38,7 +38,8 @@ export default async function handler(req, res) {
         refrigerant_type,
         operating_temp_range,
         // Physical Characteristics
-        dimensions,
+        indoor_dimensions,
+        outdoor_dimensions,
         weight,
         noise_level,
         air_flow,
@@ -140,7 +141,8 @@ export default async function handler(req, res) {
             refrigerant_type,
             operating_temp_range,
             // Physical Characteristics
-            dimensions,
+            indoor_dimensions,
+            outdoor_dimensions,
             weight,
             noise_level,
             air_flow,
@@ -203,7 +205,8 @@ export default async function handler(req, res) {
         if (operating_temp_range !== undefined) updateData.operating_temp_range = operating_temp_range;
 
         // Physical Characteristics
-        if (dimensions !== undefined) updateData.dimensions = dimensions;
+        if (indoor_dimensions !== undefined) updateData.indoor_dimensions = indoor_dimensions;
+        if (outdoor_dimensions !== undefined) updateData.outdoor_dimensions = outdoor_dimensions;
         if (weight !== undefined) updateData.weight = weight;
         if (noise_level !== undefined) updateData.noise_level = noise_level;
         if (air_flow !== undefined) updateData.air_flow = air_flow;

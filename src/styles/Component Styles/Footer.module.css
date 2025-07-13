@@ -378,48 +378,40 @@
 /* Back to Top Button - Enhanced */
 .backToTop {
   position: fixed;
-  bottom: 2rem;
   right: 2rem;
-  width: 3.5rem;
-  height: 3.5rem;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
-  color: var(--text-primary);
-  border: none;
+  bottom: 2.5rem;
+  z-index: 100;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  cursor: pointer;
+  background: var(--background-white);
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-smooth);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  z-index: 1000;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  font-size: 2.2rem;
+  padding: 0;
 }
 
-.backToTop:hover {
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(135deg, var(--background-white), rgba(255, 255, 255, 0.95));
-}
-
-.backToTop:focus {
-  outline: 3px solid rgba(255, 255, 255, 0.6);
-  outline-offset: 3px;
-}
-
-.backToTop:active {
-  transform: translateY(-2px) scale(1.02);
+.backToTop:hover, .backToTop:focus {
+  background: var(--primary-light, #e0f7fa);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+  outline: none;
+  transform: translateY(-2px) scale(1.05);
 }
 
 .backToTopIcon {
-  width: 1.5rem;
-  height: 1.5rem;
-  transition: transform var(--transition-smooth);
-}
-
-.backToTop:hover .backToTopIcon {
-  transform: translateY(-2px);
+  font-size: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  line-height: 1;
 }
 
 /* Responsive Design - Enhanced */

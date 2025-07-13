@@ -90,6 +90,26 @@
       "priceMaxError": "Maximum price cannot be above {{max}} BGN.",
       "priceHelp": "Enter a price between {{min}} BGN and {{max}} BGN.",
       "close": "Close"
+    },
+    "badges": {
+      "featured": "Featured Product",
+      "bestseller": "Bestseller",
+      "new": "New Product"
+    },
+    "types": {
+      "split": "Split",
+      "cassette": "Cassette",
+      "multiSplit": "Multi-Split",
+      "ducted": "Ducted",
+      "window": "Window",
+      "portable": "Portable"
+    },
+    "physicalCharacteristics": {
+      "indoorDimensions": "Indoor Unit Dimensions (W×H×D)",
+      "outdoorDimensions": "Outdoor Unit Dimensions (W×H×D)",
+      "indoorWeight": "Indoor Unit Weight (kg)",
+      "outdoorWeight": "Outdoor Unit Weight (kg)",
+      "kg": "kg"
     }
   },
   "cart": {
@@ -540,6 +560,7 @@
         "description": "Product Description",
         "productFeatures": "Product Features",
         "addFeature": "Add",
+        "removeFeature": "Remove",
         "roomSizeHint": "Recommended room size",
         "featuresHint": "Common features: Wi-Fi Control, Timer, Sleep Mode, Auto Restart, etc."
       },
@@ -561,7 +582,9 @@
         "roomSizeExample": "15-25 m²",
         "descriptionExample": "Detailed product description...",
         "featureExample": "Add a feature...",
-        "imageUrlExample": "https://example.com/image.jpg"
+        "imageUrlExample": "https://example.com/image.jpg",
+        "indoorDimensionsHint": "e.g. 890×295×204 mm",
+        "outdoorDimensionsHint": "e.g. 780×540×285 mm"
       },
       "sections": {
         "basic": "Basic Information",
@@ -589,7 +612,11 @@
         "isFeatured": "Featured Product",
         "isBestseller": "Bestseller",
         "isNew": "New Product",
-        "description": "Description"
+        "description": "Description",
+        "indoorDimensions": "Indoor Unit Dimensions",
+        "outdoorDimensions": "Outdoor Unit Dimensions",
+        "indoorWeight": "Indoor Unit Weight",
+        "outdoorWeight": "Outdoor Unit Weight"
       },
       "hints": {
         "copHint": "Higher is better (typically 3-6)",
@@ -597,7 +624,11 @@
         "powerHint": "e.g. 2.5 kW",
         "tempRangeHint": "e.g. -15°C to +50°C",
         "dimensionsHint": "e.g. 890×295×204 mm",
+        "indoorDimensionsHint": "e.g. 890×295×204 mm",
+        "outdoorDimensionsHint": "e.g. 780×540×285 mm",
         "weightHint": "e.g. 12.5 kg",
+        "indoorWeightHint": "e.g. 12.5 kg",
+        "outdoorWeightHint": "e.g. 35.8 kg",
         "noiseHint": "e.g. 22 dB",
         "airFlowHint": "e.g. 780 m³/h",
         "roomSizeHint": "e.g. 25-35 m²"
@@ -641,7 +672,8 @@
           "5years": "5 years",
           "7years": "7 years",
           "10years": "10 years"
-        }
+        },
+        "selectRefrigerant": "Select refrigerant type..."
       },
       "formCards": {
         "productIdentity": "Product Identity",
@@ -650,7 +682,8 @@
         "physicalSpecs": "Physical Specifications",
         "installationDetails": "Installation Details",
         "promotionalTags": "Promotional Tags",
-        "productDescription": "Product Description"
+        "productDescription": "Product Description",
+        "productFeatures": "Product Features"
       },
       "status": {
         "completed": "Completed",

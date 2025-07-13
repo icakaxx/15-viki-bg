@@ -189,6 +189,14 @@
   stroke-width: 1.5;
 }
 
+/* Mobile Header */
+.mobileHeader {
+  display: none;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
 /* Mobile Menu Toggle */
 .mobileMenuToggle {
   display: none;
@@ -289,6 +297,10 @@
   .centerNav,
   .rightSection {
     display: none;
+  }
+  
+  .mobileHeader {
+    display: flex;
   }
   
   .mobileMenuToggle {

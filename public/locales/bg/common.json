@@ -119,6 +119,26 @@
       "priceMaxError": "Максималната цена не може да бъде над {{max}} лв.",
       "priceHelp": "Въведете цена между {{min}} лв. и {{max}} лв.",
       "close": "Затвори"
+    },
+    "badges": {
+      "featured": "Препоръчан продукт",
+      "bestseller": "Най-продаван",
+      "new": "Нов продукт"
+    },
+    "types": {
+      "split": "Сплит",
+      "cassette": "Касетъчен",
+      "multiSplit": "Мулти-сплит",
+      "ducted": "Канален",
+      "window": "Прозоречен",
+      "portable": "Преносим"
+    },
+    "physicalCharacteristics": {
+      "indoorDimensions": "Размери на вътрешното тяло (Ш×В×Д)",
+      "outdoorDimensions": "Размери на външното тяло (Ш×В×Д)",
+      "indoorWeight": "Тегло на вътрешното тяло (кг)",
+      "outdoorWeight": "Тегло на външното тяло (кг)",
+      "kg": "кг"
     }
   },
   "cart": {
@@ -503,12 +523,12 @@
       "model": "Модел",
       "color": "Цвят",
       "type": "Тип",
-      "capacity": "Капацитет (BTU)",
+      "capacity": "Капацитет",
       "energyRating": "Енергиен Клас",
-      "price": "Цена (€)",
+      "price": "Цена",
       "previousPrice": "Предишна Цена (€)",
       "stock": "Налично количество",
-      "discount": "Отстъпка (%)",
+      "discount": "Отстъпка",
       "discountedPrice": "Цена с отстъпка",
       "image": "Снимка",
       "actions": "Действия",
@@ -569,6 +589,7 @@
         "description": "Описание на продукта",
         "productFeatures": "Функции на продукта",
         "addFeature": "Добави",
+        "removeFeature": "Премахни",
         "roomSizeHint": "Препоръчителен размер на помещението",
         "featuresHint": "Често срещани функции: Wi-Fi управление, таймер, нощен режим, автоматично възстановяване и т.н."
       },
@@ -609,6 +630,10 @@
         "powerConsumption": "Консумация на мощност",
         "operatingTempRange": "Работен температурен диапазон",
         "dimensions": "Размери",
+        "indoorDimensions": "Размери на вътрешното тяло",
+        "outdoorDimensions": "Размери на външното тяло",
+        "indoorWeight": "Тегло на вътрешното тяло",
+        "outdoorWeight": "Тегло на външното тяло",
         "weight": "Тегло",
         "noiseLevel": "Ниво на шум",
         "airFlow": "Въздушен поток",
@@ -618,7 +643,8 @@
         "isFeatured": "Препоръчан продукт",
         "isBestseller": "Най-продаван",
         "isNew": "Нов продукт",
-        "description": "Описание"
+        "description": "Описание",
+        "refrigerantType": "Тип хладилен агент"
       },
       "hints": {
         "copHint": "По-високо е по-добре (обикновено 3-6)",
@@ -626,7 +652,11 @@
         "powerHint": "напр. 2,5 kW",
         "tempRangeHint": "напр. -15°C до +50°C",
         "dimensionsHint": "напр. 890×295×204 mm",
+        "indoorDimensionsHint": "напр. 890×295×204 mm",
+        "outdoorDimensionsHint": "напр. 780×540×285 mm",
         "weightHint": "напр. 12,5 kg",
+        "indoorWeightHint": "напр. 12,5 kg",
+        "outdoorWeightHint": "напр. 35,8 kg",
         "noiseHint": "напр. 22 dB",
         "airFlowHint": "напр. 780 m³/h",
         "roomSizeHint": "напр. 25-35 m²"
@@ -670,7 +700,8 @@
           "5years": "5 години",
           "7years": "7 години",
           "10years": "10 години"
-        }
+        },
+        "selectRefrigerant": "Изберете хладилен агент..."
       },
       "formCards": {
         "productIdentity": "Идентификация на продукт",
@@ -679,7 +710,8 @@
         "physicalSpecs": "Физически спецификации",
         "installationDetails": "Детайли за монтаж",
         "promotionalTags": "Промоционални етикети",
-        "productDescription": "Описание на продукт"
+        "productDescription": "Описание на продукт",
+        "productFeatures": "Функции на продукта"
       },
       "status": {
         "completed": "Завършен",

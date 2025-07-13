@@ -290,8 +290,7 @@ const Footer = () => {
           title={t('footer.backToTop')}
           type="button"
         >
-          <FiChevronUp className={styles.backToTopIcon} aria-hidden="true" />
-          <span className="sr-only">{t('footer.backToTop')}</span>
+          <span className={styles.backToTopIcon} aria-hidden="true">👆</span>
         </button>
       )}
     </>
