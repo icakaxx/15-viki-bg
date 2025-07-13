@@ -35,35 +35,348 @@ export default function Administration() {
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [duplicateWarning, setDuplicateWarning] = useState(null);
+    const [showValidationModal, setShowValidationModal] = useState(false);
+    const [validationErrors, setValidationErrors] = useState([]);
     
     // Form section state - accordion style
     const [expandedSections, setExpandedSections] = useState(['basic']);
-    
-    // Form validation helpers
-    const getSectionStatus = (sectionName) => {
-        const requiredFields = {
-            basic: ['brand', 'model', 'price'],
-            technical: [],
-            physical: [],
-            installation: [],
-            features: [],
-            description: []
+    const [featureInput, setFeatureInput] = useState('');
+    // Default values map for all form fields
+    const defaultValues = {
+        brand: '',
+        model: '',
+        type: '',
+        capacity_btu: '',
+        energy_rating: '',
+        colour: '',
+        price: '',
+        previous_price: '',
+        stock: '',
+        discount: '',
+        image_url: '',
+        is_featured: false,
+        is_bestseller: false,
+        is_new: false,
+        cop: '',
+        scop: '',
+        power_consumption: '',
+        refrigerant_type: '',
+        operating_temp_range: '',
+        dimensions: '',
+        indoor_dimensions: '',
+        outdoor_dimensions: '',
+        weight: '',
+        noise_level: '',
+        air_flow: '',
+        room_size_recommendation: '',
+        installation_type: '',
+        warranty_period: '',
+        features: [],
+        description: ''
+    };
+
+    // Enhanced form validation helpers with smart default detection
+    const getSectionProgress = (sectionName) => {
+        const sectionConfig = {
+            basic: {
+                required: ['brand', 'model', 'price', 'type', 'capacity_btu', 'energy_rating', 'colour', 'stock', 'discount', 'image_url'],
+                optional: []
+            },
+            technical: {
+                required: ['cop', 'scop', 'power_consumption', 'refrigerant_type', 'operating_temp_range'],
+                optional: []
+            },
+            physical: {
+                required: [
+                    'indoor_dimensions',
+                    'outdoor_dimensions',
+                    'indoor_weight',
+                    'outdoor_weight',
+                    'colour',
+                    'refrigerant_type'
+                ],
+                optional: []
+            },
+            installation: {
+                required: ['room_size_recommendation', 'installation_type', 'warranty_period'],
+                optional: []
+            },
+            features: {
+                required: ['features', 'is_featured', 'is_bestseller', 'is_new'],
+                optional: []
+            },
+            description: {
+                required: ['description'],
+                optional: []
+            }
         };
+
+        const config = sectionConfig[sectionName] || { required: [], optional: [] };
         
-        const fields = requiredFields[sectionName] || [];
-        const isComplete = fields.every(field => formData[field] && formData[field].trim() !== '');
-        const hasContent = fields.some(field => formData[field] && formData[field].trim() !== '') || 
-                          Object.keys(formData).some(key => 
-                              !requiredFields.basic.includes(key) && 
-                              formData[key] && 
-                              (typeof formData[key] === 'string' ? formData[key].trim() !== '' : 
-                               Array.isArray(formData[key]) ? formData[key].length > 0 : 
-                               formData[key] !== false)
-                          );
+        let completedRequired = 0;
+        let completedOptional = 0;
+        let totalRequired = config.required.length;
+        let totalOptional = config.optional.length;
+
+        // Helper function to check if a field has meaningful user input
+        const hasMeaningfulInput = (fieldName, value) => {
+            const defaultValue = defaultValues[fieldName];
+
+            // For number fields, treat any value that is not '', null, or undefined as filled
+            if ([
+                'indoor_weight',
+                'outdoor_weight'
+            ].includes(fieldName)) {
+                return value !== '' && value !== null && value !== undefined;
+            }
+
+            // If value is the same as default, it's not meaningful input
+            if (value === defaultValue) {
+                return false;
+            }
+
+            // Handle different data types
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                // Don't count empty strings or placeholder-like text
+                if (trimmed === '' || trimmed === defaultValue || 
+                    trimmed.toLowerCase().includes('example') ||
+                    trimmed.toLowerCase().includes('placeholder') ||
+                    trimmed.toLowerCase().includes('e.g.')) {
+                    return false;
+                }
+                return trimmed.length > 0;
+            }
+
+            if (Array.isArray(value)) {
+                // For arrays, only count if user has added items
+                return value.length > 0 && JSON.stringify(value) !== JSON.stringify(defaultValue);
+            }
+
+            if (typeof value === 'boolean') {
+                // For checkboxes, only count if user has changed from default
+                return value !== defaultValue;
+            }
+
+            if (typeof value === 'number') {
+                // For numbers, don't count NaN
+                return !isNaN(value);
+            }
+
+            return value !== null && value !== undefined && value !== defaultValue;
+        };
+
+        // Count completed required fields
+        config.required.forEach(field => {
+            if (hasMeaningfulInput(field, formData[field])) {
+                completedRequired++;
+            }
+        });
+
+        // Count completed optional fields
+        config.optional.forEach(field => {
+            if (hasMeaningfulInput(field, formData[field])) {
+                completedOptional++;
+            }
+        });
+
+        // Debug log for physical section (after hasMeaningfulInput and counts)
+        if (sectionName === 'physical') {
+            const debugFields = [
+                'indoor_dimensions',
+                'outdoor_dimensions',
+                'indoor_weight',
+                'outdoor_weight',
+                'colour',
+                'refrigerant_type'
+            ];
+            const debugInfo = debugFields.map(field => ({
+                field,
+                value: formData[field],
+                filled: hasMeaningfulInput(field, formData[field])
+            }));
+            console.log('Physical section debug:', debugInfo, 'Completed:', completedRequired, 'of', config.required.length);
+        }
+
+        const totalCompleted = completedRequired + completedOptional;
+        const totalFields = totalRequired + totalOptional;
+
+        return {
+            completedRequired,
+            completedOptional,
+            totalRequired,
+            totalOptional,
+            totalCompleted,
+            totalFields,
+            progress: totalFields > 0 ? Math.round((totalCompleted / totalFields) * 100) : 0,
+            isComplete: totalRequired === 0 ? totalCompleted === totalFields : completedRequired === totalRequired,
+            hasContent: totalCompleted > 0
+        };
+    };
+
+    const getSectionStatus = (sectionName) => {
+        const progress = getSectionProgress(sectionName);
         
-        if (isComplete) return 'completed';
-        if (hasContent) return 'in_progress';
+        if (progress.isComplete) return 'completed';
+        if (progress.hasContent) return 'in_progress';
         return 'pending';
+    };
+
+    const getSectionStatusLabel = (sectionName) => {
+        const progress = getSectionProgress(sectionName);
+        
+        if (progress.isComplete) return 'Completed';
+        if (progress.hasContent) return 'In progress';
+        return 'Not filled';
+    };
+
+    const getSectionStatusColor = (sectionName) => {
+        const progress = getSectionProgress(sectionName);
+        
+        if (progress.isComplete) return '🟢';
+        if (progress.hasContent) return '🟠';
+        return '🔴';
+    };
+
+    // Field-level validation helpers with smart default detection
+    const isFieldRequired = (fieldName) => {
+        // All fields are now required
+        return true;
+    };
+
+    const hasMeaningfulInput = (fieldName, value) => {
+        const defaultValue = defaultValues[fieldName];
+        
+        // If value is the same as default, it's not meaningful input
+        if (value === defaultValue) {
+            return false;
+        }
+        
+        // Handle different data types
+        if (typeof value === 'string') {
+            const trimmed = value.trim();
+            // Don't count empty strings or placeholder-like text
+            if (trimmed === '' || trimmed === defaultValue || 
+                trimmed.toLowerCase().includes('example') ||
+                trimmed.toLowerCase().includes('placeholder') ||
+                trimmed.toLowerCase().includes('e.g.')) {
+                return false;
+            }
+            return trimmed.length > 0;
+        }
+        
+        if (Array.isArray(value)) {
+            // For arrays, only count if user has added items
+            return value.length > 0 && JSON.stringify(value) !== JSON.stringify(defaultValue);
+        }
+        
+        if (typeof value === 'boolean') {
+            // For checkboxes, only count if user has changed from default
+            return value !== defaultValue;
+        }
+        
+        if (typeof value === 'number') {
+            // For numbers, don't count 0 or default values
+            return value !== 0 && value !== defaultValue && !isNaN(value);
+        }
+        
+        return value !== null && value !== undefined && value !== defaultValue;
+    };
+
+    const isFieldValid = (fieldName) => {
+        const value = formData[fieldName];
+        return hasMeaningfulInput(fieldName, value);
+    };
+
+    const getFieldStatus = (fieldName) => {
+        return isFieldValid(fieldName) ? 'valid' : 'invalid';
+    };
+
+    // Form validation for submission with smart default detection
+    const validateFormForSubmission = () => {
+        const errors = [];
+        const sections = ['basic', 'technical', 'physical', 'installation', 'features', 'description'];
+        
+        sections.forEach(section => {
+            const progress = getSectionProgress(section);
+            if (progress.totalRequired > 0 && progress.completedRequired < progress.totalRequired) {
+                const sectionNames = {
+                    basic: 'Basic Information',
+                    technical: 'Technical Performance',
+                    physical: 'Physical Characteristics',
+                    installation: 'Installation & Warranty',
+                    features: 'Features & Promotional',
+                    description: 'Description'
+                };
+                
+                // Get specific missing required fields for better error messages
+                const missingFields = [];
+                const sectionConfig = {
+                    basic: ['brand', 'model', 'price', 'type', 'capacity_btu', 'energy_rating', 'colour', 'stock', 'discount', 'image_url'],
+                    technical: ['cop', 'scop', 'power_consumption', 'refrigerant_type', 'operating_temp_range'],
+                    physical: ['indoor_dimensions', 'outdoor_dimensions', 'indoor_weight', 'outdoor_weight', 'colour', 'refrigerant_type'],
+                    installation: ['room_size_recommendation', 'installation_type', 'warranty_period'],
+                    features: ['features', 'is_featured', 'is_bestseller', 'is_new'],
+                    description: ['description']
+                };
+                
+                const requiredFields = sectionConfig[section] || [];
+                requiredFields.forEach(field => {
+                    if (!hasMeaningfulInput(field, formData[field])) {
+                        const fieldNames = {
+                            brand: 'Brand',
+                            model: 'Model',
+                            price: 'Price',
+                            type: 'Type',
+                            capacity_btu: 'Capacity (BTU)',
+                            energy_rating: 'Energy Rating',
+                            colour: 'Color',
+                            stock: 'Stock Quantity',
+                            discount: 'Discount',
+                            image_url: 'Image URL',
+                            cop: 'COP',
+                            scop: 'SCOP',
+                            power_consumption: 'Power Consumption',
+                            refrigerant_type: 'Refrigerant Type',
+                            operating_temp_range: 'Operating Temperature Range',
+                            dimensions: 'Dimensions',
+                            weight: 'Weight',
+                            noise_level: 'Noise Level',
+                            air_flow: 'Air Flow',
+                            room_size_recommendation: 'Room Size Recommendation',
+                            installation_type: 'Installation Type',
+                            warranty_period: 'Warranty Period',
+                            features: 'Features',
+                            is_featured: 'Featured',
+                            is_bestseller: 'Bestseller',
+                            is_new: 'New Product',
+                            description: 'Description'
+                        };
+                        missingFields.push(fieldNames[field] || field);
+                    }
+                });
+                
+                if (missingFields.length > 0) {
+                    errors.push(`${sectionNames[section]} - Missing: ${missingFields.join(', ')}`);
+                } else {
+                    errors.push(`${sectionNames[section]} - ${progress.totalRequired - progress.completedRequired} required fields missing`);
+                }
+            }
+        });
+        
+        return errors;
+    };
+
+    const handleFormSubmission = () => {
+        const errors = validateFormForSubmission();
+        
+        if (errors.length > 0) {
+            setValidationErrors(errors);
+            setShowValidationModal(true);
+            return false;
+        }
+        
+        return true;
     };
 
     const toggleSection = (sectionName) => {
@@ -99,9 +412,11 @@ export default function Administration() {
         cop: '',
         scop: '',
         power_consumption: '',
-        refrigerant_type: 'R32',
+        refrigerant_type: '',
         operating_temp_range: '',
         dimensions: '',
+        indoor_dimensions: '',
+        outdoor_dimensions: '',
         weight: '',
         noise_level: '',
         air_flow: '',
@@ -238,9 +553,11 @@ export default function Administration() {
             cop: '',
             scop: '',
             power_consumption: '',
-            refrigerant_type: 'R32',
+            refrigerant_type: '',
             operating_temp_range: '',
             dimensions: '',
+            indoor_dimensions: '',
+            outdoor_dimensions: '',
             weight: '',
             noise_level: '',
             air_flow: '',
@@ -372,9 +689,8 @@ export default function Administration() {
 
     const handleAdd = async () => {
         try {
-            // Validate required fields
-            if (!formData.brand || !formData.model || !formData.price) {
-                alert('Please fill in all required fields: Brand, Model, and Price');
+            // Enhanced validation with modal
+            if (!handleFormSubmission()) {
                 return;
             }
 
@@ -453,6 +769,8 @@ export default function Administration() {
             refrigerant_type: product.refrigerant_type || 'R32',
             operating_temp_range: product.operating_temp_range || '',
             dimensions: product.dimensions || '',
+            indoor_dimensions: product.indoor_dimensions || '',
+            outdoor_dimensions: product.outdoor_dimensions || '',
             weight: product.weight ? product.weight.toString() : '',
             noise_level: product.noise_level ? product.noise_level.toString() : '',
             air_flow: product.air_flow ? product.air_flow.toString() : '',
@@ -475,9 +793,8 @@ export default function Administration() {
 
     const handleSaveEdit = async () => {
         try {
-            // Validate required fields
-            if (!formData.brand || !formData.model || !formData.price) {
-                alert('Please fill in all required fields: Brand, Model, and Price');
+            // Enhanced validation with modal
+            if (!handleFormSubmission()) {
                 return;
             }
 
@@ -545,7 +862,43 @@ export default function Administration() {
         };
 
         return (
-            <div className={styles.loginContainer}>
+            <>
+                {/* Validation Modal */}
+                {showValidationModal && (
+                    <div className={styles.modalOverlay}>
+                        <div className={styles.modalContent}>
+                            <div className={styles.modalHeader}>
+                                <h3>⚠️ Form Validation Required</h3>
+                                <button 
+                                    className={styles.modalCloseButton}
+                                    onClick={() => setShowValidationModal(false)}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                            <div className={styles.modalBody}>
+                                <p>You must complete all required fields before submitting:</p>
+                                <ul className={styles.validationErrors}>
+                                    {validationErrors.map((error, index) => (
+                                        <li key={index} className={styles.validationError}>
+                                            {error}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className={styles.modalFooter}>
+                                <button 
+                                    className={styles.modalButton}
+                                    onClick={() => setShowValidationModal(false)}
+                                >
+                                    OK, I'll fix it
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                <div className={styles.loginContainer}>
                 <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🕵️</div>
                 <h1>Admin Login</h1>
                 <input
@@ -574,6 +927,7 @@ export default function Administration() {
                     {t('admin.login.loginButton')}
                 </button>
             </div>
+        </>
         );
     }
 
@@ -650,12 +1004,24 @@ export default function Administration() {
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>📋</span>
-                                            <span className={styles.sectionTitle}>{t('admin.products.sections.basic')}</span>
-                                            <span className={styles.sectionStatus}>
-                                                {getSectionStatus('basic') === 'completed' && '✅ ' + t('admin.products.status.completed')}
-                                                {getSectionStatus('basic') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
-                                                {getSectionStatus('basic') === 'pending' && '⭕ ' + t('admin.products.status.required')}
+                                            <span className={styles.sectionTitle}>
+                                                {t('admin.products.sections.basic')} 
+                                                <span className={styles.sectionProgress}>
+                                                    ({getSectionProgress('basic').totalCompleted}/{getSectionProgress('basic').totalFields})
+                                                </span>
                                             </span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatusColor('basic')} {getSectionStatusLabel('basic')}
+                                            </span>
+                                            <div className={styles.sectionProgressBar}>
+                                                <div 
+                                                    className={`${styles.sectionProgressFill} ${
+                                                        getSectionProgress('basic').progress === 100 ? '' : 
+                                                        getSectionProgress('basic').progress > 0 ? 'incomplete' : 'empty'
+                                                    }`}
+                                                    style={{ width: `${getSectionProgress('basic').progress}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
                                         <span className={styles.expandIcon}>
                                             {isSectionExpanded('basic') ? '▼' : '▶'}
@@ -667,7 +1033,7 @@ export default function Administration() {
                                             <div className={styles.formCard}>
                                                 <h3 className={styles.cardTitle}>📦 {t('admin.products.formCards.productIdentity')}</h3>
                                                 <div className={styles.formGrid}>
-                                                    <div className={styles.formGroup}>
+                                                    <div className={`${styles.formGroup} ${styles[getFieldStatus('brand')]}`}>
                                                         <label>
                                                             {t('admin.products.brand')} *:
                                                             <input
@@ -677,10 +1043,14 @@ export default function Administration() {
                                                                 onChange={handleChange}
                                                                 required
                                                                 placeholder={t('admin.products.placeholders.brandExample')}
+                                                                className={getFieldStatus('brand') === 'invalid' ? styles.invalidField : ''}
                                                             />
+                                                            {getFieldStatus('brand') === 'invalid' && (
+                                                                <span className={styles.fieldError}>Required</span>
+                                                            )}
                                                         </label>
                                                     </div>
-                                                    <div className={styles.formGroup}>
+                                                    <div className={`${styles.formGroup} ${styles[getFieldStatus('model')]}`}>
                                                         <label>
                                                             {t('admin.products.model')} *:
                                                             <input
@@ -690,22 +1060,36 @@ export default function Administration() {
                                                                 onChange={handleChange}
                                                                 required
                                                                 placeholder={t('admin.products.placeholders.modelExample')}
+                                                                className={getFieldStatus('model') === 'invalid' ? styles.invalidField : ''}
                                                             />
+                                                            {getFieldStatus('model') === 'invalid' && (
+                                                                <span className={styles.fieldError}>Required</span>
+                                                            )}
                                                         </label>
                                                     </div>
-                                                    <div className={styles.formGroup}>
+                                                    <div className={`${styles.formGroup} ${styles[getFieldStatus('price')]}`}> 
                                                         <label>
-                                                            {t('admin.products.price')} * (€):
-                                                            <input
-                                                                type="number"
-                                                                name="price"
-                                                                value={formData.price}
-                                                                onChange={handleChange}
-                                                                step="0.01"
-                                                                min="0"
-                                                                required
-                                                                placeholder={t('admin.products.placeholders.priceExample')}
-                                                            />
+                                                            {t('admin.products.price')} (лв. / BGN):
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                                <input
+                                                                    type="number"
+                                                                    name="price"
+                                                                    value={formData.price}
+                                                                    onChange={handleChange}
+                                                                    step="0.01"
+                                                                    min="0"
+                                                                    required
+                                                                    placeholder={t('admin.products.placeholders.priceExample')}
+                                                                    className={getFieldStatus('price') === 'invalid' ? styles.invalidField : ''}
+                                                                    style={{ maxWidth: 120 }}
+                                                                />
+                                                                <span style={{ color: '#888', fontSize: '0.95em' }}>
+                                                                    €{formData.price && !isNaN(formData.price) ? (parseFloat(formData.price) / 1.96).toFixed(2) : '0.00'}
+                                                                </span>
+                                                            </div>
+                                                            {getFieldStatus('price') === 'invalid' && (
+                                                                <span className={styles.fieldError}>Required</span>
+                                                            )}
                                                         </label>
                                                     </div>
                                                 </div>
@@ -876,12 +1260,24 @@ export default function Administration() {
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>⚡</span>
-                                            <span className={styles.sectionTitle}>{t('admin.products.sections.technical')}</span>
-                                            <span className={styles.sectionStatus}>
-                                                {getSectionStatus('technical') === 'completed' && '✅ ' + t('admin.products.status.completed')}
-                                                {getSectionStatus('technical') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
-                                                {getSectionStatus('technical') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            <span className={styles.sectionTitle}>
+                                                {t('admin.products.sections.technical')} 
+                                                <span className={styles.sectionProgress}>
+                                                    ({getSectionProgress('technical').totalCompleted}/{getSectionProgress('technical').totalFields})
+                                                </span>
                                             </span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatusColor('technical')} {getSectionStatusLabel('technical')}
+                                            </span>
+                                            <div className={styles.sectionProgressBar}>
+                                                <div 
+                                                    className={`${styles.sectionProgressFill} ${
+                                                        getSectionProgress('technical').progress === 100 ? '' : 
+                                                        getSectionProgress('technical').progress > 0 ? 'incomplete' : 'empty'
+                                                    }`}
+                                                    style={{ width: `${getSectionProgress('technical').progress}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
                                         <span className={styles.expandIcon}>
                                             {isSectionExpanded('technical') ? '▼' : '▶'}
@@ -941,12 +1337,13 @@ export default function Administration() {
                                                     </div>
                                                     <div className={styles.formGroup}>
                                                         <label>
-                                                            Refrigerant Type:
+                                                            {t('admin.products.fields.refrigerantType')}:
                                                             <select
                                                                 name="refrigerant_type"
                                                                 value={formData.refrigerant_type}
                                                                 onChange={handleChange}
                                                             >
+                                                                <option value="" disabled>{t('admin.products.dropdowns.selectRefrigerant') || 'Select refrigerant type...'}</option>
                                                                 <option value="R32">{t('admin.products.dropdowns.refrigerantTypes.r32')}</option>
                                                                 <option value="R410A">{t('admin.products.dropdowns.refrigerantTypes.r410a')}</option>
                                                                 <option value="R134a">{t('admin.products.dropdowns.refrigerantTypes.r134a')}</option>
@@ -980,12 +1377,24 @@ export default function Administration() {
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>📏</span>
-                                            <span className={styles.sectionTitle}>{t('admin.products.sections.physical')}</span>
-                                            <span className={styles.sectionStatus}>
-                                                {getSectionStatus('physical') === 'completed' && '✅ ' + t('admin.products.status.completed')}
-                                                {getSectionStatus('physical') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
-                                                {getSectionStatus('physical') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            <span className={styles.sectionTitle}>
+                                                {t('admin.products.sections.physical')} 
+                                                <span className={styles.sectionProgress}>
+                                                    ({getSectionProgress('physical').totalCompleted}/{getSectionProgress('physical').totalFields})
+                                                </span>
                                             </span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatusColor('physical')} {getSectionStatusLabel('physical')}
+                                            </span>
+                                            <div className={styles.sectionProgressBar}>
+                                                <div 
+                                                    className={`${styles.sectionProgressFill} ${
+                                                        getSectionProgress('physical').progress === 100 ? '' : 
+                                                        getSectionProgress('physical').progress > 0 ? 'incomplete' : 'empty'
+                                                    }`}
+                                                    style={{ width: `${getSectionProgress('physical').progress}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
                                         <span className={styles.expandIcon}>
                                             {isSectionExpanded('physical') ? '▼' : '▶'}
@@ -999,27 +1408,53 @@ export default function Administration() {
                                                 <div className={styles.formGrid}>
                                                     <div className={styles.formGroup}>
                                                         <label>
-                                                            {t('admin.products.fields.dimensions')} (W×H×D):
+                                                            {t('admin.products.fields.indoorDimensions')} (W×H×D):
                                                             <input
                                                                 type="text"
-                                                                name="dimensions"
-                                                                value={formData.dimensions}
+                                                                name="indoor_dimensions"
+                                                                value={formData.indoor_dimensions}
                                                                 onChange={handleChange}
-                                                                placeholder={t('admin.products.hints.dimensionsHint')}
+                                                                placeholder={t('admin.products.hints.indoorDimensionsHint')}
                                                             />
                                                         </label>
                                                     </div>
                                                     <div className={styles.formGroup}>
                                                         <label>
-                                                            {t('admin.products.fields.weight')} (kg):
+                                                            {t('admin.products.fields.outdoorDimensions')} (W×H×D):
+                                                            <input
+                                                                type="text"
+                                                                name="outdoor_dimensions"
+                                                                value={formData.outdoor_dimensions}
+                                                                onChange={handleChange}
+                                                                placeholder={t('admin.products.hints.outdoorDimensionsHint')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.indoorWeight')} (kg):
                                                             <input
                                                                 type="number"
-                                                                name="weight"
-                                                                value={formData.weight}
+                                                                name="indoor_weight"
+                                                                value={formData.indoor_weight}
                                                                 onChange={handleChange}
                                                                 step="0.1"
                                                                 min="0"
-                                                                placeholder={t('admin.products.hints.weightHint')}
+                                                                placeholder={t('admin.products.hints.indoorWeightHint')}
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    <div className={styles.formGroup}>
+                                                        <label>
+                                                            {t('admin.products.fields.outdoorWeight')} (kg):
+                                                            <input
+                                                                type="number"
+                                                                name="outdoor_weight"
+                                                                value={formData.outdoor_weight}
+                                                                onChange={handleChange}
+                                                                step="0.1"
+                                                                min="0"
+                                                                placeholder={t('admin.products.hints.outdoorWeightHint')}
                                                             />
                                                         </label>
                                                     </div>
@@ -1064,12 +1499,24 @@ export default function Administration() {
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>🔧</span>
-                                            <span className={styles.sectionTitle}>{t('admin.products.sections.installation')}</span>
-                                            <span className={styles.sectionStatus}>
-                                                {getSectionStatus('installation') === 'completed' && '✅ ' + t('admin.products.status.completed')}
-                                                {getSectionStatus('installation') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
-                                                {getSectionStatus('installation') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            <span className={styles.sectionTitle}>
+                                                {t('admin.products.sections.installation')} 
+                                                <span className={styles.sectionProgress}>
+                                                    ({getSectionProgress('installation').totalCompleted}/{getSectionProgress('installation').totalFields})
+                                                </span>
                                             </span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatusColor('installation')} {getSectionStatusLabel('installation')}
+                                            </span>
+                                            <div className={styles.sectionProgressBar}>
+                                                <div 
+                                                    className={`${styles.sectionProgressFill} ${
+                                                        getSectionProgress('installation').progress === 100 ? '' : 
+                                                        getSectionProgress('installation').progress > 0 ? 'incomplete' : 'empty'
+                                                    }`}
+                                                    style={{ width: `${getSectionProgress('installation').progress}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
                                         <span className={styles.expandIcon}>
                                             {isSectionExpanded('installation') ? '▼' : '▶'}
@@ -1142,12 +1589,24 @@ export default function Administration() {
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>⭐</span>
-                                            <span className={styles.sectionTitle}>{t('admin.products.sections.features')}</span>
-                                            <span className={styles.sectionStatus}>
-                                                {getSectionStatus('features') === 'completed' && '✅ ' + t('admin.products.status.completed')}
-                                                {getSectionStatus('features') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
-                                                {getSectionStatus('features') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            <span className={styles.sectionTitle}>
+                                                {t('admin.products.sections.features')} 
+                                                <span className={styles.sectionProgress}>
+                                                    ({getSectionProgress('features').totalCompleted}/{getSectionProgress('features').totalFields})
+                                                </span>
                                             </span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatusColor('features')} {getSectionStatusLabel('features')}
+                                            </span>
+                                            <div className={styles.sectionProgressBar}>
+                                                <div 
+                                                    className={`${styles.sectionProgressFill} ${
+                                                        getSectionProgress('features').progress === 100 ? '' : 
+                                                        getSectionProgress('features').progress > 0 ? 'incomplete' : 'empty'
+                                                    }`}
+                                                    style={{ width: `${getSectionProgress('features').progress}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
                                         <span className={styles.expandIcon}>
                                             {isSectionExpanded('features') ? '▼' : '▶'}
@@ -1157,40 +1616,84 @@ export default function Administration() {
                                     {isSectionExpanded('features') && (
                                         <div className={styles.sectionContent}>
                                             <div className={styles.formCard}>
+                                                <h3 className={styles.cardTitle}>🛠️ {t('admin.products.formCards.productFeatures')}</h3>
+                                                <div className={styles.featuresManager}>
+                                                    <div className={styles.inputRow}>
+                                                        <input
+                                                            type="text"
+                                                            value={featureInput || ''}
+                                                            onChange={e => setFeatureInput(e.target.value)}
+                                                            placeholder={t('admin.products.placeholders.featureExample')}
+                                                            className={styles.featureInput}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter' && featureInput?.trim()) {
+                                                                    e.preventDefault();
+                                                                    if (!formData.features.includes(featureInput.trim())) {
+                                                                        setFormData(prev => ({ ...prev, features: [...prev.features, featureInput.trim()] }));
+                                                                    }
+                                                                    setFeatureInput('');
+                                                                }
+                                                            }}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className={styles.addFeatureButton}
+                                                            onClick={() => {
+                                                                if (featureInput?.trim() && !formData.features.includes(featureInput.trim())) {
+                                                                    setFormData(prev => ({ ...prev, features: [...prev.features, featureInput.trim()] }));
+                                                                    setFeatureInput('');
+                                                                }
+                                                            }}
+                                                        >
+                                                            {t('admin.products.features.addFeature')}
+                                                        </button>
+                                                    </div>
+                                                    <div className={styles.featuresList}>
+                                                        {formData.features.map((feature, idx) => (
+                                                            <span key={feature} className={styles.featureTag}>
+                                                                {feature}
+                                                                <button
+                                                                    type="button"
+                                                                    className={styles.removeFeatureButton}
+                                                                    onClick={() => setFormData(prev => ({ ...prev, features: prev.features.filter((_, i) => i !== idx) }))}
+                                                                    aria-label={t('admin.products.features.removeFeature') || 'Remove feature'}
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className={styles.formCard}>
                                                 <h3 className={styles.cardTitle}>🎯 {t('admin.products.formCards.promotionalTags')}</h3>
-                                                <div className={styles.formGrid}>
+                                                <div className={styles.promoTagsGroup}>
                                                     <div className={styles.formGroup}>
-                                                        <label>
-                                                            <input
-                                                                type="checkbox"
-                                                                name="is_featured"
-                                                                checked={formData.is_featured}
-                                                                onChange={handleChange}
-                                                            />
-                                                            {t('admin.products.fields.isFeatured')}
-                                                        </label>
+                                                        <span>{t('admin.products.fields.isFeatured')}</span>
+                                                        <input
+                                                            type="checkbox"
+                                                            name="is_featured"
+                                                            checked={formData.is_featured}
+                                                            onChange={handleChange}
+                                                        />
                                                     </div>
                                                     <div className={styles.formGroup}>
-                                                        <label>
-                                                            <input
-                                                                type="checkbox"
-                                                                name="is_bestseller"
-                                                                checked={formData.is_bestseller}
-                                                                onChange={handleChange}
-                                                            />
-                                                            {t('admin.products.fields.isBestseller')}
-                                                        </label>
+                                                        <span>{t('admin.products.fields.isBestseller')}</span>
+                                                        <input
+                                                            type="checkbox"
+                                                            name="is_bestseller"
+                                                            checked={formData.is_bestseller}
+                                                            onChange={handleChange}
+                                                        />
                                                     </div>
                                                     <div className={styles.formGroup}>
-                                                        <label>
-                                                            <input
-                                                                type="checkbox"
-                                                                name="is_new"
-                                                                checked={formData.is_new}
-                                                                onChange={handleChange}
-                                                            />
-                                                            {t('admin.products.fields.isNew')}
-                                                        </label>
+                                                        <span>{t('admin.products.fields.isNew')}</span>
+                                                        <input
+                                                            type="checkbox"
+                                                            name="is_new"
+                                                            checked={formData.is_new}
+                                                            onChange={handleChange}
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
@@ -1206,12 +1709,24 @@ export default function Administration() {
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>📝</span>
-                                            <span className={styles.sectionTitle}>{t('admin.products.sections.description')}</span>
-                                            <span className={styles.sectionStatus}>
-                                                {getSectionStatus('description') === 'completed' && '✅ ' + t('admin.products.status.completed')}
-                                                {getSectionStatus('description') === 'in_progress' && '🔄 ' + t('admin.products.status.inProgress')}
-                                                {getSectionStatus('description') === 'pending' && '⚪ ' + t('admin.products.status.optional')}
+                                            <span className={styles.sectionTitle}>
+                                                {t('admin.products.sections.description')} 
+                                                <span className={styles.sectionProgress}>
+                                                    ({getSectionProgress('description').totalCompleted}/{getSectionProgress('description').totalFields})
+                                                </span>
                                             </span>
+                                            <span className={styles.sectionStatus}>
+                                                {getSectionStatusColor('description')} {getSectionStatusLabel('description')}
+                                            </span>
+                                            <div className={styles.sectionProgressBar}>
+                                                <div 
+                                                    className={`${styles.sectionProgressFill} ${
+                                                        getSectionProgress('description').progress === 100 ? '' : 
+                                                        getSectionProgress('description').progress > 0 ? 'incomplete' : 'empty'
+                                                    }`}
+                                                    style={{ width: `${getSectionProgress('description').progress}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
                                         <span className={styles.expandIcon}>
                                             {isSectionExpanded('description') ? '▼' : '▶'}
@@ -1221,8 +1736,8 @@ export default function Administration() {
                                     {isSectionExpanded('description') && (
                                         <div className={styles.sectionContent}>
                                             <div className={styles.formCard}>
-                                                <h3 className={styles.cardTitle}>📄 {t('admin.products.formCards.productDescription')}</h3>
-                                                <div className={styles.formGroup}>
+                                                <h3 className={styles.cardTitle}>📝 {t('admin.products.formCards.productDescription')}</h3>
+                                                <div className={styles.formGroup + ' ' + styles.descriptionGroup}>
                                                     <label>
                                                         {t('admin.products.fields.description')}:
                                                         <textarea

@@ -48,22 +48,19 @@ export const LanguageProvider = ({ children }) => {
     }
   }, [locale, mounted]);
   
-  const t = (key) => {
+  const t = (key, variables) => {
     // If not mounted yet (server-side), return the key
     if (!mounted) {
       return key;
     }
-    
     // During loading, use previous translations if available, otherwise use current
     const activeTranslations = loading && Object.keys(previousTranslations).length > 0 
       ? previousTranslations 
       : translations;
-      
     if (Object.keys(activeTranslations).length === 0) {
       return key; // Only return key if no translations available at all
     }
-    
-    return getTranslation(activeTranslations, key);
+    return getTranslation(activeTranslations, key, variables);
   };
   
   const switchLanguage = (newLocale) => {
@@ -124,7 +121,7 @@ const Header = () => {
             </h1>
           </div>
           <nav className={styles.centerNav}>
-            <div>Loading...</div>
+            <div>{t('common.loading')}</div>
           </nav>
           <div className={styles.rightSection}>
             <div className={styles.languageSwitcher}>
@@ -205,17 +202,23 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <div className={styles.mobileMenuToggle}>
-          <button
-            className={styles.mobileMenuButton}
-            onClick={toggleMobileMenu}
-            aria-label="Toggle mobile menu"
-            aria-expanded={mobileMenuOpen}
-            type="button"
-          >
-            <FiMenu className={styles.mobileIcon} />
-          </button>
+        {/* Mobile Header - Cart and Menu Toggle */}
+        <div className={styles.mobileHeader}>
+          {/* Mobile Cart Icon */}
+          <CartIcon />
+          
+          {/* Mobile Menu Toggle */}
+          <div className={styles.mobileMenuToggle}>
+            <button
+              className={styles.mobileMenuButton}
+              onClick={toggleMobileMenu}
+              aria-label="Toggle mobile menu"
+              aria-expanded={mobileMenuOpen}
+              type="button"
+            >
+              <FiMenu className={styles.mobileIcon} />
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}

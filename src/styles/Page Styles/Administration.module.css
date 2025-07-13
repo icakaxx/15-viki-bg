@@ -986,48 +986,27 @@
 
 /* Features Manager Styling */
 .featuresManager {
-  border: 1px solid #eaeaea;
-  border-radius: 8px;
-  padding: 1rem;
-  background-color: #f9f9f9;
-}
-
-.addFeatureSection {
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
-  margin-bottom: 1rem;
 }
 
-.addFeatureSection input {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.9rem;
+.featuresManager .featureInput,
+.featuresManager .addFeatureButton {
   margin-bottom: 0;
 }
 
-.addFeatureButton {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.addFeatureButton:hover {
-  background-color: #218838;
+.featuresManager .inputRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .featuresList {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  min-height: 2rem;
+  margin-top: 0.75rem;
 }
 
 .featureTag {
@@ -2758,4 +2737,245 @@
   .ordersSection {
     padding: 1.5rem;
   }
+}
+
+/* Enhanced Section Progress Styles */
+.sectionProgress {
+  font-size: 0.8em;
+  color: #666;
+  font-weight: normal;
+  margin-left: 8px;
+}
+
+.sectionStatus {
+  font-size: 0.9em;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Field Validation Styles */
+.formGroup.invalid {
+  border-left: 3px solid #dc3545;
+  padding-left: 12px;
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.formGroup.valid {
+  border-left: 3px solid #28a745;
+  padding-left: 12px;
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
+.formGroup.optional {
+  border-left: 3px solid #6c757d;
+  padding-left: 12px;
+  background-color: rgba(108, 117, 125, 0.05);
+}
+
+.invalidField {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.fieldError {
+  color: #dc3545;
+  font-size: 0.8em;
+  margin-top: 4px;
+  display: block;
+  font-weight: 500;
+}
+
+/* Status Color Indicators */
+.accordionHeader.completed {
+  border-left: 4px solid #28a745;
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.accordionHeader.in_progress {
+  border-left: 4px solid #ffc107;
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+.accordionHeader.pending {
+  border-left: 4px solid #dc3545;
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Progress Bar for Sections */
+.sectionProgressBar {
+  width: 100%;
+  height: 4px;
+  background-color: #e9ecef;
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.sectionProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #20c997);
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.sectionProgressFill.incomplete {
+  background: linear-gradient(90deg, #ffc107, #fd7e14);
+}
+
+.sectionProgressFill.empty {
+  background: linear-gradient(90deg, #dc3545, #e83e8c);
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  color: #dc3545;
+  font-size: 1.2rem;
+}
+
+.modalCloseButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.modalCloseButton:hover {
+  background-color: #e9ecef;
+  color: #333;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.modalBody p {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.validationErrors {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.validationError {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  border-left: 4px solid #dc3545;
+  font-size: 0.9rem;
+}
+
+.modalFooter {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modalButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modalButton:hover {
+  background-color: #0056b3;
+}
+
+.promoTagsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.promoTagsGroup .formGroup {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.promoTagsGroup .formGroup span {
+  flex: 1;
+  text-align: left;
+}
+
+.promoTagsGroup .formGroup input[type="checkbox"] {
+  margin: 0 auto;
+  display: block;
+}
+
+.descriptionGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.descriptionGroup label {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.descriptionGroup textarea {
+  width: 100%;
+  min-width: 250px;
+  max-width: 400px;
+  min-height: 100px;
 }

@@ -181,7 +181,7 @@ function getMinimalEnglishFallback() {
 }
 
 // Helper function to get nested translation values
-export function getTranslation(translations, key) {
+export function getTranslation(translations, key, variables = {}) {
   const keys = key.split('.');
   let value = translations;
   
@@ -189,11 +189,17 @@ export function getTranslation(translations, key) {
     if (value && typeof value === 'object' && k in value) {
       value = value[k];
     } else {
-      // If translation not found, log it for debugging
       console.warn(`Translation not found for key: ${key}`);
-      return key; // Return the key if translation not found
+      return key;
     }
   }
-  
+
+  // Interpolate variables if value is a string
+  if (typeof value === 'string' && variables && Object.keys(variables).length > 0) {
+    Object.entries(variables).forEach(([varKey, varValue]) => {
+      value = value.replace(new RegExp(`{{\\s*${varKey}\\s*}}`, 'g'), varValue);
+    });
+  }
+
   return value;
 } 

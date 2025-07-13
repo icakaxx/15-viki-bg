@@ -34,8 +34,10 @@ export default async function handler(req, res) {
         refrigerant_type = 'R32',
         operating_temp_range = null,
         // Physical Characteristics
-        dimensions = null,
-        weight = null,
+        indoor_dimensions = null,
+        outdoor_dimensions = null,
+        indoor_weight = null,
+        outdoor_weight = null,
         noise_level = null,
         air_flow = null,
         // Features & Usability
@@ -121,8 +123,10 @@ export default async function handler(req, res) {
             refrigerant_type,
             operating_temp_range,
             // Physical Characteristics
-            dimensions,
-            weight,
+            indoor_dimensions,
+            outdoor_dimensions,
+            indoor_weight,
+            outdoor_weight,
             noise_level,
             air_flow,
             // Features & Usability
@@ -188,8 +192,10 @@ export default async function handler(req, res) {
             refrigerant_type,
             operating_temp_range,
             // Physical Characteristics
-            dimensions,
-            weight,
+            indoor_dimensions,
+            outdoor_dimensions,
+            indoor_weight,
+            outdoor_weight,
             noise_level,
             air_flow,
             // Features & Usability

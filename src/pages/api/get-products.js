@@ -25,8 +25,10 @@ const transformProduct = (product) => {
         RefrigerantType: product.refrigerant_type || 'R32',
         OperatingTempRange: product.operating_temp_range || null,
         // Physical Characteristics (with defaults for missing columns)
-        Dimensions: product.dimensions || null,
-        Weight: product.weight || null,
+        IndoorDimensions: product.indoor_dimensions || null,
+        OutdoorDimensions: product.outdoor_dimensions || null,
+        IndoorWeight: product.indoor_weight || null,
+        OutdoorWeight: product.outdoor_weight || null,
         NoiseLevel: product.noise_level || null,
         AirFlow: product.air_flow || null,
         // Features & Usability (with defaults for missing columns)
@@ -224,7 +226,21 @@ export default async function handler(req, res) {
             discount,
             is_archived,
             created_at,
-            updated_at
+            updated_at,
+            indoor_dimensions,
+            outdoor_dimensions,
+            indoor_weight,
+            outdoor_weight,
+            noise_level,
+            air_flow,
+            warranty_period,
+            room_size_recommendation,
+            installation_type,
+            description,
+            features,
+            is_featured,
+            is_bestseller,
+            is_new
         `)
 
         // Apply archived filter

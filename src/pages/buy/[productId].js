@@ -13,6 +13,25 @@ const ProductDetailPage = () => {
   const { t } = useContext(LanguageContext);
   const { addToCartEnhanced } = useCart();
 
+  // Helper function to translate AC types
+  const translateType = (type) => {
+    if (!type) return '';
+    const typeKey = type.toLowerCase();
+    return t(`buyPage.types.${typeKey}`) || type;
+  };
+
+  // Helper function to count physical characteristics
+  const getPhysicalCharacteristicsCount = () => {
+    let count = 0;
+    if (product.IndoorDimensions) count++;
+    if (product.OutdoorDimensions) count++;
+    if (product.IndoorWeight) count++;
+    if (product.OutdoorWeight) count++;
+    if (product.Colour) count++;
+    if (product.RefrigerantType) count++;
+    return count;
+  };
+
   // State management
   const [product, setProduct] = useState(null);
   const [accessories, setAccessories] = useState([]);
@@ -358,7 +377,7 @@ const ProductDetailPage = () => {
                     {t('productDetail.specs.type')}
                   </div>
                   <div className={styles.quickSpecValue}>
-                    {product.Type}
+                    {translateType(product.Type)}
                   </div>
                 </div>
                 {product.RoomSizeRecommendation && (
@@ -392,7 +411,7 @@ const ProductDetailPage = () => {
           {/* Technical Specifications */}
           <div className={styles.specsSection}>
             <h2 className={styles.sectionTitle}>
-              {t('productDetail.technicalSpecs')}
+              {t('productDetail.technicalSpecs')} ({getPhysicalCharacteristicsCount()}/6)
             </h2>
             <div className={styles.specsGrid}>
               {product.COP && (
@@ -470,11 +489,11 @@ const ProductDetailPage = () => {
                   <div className={styles.specValue}>{product.AirFlow}</div>
                 </div>
               )}
-              {product.Dimensions && (
+              {product.IndoorDimensions && (
                 <div className={styles.specCard}>
-                  <div className={styles.specIcon}>📏</div>
+                  <div className={styles.specIcon}>🏠</div>
                   <div className={styles.specName}>
-                    {t('productDetail.specs.dimensions')}
+                    {t('buyPage.physicalCharacteristics.indoorDimensions')}
                     <span 
                       className={styles.infoIcon}
                       title={t('productDetail.tooltips.dimensions')}
@@ -482,14 +501,29 @@ const ProductDetailPage = () => {
                       ?
                     </span>
                   </div>
-                  <div className={styles.specValue}>{product.Dimensions}</div>
+                  <div className={styles.specValue}>{product.IndoorDimensions}</div>
                 </div>
               )}
-              {product.Weight && (
+              {product.OutdoorDimensions && (
+                <div className={styles.specCard}>
+                  <div className={styles.specIcon}>🏢</div>
+                  <div className={styles.specName}>
+                    {t('buyPage.physicalCharacteristics.outdoorDimensions')}
+                    <span 
+                      className={styles.infoIcon}
+                      title={t('productDetail.tooltips.dimensions')}
+                    >
+                      ?
+                    </span>
+                  </div>
+                  <div className={styles.specValue}>{product.OutdoorDimensions}</div>
+                </div>
+              )}
+              {product.IndoorWeight && (
                 <div className={styles.specCard}>
                   <div className={styles.specIcon}>⚖️</div>
                   <div className={styles.specName}>
-                    {t('productDetail.specs.weight')}
+                    {t('buyPage.physicalCharacteristics.indoorWeight')}
                     <span 
                       className={styles.infoIcon}
                       title={t('productDetail.tooltips.weight')}
@@ -497,7 +531,22 @@ const ProductDetailPage = () => {
                       ?
                     </span>
                   </div>
-                  <div className={styles.specValue}>{product.Weight}</div>
+                  <div className={styles.specValue}>{product.IndoorWeight} {t('buyPage.physicalCharacteristics.kg')}</div>
+                </div>
+              )}
+              {product.OutdoorWeight && (
+                <div className={styles.specCard}>
+                  <div className={styles.specIcon}>⚖️</div>
+                  <div className={styles.specName}>
+                    {t('buyPage.physicalCharacteristics.outdoorWeight')}
+                    <span 
+                      className={styles.infoIcon}
+                      title={t('productDetail.tooltips.weight')}
+                    >
+                      ?
+                    </span>
+                  </div>
+                  <div className={styles.specValue}>{product.OutdoorWeight} {t('buyPage.physicalCharacteristics.kg')}</div>
                 </div>
               )}
               <div className={styles.specCard}>

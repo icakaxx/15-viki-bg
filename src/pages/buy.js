@@ -22,6 +22,22 @@ const BuyPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 20;
   
+  // Skeleton Loading Component
+  const SkeletonLoader = () => (
+    <div className={styles.skeletonGrid}>
+      {[...Array(6)].map((_, index) => (
+        <div key={index} className={styles.skeletonCard}>
+          <div className={styles.skeletonImage}></div>
+          <div className={`${styles.skeletonText} ${styles.skeletonText.short}`}></div>
+          <div className={`${styles.skeletonText} ${styles.skeletonText.medium}`}></div>
+          <div className={styles.skeletonText}></div>
+          <div className={styles.skeletonText}></div>
+          <div className={styles.skeletonButton}></div>
+        </div>
+      ))}
+    </div>
+  );
+
   // Handle hydration safely
   useEffect(() => {
     setMounted(true);
@@ -40,8 +56,8 @@ const BuyPage = () => {
   // Temporary filters for mobile (applied only when user hits "Apply")
   const [tempMobileFilters, setTempMobileFilters] = useState(null);
 
-  let minPrice = 0;
-  let maxPrice = 10000;
+  // Price bounds state
+  const [priceBounds, setPriceBounds] = useState({ min: 0, max: 10000 });
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -62,9 +78,8 @@ const BuyPage = () => {
           const calculatedMinPrice = Math.floor(Math.min(...prices) / 100) * 100;
           const calculatedMaxPrice = Math.ceil(Math.max(...prices) / 100) * 100;
           
-          // Update the global min/max bounds without affecting filter state
-          minPrice = calculatedMinPrice;
-          maxPrice = calculatedMaxPrice;
+          // Update the price bounds state
+          setPriceBounds({ min: calculatedMinPrice, max: calculatedMaxPrice });
           
           // Only set the initial range if it hasn't been set yet
           setFilters(prev => ({
@@ -298,6 +313,13 @@ const BuyPage = () => {
     }).format(eurPrice);
   };
 
+  // Helper function to translate AC types
+  const translateType = (type) => {
+    if (!type) return '';
+    const typeKey = type.toLowerCase();
+    return t(`buyPage.types.${typeKey}`) || type;
+  };
+
   // Handle escape key and back button
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -401,6 +423,7 @@ const BuyPage = () => {
             {!isMobile && (
               <>
                 <h2 className={styles.filterTitle}>{t('buyPage.filters.title')}</h2>
+                <br/>
                 <button 
                   onClick={clearAllFilters}
                   className={styles.clearButton}>
@@ -441,7 +464,7 @@ const BuyPage = () => {
                       checked={currentFilters.types.includes(type)}
                       onChange={() => filterChangeHandler('types', type)}
                     />
-                    <span className={styles.filterLabel}>{type}</span>
+                    <span className={styles.filterLabel}>{translateType(type)}</span>
                   </label>
                 ))}
               </div>
@@ -508,8 +531,8 @@ const BuyPage = () => {
               minValue={currentFilters.priceRange.min}
               maxValue={currentFilters.priceRange.max}
               onPriceChange={priceChangeHandler}
-              minBound={minPrice}
-              maxBound={maxPrice}
+              minBound={priceBounds.min}
+              maxBound={priceBounds.max}
             />
           </div>
         </div>
@@ -527,7 +550,7 @@ const BuyPage = () => {
         </Head>
         <div className={styles.container}>
           <h1 className={styles.title}>Buy ACs</h1>
-          <div className={styles.loading}>Loading...</div>
+          <SkeletonLoader />
         </div>
       </>
     );
@@ -607,7 +630,7 @@ const BuyPage = () => {
             ) : (
               <>
                 <div className={styles.grid}>
-                  {currentProducts.map((product) => {
+                  {currentProducts.map((product, index) => {
                   const discount = calculateDiscount(product.Price, product.PreviousPrice);
                   
                   return (
@@ -623,12 +646,36 @@ const BuyPage = () => {
                       
                       {/* Clickable Product Info Section */}
                       <Link href={`/buy/${product.ProductID}`} className={styles.productLink}>
+                        {/* Promotional Badges */}
+                        {(product.IsFeatured || product.IsBestseller || product.IsNew) && (
+                          <div className={styles.promotionalBadges}>
+                            {product.IsFeatured && (
+                              <span className={styles.badge} title={t('buyPage.badges.featured')}>
+                                ⭐
+                              </span>
+                            )}
+                            {product.IsBestseller && (
+                              <span className={styles.badge} title={t('buyPage.badges.bestseller')}>
+                                🏆
+                              </span>
+                            )}
+                            {product.IsNew && (
+                              <span className={styles.badge} title={t('buyPage.badges.new')}>
+                                🆕
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
                         <div className={styles.imageContainer}>
                           <Image
                             src={product.ImageURL || '/images/placeholder-ac.svg'}
                             alt={`${product.Brand} ${product.Model}`}
                             fill
                             className={styles.image}
+                            priority={index < 6} // Priority loading for first 6 images
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            quality={85}
                           />
                         </div>
                         
@@ -639,7 +686,7 @@ const BuyPage = () => {
                           
                           <div className={styles.specs}>
                             <div className={styles.spec}>
-                              <span className={styles.specLabel}>{t('buyPage.type')}:</span> {product.Type}
+                              <span className={styles.specLabel}>{t('buyPage.type')}:</span> {translateType(product.Type)}
                             </div>
                             <div className={styles.spec}>
                               <span className={styles.specLabel}>{t('buyPage.capacity')}:</span> {product.CapacityBTU} {t('buyPage.btu')}
@@ -815,12 +862,19 @@ const BuyPage = () => {
             
             <div className={styles.mobileFilterHeader}>
               <h2 className={styles.filterTitle}>{t('buyPage.filters.title')}</h2>
-              <button 
-                className={styles.mobileCloseButton}
-                onClick={closeMobileFilters}
-                aria-label={t('buyPage.filters.close')}>
-                ✕
-              </button>
+              <div className={styles.mobileFilterHeaderActions}>
+                <button 
+                  className={styles.mobileClearButton}
+                  onClick={clearAllFilters}>
+                  {t('buyPage.filters.clearAll')}
+                </button>
+                <button 
+                  className={styles.mobileCloseButton}
+                  onClick={closeMobileFilters}
+                  aria-label={t('buyPage.filters.close')}>
+                  ✕
+                </button>
+              </div>
             </div>
             
             {/* Mobile Filter Content */}
@@ -855,7 +909,7 @@ const BuyPage = () => {
                         checked={(tempMobileFilters || filters).types.includes(type)}
                         onChange={() => handleFilterChange('types', type)}
                       />
-                      <span className={styles.filterLabel}>{type}</span>
+                      <span className={styles.filterLabel}>{translateType(type)}</span>
                     </label>
                   ))}
                 </div>
@@ -923,8 +977,8 @@ const BuyPage = () => {
                   minValue={(tempMobileFilters || filters).priceRange.min}
                   maxValue={(tempMobileFilters || filters).priceRange.max}
                   onPriceChange={handlePriceChange}
-                  minBound={minPrice}
-                  maxBound={maxPrice}
+                  minBound={priceBounds.min}
+                  maxBound={priceBounds.max}
                 />
               </div>
             </div>

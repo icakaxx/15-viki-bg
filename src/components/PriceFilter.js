@@ -176,8 +176,8 @@ const PriceFilter = ({
       {/* Helper Text */}
       <div className={styles.helperText}>
         {t('buyPage.filters.priceHelp', { 
-          min: minBound ? minBound.toLocaleString('bg-BG') : '0', 
-          max: maxBound ? maxBound.toLocaleString('bg-BG') : '10000' 
+          min: minBound.toLocaleString('bg-BG'), 
+          max: maxBound.toLocaleString('bg-BG') 
         })}
       </div>
     </div>

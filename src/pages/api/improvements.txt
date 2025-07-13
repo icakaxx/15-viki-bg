@@ -1,0 +1,65 @@
+ Priority: High
+Apply the following updates and visual improvements across the frontend of the application:
+
+📱 1. Mobile View – Cart Visibility
+Issue: On mobile devices, the cart is not visible or accessible. - done 
+
+Fix: Ensure the cart icon or navigation is visible and functional in mobile view.
+
+Expectation: A user should be able to view and access the cart from any screen size, especially phones.
+
+🖱️ 2. Back to Top Button – Hand Cursor
+Update: Add a pointer (hand) cursor when hovering over the “Back to Top” button to indicate it's clickable. 
+
+Functionality stays the same — only cursor feedback changes. - done
+
+🌐 3. i18n Translation – 'Loading' on Buy ACs
+Issue: On the Buy AC page (when language is set to Bulgarian), the word “Loading” still appears in English.
+
+Fix:
+
+Replace with the correct localized string: Зареждане. - should be fixed
+
+✅ Also audit the application for other similar untranslated words and list them before proceeding with code — ask me to confirm.
+
+Look specifically in:
+
+API fetch states
+
+Button spinners/loaders
+
+Dynamic content fallback values
+
+💰 4. Price Range Display – Buy AC Page
+Issue: The UI currently shows:
+{{min}} лв. и {{max}} лв.
+without actual values.
+
+Action: Ask me for the min and max values to use (or fetch dynamically if already implemented).
+
+Then: Populate the placeholders correctly or gracefully hide the component if values aren’t available. - done
+
+🎯 5. Filter Bar Spacing – Buy AC Page
+Issue: The “Filters” title and “Clear All” link are too close together.
+
+Fix: Add appropriate horizontal spacing or padding between the two for mobile and desktop view.
+
+📐 6. Product Form – Separate Dimensions
+Issue: In the admin panel’s Add Product form, the size/dimensions field is unclear.
+
+Fix:
+
+Split size inputs into:
+
+Indoor Unit Dimensions (e.g., Width x Height x Depth)
+
+Outdoor Unit Dimensions
+
+Add placeholder text to help admins input correctly.
+
+🏷️ 7. Promotional Tags – Checkbox Alignment
+Issue: In the “Promotional Labels” section (e.g. “Most Sold”, “New Product”), the checkboxes are not vertically aligned with their labels.
+
+Fix: Align the checkboxes so they sit inline with the text on all screen sizes.
+
+Use flexbox or grid layout where necessary for proper alignment.
