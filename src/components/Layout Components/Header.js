@@ -3,12 +3,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FiMenu } from "react-icons/fi";
 import styles from "../../styles/Component Styles/Header.module.css";
-import companyNameStyles from "../../styles/Component Styles/CompanyName.module.css";
-import logoContainerStyles from "../../styles/Component Styles/LogoContainer.module.css";
-import logoImageStyles from "../../styles/Component Styles/LogoImage.module.css";
 import navigationStyles from "../../styles/Component Styles/NavigationContainer.module.css";
 import { useTranslation } from "next-i18next";
 import CartIcon from "../CartIcon";
+import BrandContainer from "../BrandContainer";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -37,20 +35,9 @@ const Header = () => {
       <header className={styles.header}>
         <div className={styles.container}>
         
-        {/* Left Section - Company Name */}
+        {/* Left Section - Brand Container (Logo + Company Name) */}
         <div className={styles.leftSection}>
-          <div className={companyNameStyles.companyName}>
-            БГВИКИ15 ЕООД
-          </div>
-        </div>
-        
-        {/* Logo - Between Company Name and Navigation */}
-        <div className={logoContainerStyles.logoContainer}>
-          <img 
-            src="/images/bgVIKI15-eood.jpg" 
-            alt="VIKI15 EOOD Logo" 
-            className={logoImageStyles.logoImage}
-          />
+          <BrandContainer />
         </div>
 
         {/* Center Navigation */}

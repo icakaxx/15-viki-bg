@@ -1,7 +1,6 @@
 /* Logo Image Styles - Separate module for easy dev console editing */
 .logoImage {
-  position: absolute;
-  left: -100px;
+  position: relative;
   object-fit: contain;
   filter: brightness() contrast(1.05) saturate(1.1);
   border-radius: 39px;
