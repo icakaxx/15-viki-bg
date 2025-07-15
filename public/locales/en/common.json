@@ -84,7 +84,7 @@
   "solutions": {
     "air_conditioning": {
       "title": "Air Conditioner Sales and Installation",
-      "short": "Short description for air conditioning.",
+      "short": "Efficient and reliable air conditioners for home and business – sales, installation, and professional consultation.",
       "details": "Detailed description for air conditioner sales and installation.",
       "benefits": [
         "High energy efficiency",
@@ -94,7 +94,7 @@
     },
     "chillers": {
       "title": "Chillers – Industrial and Commercial Cooling Solutions for Buildings and Technological Processes",
-      "short": "Short description for chillers.",
+      "short": "Flexible and energy-efficient chillers for any needs – from offices to industrial facilities.",
       "details": "Detailed description for industrial and commercial chillers.",
       "benefits": [
         "Flexible solutions for various applications",
@@ -114,7 +114,7 @@
     },
     "heat_pumps": {
       "title": "Heat Pumps – Modern Energy-Efficient Solutions for Heating and Cooling Residential and Commercial Buildings",
-      "short": "Short description for heat pumps.",
+      "short": "Modern energy-efficient solutions for heating and cooling residential and commercial buildings",
       "details": "Detailed description for heat pumps.",
       "benefits": [
         "Energy-saving technologies",
@@ -124,7 +124,7 @@
     },
     "cold_rooms": {
       "title": "Cold Rooms – Design and Installation for Storage of Food Products, Medical Materials, and More",
-      "short": "Short description for cold rooms.",
+      "short": "Optimal storage conditions for food products, medical materials, and other",
       "details": "Detailed description for cold rooms.",
       "benefits": [
         "Optimal storage conditions",
@@ -134,7 +134,7 @@
     },
     "ventilation": {
       "title": "Ventilation Systems – Solutions for Clean Air, Recuperation, and Optimal Circulation in All Types of Premises",
-      "short": "Short description for ventilation systems.",
+      "short": "Solutions for clean air, recuperation, and optimal circulation in all types of premises",
       "details": "Detailed description for ventilation systems.",
       "benefits": [
         "Improved air quality",

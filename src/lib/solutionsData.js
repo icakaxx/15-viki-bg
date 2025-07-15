@@ -1,32 +1,32 @@
 export const solutions = [
   {
     id: "air_conditioning",
-    image: "https://via.placeholder.com/300x140.png?text=Air+Conditioning",
+    image: "/images/products/installation.jpg",
     translationKey: "solutions.air_conditioning"
   },
   {
     id: "chillers",
-    image: "https://via.placeholder.com/300x140.png?text=Chillers",
+    image: "/images/products/chiller.jpeg",
     translationKey: "solutions.chillers"
   },
   {
     id: "vrv-vrf",
-    image: "https://via.placeholder.com/300x140.png?text=VRV%2FVRF+Systems",
+    image: "/images/products/VRF.jpg",
     translationKey: "solutions.vrv_vrf"
   },
   {
     id: "heat-pumps",
-    image: "https://via.placeholder.com/300x140.png?text=Heat+Pumps",
+    image: "/images/products/heatPump.jpg",
     translationKey: "solutions.heat_pumps"
   },
   {
     id: "cold-rooms",
-    image: "https://via.placeholder.com/300x140.png?text=Cold+Rooms",
+    image: "/images/products/coldRoom.jpg",
     translationKey: "solutions.cold_rooms"
   },
   {
     id: "ventilation",
-    image: "https://via.placeholder.com/300x140.png?text=Ventilation",
+    image: "/images/products/ventillationSystem.jpg",
     translationKey: "solutions.ventilation"
   }
 ]; 

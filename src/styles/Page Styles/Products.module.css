@@ -149,9 +149,9 @@
 
 .paginationButton {
   padding: 0.75rem 1.5rem;
-  border: 1px solid #ddd;
-  background: white;
-  color: #333;
+  border: none;
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 500;
@@ -161,9 +161,9 @@
 }
 
 .paginationButton:hover:not(.disabled) {
-  background: #f8f9fa;
-  border-color: #007bff;
-  color: #007bff;
+  background: linear-gradient(135deg, #1e3a21 0%, #2c5530 100%);
+  border: none;
+  color: white;
 }
 
 .paginationButton.disabled {
@@ -183,9 +183,9 @@
 .pageNumber {
   width: 40px;
   height: 40px;
-  border: 1px solid #ddd;
-  background: white;
-  color: #333;
+  border: none;
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 500;
@@ -197,9 +197,8 @@
 }
 
 .pageNumber:hover:not(.active) {
-  background: #f8f9fa;
-  border-color: #007bff;
-  color: #007bff;
+  background: linear-gradient(135deg, #1e3a21 0%, #2c5530 100%);
+  color: white;
 }
 
 .pageNumber.active {
@@ -1312,4 +1311,188 @@
   .container {
     max-width: 1600px;
   }
+} 
+
+/* Hero Section */
+.heroSection {
+  margin-bottom: 4rem;
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+}
+.heroTitle {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+.heroSubtitle {
+  font-size: 1.2rem;
+  color: #666;
+  max-width: 800px;
+  margin: 0 auto 2rem;
+}
+.heroButton {
+  display: inline-block;
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: background 0.2s;
+  border: none;
+  cursor: pointer;
+}
+.heroButton:hover {
+  background: linear-gradient(135deg, #1e3a21 0%, #2c5530 100%);
+}
+
+/* Climate Solutions Section */
+.solutionsSection {
+  margin-bottom: 4rem;
+}
+.solutionsTitle {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.solutionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 6rem 2rem; /* 3rem row gap, 2rem column gap */
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+.serviceCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-height: 420px; /* Ensures all cards are at least this tall */
+}
+.imageContainer {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+.serviceCardImage {
+  width: 100%;
+  border-radius: 8px;
+  max-height: 200px;
+  object-fit: cover;
+}
+.serviceCardTitle {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #2c5530;
+}
+.serviceCardDescription {
+  color: #666;
+  line-height: 1.6;
+  flex: 1 1 auto;
+  margin-bottom: 1rem;
+}
+.learnMoreButton {
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: auto;
+  transition: background 0.2s;
+  width: 50%;
+  align-self: center;
+}
+.learnMoreButton:hover {
+  background: linear-gradient(135deg, #1e3a21 0%, #2c5530 100%);
+}
+
+/* Services Section */
+.servicesSection {
+  margin-bottom: 4rem;
+}
+.servicesTitle {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #333;
+}
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.serviceInfoCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.serviceCardTitle {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #2c5530;
+}
+
+.serviceCardDescription {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* CTA Section */
+.ctaSection {
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  text-align: center;
+  color: white;
+}
+.ctaTitle {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+.ctaSubtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+.ctaActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.ctaInquiryButton {
+  display: inline-block;
+  background: white;
+  color: #2c5530;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  border: none;
+}
+.ctaContactButton {
+  display: inline-block;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
 } 

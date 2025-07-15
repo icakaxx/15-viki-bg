@@ -4,8 +4,7 @@ import Link from 'next/link';
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { solutions } from "../lib/solutionsData";
-import styles from '../styles/Page Styles/BuyPage.module.css';
-import stylesIndex from "../styles/Page Styles/index.module.css";
+import styles from '../styles/Page Styles/Products.module.css';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export async function getStaticProps({ locale }) {
@@ -20,27 +19,24 @@ const ProductsPage = () => {
   const { t, i18n } = useTranslation("common");
   const router = useRouter();
 
-
-
-
-
   const services = [
     {
       title: t('productsPage.services.consultation.title'),
-      description: t('productsPage.services.consultation.description')
-    },
+      description: t('productsPage.services.consultation.description'),
+      image: '/images/products/consultation.jpg'    },
     {
       title: t('productsPage.services.installation.title'),
-      description: t('productsPage.services.installation.description')
+      description: t('productsPage.services.installation.description'),
+      image: '/images/products/ACInstall.jpg'
     },
     {
       title: t('productsPage.services.maintenance.title'),
-      description: t('productsPage.services.maintenance.description')
-    },
+      description: t('productsPage.services.maintenance.description'),
+      image: '/images/products/maintenance.jpg'    },
     {
       title: t('productsPage.services.warranty.title'),
-      description: t('productsPage.services.warranty.description')
-    }
+      description: t('productsPage.services.warranty.description'),
+      image: '/images/products/warranty.jpg'    }
   ];
 
   return (
@@ -54,59 +50,31 @@ const ProductsPage = () => {
       
       <div className={styles.container}>
         <h1 className={styles.title}>{t('productsPage.title')}</h1>
+        <p style={{ textAlign: 'center', fontSize: '1.2rem', color: '#2c5530', marginBottom: '2rem', maxWidth: 700, marginLeft: 'auto', marginRight: 'auto' }}>
+          {i18n.language === 'bg'
+            ? 'Открийте най-добрите климатични решения и услуги за вашия дом или бизнес. Разгледайте нашите продукти и изберете най-подходящото за вас!'
+            : 'Discover the best climate solutions and services for your home or business. Explore our products and find the perfect fit for your needs!'}
+        </p>
         
-        {/* Hero Section */}
-        <section style={{ marginBottom: '4rem', textAlign: 'center', padding: '2rem', backgroundColor: '#f8f9fa', borderRadius: '12px' }}>
-          <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#333' }}>
-            {t('productsPage.hero.title')}
-          </h2>
-          <p style={{ fontSize: '1.2rem', color: '#666', maxWidth: '800px', margin: '0 auto 2rem' }}>
-            {t('productsPage.hero.subtitle')}
-          </p>
-          <Link href="/buy" style={{
-            display: 'inline-block',
-            background: 'linear-gradient(135deg, #2c5530 0%, #4a7c59 100%)',
-            color: 'white',
-            padding: '1rem 2rem',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontWeight: '600',
-            fontSize: '1.1rem'
-          }}>
-            {t('productsPage.hero.cta')}
-          </Link>
-        </section>
-
-
-
         {/* Climate Solutions Section */}
-        <section style={{ marginBottom: '4rem' }}>
-          <h2 style={{ textAlign: "center", marginBottom: "2rem" }}>{t("products_solutions_section_title", "Продукти и решения")}</h2>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
-              gap: "3rem",
-              maxWidth: 1400,
-              margin: "0 auto",
-              padding: "2rem 1rem"
-            }}
-          >
+        <section className={styles.solutionsSection}>
+          <div className={styles.solutionsGrid}>
             {solutions.map((solution) => (
               <div
                 key={solution.id}
-                className="service-card"
+                className={styles.serviceCard}
               >
-                <div className="image-container">
+                <div className={styles.imageContainer}>
                   <img
                     src={solution.image}
                     alt={t(`${solution.translationKey}.title`)}
+                    className={styles.serviceCardImage}
                   />
                 </div>
-                <h3>
+                <h3 className={styles.serviceCardTitle}>
                   {t(`${solution.translationKey}.title`)}
                 </h3>
-                <p className="description">
+                <p className={styles.serviceCardDescription}>
                   {t(`${solution.translationKey}.short`)}
                 </p>
                 <button
@@ -117,6 +85,7 @@ const ProductsPage = () => {
                       router.push(`/solutions/${solution.id}`);
                     }
                   }}
+                  className={styles.learnMoreButton}
                 >
                   {i18n.language === "bg" ? "Научи повече" : "Learn More"}
                 </button>
@@ -126,61 +95,38 @@ const ProductsPage = () => {
         </section>
 
         {/* Services */}
-        <section style={{ marginBottom: '4rem' }}>
-          <h2 style={{ fontSize: '2.5rem', textAlign: 'center', marginBottom: '3rem', color: '#333' }}>
+        <section className={styles.servicesSection}>
+          <h2 className={styles.servicesTitle}>
             {t('productsPage.services.title')}
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+          <div className={styles.servicesGrid}>
             {services.map((service, index) => (
-              <div key={index} style={{
-                background: 'white',
-                padding: '2rem',
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #e0e0e0',
-                textAlign: 'center'
-              }}>
-                <h3 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: '#2c5530' }}>{service.title}</h3>
-                <p style={{ color: '#666', lineHeight: '1.6' }}>{service.description}</p>
+              <div key={index} className={styles.serviceInfoCard}>
+                {service.image && (
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    className={styles.serviceCardImage}
+                  />
+                )}
+                <h3 className={styles.serviceCardTitle}>{service.title}</h3>
+                <p className={styles.serviceCardDescription}>{service.description}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* CTA Section */}
-        <section style={{
-          background: 'linear-gradient(135deg, #2c5530 0%, #4a7c59 100%)',
-          padding: '3rem 2rem',
-          borderRadius: '12px',
-          textAlign: 'center',
-          color: 'white'
-        }}>
-          <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{t('productsPage.cta.title')}</h2>
-          <p style={{ fontSize: '1.2rem', marginBottom: '2rem', opacity: '0.9' }}>
+        <section className={styles.ctaSection}>
+          <h2 className={styles.ctaTitle}>{t('productsPage.cta.title')}</h2>
+          <p className={styles.ctaSubtitle}>
             {t('productsPage.cta.subtitle')}
           </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/inquiry" style={{
-              display: 'inline-block',
-              background: 'white',
-              color: '#2c5530',
-              padding: '1rem 2rem',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontWeight: '600'
-            }}>
+          <div className={styles.ctaActions}>
+            <Link href="/inquiry" className={styles.ctaInquiryButton}>
               {t('productsPage.cta.inquiry')}
             </Link>
-            <Link href="/contact" style={{
-              display: 'inline-block',
-              background: 'transparent',
-              color: 'white',
-              border: '2px solid white',
-              padding: '1rem 2rem',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontWeight: '600'
-            }}>
+            <Link href="/contact" className={styles.ctaContactButton}>
               {t('productsPage.cta.contact')}
             </Link>
           </div>
