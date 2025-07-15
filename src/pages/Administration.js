@@ -1,12 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
-import { LanguageContext } from '../components/Layout Components/Header';
-import { useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 import styles from '../styles/Page Styles/Administration.module.css';
 import AdminOrderHistoryTab from '../components/AdminOrderHistoryTab';
 import WeeklyInstallationsTab from '../components/WeeklyInstallationsTab';
 
 export default function Administration() {
-    const { t, locale, switchLanguage } = useContext(LanguageContext);
+    const { t } = useTranslation('common');
+    const router = useRouter();
+    const locale = router.locale || 'bg';
     
     // Debug info
     console.log('Admin Panel - Current locale:', locale);
@@ -1835,6 +1837,16 @@ export default function Administration() {
             )}
         </div>
     );
+}
+
+export async function getStaticProps({ locale }) {
+  const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+  
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }
 
  

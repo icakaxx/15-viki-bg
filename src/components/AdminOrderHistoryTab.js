@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { LanguageContext } from './Layout Components/Header';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'next-i18next';
 
 const PAGE_SIZE = 20;
 
@@ -10,7 +10,7 @@ function formatDate(dateStr) {
 }
 
 export default function AdminOrderHistoryTab() {
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

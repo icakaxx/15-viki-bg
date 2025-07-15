@@ -1,13 +1,13 @@
-import React, { useContext, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
-import { LanguageContext } from '../components/Layout Components/Header';
+import { useTranslation } from 'next-i18next';
 import { useCart } from '../contexts/CartContext';
 import styles from '../styles/Page Styles/CheckoutPage.module.css';
 
 const CheckoutPage = () => {
   const { cart, updateQuantity, removeFromCart, updateItemAccessories, updateItemInstallation, clearCart, formatPrice, formatPriceEUR } = useCart();
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -730,5 +730,15 @@ const CheckoutPage = () => {
     </>
   );
 };
+
+export async function getStaticProps({ locale }) {
+  const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+  
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
+}
 
 export default CheckoutPage; 

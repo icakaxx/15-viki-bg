@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import Image from 'next/image';
-import Head from '../../components/Head';
-import { LanguageContext } from '../../components/Layout Components/Header';
 import { useCart } from '../../contexts/CartContext';
 import styles from '../../styles/Page Styles/ProductDetail.module.css';
 
 const ProductDetailPage = () => {
   const router = useRouter();
   const { productId } = router.query;
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
   const { addToCartEnhanced } = useCart();
 
   // Helper function to translate AC types
@@ -825,5 +825,22 @@ const ProductDetailPage = () => {
     </>
   );
 };
+
+export async function getStaticPaths() {
+  return {
+    paths: [],
+    fallback: 'blocking'
+  };
+}
+
+export async function getStaticProps({ locale }) {
+  const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+  
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
+}
 
 export default ProductDetailPage; 

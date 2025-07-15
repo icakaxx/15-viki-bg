@@ -1,6 +1,5 @@
 import Head from 'next/head';
-import { useContext } from 'react';
-import { LanguageContext } from './Layout Components/Header';
+import { useRouter } from 'next/router';
 
 const SEOHead = ({ 
   title, 
@@ -11,7 +10,8 @@ const SEOHead = ({
   type = 'website',
   noIndex = false 
 }) => {
-  const { locale } = useContext(LanguageContext) || { locale: 'bg' };
+  const router = useRouter();
+  const locale = router.locale || 'bg';
 
   const fullTitle = title ? `${title} - BGVIKI15 Ltd` : 'BGVIKI15 Ltd - Air Conditioning & Climate Solutions';
   const fullDescription = description || 'Quality and reliable air conditioning solutions since 2000. Air conditioners, climate control and energy efficient solutions in Bulgaria.';

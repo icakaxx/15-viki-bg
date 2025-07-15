@@ -1,11 +1,11 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
-import { LanguageContext } from '../components/Layout Components/Header';
+import { useTranslation } from 'next-i18next';
 import styles from '../styles/Page Styles/BuyPage.module.css';
 
+// Fixed Link import issue
 const InquiryPage = () => {
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -368,7 +368,7 @@ const InquiryPage = () => {
           <p style={{ fontSize: '1.1rem', marginBottom: '2rem', color: '#666' }}>
             {t('inquiryPage.productsCta.subtitle')}
           </p>
-          <Link href="/buy" style={{
+          <a href="/buy" style={{
             display: 'inline-block',
             background: 'linear-gradient(135deg, #2c5530 0%, #4a7c59 100%)',
             color: 'white',
@@ -378,11 +378,21 @@ const InquiryPage = () => {
             fontWeight: '600'
           }}>
             {t('inquiryPage.productsCta.button')}
-          </Link>
+          </a>
         </section>
       </div>
     </>
   );
 };
+
+export async function getStaticProps({ locale }) {
+  const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+  
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
+}
 
 export default InquiryPage; 

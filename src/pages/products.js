@@ -1,47 +1,28 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { LanguageContext } from '../components/Layout Components/Header';
+import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next";
+import { solutions } from "../lib/solutionsData";
 import styles from '../styles/Page Styles/BuyPage.module.css';
+import stylesIndex from "../styles/Page Styles/index.module.css";
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
+export async function getStaticProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
+}
 
 const ProductsPage = () => {
-  const { t } = useContext(LanguageContext);
+  const { t, i18n } = useTranslation("common");
+  const router = useRouter();
 
-  const productCategories = [
-    {
-      title: t('productsPage.categories.residential.title'),
-      description: t('productsPage.categories.residential.description'),
-      features: [
-        t('productsPage.categories.residential.features.split'),
-        t('productsPage.categories.residential.features.multiSplit'),
-        t('productsPage.categories.residential.features.inverter'),
-        t('productsPage.categories.residential.features.wifi')
-      ],
-      image: "/images/placeholder-ac.svg"
-    },
-    {
-      title: t('productsPage.categories.commercial.title'), 
-      description: t('productsPage.categories.commercial.description'),
-      features: [
-        t('productsPage.categories.commercial.features.vrf'),
-        t('productsPage.categories.commercial.features.cassette'),
-        t('productsPage.categories.commercial.features.ducted'),
-        t('productsPage.categories.commercial.features.central')
-      ],
-      image: "/images/placeholder-ac.svg"
-    },
-    {
-      title: t('productsPage.categories.industrial.title'),
-      description: t('productsPage.categories.industrial.description'),
-      features: [
-        t('productsPage.categories.industrial.features.chillers'),
-        t('productsPage.categories.industrial.features.rooftop'),
-        t('productsPage.categories.industrial.features.precision'),
-        t('productsPage.categories.industrial.features.ventilation')
-      ],
-      image: "/images/placeholder-ac.svg"
-    }
-  ];
+
+
+
 
   const services = [
     {
@@ -69,6 +50,7 @@ const ProductsPage = () => {
         <meta name="description" content={t('productsPage.metaDescription')} />
         <meta name="robots" content="index, follow" />
       </Head>
+
       
       <div className={styles.container}>
         <h1 className={styles.title}>{t('productsPage.title')}</h1>
@@ -95,45 +77,49 @@ const ProductsPage = () => {
           </Link>
         </section>
 
-        {/* Product Categories */}
+
+
+        {/* Climate Solutions Section */}
         <section style={{ marginBottom: '4rem' }}>
-          <h2 style={{ fontSize: '2.5rem', textAlign: 'center', marginBottom: '3rem', color: '#333' }}>
-            {t('productsPage.categories.title')}
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
-            {productCategories.map((category, index) => (
-              <div key={index} style={{
-                background: 'white',
-                padding: '2rem',
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #e0e0e0'
-              }}>
-                <div style={{
-                  width: '100%',
-                  height: '200px',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '8px',
-                  marginBottom: '1.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <img src={category.image} alt={category.title} style={{ maxWidth: '150px', opacity: '0.7' }} />
+          <h2 style={{ textAlign: "center", marginBottom: "2rem" }}>{t("products_solutions_section_title", "Продукти и решения")}</h2>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+              gap: "3rem",
+              maxWidth: 1400,
+              margin: "0 auto",
+              padding: "2rem 1rem"
+            }}
+          >
+            {solutions.map((solution) => (
+              <div
+                key={solution.id}
+                className="service-card"
+              >
+                <div className="image-container">
+                  <img
+                    src={solution.image}
+                    alt={t(`${solution.translationKey}.title`)}
+                  />
                 </div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#333' }}>{category.title}</h3>
-                <p style={{ color: '#666', marginBottom: '1.5rem', lineHeight: '1.6' }}>{category.description}</p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                  {category.features.map((feature, idx) => (
-                    <li key={idx} style={{
-                      padding: '0.5rem 0',
-                      borderBottom: idx < category.features.length - 1 ? '1px solid #f0f0f0' : 'none',
-                      color: '#555'
-                    }}>
-                      ✓ {feature}
-                    </li>
-                  ))}
-                </ul>
+                <h3>
+                  {t(`${solution.translationKey}.title`)}
+                </h3>
+                <p className="description">
+                  {t(`${solution.translationKey}.short`)}
+                </p>
+                <button
+                  onClick={() => {
+                    if (solution.id === 'air_conditioning') {
+                      router.push('/buy');
+                    } else {
+                      router.push(`/solutions/${solution.id}`);
+                    }
+                  }}
+                >
+                  {i18n.language === "bg" ? "Научи повече" : "Learn More"}
+                </button>
               </div>
             ))}
           </div>

@@ -1,11 +1,20 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { LanguageContext } from '../components/Layout Components/Header';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import styles from '../styles/Page Styles/index.module.css';
 
+export async function getStaticProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
+}
+
 const HomePage = () => {
-  const { t } = useContext(LanguageContext);
+  const { t, i18n } = useTranslation('common');
 
   return (
     <>
@@ -18,59 +27,277 @@ const HomePage = () => {
         <meta property="og:type" content="website" />
       </Head>
       
-      <div className={styles.container}>
-        <section className={styles.hero}>
+      {/* Hero Section */}
+      <section className={styles.hero}>
+        <div className={styles.heroBackground}></div>
+        <div className={styles.heroOverlay}></div>
+        <div className={styles.container}>
           <div className={styles.heroContent}>
             <h1 className={styles.heroTitle}>
-              {t('hero.title')}
+              {i18n.language === 'bg' ? 'Професионални HVAC решения' : 'Professional HVAC Solutions'}
+              <br />
+              <span className={styles.heroSubtext}>
+                {i18n.language === 'bg' ? 'От 2000 година' : 'Since 2000'}
+              </span>
             </h1>
             <p className={styles.heroSubtitle}>
-              {t('hero.subtitle')}
+              {i18n.language === 'bg' 
+                ? 'Водещ доставчик на климатични, отоплителни и вентилационни системи в България. Качествени инсталации, енергийно ефективни решения и експертно обслужване.'
+                : 'Leading provider of air conditioning, heating, and ventilation systems in Bulgaria. Quality installations, energy-efficient solutions, and expert service you can trust.'
+              }
             </p>
-            <div className={styles.heroActions}>
-              <Link href="/buy" className={styles.primaryButton}>
-                {t('hero.shopNow')}
+            
+            <div className={styles.heroStats}>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>2000+</span>
+                <span className={styles.statLabel}>
+                  {i18n.language === 'bg' ? 'Инсталации' : 'Installations'}
+                </span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>20+</span>
+                <span className={styles.statLabel}>
+                  {i18n.language === 'bg' ? 'Години опит' : 'Years Experience'}
+                </span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statNumber}>98%</span>
+                <span className={styles.statLabel}>
+                  {i18n.language === 'bg' ? 'Доволни клиенти' : 'Satisfied Clients'}
+                </span>
+              </div>
+            </div>
+            
+            <div className={styles.heroButtons}>
+              <Link href="/buy" className={styles.btnPrimary}>
+                🛒 {i18n.language === 'bg' ? 'Купи продукти' : 'Shop Products'}
               </Link>
-              <Link href="/buy" className={styles.secondaryButton}>
-                {t('hero.learnMore')}
+              <Link href="/contact" className={styles.btnSecondary}>
+                💬 {i18n.language === 'bg' ? 'Заяви оферта' : 'Get Quote'}
               </Link>
             </div>
           </div>
-          <div className={styles.heroImage}>
-            <img 
-              src="/images/bgVIKI15-eood.jpg" 
-              alt={t('company.name')}
-              className={styles.companyLogo}
-            />
-          </div>
-        </section>
+        </div>
+        
+        {/* Floating Cards for All Services */}
+        <div className={`${styles.floatingCard} ${styles.floatingCard1}`}>
+          <h3>❄️ {i18n.language === 'bg' ? 'Климатици' : 'Air Conditioning'}</h3>
+          <p>
+            {i18n.language === 'bg' 
+              ? 'Професионални инсталации с гаранция за качество и надеждност'
+              : 'Professional installations with quality and reliability guarantee'
+            }
+          </p>
+        </div>
 
-        <section className={styles.features}>
-          <h2 className={styles.sectionTitle}>{t('features.title')}</h2>
-          <div className={styles.featuresGrid}>
-            <div className={styles.featureCard}>
-              <h3>{t('features.quality.title')}</h3>
-              <p>{t('features.quality.description')}</p>
+        <div className={`${styles.floatingCard} ${styles.floatingCard2}`}>
+          <h3>🏭 {i18n.language === 'bg' ? 'Чилъри' : 'Chillers'}</h3>
+          <p>
+            {i18n.language === 'bg' 
+              ? 'Индустриални решения за охлаждане на големи обекти'
+              : 'Industrial cooling solutions for large buildings'
+            }
+          </p>
+        </div>
+
+        <div className={`${styles.floatingCard} ${styles.floatingCard3}`}>
+          <h3>🏢 {i18n.language === 'bg' ? 'VRV/VRF системи' : 'VRV/VRF Systems'}</h3>
+          <p>
+            {i18n.language === 'bg' 
+              ? 'Високоефективни системи за многозонов контрол'
+              : 'High-efficiency multi-zone control systems'
+            }
+          </p>
+        </div>
+
+        <div className={`${styles.floatingCard} ${styles.floatingCard4}`}>
+          <h3>🔥 {i18n.language === 'bg' ? 'Термопомпи' : 'Heat Pumps'}</h3>
+          <p>
+            {i18n.language === 'bg' 
+              ? 'Енергийно ефективни решения за отопление'
+              : 'Energy-efficient heating solutions'
+            }
+          </p>
+        </div>
+
+        <div className={`${styles.floatingCard} ${styles.floatingCard5}`}>
+          <h3>🧊 {i18n.language === 'bg' ? 'Хладилни камери' : 'Cold Rooms'}</h3>
+          <p>
+            {i18n.language === 'bg' 
+              ? 'Специализирани решения за съхранение'
+              : 'Specialized storage solutions'
+            }
+          </p>
+        </div>
+
+        <div className={`${styles.floatingCard} ${styles.floatingCard6}`}>
+          <h3>🌀 {i18n.language === 'bg' ? 'Вентилация' : 'Ventilation'}</h3>
+          <p>
+            {i18n.language === 'bg' 
+              ? 'Системи за качествен въздух'
+              : 'Quality air circulation systems'
+            }
+          </p>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className={styles.services}>
+        <div className={styles.container}>
+          <h2 className={styles.sectionTitle}>
+            {i18n.language === 'bg' ? 'Нашите услуги' : 'Our Services'}
+          </h2>
+          <p className={styles.sectionSubtitle}>
+            {i18n.language === 'bg' 
+              ? 'Пълен спектър от HVAC решения за всяко приложение'
+              : 'Complete range of HVAC solutions for every application'
+            }
+          </p>
+          
+          <div className={styles.servicesGrid}>
+            <Link href="/buy" className={styles.serviceCard}>
+              <div className={styles.serviceIcon}>❄️</div>
+              <h3>{i18n.language === 'bg' ? 'Климатици' : 'Air Conditioning'}</h3>
+              <p>
+                {i18n.language === 'bg' 
+                  ? 'Продажба и инсталация на климатици за дома и офиса'
+                  : 'Sales and installation of air conditioners for home and office'
+                }
+              </p>
+              <span className={styles.serviceLink}>
+                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
+              </span>
+            </Link>
+
+            <Link href="/solutions/chillers" className={styles.serviceCard}>
+              <div className={styles.serviceIcon}>🏭</div>
+              <h3>{i18n.language === 'bg' ? 'Чилъри' : 'Chillers'}</h3>
+              <p>
+                {i18n.language === 'bg' 
+                  ? 'Индустриални и търговски решения за охлаждане'
+                  : 'Industrial and commercial cooling solutions'
+                }
+              </p>
+              <span className={styles.serviceLink}>
+                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
+              </span>
+            </Link>
+
+            <Link href="/solutions/vrv-vrf" className={styles.serviceCard}>
+              <div className={styles.serviceIcon}>🏢</div>
+              <h3>{i18n.language === 'bg' ? 'VRV/VRF системи' : 'VRV/VRF Systems'}</h3>
+              <p>
+                {i18n.language === 'bg' 
+                  ? 'Високоефективни системи за големи обекти'
+                  : 'High-efficiency systems for large buildings'
+                }
+              </p>
+              <span className={styles.serviceLink}>
+                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
+              </span>
+            </Link>
+
+            <Link href="/solutions/heat-pumps" className={styles.serviceCard}>
+              <div className={styles.serviceIcon}>🔥</div>
+              <h3>{i18n.language === 'bg' ? 'Термопомпи' : 'Heat Pumps'}</h3>
+              <p>
+                {i18n.language === 'bg' 
+                  ? 'Енергийно ефективни решения за отопление и охлаждане'
+                  : 'Energy-efficient heating and cooling solutions'
+                }
+              </p>
+              <span className={styles.serviceLink}>
+                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
+              </span>
+            </Link>
+
+            <Link href="/solutions/cold-rooms" className={styles.serviceCard}>
+              <div className={styles.serviceIcon}>🧊</div>
+              <h3>{i18n.language === 'bg' ? 'Хладилни камери' : 'Cold Rooms'}</h3>
+              <p>
+                {i18n.language === 'bg' 
+                  ? 'Проектиране и монтаж на хладилни камери'
+                  : 'Design and installation of cold storage rooms'
+                }
+              </p>
+              <span className={styles.serviceLink}>
+                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
+              </span>
+            </Link>
+
+            <Link href="/solutions/ventilation" className={styles.serviceCard}>
+              <div className={styles.serviceIcon}>🌀</div>
+              <h3>{i18n.language === 'bg' ? 'Вентилация' : 'Ventilation'}</h3>
+              <p>
+                {i18n.language === 'bg' 
+                  ? 'Системи за обновяване и филтрация на въздуха'
+                  : 'Air renewal and filtration systems'
+                }
+              </p>
+              <span className={styles.serviceLink}>
+                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
+              </span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className={styles.about}>
+        <div className={styles.container}>
+          <div className={styles.aboutContent}>
+            <div className={styles.aboutText}>
+              <h2>
+                {i18n.language === 'bg' ? 'За БГВИКИ15 ЕООД' : 'About BGVIKI15 Ltd'}
+              </h2>
+              <p>
+                {i18n.language === 'bg' 
+                  ? 'С над 20 години опит в HVAC индустрията, ние сме водещата компания в България за продажба, инсталация и поддръжка на климатични, отоплителни и вентилационни системи.'
+                  : 'With over 20 years of experience in the HVAC industry, we are the leading company in Bulgaria for sales, installation and maintenance of air conditioning, heating and ventilation systems.'
+                }
+              </p>
+              <p>
+                {i18n.language === 'bg' 
+                  ? 'Нашият екип от сертифицирани специалисти осигурява най-високо качество на услугите и използва най-модерните технологии за енергийна ефективност.'
+                  : 'Our team of certified specialists ensures the highest quality of services and uses the most modern technologies for energy efficiency.'
+                }
+              </p>
+              
+              <ul className={styles.aboutFeatures}>
+                <li>{i18n.language === 'bg' ? 'Сертифицирани специалисти' : 'Certified specialists'}</li>
+                <li>{i18n.language === 'bg' ? 'Гаранция за качество' : 'Quality guarantee'}</li>
+                <li>{i18n.language === 'bg' ? 'Енергийно ефективни решения' : 'Energy efficient solutions'}</li>
+                <li>{i18n.language === 'bg' ? '24/7 техническа поддръжка' : '24/7 technical support'}</li>
+              </ul>
             </div>
-            <div className={styles.featureCard}>
-              <h3>{t('features.service.title')}</h3>
-              <p>{t('features.service.description')}</p>
-            </div>
-            <div className={styles.featureCard}>
-              <h3>{t('features.experience.title')}</h3>
-              <p>{t('features.experience.description')}</p>
+            
+            <div className={styles.aboutImage}>
+              <img 
+                src="https://via.placeholder.com/500x400.png?text=HVAC+Professional+Team" 
+                alt={i18n.language === 'bg' ? 'Нашият екип' : 'Our Team'}
+              />
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className={styles.cta}>
-          <h2>{t('cta.title')}</h2>
-          <p>{t('cta.description')}</p>
-          <Link href="/buy" className={styles.ctaButton}>
-            {t('cta.button')}
+      {/* CTA Section */}
+      <section className={styles.cta}>
+        <div className={styles.container}>
+          <h2>
+            {i18n.language === 'bg' ? 'Готови за професионална HVAC консултация?' : 'Ready for professional HVAC consultation?'}
+          </h2>
+          <p>
+            {i18n.language === 'bg' 
+              ? 'Свържете се с нас за безплатна оценка и персонализирано предложение'
+              : 'Contact us for a free assessment and personalized proposal'
+            }
+          </p>
+          <Link href="/contact" className={styles.btnPrimary}>
+            {i18n.language === 'bg' ? 'Свържи се с нас' : 'Contact Us'}
           </Link>
-        </section>
-      </div>
+        </div>
+      </section>
     </>
   );
 };

@@ -1,13 +1,13 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '../contexts/CartContext';
-import { LanguageContext } from './Layout Components/Header';
+import { useTranslation } from 'next-i18next';
 import styles from '../styles/Component Styles/CartIcon.module.css';
 
 const CartIcon = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const { cart, removeFromCart, formatPrice, formatPriceEUR } = useCart();
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
 
   const handleCartClick = () => {
     setShowDropdown(!showDropdown);

@@ -1,11 +1,10 @@
-import React, { useContext } from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
-import { LanguageContext } from '../components/Layout Components/Header';
-import styles from '../styles/Page Styles/BuyPage.module.css';
+import { useTranslation } from 'next-i18next';
+import styles from '../styles/Page Styles/ContactPage.module.css';
 
 const ContactPage = () => {
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
 
   const contactInfo = [
     {
@@ -306,7 +305,7 @@ const ContactPage = () => {
             Направете запитване или разгледайте нашите продукти още днес.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/inquiry" style={{
+            <a href="/inquiry" style={{
               display: 'inline-block',
               background: 'white',
               color: '#2c5530',
@@ -316,8 +315,8 @@ const ContactPage = () => {
               fontWeight: '600'
             }}>
               Направи запитване
-            </Link>
-            <Link href="/buy" style={{
+            </a>
+            <a href="/buy" style={{
               display: 'inline-block',
               background: 'transparent',
               color: 'white',
@@ -328,12 +327,22 @@ const ContactPage = () => {
               fontWeight: '600'
             }}>
               Разгледай продукти
-            </Link>
+            </a>
           </div>
         </section>
       </div>
     </>
   );
 };
+
+export async function getStaticProps({ locale }) {
+  const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+  
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
+}
 
 export default ContactPage; 

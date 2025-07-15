@@ -1,6 +1,6 @@
-import { useContext } from 'react';
 import NextHead from 'next/head';
-import { LanguageContext } from './Layout Components/Header';
+import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 
 const Head = ({ 
   titleKey = 'metaTitle',
@@ -8,15 +8,13 @@ const Head = ({
   customTitle = null,
   customDescription = null
 }) => {
-  const { t, locale, loading } = useContext(LanguageContext) || {
-    t: (key) => key,
-    locale: 'bg',
-    loading: false
-  };
+  const { t } = useTranslation('common');
+  const router = useRouter();
+  const locale = router.locale || 'bg';
 
   // Use custom values if provided, otherwise use translations
-  const title = customTitle || (loading ? 'Loading...' : t(titleKey));
-  const description = customDescription || (loading ? 'Loading...' : t(descriptionKey));
+  const title = customTitle || t(titleKey);
+  const description = customDescription || t(descriptionKey);
   
   // Set language attribute based on current locale
   const htmlLang = locale === 'bg' ? 'bg' : 'en';
@@ -49,7 +47,7 @@ const Head = ({
       } />
       
       {/* Favicon */}
-      <link rel="icon" href="/favicon.ico" />
+      <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
     </NextHead>
   );
 };

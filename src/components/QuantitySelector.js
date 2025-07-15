@@ -1,12 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { useCart } from '../contexts/CartContext';
-import { LanguageContext } from './Layout Components/Header';
+import { useTranslation } from 'next-i18next';
 import styles from '../styles/Component Styles/QuantitySelector.module.css';
 
 const QuantitySelector = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const { addToCart, getCartItemQuantity } = useCart();
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
   
   // Debug logging
   console.log('QuantitySelector rendered for product:', product?.ProductID);

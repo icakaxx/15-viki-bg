@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
-import Head from '../../components/Head';
+import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
+import { useTranslation } from 'next-i18next';
 import Layout from '../../components/Layout';
-import { LanguageContext } from '../../components/Layout Components/Header';
 import styles from '../../styles/Page Styles/Administration.module.css';
 
-const AdminAnalytics = () => {
-  const { t } = useContext(LanguageContext);
+const AnalyticsPage = () => {
+  const { t } = useTranslation('common');
   
   // State management
   const [loading, setLoading] = useState(true);
@@ -357,4 +357,14 @@ const AdminAnalytics = () => {
   );
 };
 
-export default AdminAnalytics; 
+export async function getStaticProps({ locale }) {
+  const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+  
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
+}
+
+export default AnalyticsPage; 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { LanguageContext } from './Layout Components/Header';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'next-i18next';
 import styles from '../styles/Component Styles/PriceFilter.module.css';
 
 const PriceFilterWithSlider = ({ 
@@ -11,7 +11,7 @@ const PriceFilterWithSlider = ({
   maxBound = 10000,
   showSlider = true
 }) => {
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
   const [fromPrice, setFromPrice] = useState(minValue);
   const [toPrice, setToPrice] = useState(maxValue);
   const [errors, setErrors] = useState({});

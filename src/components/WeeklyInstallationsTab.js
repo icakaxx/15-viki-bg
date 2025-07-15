@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { LanguageContext } from './Layout Components/Header';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'next-i18next';
 
 import { TIME_SLOTS } from '../lib/slotUtils';
 // Weekdays will be handled by translation system instead of this constant
@@ -29,7 +29,7 @@ function getWeekdayName(index, t) {
 }
 
 export default function WeeklyInstallationsTab({ onInstallationCancelled, onInstallationRescheduled, onInstallationCompleted }) {
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [installations, setInstallations] = useState([]);
   const [loading, setLoading] = useState(false);

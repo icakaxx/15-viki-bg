@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { LanguageContext } from '../components/Layout Components/Header';
+import { useTranslation } from 'next-i18next';
 import PriceFilter from '../components/PriceFilter';
 import QuantitySelector from '../components/QuantitySelector';
 // Layout is already provided by _app.js, no need to import
@@ -15,7 +15,7 @@ const BuyPage = () => {
   const [error, setError] = useState(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { t } = useContext(LanguageContext);
+  const { t } = useTranslation('common');
   const router = useRouter();
   
   // Pagination state
@@ -1001,5 +1001,15 @@ const BuyPage = () => {
     </>
   );
 };
+
+export async function getStaticProps({ locale }) {
+  const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+  
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
+}
 
 export default BuyPage; 

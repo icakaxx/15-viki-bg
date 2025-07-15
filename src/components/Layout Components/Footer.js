@@ -1,23 +1,13 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiPhone, FiMail, FiChevronUp } from "react-icons/fi";
 import styles from "../../styles/Component Styles/Footer.module.css";
-
-// Import the shared language context from Header
-import { LanguageContext } from './Header';
-
-// Custom hook to use language context
-const useLanguage = () => {
-  const context = useContext(LanguageContext);
-  return context || {
-    locale: 'bg',
-    t: (key) => key,
-    switchLanguage: () => {}
-  };
-};
+import { useTranslation } from "next-i18next";
+import { useRouter } from "next/router";
 
 const Footer = () => {
-  const { locale, t } = useLanguage();
+  const { t } = useTranslation("common");
+  const router = useRouter();
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [logoError, setLogoError] = useState(false);

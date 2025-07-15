@@ -1,20 +1,147 @@
 {
-  "metaTitle": "BGVIKI15 Ltd - Air Conditioning & Climate Solutions",
-  "metaDescription": "BGVIKI15 Ltd - Quality and reliable solutions since 2000. Air conditioning, climate control and energy efficient solutions in Bulgaria.",
-  "common": {
-    "close": "Close",
-    "today": "Today",
-    "weekdays": {
-      "monday": "Monday",
-      "tuesday": "Tuesday", 
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday",
-      "sunday": "Sunday"
+  "metaTitle": "BGVIKI15 Ltd - Air Conditioners and HVAC Solutions",
+  "metaDescription": "BGVIKI15 Ltd - Quality and reliable solutions since 2000. Air conditioners, HVAC, and energy-efficient solutions in Bulgaria.",
+  "close": "Close",
+  "today": "Today",
+  "weekdays": {
+    "monday": "Monday",
+    "tuesday": "Tuesday", 
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
+  "error": "Error:",
+  "others": "others",
+  "productsPage": {
+    "title": "Products & Solutions",
+    "metaDescription": "Complete range of air conditioners and climate solutions for home, office and industry. Professional services and maintenance.",
+    "hero": {
+      "title": "Complete Climate Solutions",
+      "subtitle": "From residential air conditioners to complex industrial systems - we offer quality products and professional services for all your needs.",
+      "cta": "View All Products"
     },
-    "error": "Error:",
-    "others": "others"
+    "categories": {
+      "title": "Product Categories",
+      "residential": {
+        "title": "Residential Air Conditioners",
+        "description": "Energy-efficient solutions for home",
+        "features": {
+          "split": "Split systems",
+          "multiSplit": "Multi-split systems",
+          "inverter": "Inverter technology",
+          "wifi": "Wi-Fi control"
+        }
+      },
+      "commercial": {
+        "title": "Commercial Systems",
+        "description": "Professional solutions for business",
+        "features": {
+          "vrf": "VRF systems",
+          "cassette": "Cassette air conditioners",
+          "ducted": "Ducted systems",
+          "central": "Central control"
+        }
+      },
+      "industrial": {
+        "title": "Industrial Solutions",
+        "description": "Powerful systems for large facilities",
+        "features": {
+          "chillers": "Chillers",
+          "rooftop": "Rooftop units",
+          "precision": "Precision air conditioners",
+          "ventilation": "Ventilation systems"
+        }
+      }
+    },
+    "services": {
+      "title": "Our Services",
+      "consultation": {
+        "title": "Consultation & Design",
+        "description": "Professional needs assessment and project design"
+      },
+      "installation": {
+        "title": "Installation & Commissioning",
+        "description": "Quality installation by certified technicians"
+      },
+      "maintenance": {
+        "title": "Service & Maintenance",
+        "description": "Regular maintenance and quick repairs when needed"
+      },
+      "warranty": {
+        "title": "Warranty Service",
+        "description": "Full warranty and post-warranty service"
+      }
+    },
+    "cta": {
+      "title": "Need consultation?",
+      "subtitle": "Our experts will help you choose the most suitable solution for your needs.",
+      "inquiry": "Make an Inquiry",
+      "contact": "Contact Us"
+    }
+  },
+  "solutions": {
+    "air_conditioning": {
+      "title": "Air Conditioner Sales and Installation",
+      "short": "Short description for air conditioning.",
+      "details": "Detailed description for air conditioner sales and installation.",
+      "benefits": [
+        "High energy efficiency",
+        "Reliability and long lifespan",
+        "Easy maintenance"
+      ]
+    },
+    "chillers": {
+      "title": "Chillers – Industrial and Commercial Cooling Solutions for Buildings and Technological Processes",
+      "short": "Short description for chillers.",
+      "details": "Detailed description for industrial and commercial chillers.",
+      "benefits": [
+        "Flexible solutions for various applications",
+        "High performance",
+        "Low energy consumption"
+      ]
+    },
+    "vrv_vrf": {
+      "title": "VRV/VRF Systems",
+      "short": "High-efficiency air conditioning and heating systems for large facilities like offices, hotels, and shopping centers.",
+      "details": "Detailed description for VRV/VRF systems.",
+      "benefits": [
+        "Modular structure",
+        "Individual control capability",
+        "High efficiency"
+      ]
+    },
+    "heat_pumps": {
+      "title": "Heat Pumps – Modern Energy-Efficient Solutions for Heating and Cooling Residential and Commercial Buildings",
+      "short": "Short description for heat pumps.",
+      "details": "Detailed description for heat pumps.",
+      "benefits": [
+        "Energy-saving technologies",
+        "Suitable for various building types",
+        "Low carbon footprint"
+      ]
+    },
+    "cold_rooms": {
+      "title": "Cold Rooms – Design and Installation for Storage of Food Products, Medical Materials, and More",
+      "short": "Short description for cold rooms.",
+      "details": "Detailed description for cold rooms.",
+      "benefits": [
+        "Optimal storage conditions",
+        "Reliability",
+        "Individual approach to the client"
+      ]
+    },
+    "ventilation": {
+      "title": "Ventilation Systems – Solutions for Clean Air, Recuperation, and Optimal Circulation in All Types of Premises",
+      "short": "Short description for ventilation systems.",
+      "details": "Detailed description for ventilation systems.",
+      "benefits": [
+        "Improved air quality",
+        "Energy efficiency",
+        "Easy integration"
+      ]
+    }
   },
   "nav": {
     "about": "About",
@@ -252,73 +379,6 @@
     "admin": "Go to Administration"
   },
   "country": "🇧🇬 Bulgaria",
-  "productsPage": {
-    "title": "Products & Solutions",
-    "metaDescription": "Complete range of air conditioners and climate solutions for home, office and industry. Professional services and maintenance.",
-    "hero": {
-      "title": "Complete Climate Solutions",
-      "subtitle": "From residential air conditioners to complex industrial systems - we offer quality products and professional services for all your needs.",
-      "cta": "View All Products"
-    },
-    "categories": {
-      "title": "Product Categories",
-      "residential": {
-        "title": "Residential Air Conditioners",
-        "description": "Energy-efficient solutions for home",
-        "features": {
-          "split": "Split systems",
-          "multiSplit": "Multi-split systems",
-          "inverter": "Inverter technology",
-          "wifi": "Wi-Fi control"
-        }
-      },
-      "commercial": {
-        "title": "Commercial Systems",
-        "description": "Professional solutions for business",
-        "features": {
-          "vrf": "VRF systems",
-          "cassette": "Cassette air conditioners",
-          "ducted": "Ducted systems",
-          "central": "Central control"
-        }
-      },
-      "industrial": {
-        "title": "Industrial Solutions",
-        "description": "Powerful systems for large facilities",
-        "features": {
-          "chillers": "Chillers",
-          "rooftop": "Rooftop units",
-          "precision": "Precision air conditioners",
-          "ventilation": "Ventilation systems"
-        }
-      }
-    },
-    "services": {
-      "title": "Our Services",
-      "consultation": {
-        "title": "Consultation & Design",
-        "description": "Professional needs assessment and project design"
-      },
-      "installation": {
-        "title": "Installation & Commissioning",
-        "description": "Quality installation by certified technicians"
-      },
-      "maintenance": {
-        "title": "Service & Maintenance",
-        "description": "Regular maintenance and quick repairs when needed"
-      },
-      "warranty": {
-        "title": "Warranty Service",
-        "description": "Full warranty and post-warranty service"
-      }
-    },
-    "cta": {
-      "title": "Need consultation?",
-      "subtitle": "Our experts will help you choose the most suitable solution for your needs.",
-      "inquiry": "Make an Inquiry",
-      "contact": "Contact Us"
-    }
-  },
   "inquiryPage": {
     "title": "Make an Inquiry",
     "metaDescription": "Make an inquiry for air conditioners and climate solutions. Free consultation and quote from experts.",
