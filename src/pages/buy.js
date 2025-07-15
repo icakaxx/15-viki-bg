@@ -6,7 +6,7 @@ import { useTranslation } from 'next-i18next';
 import PriceFilter from '../components/PriceFilter';
 import QuantitySelector from '../components/QuantitySelector';
 // Layout is already provided by _app.js, no need to import
-import styles from '../styles/Page Styles/BuyPage.module.css';
+import styles from '../styles/Page Styles/Products.module.css';
 import Image from 'next/image';
 
 const BuyPage = () => {
