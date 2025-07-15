@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import { useTranslation } from 'next-i18next';
-import styles from '../styles/Page Styles/BuyPage.module.css';
+import styles from '../styles/Page Styles/Products.module.css';
 
 // Fixed Link import issue
 const InquiryPage = () => {
