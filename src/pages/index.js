@@ -28,8 +28,15 @@ const HomePage = () => {
       </Head>
       
       {/* Hero Section */}
-      <section className={styles.hero}>
-        <div className={styles.heroBackground}></div>
+      <section 
+        className={styles.hero}
+        style={{
+          backgroundImage: 'url(https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/hero_background.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
         <div className={styles.heroOverlay}></div>
         <div className={styles.container}>
           <div className={styles.heroContent}>
@@ -69,8 +76,8 @@ const HomePage = () => {
             </div>
             
             <div className={styles.heroButtons}>
-              <Link href="/buy" className={styles.btnPrimary}>
-                🛒 {i18n.language === 'bg' ? 'Купи продукти' : 'Shop Products'}
+              <Link href="/products" className={styles.btnPrimary}>
+                🔍 {i18n.language === 'bg' ? 'Разгледай услуги' : 'View Services'}
               </Link>
               <Link href="/contact" className={styles.btnSecondary}>
                 💬 {i18n.language === 'bg' ? 'Заяви оферта' : 'Get Quote'}
@@ -141,106 +148,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className={styles.services}>
-        <div className={styles.container}>
-          <h2 className={styles.sectionTitle}>
-            {i18n.language === 'bg' ? 'Нашите услуги' : 'Our Services'}
-          </h2>
-          <p className={styles.sectionSubtitle}>
-            {i18n.language === 'bg' 
-              ? 'Пълен спектър от HVAC решения за всяко приложение'
-              : 'Complete range of HVAC solutions for every application'
-            }
-          </p>
-          
-          <div className={styles.servicesGrid}>
-            <Link href="/buy" className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>❄️</div>
-              <h3>{i18n.language === 'bg' ? 'Климатици' : 'Air Conditioning'}</h3>
-              <p>
-                {i18n.language === 'bg' 
-                  ? 'Продажба и инсталация на климатици за дома и офиса'
-                  : 'Sales and installation of air conditioners for home and office'
-                }
-              </p>
-              <span className={styles.serviceLink}>
-                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
-              </span>
-            </Link>
-
-            <Link href="/solutions/chillers" className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>🏭</div>
-              <h3>{i18n.language === 'bg' ? 'Чилъри' : 'Chillers'}</h3>
-              <p>
-                {i18n.language === 'bg' 
-                  ? 'Индустриални и търговски решения за охлаждане'
-                  : 'Industrial and commercial cooling solutions'
-                }
-              </p>
-              <span className={styles.serviceLink}>
-                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
-              </span>
-            </Link>
-
-            <Link href="/solutions/vrv-vrf" className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>🏢</div>
-              <h3>{i18n.language === 'bg' ? 'VRV/VRF системи' : 'VRV/VRF Systems'}</h3>
-              <p>
-                {i18n.language === 'bg' 
-                  ? 'Високоефективни системи за големи обекти'
-                  : 'High-efficiency systems for large buildings'
-                }
-              </p>
-              <span className={styles.serviceLink}>
-                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
-              </span>
-            </Link>
-
-            <Link href="/solutions/heat-pumps" className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>🔥</div>
-              <h3>{i18n.language === 'bg' ? 'Термопомпи' : 'Heat Pumps'}</h3>
-              <p>
-                {i18n.language === 'bg' 
-                  ? 'Енергийно ефективни решения за отопление и охлаждане'
-                  : 'Energy-efficient heating and cooling solutions'
-                }
-              </p>
-              <span className={styles.serviceLink}>
-                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
-              </span>
-            </Link>
-
-            <Link href="/solutions/cold-rooms" className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>🧊</div>
-              <h3>{i18n.language === 'bg' ? 'Хладилни камери' : 'Cold Rooms'}</h3>
-              <p>
-                {i18n.language === 'bg' 
-                  ? 'Проектиране и монтаж на хладилни камери'
-                  : 'Design and installation of cold storage rooms'
-                }
-              </p>
-              <span className={styles.serviceLink}>
-                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
-              </span>
-            </Link>
-
-            <Link href="/solutions/ventilation" className={styles.serviceCard}>
-              <div className={styles.serviceIcon}>🌀</div>
-              <h3>{i18n.language === 'bg' ? 'Вентилация' : 'Ventilation'}</h3>
-              <p>
-                {i18n.language === 'bg' 
-                  ? 'Системи за обновяване и филтрация на въздуха'
-                  : 'Air renewal and filtration systems'
-                }
-              </p>
-              <span className={styles.serviceLink}>
-                {i18n.language === 'bg' ? 'Разгледай →' : 'Explore →'}
-              </span>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* About Section */}
       <section className={styles.about}>
@@ -293,8 +200,8 @@ const HomePage = () => {
               : 'Contact us for a free assessment and personalized proposal'
             }
           </p>
-          <Link href="/contact" className={styles.btnPrimary}>
-            {i18n.language === 'bg' ? 'Свържи се с нас' : 'Contact Us'}
+          <Link href="/products" className={styles.btnPrimary}>
+            {i18n.language === 'bg' ? 'Продукти и решения' : 'Products & Solutions'}
           </Link>
         </div>
       </section>

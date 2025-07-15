@@ -1,0 +1,125 @@
+/* Navigation Container Styles - Separate module for easy dev console editing */
+.navigationContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.navList {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.navLink {
+  color: #2c5530;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.75rem 1rem;
+  position: relative;
+  white-space: nowrap;
+  border-radius: 12px;
+  background: transparent;
+  overflow: hidden;
+}
+
+.navLink::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(44, 85, 48, 0.08) 0%, rgba(74, 124, 89, 0.05) 100%);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+}
+
+.navLink:hover::before {
+  opacity: 1;
+}
+
+.navLink:hover {
+  color: #1e3a21;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(44, 85, 48, 0.1);
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2c5530 0%, #4a7c59 100%);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 1px;
+}
+
+.navLink:hover::after {
+  width: calc(100% - 20px);
+}
+
+.activeNavLink {
+  color: #1e3a21;
+  font-weight: 700;
+  background: rgba(44, 85, 48, 0.08);
+  box-shadow: 0 2px 8px rgba(44, 85, 48, 0.1);
+}
+
+.activeNavLink::before {
+  opacity: 1;
+}
+
+.activeNavLink::after {
+  width: calc(100% - 20px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) and (min-width: 1024px) {
+  .navigationContainer {
+    margin-left: 0.5rem;
+    margin-right: 2rem;
+  }
+  
+  .navList {
+    gap: 1rem;
+  }
+  
+  .navLink {
+    font-size: 1rem;
+    padding: 0.6rem 0.8rem;
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 1024px) {
+  .navigationContainer {
+    margin-left: 0.5rem;
+    margin-right: 1rem;
+  }
+  
+  .navList {
+    gap: 0.8rem;
+  }
+  
+  .navLink {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.7rem;
+  }
+} 

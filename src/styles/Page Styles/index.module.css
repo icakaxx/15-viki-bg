@@ -12,32 +12,13 @@
   display: flex;
   align-items: center;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a3a1e 0%, #2c5530 50%, #4a7c59 100%);
 }
 
 .heroBackground {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #1a3a1e 0%, #2c5530 50%, #4a7c59 100%);
-  z-index: -2;
+  display: none;
 }
 
-.heroBackground::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
-    radial-gradient(circle at 40% 80%, rgba(255,255,255,0.05) 0%, transparent 50%);
-  animation: backgroundFloat 15s ease-in-out infinite;
-}
+
 
 .heroOverlay {
   position: absolute;
@@ -45,7 +26,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.2);
+  background: linear-gradient(135deg, rgba(26, 58, 30, 0.4) 0%, rgba(44, 85, 48, 0.3) 50%, rgba(74, 124, 89, 0.2) 100%);
   z-index: -1;
 }
 

@@ -3,6 +3,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FiMenu } from "react-icons/fi";
 import styles from "../../styles/Component Styles/Header.module.css";
+import companyNameStyles from "../../styles/Component Styles/CompanyName.module.css";
+import logoContainerStyles from "../../styles/Component Styles/LogoContainer.module.css";
+import logoImageStyles from "../../styles/Component Styles/LogoImage.module.css";
+import navigationStyles from "../../styles/Component Styles/NavigationContainer.module.css";
 import { useTranslation } from "next-i18next";
 import CartIcon from "../CartIcon";
 
@@ -29,38 +33,39 @@ const Header = () => {
   ];
 
   return (
-    <header className={styles.header}>
-      <div className={styles.container}>
+    <>
+      <header className={styles.header}>
+        <div className={styles.container}>
         
-        {/* Left Section - Company Name & Logo */}
+        {/* Left Section - Company Name */}
         <div className={styles.leftSection}>
-          <div className={styles.companyName}>
+          <div className={companyNameStyles.companyName}>
             БГВИКИ15 ЕООД
           </div>
-          <h1 className={styles.logoContainer}>
-            <div className={styles.logoWrapper}>
-              <img 
-                src="/images/bgVIKI15-eood.jpg" 
-                alt="VIKI15 EOOD Logo" 
-                className={styles.logoImage}
-              />
-            </div>
-          </h1>
+        </div>
+        
+        {/* Logo - Between Company Name and Navigation */}
+        <div className={logoContainerStyles.logoContainer}>
+          <img 
+            src="/images/bgVIKI15-eood.jpg" 
+            alt="VIKI15 EOOD Logo" 
+            className={logoImageStyles.logoImage}
+          />
         </div>
 
         {/* Center Navigation */}
-        <nav className={styles.centerNav} aria-label="Main navigation">
-          <ul className={styles.navList}>
+        <nav className={navigationStyles.navigationContainer} aria-label="Main navigation">
+          <ul className={navigationStyles.navList}>
             {navigationItems.map((item, index) => (
               <li key={index}>
                 {item.href.startsWith('#') ? (
-                  <a href={item.href} className={styles.navLink}>
+                  <a href={item.href} className={navigationStyles.navLink}>
                     {t(item.translationKey)}
                   </a>
                 ) : (
                   <Link 
                     href={item.href}
-                    className={`${styles.navLink} ${router.pathname === item.href ? styles.activeNavLink : ''}`}
+                    className={`${navigationStyles.navLink} ${router.pathname === item.href ? navigationStyles.activeNavLink : ''}`}
                   >
                     {t(item.translationKey)}
                   </Link>
@@ -170,6 +175,7 @@ const Header = () => {
 
       </div>
     </header>
+  </>
   );
 };
 
