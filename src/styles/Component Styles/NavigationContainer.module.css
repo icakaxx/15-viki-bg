@@ -122,4 +122,11 @@
     font-size: 0.95rem;
     padding: 0.5rem 0.7rem;
   }
+}
+
+/* Hide desktop navigation on mobile */
+@media (max-width: 1023px) {
+  .navigationContainer {
+    display: none;
+  }
 } 
