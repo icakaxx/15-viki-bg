@@ -59,23 +59,23 @@
       "title": "Our Services",
       "consultation": {
         "title": "Consultation & Design",
-        "description": "Professional needs assessment and project design"
+        "description": "Professional needs assessment and project design for optimal climate solutions tailored to your specific requirements"
       },
       "installation": {
         "title": "Installation & Commissioning",
-        "description": "Quality installation by certified technicians"
+        "description": "Quality installation by certified technicians with proper testing and commissioning to ensure optimal performance"
       },
       "maintenance": {
         "title": "Service & Maintenance",
-        "description": "Regular maintenance and quick repairs when needed"
+        "description": "Regular maintenance and quick repairs when needed to keep your systems running efficiently and extend their lifespan"
       },
       "warranty": {
         "title": "Warranty Service",
-        "description": "Full warranty and post-warranty service"
+        "description": "Full warranty and post-warranty service with comprehensive support and technical assistance throughout the product lifecycle"
       }
     },
     "cta": {
-      "title": "Need consultation?",
+      "title": "Ready to start? Contact us!",
       "subtitle": "Our experts will help you choose the most suitable solution for your needs.",
       "inquiry": "Make an Inquiry",
       "contact": "Contact Us"
@@ -95,52 +95,42 @@
     "chillers": {
       "title": "Chillers – Industrial and Commercial Cooling Solutions for Buildings and Technological Processes",
       "short": "Flexible and energy-efficient chillers for any needs – from offices to industrial facilities.",
-      "details": "Detailed description for industrial and commercial chillers.",
-      "benefits": [
-        "Flexible solutions for various applications",
-        "High performance",
-        "Low energy consumption"
-      ]
+      "p1": "Chillers are essential for large-scale cooling in commercial and industrial buildings.",
+      "p2": "They work by removing heat from a liquid via a vapor-compression or absorption refrigeration cycle.",
+      "p3": "Our chillers are energy-efficient and designed for reliable, long-term operation.",
+      "p4": "We offer installation, maintenance, and support for all types of chiller systems."
     },
     "vrv_vrf": {
       "title": "VRV/VRF Systems",
       "short": "High-efficiency air conditioning and heating systems for large facilities like offices, hotels, and shopping centers.",
-      "details": "Detailed description for VRV/VRF systems.",
-      "benefits": [
-        "Modular structure",
-        "Individual control capability",
-        "High efficiency"
-      ]
+      "p1": "VRV/VRF systems provide flexible and efficient climate control for buildings of all sizes.",
+      "p2": "They allow for individual temperature control in different zones, maximizing comfort.",
+      "p3": "Our solutions are suitable for offices, hotels, and residential complexes.",
+      "p4": "We ensure professional installation and ongoing technical support."
     },
     "heat_pumps": {
       "title": "Heat Pumps – Modern Energy-Efficient Solutions for Heating and Cooling Residential and Commercial Buildings",
       "short": "Modern energy-efficient solutions for heating and cooling residential and commercial buildings",
-      "details": "Detailed description for heat pumps.",
-      "benefits": [
-        "Energy-saving technologies",
-        "Suitable for various building types",
-        "Low carbon footprint"
-      ]
+      "p1": "Heat pumps are an eco-friendly solution for both heating and cooling your property.",
+      "p2": "They transfer heat from the outside air or ground into your building, reducing energy costs.",
+      "p3": "Our heat pumps are suitable for homes, offices, and industrial facilities.",
+      "p4": "We provide expert consultation, installation, and maintenance services."
     },
     "cold_rooms": {
       "title": "Cold Rooms – Design and Installation for Storage of Food Products, Medical Materials, and More",
-      "short": "Optimal storage conditions for food products, medical materials, and other",
-      "details": "Detailed description for cold rooms.",
-      "benefits": [
-        "Optimal storage conditions",
-        "Reliability",
-        "Individual approach to the client"
-      ]
+      "short": "Optimal storage conditions for food products, medical materials, and other perishable goods",
+      "p1": "Cold rooms are vital for the storage of perishable goods in the food and pharmaceutical industries.",
+      "p2": "We design and build custom cold rooms to meet your specific requirements.",
+      "p3": "Our systems ensure precise temperature control and energy efficiency.",
+      "p4": "We offer full service from project planning to installation and maintenance."
     },
     "ventilation": {
       "title": "Ventilation Systems – Solutions for Clean Air, Recuperation, and Optimal Circulation in All Types of Premises",
       "short": "Solutions for clean air, recuperation, and optimal circulation in all types of premises",
-      "details": "Detailed description for ventilation systems.",
-      "benefits": [
-        "Improved air quality",
-        "Energy efficiency",
-        "Easy integration"
-      ]
+      "p1": "Proper ventilation is crucial for healthy indoor air quality and comfort.",
+      "p2": "We offer advanced ventilation systems for homes, offices, and industrial spaces.",
+      "p3": "Our solutions help remove pollutants, control humidity, and save energy.",
+      "p4": "We provide design, installation, and regular maintenance for all ventilation systems."
     }
   },
   "nav": {
