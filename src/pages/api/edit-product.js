@@ -40,7 +40,8 @@ export default async function handler(req, res) {
         // Physical Characteristics
         indoor_dimensions,
         outdoor_dimensions,
-        weight,
+        indoor_weight,
+        outdoor_weight,
         noise_level,
         air_flow,
         // Features & Usability
@@ -143,7 +144,8 @@ export default async function handler(req, res) {
             // Physical Characteristics
             indoor_dimensions,
             outdoor_dimensions,
-            weight,
+            indoor_weight,
+            outdoor_weight,
             noise_level,
             air_flow,
             // Features & Usability
@@ -207,7 +209,8 @@ export default async function handler(req, res) {
         // Physical Characteristics
         if (indoor_dimensions !== undefined) updateData.indoor_dimensions = indoor_dimensions;
         if (outdoor_dimensions !== undefined) updateData.outdoor_dimensions = outdoor_dimensions;
-        if (weight !== undefined) updateData.weight = weight;
+        if (indoor_weight !== undefined) updateData.indoor_weight = indoor_weight;
+        if (outdoor_weight !== undefined) updateData.outdoor_weight = outdoor_weight;
         if (noise_level !== undefined) updateData.noise_level = noise_level;
         if (air_flow !== undefined) updateData.air_flow = air_flow;
 

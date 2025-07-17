@@ -155,17 +155,18 @@
 
 /* Floating Cards - Base Style */
 .floatingCard {
-  position: absolute;
-  background: rgba(255,255,255,0.95);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 20px;
-  padding: 1.5rem;
-  max-width: 220px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   z-index: 5;
-  transition: all 0.3s ease;
   cursor: pointer;
+  background: rgb(226 226 226);
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 20px;
+  max-width: 270px;
+  padding: 1.5rem;
+  transition: all .3s;
+  position: absolute;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
 }
 
 .floatingCard:hover {
@@ -538,9 +539,49 @@
     display: none;
   }
   
+  /* Enhanced About Section Mobile Optimization */
+  .about {
+    padding: 3rem 0;
+  }
+  
   .aboutContent {
     grid-template-columns: 1fr;
     gap: 2rem;
+    text-align: center;
+  }
+  
+  .aboutText h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  .aboutText p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  .aboutFeatures {
+    margin: 1.5rem 0;
+    text-align: left;
+  }
+  
+  .aboutFeatures li {
+    padding: 0.75rem 0;
+    font-size: 0.95rem;
+    gap: 0.75rem;
+  }
+  
+  .aboutFeatures li::before {
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+  }
+  
+  .aboutImage {
+    height: 250px;
+    border-radius: 12px;
+    order: -1; /* Move image to top on mobile */
   }
   
   .servicesGrid {
@@ -549,5 +590,38 @@
   
   .sectionTitle {
     font-size: 2rem;
+  }
+}
+
+/* Additional mobile optimization for smaller screens */
+@media (max-width: 480px) {
+  .about {
+    padding: 2rem 0;
+  }
+  
+  .aboutContent {
+    gap: 1.5rem;
+  }
+  
+  .aboutText h2 {
+    font-size: 1.6rem;
+  }
+  
+  .aboutText p {
+    font-size: 0.95rem;
+  }
+  
+  .aboutFeatures li {
+    font-size: 0.9rem;
+    padding: 0.5rem 0;
+  }
+  
+  .aboutImage {
+    height: 200px;
+    border-radius: 10px;
+  }
+  
+  .container {
+    padding: 0 1rem;
   }
 }

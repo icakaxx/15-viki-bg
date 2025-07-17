@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import styles from '../styles/Page Styles/Administration.module.css';
 import AdminOrderHistoryTab from '../components/AdminOrderHistoryTab';
 import WeeklyInstallationsTab from '../components/WeeklyInstallationsTab';
+import OrdersManagementTab from '../components/OrdersManagementTab';
 
 export default function Administration() {
     const { t } = useTranslation('common');
@@ -506,7 +507,7 @@ export default function Administration() {
                 refrigerant_type: product.RefrigerantType || product.refrigerant_type,
                 operating_temp_range: product.OperatingTempRange || product.operating_temp_range,
                 dimensions: product.Dimensions || product.dimensions,
-                weight: product.Weight || product.weight,
+        
                 noise_level: product.NoiseLevel || product.noise_level,
                 air_flow: product.AirFlow || product.air_flow,
                 room_size_recommendation: product.RoomSizeRecommendation || product.room_size_recommendation,
@@ -773,7 +774,6 @@ export default function Administration() {
             dimensions: product.dimensions || '',
             indoor_dimensions: product.indoor_dimensions || '',
             outdoor_dimensions: product.outdoor_dimensions || '',
-            weight: product.weight ? product.weight.toString() : '',
             noise_level: product.noise_level ? product.noise_level.toString() : '',
             air_flow: product.air_flow ? product.air_flow.toString() : '',
             room_size_recommendation: product.room_size_recommendation || '',
@@ -1820,10 +1820,7 @@ export default function Administration() {
 
             {/* Orders Tab */}
             {activeTab === 'orders' && (
-                <div className={styles.ordersSection}>
-                    <h3>Orders Management</h3>
-                    <p>Orders functionality will be implemented here...</p>
-                </div>
+                <OrdersManagementTab />
             )}
 
             {/* Order History Tab */}

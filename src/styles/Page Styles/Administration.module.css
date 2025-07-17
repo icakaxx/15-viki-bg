@@ -2979,3 +2979,352 @@
   max-width: 400px;
   min-height: 100px;
 }
+
+/* Orders Management Styles */
+.ordersManagementSection {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.ordersHeader {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.ordersHeader h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.ordersHeader p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.ordersFilters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  min-width: 300px;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+}
+
+.statusFilter {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.statusFilter:focus {
+  outline: none;
+  border-color: #0070f3;
+}
+
+.refreshButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ordersTableContainer {
+  margin-bottom: 2rem;
+}
+
+.errorMessage {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #f5c6cb;
+}
+
+.ordersTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ordersTable th {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.ordersTable td {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.ordersTable tr:hover {
+  background-color: #f8f9fa;
+}
+
+.loadingCell,
+.emptyCell {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+.orderRow {
+  transition: background-color 0.2s ease;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.viewButton {
+  padding: 0.5rem 1rem;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewButton:hover {
+  background-color: #005bb5;
+  transform: translateY(-1px);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.paginationButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  border-color: #0070f3;
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.activePage {
+  background-color: #0070f3;
+  color: white;
+  border-color: #0070f3;
+}
+
+.activePage:hover {
+  background-color: #005bb5;
+}
+
+/* Order Details Modal Styles */
+.orderInfo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.infoSection h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.infoSection p {
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.infoSection strong {
+  color: #333;
+}
+
+.statusUpdateSection {
+  border-top: 1px solid #eee;
+  padding-top: 2rem;
+}
+
+.statusUpdateSection h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.statusUpdateForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.statusSelect,
+.dateInput {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.statusSelect:focus,
+.dateInput:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+}
+
+.notesTextarea {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.notesTextarea:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+}
+
+.statusUpdateActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.updateStatusButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.updateStatusButton:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.updateStatusButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ordersManagementSection {
+    padding: 1rem;
+  }
+  
+  .ordersFilters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .searchInput {
+    min-width: auto;
+  }
+  
+  .ordersTable {
+    font-size: 0.875rem;
+  }
+  
+  .ordersTable th,
+  .ordersTable td {
+    padding: 0.5rem;
+  }
+  
+  .orderInfo {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .statusUpdateActions {
+    flex-direction: column;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+  }
+  
+  .paginationButton {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}

@@ -180,7 +180,7 @@ const HomePage = () => {
             
             <div className={styles.aboutImage}>
               <img 
-                src="https://via.placeholder.com/500x400.png?text=HVAC+Professional+Team" 
+                src="https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg//lanes-ac-installation-replacement%20(1).png" 
                 alt={i18n.language === 'bg' ? 'Нашият екип' : 'Our Team'}
               />
             </div>
