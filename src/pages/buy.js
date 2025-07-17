@@ -54,6 +54,9 @@ const BuyPage = () => {
     priceRange: { min: 0, max: 3000 }
   });
 
+  // Sort state
+  const [sortBy, setSortBy] = useState('default'); // 'default', 'price-low', 'price-high'
+
   // Temporary filters for mobile (applied only when user hits "Apply")
   const [tempMobileFilters, setTempMobileFilters] = useState(null);
 
@@ -148,7 +151,7 @@ const BuyPage = () => {
   const filteredProducts = useMemo(() => {
     const activeFilters = tempMobileFilters || filters;
     
-    return products.filter(product => {
+    let filtered = products.filter(product => {
       // Brand filter
       if (activeFilters.brands.length > 0 && !activeFilters.brands.includes(product.Brand)) {
         return false;
@@ -181,7 +184,48 @@ const BuyPage = () => {
       
       return true;
     });
-  }, [products, filters, tempMobileFilters]);
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => a.Price - b.Price);
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => b.Price - a.Price);
+        break;
+      case 'capacity-low':
+        filtered.sort((a, b) => (a.CapacityBTU || 0) - (b.CapacityBTU || 0));
+        break;
+      case 'capacity-high':
+        filtered.sort((a, b) => (b.CapacityBTU || 0) - (a.CapacityBTU || 0));
+        break;
+      case 'energy-best': {
+        // Custom order: A+++ > A++ > A+ > A > B > C
+        const order = ['A+++', 'A++', 'A+', 'A', 'B', 'C'];
+        filtered.sort((a, b) => {
+          const aIndex = order.indexOf(a.EnergyRating);
+          const bIndex = order.indexOf(b.EnergyRating);
+          return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex);
+        });
+        break;
+      }
+      case 'energy-worst': {
+        // Custom order: C > B > A > A+ > A++ > A+++
+        const order = ['C', 'B', 'A', 'A+', 'A++', 'A+++'];
+        filtered.sort((a, b) => {
+          const aIndex = order.indexOf(a.EnergyRating);
+          const bIndex = order.indexOf(b.EnergyRating);
+          return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex);
+        });
+        break;
+      }
+      default:
+        // Keep original order (default)
+        break;
+    }
+
+    return filtered;
+  }, [products, filters, tempMobileFilters, sortBy]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
@@ -213,6 +257,11 @@ const BuyPage = () => {
       ...prev,
       priceRange: { min, max }
     }));
+  };
+
+  const handleSortChange = (newSortBy) => {
+    setSortBy(newSortBy);
+    setCurrentPage(1); // Reset to first page when sorting changes
   };
 
   const clearAllFilters = () => {
@@ -320,6 +369,92 @@ const BuyPage = () => {
     if (!type) return '';
     const typeKey = type.toLowerCase();
     return t(`buyPage.types.${typeKey}`) || type;
+  };
+
+  // Helper function to translate features
+  const translateFeature = (feature) => {
+    if (!feature) return '';
+    
+    // Create a mapping from English feature names to translation keys
+    const featureMapping = {
+      'WiFi Control': 'wifi',
+      'Inverter Technology': 'inverter',
+      'Heat Pump': 'heatPump',
+      'Eco Mode': 'eco',
+      'Sleep Mode': 'sleepMode',
+      'Auto Restart': 'autoRestart',
+      'Diamond Filter': 'diamondFilter',
+      'Air Purification': 'airPurification',
+      'WindFree Mode': 'windFreeMode',
+      'Nanoe-G': 'nanoeG',
+      'Gallery Design': 'galleryDesign',
+      'Smart Control': 'smartControl',
+      'Energy Saving': 'energySaving',
+      'Auto Clean': 'autoClean',
+      'Quiet Operation': 'quietOperation',
+      'Dual Filter': 'dualFilter',
+      'Anti-fungus': 'antiFungus'
+    };
+    
+    const translationKey = featureMapping[feature];
+    if (translationKey) {
+      return t(`buyPage.features.${translationKey}`) || feature;
+    }
+    
+    return feature; // Return original if no translation found
+  };
+
+  // Helper function to translate colors
+  const translateColor = (color) => {
+    if (!color) return '';
+    
+    const colorMapping = {
+      'White': 'white',
+      'Black': 'black',
+      'Silver': 'silver',
+      'Gray': 'gray',
+      'Beige': 'beige',
+      'Brown': 'brown'
+    };
+    
+    const translationKey = colorMapping[color];
+    if (translationKey) {
+      return t(`buyPage.colors.${translationKey}`) || color;
+    }
+    
+    return color; // Return original if no translation found
+  };
+
+  // Helper function to translate warranty periods
+  const translateWarranty = (warranty) => {
+    if (!warranty) return '';
+    
+    // Extract number and unit from warranty string (e.g., "3 years" -> "3" and "years")
+    const match = warranty.match(/^(\d+)\s*(year|years|години|година)$/i);
+    if (match) {
+      const number = match[1];
+      const unit = match[2].toLowerCase();
+      
+      // Try to get the translation with fallback
+      let translatedYears;
+      try {
+        translatedYears = t('buyPage.warranty.years');
+        // If the translation returns the key itself, use fallback
+        if (translatedYears === 'buyPage.warranty.years') {
+          translatedYears = 'years';
+        }
+      } catch (error) {
+        translatedYears = 'years';
+      }
+      
+      if (unit === 'year' || unit === 'years') {
+        return `${number} ${translatedYears}`;
+      } else if (unit === 'години' || unit === 'година') {
+        return `${number} ${translatedYears}`;
+      }
+    }
+    
+    return warranty; // Return original if no translation found
   };
 
   // Handle escape key and back button
@@ -521,7 +656,7 @@ const BuyPage = () => {
                         checked={currentFilters.colors.includes(color)}
                         onChange={() => filterChangeHandler('colors', color)}
                       />
-                      <span className={styles.filterLabel}>{color}</span>
+                      <span className={styles.filterLabel}>{translateColor(color)}</span>
                     </label>
                   ))}
                 </div>
@@ -622,6 +757,35 @@ const BuyPage = () => {
                 )}
               </div>
             </div>
+
+            {/* Sort Dropdown */}
+            {filteredProducts.length > 0 && (
+              <div className={styles.sortContainer}>
+                <label htmlFor="sort-select" className={styles.sortLabel}>
+                  {t && t('buyPage.sort.label') !== 'buyPage.sort.label' ? t('buyPage.sort.label') : 'Sort by'}:
+                </label>
+                <select
+                  id="sort-select"
+                  value={sortBy}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className={styles.sortSelect}
+                >
+                  <optgroup label={t && t('buyPage.sort.groupPrice') !== 'buyPage.sort.groupPrice' ? t('buyPage.sort.groupPrice') : 'Price'}>
+                    <option value="default">{t && t('buyPage.sort.default') !== 'buyPage.sort.default' ? t('buyPage.sort.default') : 'Default'}</option>
+                    <option value="price-low">{t && t('buyPage.sort.priceLow') !== 'buyPage.sort.priceLow' ? t('buyPage.sort.priceLow') : 'Price: Low to High'}</option>
+                    <option value="price-high">{t && t('buyPage.sort.priceHigh') !== 'buyPage.sort.priceHigh' ? t('buyPage.sort.priceHigh') : 'Price: High to Low'}</option>
+                  </optgroup>
+                  <optgroup label={t && t('buyPage.sort.groupCapacity') !== 'buyPage.sort.groupCapacity' ? t('buyPage.sort.groupCapacity') : 'Capacity'}>
+                    <option value="capacity-low">{t && t('buyPage.sort.capacityLow') !== 'buyPage.sort.capacityLow' ? t('buyPage.sort.capacityLow') : 'Capacity: Low to High'}</option>
+                    <option value="capacity-high">{t && t('buyPage.sort.capacityHigh') !== 'buyPage.sort.capacityHigh' ? t('buyPage.sort.capacityHigh') : 'Capacity: High to Low'}</option>
+                  </optgroup>
+                  <optgroup label={t && t('buyPage.sort.groupEnergy') !== 'buyPage.sort.groupEnergy' ? t('buyPage.sort.groupEnergy') : 'Energy Class'}>
+                    <option value="energy-best">{t && t('buyPage.sort.energyBest') !== 'buyPage.sort.energyBest' ? t('buyPage.sort.energyBest') : 'Energy Class: Best to Worst'}</option>
+                    <option value="energy-worst">{t && t('buyPage.sort.energyWorst') !== 'buyPage.sort.energyWorst' ? t('buyPage.sort.energyWorst') : 'Energy Class: Worst to Best'}</option>
+                  </optgroup>
+                </select>
+              </div>
+            )}
             
             {filteredProducts.length === 0 ? (
               <div className={styles.noProducts}>
@@ -697,24 +861,24 @@ const BuyPage = () => {
                               <span className={styles.specLabel}>{t ? t('buyPage.type') : 'Type'}:</span> {translateType(product.Type)}
                             </div>
                             <div className={styles.spec}>
-                              <span className={styles.specLabel}>{t ? t('buyPage.capacity') : 'Capacity'}:</span> {product.CapacityBTU} {t ? t('buyPage.btu') : 'BTU'}
+                              <span className={styles.specLabel}>{t ? t('buyPage.capacity') : 'Capacity'}:</span> {product.CapacityBTU} BTU
                             </div>
                             <div className={styles.spec}>
                               <span className={styles.specLabel}>{t ? t('buyPage.energyRating') : 'Energy Rating'}:</span> {product.EnergyRating}
                             </div>
                             {product.Colour && (
                               <div className={styles.spec}>
-                                <span className={styles.specLabel}>{t ? t('buyPage.color') : 'Color'}:</span> {product.Colour}
+                                <span className={styles.specLabel}>{t ? t('buyPage.color') : 'Color'}:</span> {translateColor(product.Colour)}
                               </div>
                             )}
                             {product.NoiseLevel && (
                               <div className={styles.spec}>
-                                <span className={styles.specLabel}>{t ? t('buyPage.noiseLevel') : 'Noise'}:</span> {product.NoiseLevel} {t ? t('buyPage.units.dB') : 'dB'}
+                                <span className={styles.specLabel}>{t ? t('buyPage.noiseLevel') : 'Noise'}:</span> {product.NoiseLevel} dB
                               </div>
                             )}
                             {product.WarrantyPeriod && (
                               <div className={styles.spec}>
-                                <span className={styles.specLabel}>{t ? t('buyPage.warranty') : 'Warranty'}:</span> {product.WarrantyPeriod}
+                                <span className={styles.specLabel}>{t ? t('buyPage.warranty.label') : 'Warranty'}:</span> {translateWarranty(product.WarrantyPeriod)}
                               </div>
                             )}
                           </div>
@@ -724,11 +888,14 @@ const BuyPage = () => {
                             <div className={styles.featureTags}>
                               {product.Features.slice(0, 4).map((feature, featureIndex) => (
                                 <span key={featureIndex} className={styles.featureTag}>
-                                  {feature}
+                                  {translateFeature(feature)}
                                 </span>
                               ))}
                               {product.Features.length > 4 && (
-                                <span className={styles.featureTag}>
+                                <span
+                                  className={styles.featureTag}
+                                  title={product.Features.slice(4).map(translateFeature).join(', ')}
+                                >
                                   +{product.Features.length - 4} more
                                 </span>
                               )}
@@ -950,7 +1117,7 @@ const BuyPage = () => {
                           checked={(tempMobileFilters || filters).colors.includes(color)}
                           onChange={() => handleFilterChange('colors', color)}
                         />
-                        <span className={styles.filterLabel}>{color}</span>
+                        <span className={styles.filterLabel}>{translateColor(color)}</span>
                       </label>
                     ))}
                   </div>

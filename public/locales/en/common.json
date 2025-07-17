@@ -162,8 +162,13 @@
     "stockStatus": "Stock",
     "roomSize": "Room Size",
     "noiseLevel": "Noise",
-    "warranty": "Warranty",
-    "discount": "Discount",
+    "warranty": {
+      "label": "Warranty",
+      "years": "years"
+    },
+    "discount": {
+      "off": "OFF"
+    },
     "btu": "BTU",
     "color": "Color",
     "priceNote": "EUR prices are approximate",
@@ -172,9 +177,22 @@
     "outOfStock": "Out of Stock",
     "features": {
       "wifi": "WiFi Control",
-      "inverter": "Inverter",
+      "inverter": "Inverter Technology",
       "heatPump": "Heat Pump",
-      "eco": "Eco Mode"
+      "eco": "Eco Mode",
+      "sleepMode": "Sleep Mode",
+      "autoRestart": "Auto Restart",
+      "diamondFilter": "Diamond Filter",
+      "airPurification": "Air Purification",
+      "windFreeMode": "WindFree Mode",
+      "nanoeG": "Nanoe-G",
+      "galleryDesign": "Gallery Design",
+      "smartControl": "Smart Control",
+      "energySaving": "Energy Saving",
+      "autoClean": "Auto Clean",
+      "quietOperation": "Quiet Operation",
+      "dualFilter": "Dual Filter",
+      "antiFungus": "Anti-fungus"
     },
     "pagination": {
       "showing": "Showing",
@@ -182,6 +200,19 @@
       "page": "Page",
       "previous": "Previous",
       "next": "Next"
+    },
+    "sort": {
+      "groupPrice": "Price",
+      "groupCapacity": "Capacity",
+      "groupEnergy": "Energy Class",
+      "label": "Sort by",
+      "default": "Default",
+      "priceLow": "Price: Low to High",
+      "priceHigh": "Price: High to Low",
+      "capacityLow": "Capacity: Low to High",
+      "capacityHigh": "Capacity: High to Low",
+      "energyBest": "Energy Class: Best to Worst",
+      "energyWorst": "Energy Class: Worst to Best"
     },
     "filters": {
       "title": "Filters",
@@ -230,6 +261,14 @@
     },
     "units": {
       "dB": "dB"
+    },
+    "colors": {
+      "white": "White",
+      "black": "Black",
+      "silver": "Silver",
+      "gray": "Gray",
+      "beige": "Beige",
+      "brown": "Brown"
     }
   },
   "cart": {
@@ -925,6 +964,11 @@
     "notFound": "Product not found",
     "backToBuy": "Back to Products",
     "technicalSpecs": "Technical Specifications",
+    "specsTabs": {
+      "overview": "Overview",
+      "technical": "Technical Details",
+      "physical": "Physical Characteristics"
+    },
     "features": "Features",
     "options": "Options & Accessories",
     "accessories": "Accessories",
@@ -936,7 +980,9 @@
     "stock": {
       "inStock": "In Stock",
       "lowStock": "Low Stock",
-      "outOfStock": "Out of Stock"
+      "outOfStock": "Out of Stock",
+      "available": "available",
+      "outOfStockShort": "Out of stock"
     },
     "specs": {
       "capacity": "Capacity",
@@ -948,7 +994,16 @@
       "airflow": "Air Flow",
       "dimensions": "Dimensions",
       "weight": "Weight",
-      "color": "Color"
+      "color": "Color",
+      "operatingRange": "Operating Range",
+      "refrigerant": "Refrigerant",
+      "installation": "Installation",
+      "stock": "Stock",
+      "indoorDimensions": "Indoor Dimensions",
+      "outdoorDimensions": "Outdoor Dimensions",
+      "indoorWeight": "Indoor Weight",
+      "outdoorWeight": "Outdoor Weight",
+      "roomSize": "Room Size"
     },
     "tooltips": {
       "cop": "Coefficient of Performance - Higher values mean better energy efficiency for cooling",
@@ -967,7 +1022,8 @@
     },
     "installation": {
       "title": "Professional Installation",
-      "description": "Professional installation by certified technicians with warranty. Price includes transport, materials and commissioning."
+      "description": "Professional installation service by certified technicians",
+      "perUnit": "per unit"
     },
     "loadingAccessories": "Loading accessories",
     "noAccessories": "No accessories available for this product",

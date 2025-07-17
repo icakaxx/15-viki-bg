@@ -153,6 +153,47 @@
   font-weight: normal;
 }
 
+/* Sort Dropdown */
+.sortContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.sortLabel {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+}
+
+.sortSelect {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.9rem;
+  color: #333;
+  cursor: pointer;
+  min-width: 180px;
+  transition: border-color 0.2s ease;
+}
+
+.sortSelect:hover {
+  border-color: #4a7c59;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: #2c5530;
+  box-shadow: 0 0 0 2px rgba(44, 85, 48, 0.1);
+}
+
 /* Product Grid */
 .grid {
   display: grid;
@@ -1274,13 +1315,22 @@
     font-size: 0.9rem;
     color: #6b7280;
   }
-  
-  /* No products message mobile */
+
   .noProducts {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: #6b7280;
-    font-size: 1.125rem;
+    padding: 2rem 1rem;
+    font-size: 1rem;
+  }
+
+  .sortContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .sortSelect {
+    width: 100%;
+    min-width: auto;
   }
 }
 

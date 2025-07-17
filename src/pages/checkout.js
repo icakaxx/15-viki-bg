@@ -18,9 +18,6 @@ const CheckoutPage = () => {
     phone: '',
     town: '',
     
-    // Service selections (per product)
-    services: {},
-    
     // Invoice Information
     invoiceEnabled: false,
     companyName: '',
@@ -39,7 +36,6 @@ const CheckoutPage = () => {
   // Accordion state - which sections are expanded
   const [expandedSections, setExpandedSections] = useState({
     personal: true,    // Start with first section expanded
-    services: false,
     invoice: false,
     payment: false
   });
@@ -51,22 +47,6 @@ const CheckoutPage = () => {
       [sectionKey]: !prev[sectionKey]
     }));
   };
-
-  // Initialize service selections for each cart item
-  React.useEffect(() => {
-    const initialServices = {};
-    cart.items.forEach(item => {
-      if (!formData.services[item.productId]) {
-        initialServices[item.productId] = 'ac-only';
-      }
-    });
-    if (Object.keys(initialServices).length > 0) {
-      setFormData(prev => ({
-        ...prev,
-        services: { ...prev.services, ...initialServices }
-      }));
-    }
-  }, [cart.items]);
 
   // Handle quantity changes for main product
   const handleProductQuantityChange = (cartItemId, productId, newQuantity) => {
@@ -118,16 +98,8 @@ const CheckoutPage = () => {
     updateItemAccessories(cartItemId, updatedAccessories);
   };
 
-  // Calculate installation costs (300 BGN per AC unit)
-  const installationCost = 300;
-  const totalInstallations = cart.items.reduce((total, item) => {
-    if (formData.services[item.productId] === 'ac-installation') {
-      return total + item.quantity;
-    }
-    return total;
-  }, 0);
-  const totalInstallationCost = totalInstallations * installationCost;
-  const grandTotal = cart.totalPrice + totalInstallationCost;
+  // Calculate totals from cart (installation costs are now handled per unit in cart)
+  const grandTotal = cart.totalPrice;
 
   // Form handlers
   const handleInputChange = (field, value) => {
@@ -135,13 +107,6 @@ const CheckoutPage = () => {
     if (formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: '' }));
     }
-  };
-
-  const handleServiceChange = (productId, service) => {
-    setFormData(prev => ({
-      ...prev,
-      services: { ...prev.services, [productId]: service }
-    }));
   };
 
   const validateForm = () => {
@@ -210,12 +175,12 @@ const CheckoutPage = () => {
         cartItems: cart.items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          serviceOption: formData.services[item.productId] || 'ac-only'
+          serviceOption: 'ac-only' // Installation is now handled per unit in cart
         })),
         sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
         totals: {
           productsTotal: cart.totalPrice,
-          installationCost: totalInstallationCost,
+          installationCost: 0, // Installation costs are now handled per unit in cart
           grandTotal: grandTotal
         }
       };
@@ -403,12 +368,7 @@ const CheckoutPage = () => {
               <span>{t('checkout.total')} ({t('buyPage.title')}):</span>
               <span>{formatPrice(cart.totalPrice)} / {formatPriceEUR(cart.totalPrice)}</span>
             </div>
-            {totalInstallations > 0 && (
-              <div className={styles.totalRow}>
-                <span>{t('checkout.form.services.totalInstallation')} ({totalInstallations} {t('checkout.form.services.installations')}):</span>
-                <span>{formatPrice(totalInstallationCost)} / {formatPriceEUR(totalInstallationCost)}</span>
-              </div>
-            )}
+            {/* Installation costs are now handled per unit in cart, so this total row is no longer needed */}
             <div className={styles.grandTotal}>
               <span>{t('checkout.total')}:</span>
               <span>{formatPrice(grandTotal)} / {formatPriceEUR(grandTotal)}</span>
@@ -499,61 +459,8 @@ const CheckoutPage = () => {
             )}
           </div>
 
-          {/* 2. Service Selection */}
-          <div className={styles.accordionSection}>
-            <div 
-              className={styles.accordionHeader}
-              onClick={() => toggleSection('services')}
-            >
-              <h3 className={styles.accordionTitle}>{t('checkout.form.services.title')}</h3>
-              <span className={`${styles.accordionIcon} ${expandedSections.services ? styles.expanded : ''}`}>
-                ▼
-              </span>
-            </div>
-            {expandedSections.services && (
-              <div className={styles.accordionContent}>
-                <p className={styles.sectionSubtitle}>{t('checkout.form.services.subtitle')}</p>
-                
-                <div className={styles.servicesList}>
-                  {cart.items.map((item) => (
-                    <div key={item.productId} className={styles.serviceItem}>
-                      <div className={styles.serviceProduct}>
-                        <strong>{item.product.Brand} {item.product.Model}</strong>
-                        <span>({item.quantity} {t('checkout.quantity')})</span>
-                      </div>
-                      <div className={styles.serviceOptions}>
-                        <label className={styles.radioLabel}>
-                          <input
-                            type="radio"
-                            name={`service-${item.productId}`}
-                            value="ac-only"
-                            checked={formData.services[item.productId] === 'ac-only'}
-                            onChange={() => handleServiceChange(item.productId, 'ac-only')}
-                          />
-                          {t('checkout.form.services.acOnly')}
-                        </label>
-                        <label className={styles.radioLabel}>
-                          <input
-                            type="radio"
-                            name={`service-${item.productId}`}
-                            value="ac-installation"
-                            checked={formData.services[item.productId] === 'ac-installation'}
-                            onChange={() => handleServiceChange(item.productId, 'ac-installation')}
-                          />
-                          {t('checkout.form.services.acWithInstallation')}
-                        </label>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className={styles.installationInfo}>
-                  <small>{t('checkout.form.services.installationFee')}</small>
-                </div>
-              </div>
-            )}
-          </div>
-
+          {/* 2. Services Section - Removed since installation is now handled per unit in cart */}
+          
           {/* 3. Invoice Information */}
           <div className={styles.accordionSection}>
             <div 

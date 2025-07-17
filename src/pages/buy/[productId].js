@@ -9,7 +9,7 @@ import styles from '../../styles/Page Styles/ProductDetail.module.css';
 
 const ProductDetailPage = () => {
   const router = useRouter();
-  const { productId } = router.query;
+  const { productId, qty } = router.query;
   const { t } = useTranslation('common');
   const { addToCartEnhanced } = useCart();
 
@@ -18,6 +18,35 @@ const ProductDetailPage = () => {
     if (!type) return '';
     const typeKey = type.toLowerCase();
     return t(`buyPage.types.${typeKey}`) || type;
+  };
+
+  // Helper function to translate features
+  const translateFeature = (feature) => {
+    if (!feature) return '';
+    
+    // Map English feature names to translation keys
+    const featureMap = {
+      'WiFi Control': 'buyPage.features.wifi',
+      'Inverter Technology': 'buyPage.features.inverter',
+      'Heat Pump': 'buyPage.features.heatPump',
+      'Eco Mode': 'buyPage.features.eco',
+      'Sleep Mode': 'buyPage.features.sleepMode',
+      'Auto Restart': 'buyPage.features.autoRestart',
+      'Diamond Filter': 'buyPage.features.diamondFilter',
+      'Air Purification': 'buyPage.features.airPurification',
+      'WindFree Mode': 'buyPage.features.windFreeMode',
+      'Nanoe-G': 'buyPage.features.nanoeG',
+      'Gallery Design': 'buyPage.features.galleryDesign',
+      'Smart Control': 'buyPage.features.smartControl',
+      'Energy Saving': 'buyPage.features.energySaving',
+      'Auto Clean': 'buyPage.features.autoClean',
+      'Quiet Operation': 'buyPage.features.quietOperation',
+      'Dual Filter': 'buyPage.features.dualFilter',
+      'Anti-fungus': 'buyPage.features.antiFungus'
+    };
+    
+    const translationKey = featureMap[feature];
+    return translationKey ? t(translationKey) || feature : feature;
   };
 
   // Helper function to count all technical specifications
@@ -43,13 +72,26 @@ const ProductDetailPage = () => {
   // State management
   const [product, setProduct] = useState(null);
   const [accessories, setAccessories] = useState([]);
-  const [accessoriesLoading, setAccessoriesLoading] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
   const [installationSelected, setInstallationSelected] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [activeSpecsTab, setActiveSpecsTab] = useState('overview');
+  const [loading, setLoading] = useState(true);
+  const [accessoriesLoading, setAccessoriesLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Fixed installation price per AC unit
+  const INSTALLATION_PRICE_PER_UNIT = 300.00;
+
+  // Initialize quantity from URL parameter
+  useEffect(() => {
+    if (qty) {
+      const qtyValue = parseInt(qty);
+      if (qtyValue >= 1 && qtyValue <= 10) {
+        setQuantity(qtyValue);
+      }
+    }
+  }, [qty]);
 
   // Helper function to render spec cards with value next to name
   const renderSpecCard = (icon, name, value, tooltip, useSmallFont = false) => (
@@ -68,9 +110,6 @@ const ProductDetailPage = () => {
       )}
     </div>
   );
-
-  // Fixed installation price
-  const INSTALLATION_PRICE = 300.00;
 
   // Fetch product data
   useEffect(() => {
@@ -152,8 +191,8 @@ const ProductDetailPage = () => {
   const getTotalPrice = () => {
     const basePrice = product?.Price || 0;
     const accessoryTotal = getAccessoryTotal();
-    const installationCost = installationSelected ? INSTALLATION_PRICE : 0;
-    return (basePrice + accessoryTotal + installationCost) * quantity;
+    const installationCost = installationSelected ? INSTALLATION_PRICE_PER_UNIT * quantity : 0;
+    return (basePrice + accessoryTotal) * quantity + installationCost;
   };
 
   // Stock status
@@ -197,7 +236,7 @@ const ProductDetailPage = () => {
       quantity, 
       selectedAccessoryObjects, 
       installationSelected, 
-      INSTALLATION_PRICE
+      INSTALLATION_PRICE_PER_UNIT
     );
 
     // Navigate to checkout
@@ -303,8 +342,10 @@ const ProductDetailPage = () => {
                     alignItems: 'center',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                     animation: 'badgeAppear 0.4s ease-out'
-                  }}>
-                    NEW
+                  }}
+                  title={t('buyPage.badges.new')}
+                  >
+                    {t('buyPage.badges.new')}
                   </span>
                 )}
                 {product.IsBestseller && (
@@ -321,8 +362,10 @@ const ProductDetailPage = () => {
                     alignItems: 'center',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                     animation: 'badgeAppear 0.4s ease-out'
-                  }}>
-                    BESTSELLER
+                  }}
+                  title={t('buyPage.badges.bestseller')}
+                  >
+                    {t('buyPage.badges.bestseller')}
                   </span>
                 )}
                 {product.IsFeatured && (
@@ -339,8 +382,10 @@ const ProductDetailPage = () => {
                     alignItems: 'center',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                     animation: 'badgeAppear 0.4s ease-out'
-                  }}>
-                    FEATURED
+                  }}
+                  title={t('buyPage.badges.featured')}
+                  >
+                    {t('buyPage.badges.featured')}
                   </span>
                 )}
                 {product.Discount > 0 && (
@@ -358,7 +403,7 @@ const ProductDetailPage = () => {
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                     animation: 'badgeAppear 0.4s ease-out'
                   }}>
-                    🔥 {product.Discount}% OFF
+                    🔥 {product.Discount}% {t('buyPage.discount.off')}
                   </span>
                 )}
               </div>
@@ -422,7 +467,7 @@ const ProductDetailPage = () => {
                 {product.RoomSizeRecommendation && (
                   <div className={styles.quickSpec}>
                     <div className={styles.quickSpecLabel}>
-                      Room Size
+                      {t('productDetail.specs.roomSize')}
                       <span 
                         className={styles.infoIcon}
                         title={t('productDetail.tooltips.roomSizeRecommendation')}
@@ -456,59 +501,59 @@ const ProductDetailPage = () => {
             {/* Tab Navigation */}
             <div className={styles.specsTabs}>
               <button
-                className={`${styles.specsTab} ${activeSpecsTab === 'overview' ? styles.active : ''}`}
-                onClick={() => setActiveSpecsTab('overview')}
+                className={`${styles.specsTab} ${activeTab === 'overview' ? styles.active : ''}`}
+                onClick={() => setActiveTab('overview')}
               >
-                Overview
+                {t('productDetail.specsTabs.overview')}
               </button>
               <button
-                className={`${styles.specsTab} ${activeSpecsTab === 'technical' ? styles.active : ''}`}
-                onClick={() => setActiveSpecsTab('technical')}
+                className={`${styles.specsTab} ${activeTab === 'technical' ? styles.active : ''}`}
+                onClick={() => setActiveTab('technical')}
               >
-                Technical Details
+                {t('productDetail.specsTabs.technical')}
               </button>
               <button
-                className={`${styles.specsTab} ${activeSpecsTab === 'physical' ? styles.active : ''}`}
-                onClick={() => setActiveSpecsTab('physical')}
+                className={`${styles.specsTab} ${activeTab === 'physical' ? styles.active : ''}`}
+                onClick={() => setActiveTab('physical')}
               >
-                Physical Characteristics
+                {t('productDetail.specsTabs.physical')}
               </button>
             </div>
 
             {/* Overview Tab */}
-            <div className={`${styles.specsTabContent} ${activeSpecsTab === 'overview' ? styles.active : ''}`}>
+            <div className={`${styles.specsTabContent} ${activeTab === 'overview' ? styles.active : ''}`}>
               <div className={styles.specsGrid}>
                 {product.COP && renderSpecCard('⚡', 'COP', product.COP, t('productDetail.tooltips.cop'))}
                 {product.SCOP && renderSpecCard('🔥', 'SCOP', product.SCOP, t('productDetail.tooltips.scop'))}
                 {product.NoiseLevel && renderSpecCard('🔇', t('productDetail.specs.noise'), product.NoiseLevel, t('productDetail.tooltips.noiseLevel'))}
                 {product.PowerConsumption && renderSpecCard('⚡', t('productDetail.specs.power'), product.PowerConsumption, t('productDetail.tooltips.powerConsumption'))}
                 {product.AirFlow && renderSpecCard('💨', t('productDetail.specs.airflow'), product.AirFlow, t('productDetail.tooltips.airFlow'))}
-                {product.OperatingTempRange && renderSpecCard('🌡️', 'Operating Range', product.OperatingTempRange, t('productDetail.tooltips.operatingTempRange'))}
+                {product.OperatingTempRange && renderSpecCard('🌡️', t('productDetail.specs.operatingRange'), product.OperatingTempRange, t('productDetail.tooltips.operatingTempRange'))}
               </div>
             </div>
 
             {/* Technical Details Tab */}
-            <div className={`${styles.specsTabContent} ${activeSpecsTab === 'technical' ? styles.active : ''}`}>
+            <div className={`${styles.specsTabContent} ${activeTab === 'technical' ? styles.active : ''}`}>
               <div className={styles.specsGrid}>
                 {product.COP && renderSpecCard('⚡', 'COP', product.COP, t('productDetail.tooltips.cop'))}
                 {product.SCOP && renderSpecCard('🔥', 'SCOP', product.SCOP, t('productDetail.tooltips.scop'))}
                 {product.NoiseLevel && renderSpecCard('🔇', t('productDetail.specs.noise'), product.NoiseLevel, t('productDetail.tooltips.noiseLevel'))}
                 {product.PowerConsumption && renderSpecCard('⚡', t('productDetail.specs.power'), product.PowerConsumption, t('productDetail.tooltips.powerConsumption'))}
                 {product.AirFlow && renderSpecCard('💨', t('productDetail.specs.airflow'), product.AirFlow, t('productDetail.tooltips.airFlow'))}
-                {product.OperatingTempRange && renderSpecCard('🌡️', 'Operating Range', product.OperatingTempRange, t('productDetail.tooltips.operatingTempRange'))}
-                {product.RefrigerantType && renderSpecCard('❄️', 'Refrigerant', product.RefrigerantType, t('productDetail.tooltips.refrigerantType'))}
-                {product.InstallationType && renderSpecCard('🔧', 'Installation', product.InstallationType, t('productDetail.tooltips.installationType'))}
-                {product.Stock !== undefined && product.Stock !== null && renderSpecCard('📦', 'Stock', product.Stock > 0 ? `${product.Stock} available` : 'Out of stock', t('productDetail.tooltips.stock'))}
+                {product.OperatingTempRange && renderSpecCard('🌡️', t('productDetail.specs.operatingRange'), product.OperatingTempRange, t('productDetail.tooltips.operatingTempRange'))}
+                {product.RefrigerantType && renderSpecCard('❄️', t('productDetail.specs.refrigerant'), product.RefrigerantType, t('productDetail.tooltips.refrigerantType'))}
+                {product.InstallationType && renderSpecCard('🔧', t('productDetail.specs.installation'), product.InstallationType, t('productDetail.tooltips.installationType'))}
+                {product.Stock !== undefined && product.Stock !== null && renderSpecCard('📦', t('productDetail.specs.stock'), product.Stock > 0 ? `${product.Stock} ${t('productDetail.stock.available')}` : t('productDetail.stock.outOfStockShort'), t('productDetail.tooltips.stock'))}
               </div>
             </div>
 
             {/* Physical Characteristics Tab */}
-            <div className={`${styles.specsTabContent} ${activeSpecsTab === 'physical' ? styles.active : ''}`}>
+            <div className={`${styles.specsTabContent} ${activeTab === 'physical' ? styles.active : ''}`}>
               <div className={styles.specsGrid}>
-                {product.IndoorDimensions && renderSpecCard('🏠', 'Indoor Dimensions', product.IndoorDimensions, t('productDetail.tooltips.dimensions'), true)}
-                {product.OutdoorDimensions && renderSpecCard('🏢', 'Outdoor Dimensions', product.OutdoorDimensions, t('productDetail.tooltips.dimensions'), true)}
-                {product.IndoorWeight && renderSpecCard('⚖️', 'Indoor Weight', `${product.IndoorWeight} ${t('buyPage.physicalCharacteristics.kg')}`, t('productDetail.tooltips.weight'))}
-                {product.OutdoorWeight && renderSpecCard('⚖️', 'Outdoor Weight', `${product.OutdoorWeight} ${t('buyPage.physicalCharacteristics.kg')}`, t('productDetail.tooltips.weight'))}
+                {product.IndoorDimensions && renderSpecCard('🏠', t('productDetail.specs.indoorDimensions'), product.IndoorDimensions, t('productDetail.tooltips.dimensions'), true)}
+                {product.OutdoorDimensions && renderSpecCard('🏢', t('productDetail.specs.outdoorDimensions'), product.OutdoorDimensions, t('productDetail.tooltips.dimensions'), true)}
+                {product.IndoorWeight && renderSpecCard('⚖️', t('productDetail.specs.indoorWeight'), `${product.IndoorWeight} ${t('buyPage.physicalCharacteristics.kg')}`, t('productDetail.tooltips.weight'))}
+                {product.OutdoorWeight && renderSpecCard('⚖️', t('productDetail.specs.outdoorWeight'), `${product.OutdoorWeight} ${t('buyPage.physicalCharacteristics.kg')}`, t('productDetail.tooltips.weight'))}
                 {renderSpecCard('🎨', t('productDetail.specs.color'), product.Colour, t('productDetail.tooltips.color'))}
               </div>
             </div>
@@ -524,7 +569,7 @@ const ProductDetailPage = () => {
                 {product.Features.map((feature, index) => (
                   <div key={index} className={styles.featureItem}>
                     <span className={styles.featureIcon}>✓</span>
-                    <span className={styles.featureText}>{feature}</span>
+                    <span className={styles.featureText}>{translateFeature(feature)}</span>
                   </div>
                 ))}
               </div>
@@ -596,13 +641,13 @@ const ProductDetailPage = () => {
               <div className={styles.installationInfo}>
                 <h3>{t('productDetail.installation.title')}</h3>
                 <div className={styles.installationDescription}>
-                  {t('productDetail.installation.description')}
+                  {t('productDetail.installation.description')} ({t('productDetail.installation.perUnit')})
                 </div>
               </div>
               <div className={styles.installationPriceAndCheckbox}>
                 <div className={styles.installationPrice}>
-                  <div className={styles.priceMain}>{formatPrice(INSTALLATION_PRICE)}</div>
-                  <div className={styles.priceSecondary}>{formatPriceEUR(INSTALLATION_PRICE)}</div>
+                  <div className={styles.priceMain}>{formatPrice(INSTALLATION_PRICE_PER_UNIT)} {t('productDetail.installation.perUnit')}</div>
+                  <div className={styles.priceSecondary}>{formatPriceEUR(INSTALLATION_PRICE_PER_UNIT)} {t('productDetail.installation.perUnit')}</div>
                 </div>
                 <input
                   type="checkbox"
@@ -646,8 +691,8 @@ const ProductDetailPage = () => {
                   {t('productDetail.priceBreakdown.installation')}
                 </span>
                 <span className={styles.priceValue}>
-                  <div className={styles.priceMain}>{formatPrice(INSTALLATION_PRICE)}</div>
-                  <div className={styles.priceSecondary}>{formatPriceEUR(INSTALLATION_PRICE)}</div>
+                  <div className={styles.priceMain}>{formatPrice(INSTALLATION_PRICE_PER_UNIT * quantity)}</div>
+                  <div className={styles.priceSecondary}>{formatPriceEUR(INSTALLATION_PRICE_PER_UNIT * quantity)}</div>
                 </span>
               </div>
             )}

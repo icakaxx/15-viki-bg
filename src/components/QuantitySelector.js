@@ -40,8 +40,8 @@ const QuantitySelector = ({ product }) => {
     if (isOutOfStock) return; // Prevent navigation for archived products
     
     console.log('Buy now clicked for product:', product?.ProductID);
-    // Navigate to product detail page where user can select accessories and installation
-    router.push(`/buy/${product.ProductID}`);
+    // Navigate to product detail page with quantity parameter
+    router.push(`/buy/${product.ProductID}?qty=${quantity}`);
   };
 
   const handleQuantityInputChange = (e) => {

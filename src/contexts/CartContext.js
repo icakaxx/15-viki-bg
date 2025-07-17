@@ -12,7 +12,7 @@ const calculateItemTotal = (item) => {
   const accessoryTotal = item.accessories?.reduce((sum, acc) => {
     return sum + (acc.Price || 0);
   }, 0) || 0;
-  const installationCost = item.installation ? (item.installationPrice || 0) : 0;
+  const installationCost = item.installation ? (item.installationPrice || 0) * item.quantity : 0;
   
   // Total = (basePrice + accessoryTotal) * quantity + installationCost
   return (basePrice + accessoryTotal) * item.quantity + installationCost;
@@ -86,7 +86,7 @@ const cartReducer = (state, action) => {
       } else {
         // Add new item with full configuration - accessories scale with product quantity
         const accessoryTotal = accessories.reduce((sum, acc) => sum + (acc.Price || 0), 0);
-        const installationCost = installation ? installationPrice : 0;
+        const installationCostPerUnit = installation ? installationPrice : 0;
         
         newItems = [...state.items, {
           cartItemId,
@@ -98,8 +98,8 @@ const cartReducer = (state, action) => {
           installationPrice: installationPrice || 0,
           basePrice: product.Price,
           accessoryTotal,
-          installationCost,
-          itemTotalPrice: (product.Price + accessoryTotal) * quantity + installationCost
+          installationCostPerUnit,
+          itemTotalPrice: (product.Price + accessoryTotal) * quantity + (installationCostPerUnit * quantity)
         }];
       }
       
