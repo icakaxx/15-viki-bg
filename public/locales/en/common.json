@@ -482,26 +482,28 @@
     "info": {
       "phone": {
         "title": "Phone",
-        "description": "Call for quick consultation"
+        "description": "Call for quick consultation",
+        "details": ["+359895460717"]
       },
       "email": {
         "title": "Email",
-        "description": "Send us an inquiry by email"
+        "description": "Send us an inquiry by email",
+        "details": ["bgviki.ltd@abv.bg"]
       },
       "address": {
         "title": "Address",
         "description": "Visit our office and showroom",
         "details": {
-          "0": "15 Klimatici St.",
-          "1": "1000 Sofia, Bulgaria"
+          "0": "Lovech Center, ul. 'Targovska' 60, 5500 Lovech, Bulgaria",
+          "1": ""
         }
       },
       "hours": {
         "title": "Working Hours",
         "description": "We're available during business days",
         "schedule": {
-          "0": "Mon - Fri: 9:00 - 18:00",
-          "1": "Saturday: 9:00 - 14:00",
+          "0": "Monday - Friday: 9:00 – 18:00",
+          "1": "Saturday: 10:00 – 14:00",
           "2": "Sunday: Closed"
         }
       }
@@ -558,6 +560,12 @@
       "subtitle": "Make an inquiry or browse our products today.",
       "inquiry": "Make an Inquiry",
       "products": "Browse Products"
+    },
+    "map": {
+      "howToFindUs": "How to find us",
+      "googleMaps": "View in Google Maps",
+      "waze": "View in Waze",
+      "appleMaps": "View in Apple Maps"
     }
   },
   "admin": {
