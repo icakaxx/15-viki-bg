@@ -20,15 +20,23 @@ const ProductDetailPage = () => {
     return t(`buyPage.types.${typeKey}`) || type;
   };
 
-  // Helper function to count physical characteristics
-  const getPhysicalCharacteristicsCount = () => {
+  // Helper function to count all technical specifications
+  const getTechnicalSpecsCount = () => {
     let count = 0;
+    if (product.COP) count++;
+    if (product.SCOP) count++;
+    if (product.NoiseLevel) count++;
+    if (product.PowerConsumption) count++;
+    if (product.AirFlow) count++;
     if (product.IndoorDimensions) count++;
     if (product.OutdoorDimensions) count++;
     if (product.IndoorWeight) count++;
     if (product.OutdoorWeight) count++;
     if (product.Colour) count++;
     if (product.RefrigerantType) count++;
+    if (product.OperatingTempRange) count++;
+    if (product.InstallationType) count++;
+    if (product.Stock !== undefined && product.Stock !== null) count++;
     return count;
   };
 
@@ -41,6 +49,25 @@ const ProductDetailPage = () => {
   const [selectedAccessories, setSelectedAccessories] = useState([]);
   const [installationSelected, setInstallationSelected] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [activeSpecsTab, setActiveSpecsTab] = useState('overview');
+
+  // Helper function to render spec cards with value next to name
+  const renderSpecCard = (icon, name, value, tooltip, useSmallFont = false) => (
+    <div className={styles.specCard}>
+      <div className={styles.specIcon}>{icon}</div>
+      <div className={styles.specName}>
+        {name}: <span className={useSmallFont ? styles.specValueSmall : styles.specValue}>{value}</span>
+      </div>
+      {tooltip && (
+        <span 
+          className={styles.infoIcon}
+          title={tooltip}
+        >
+          ?
+        </span>
+      )}
+    </div>
+  );
 
   // Fixed installation price
   const INSTALLATION_PRICE = 300.00;
@@ -262,49 +289,58 @@ const ProductDetailPage = () => {
                 flexWrap: 'wrap', 
                 marginBottom: '16px' 
               }}>
-                {product.IsFeatured && (
+                {product.IsNew && (
                   <span style={{ 
-                    backgroundColor: '#4CAF50', 
+                    background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
                     color: 'white',
                     padding: '4px 12px',
                     borderRadius: '20px',
-                    fontSize: '14px',
+                    fontSize: '12px',
                     fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    animation: 'badgeAppear 0.4s ease-out'
                   }}>
-                    ⭐ Featured
+                    NEW
                   </span>
                 )}
                 {product.IsBestseller && (
                   <span style={{ 
-                    backgroundColor: '#FF9800', 
+                    background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
                     color: 'white',
                     padding: '4px 12px',
                     borderRadius: '20px',
-                    fontSize: '14px',
+                    fontSize: '12px',
                     fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    animation: 'badgeAppear 0.4s ease-out'
                   }}>
-                    🏆 Bestseller
+                    BESTSELLER
                   </span>
                 )}
-                {product.IsNew && (
+                {product.IsFeatured && (
                   <span style={{ 
-                    backgroundColor: '#2196F3', 
+                    background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
                     color: 'white',
                     padding: '4px 12px',
                     borderRadius: '20px',
-                    fontSize: '14px',
+                    fontSize: '12px',
                     fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    animation: 'badgeAppear 0.4s ease-out'
                   }}>
-                    🆕 New
+                    FEATURED
                   </span>
                 )}
                 {product.Discount > 0 && (
@@ -313,11 +349,14 @@ const ProductDetailPage = () => {
                     color: 'white',
                     padding: '4px 12px',
                     borderRadius: '20px',
-                    fontSize: '14px',
+                    fontSize: '12px',
                     fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    animation: 'badgeAppear 0.4s ease-out'
                   }}>
                     🔥 {product.Discount}% OFF
                   </span>
@@ -411,219 +450,67 @@ const ProductDetailPage = () => {
           {/* Technical Specifications */}
           <div className={styles.specsSection}>
             <h2 className={styles.sectionTitle}>
-              {t('productDetail.technicalSpecs')} ({getPhysicalCharacteristicsCount()}/6)
+              {t('productDetail.technicalSpecs')}
             </h2>
-            <div className={styles.specsGrid}>
-              {product.COP && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>⚡</div>
-                  <div className={styles.specName}>
-                    COP
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.cop')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.COP}</div>
-                </div>
-              )}
-              {product.SCOP && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>🔥</div>
-                  <div className={styles.specName}>
-                    SCOP
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.scop')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.SCOP}</div>
-                </div>
-              )}
-              {product.NoiseLevel && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>🔇</div>
-                  <div className={styles.specName}>
-                    {t('productDetail.specs.noise')}
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.noiseLevel')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.NoiseLevel}</div>
-                </div>
-              )}
-              {product.PowerConsumption && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>⚡</div>
-                  <div className={styles.specName}>
-                    {t('productDetail.specs.power')}
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.powerConsumption')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.PowerConsumption}</div>
-                </div>
-              )}
-              {product.AirFlow && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>💨</div>
-                  <div className={styles.specName}>
-                    {t('productDetail.specs.airflow')}
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.airFlow')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.AirFlow}</div>
-                </div>
-              )}
-              {product.IndoorDimensions && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>🏠</div>
-                  <div className={styles.specName}>
-                    {t('buyPage.physicalCharacteristics.indoorDimensions')}
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.dimensions')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.IndoorDimensions}</div>
-                </div>
-              )}
-              {product.OutdoorDimensions && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>🏢</div>
-                  <div className={styles.specName}>
-                    {t('buyPage.physicalCharacteristics.outdoorDimensions')}
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.dimensions')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.OutdoorDimensions}</div>
-                </div>
-              )}
-              {product.IndoorWeight && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>⚖️</div>
-                  <div className={styles.specName}>
-                    {t('buyPage.physicalCharacteristics.indoorWeight')}
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.weight')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.IndoorWeight} {t('buyPage.physicalCharacteristics.kg')}</div>
-                </div>
-              )}
-              {product.OutdoorWeight && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>⚖️</div>
-                  <div className={styles.specName}>
-                    {t('buyPage.physicalCharacteristics.outdoorWeight')}
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.weight')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.OutdoorWeight} {t('buyPage.physicalCharacteristics.kg')}</div>
-                </div>
-              )}
-              <div className={styles.specCard}>
-                <div className={styles.specIcon}>🎨</div>
-                <div className={styles.specName}>
-                  {t('productDetail.specs.color')}
-                  <span 
-                    className={styles.infoIcon}
-                    title={t('productDetail.tooltips.color')}
-                  >
-                    ?
-                  </span>
-                </div>
-                <div className={styles.specValue}>{product.Colour}</div>
+            
+            {/* Tab Navigation */}
+            <div className={styles.specsTabs}>
+              <button
+                className={`${styles.specsTab} ${activeSpecsTab === 'overview' ? styles.active : ''}`}
+                onClick={() => setActiveSpecsTab('overview')}
+              >
+                Overview
+              </button>
+              <button
+                className={`${styles.specsTab} ${activeSpecsTab === 'technical' ? styles.active : ''}`}
+                onClick={() => setActiveSpecsTab('technical')}
+              >
+                Technical Details
+              </button>
+              <button
+                className={`${styles.specsTab} ${activeSpecsTab === 'physical' ? styles.active : ''}`}
+                onClick={() => setActiveSpecsTab('physical')}
+              >
+                Physical Characteristics
+              </button>
+            </div>
+
+            {/* Overview Tab */}
+            <div className={`${styles.specsTabContent} ${activeSpecsTab === 'overview' ? styles.active : ''}`}>
+              <div className={styles.specsGrid}>
+                {product.COP && renderSpecCard('⚡', 'COP', product.COP, t('productDetail.tooltips.cop'))}
+                {product.SCOP && renderSpecCard('🔥', 'SCOP', product.SCOP, t('productDetail.tooltips.scop'))}
+                {product.NoiseLevel && renderSpecCard('🔇', t('productDetail.specs.noise'), product.NoiseLevel, t('productDetail.tooltips.noiseLevel'))}
+                {product.PowerConsumption && renderSpecCard('⚡', t('productDetail.specs.power'), product.PowerConsumption, t('productDetail.tooltips.powerConsumption'))}
+                {product.AirFlow && renderSpecCard('💨', t('productDetail.specs.airflow'), product.AirFlow, t('productDetail.tooltips.airFlow'))}
+                {product.OperatingTempRange && renderSpecCard('🌡️', 'Operating Range', product.OperatingTempRange, t('productDetail.tooltips.operatingTempRange'))}
               </div>
-              {product.RefrigerantType && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>❄️</div>
-                  <div className={styles.specName}>
-                    Refrigerant
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.refrigerantType')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.RefrigerantType}</div>
-                </div>
-              )}
-              {product.OperatingTempRange && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>🌡️</div>
-                  <div className={styles.specName}>
-                    Operating Range
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.operatingTempRange')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.OperatingTempRange}</div>
-                </div>
-              )}
-              {product.InstallationType && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>🔧</div>
-                  <div className={styles.specName}>
-                    Installation
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.installationType')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>{product.InstallationType}</div>
-                </div>
-              )}
-              {product.Stock !== undefined && product.Stock !== null && (
-                <div className={styles.specCard}>
-                  <div className={styles.specIcon}>📦</div>
-                  <div className={styles.specName}>
-                    Stock
-                    <span 
-                      className={styles.infoIcon}
-                      title={t('productDetail.tooltips.stock')}
-                    >
-                      ?
-                    </span>
-                  </div>
-                  <div className={styles.specValue}>
-                    {product.Stock > 0 ? `${product.Stock} available` : 'Out of stock'}
-                  </div>
-                </div>
-              )}
+            </div>
+
+            {/* Technical Details Tab */}
+            <div className={`${styles.specsTabContent} ${activeSpecsTab === 'technical' ? styles.active : ''}`}>
+              <div className={styles.specsGrid}>
+                {product.COP && renderSpecCard('⚡', 'COP', product.COP, t('productDetail.tooltips.cop'))}
+                {product.SCOP && renderSpecCard('🔥', 'SCOP', product.SCOP, t('productDetail.tooltips.scop'))}
+                {product.NoiseLevel && renderSpecCard('🔇', t('productDetail.specs.noise'), product.NoiseLevel, t('productDetail.tooltips.noiseLevel'))}
+                {product.PowerConsumption && renderSpecCard('⚡', t('productDetail.specs.power'), product.PowerConsumption, t('productDetail.tooltips.powerConsumption'))}
+                {product.AirFlow && renderSpecCard('💨', t('productDetail.specs.airflow'), product.AirFlow, t('productDetail.tooltips.airFlow'))}
+                {product.OperatingTempRange && renderSpecCard('🌡️', 'Operating Range', product.OperatingTempRange, t('productDetail.tooltips.operatingTempRange'))}
+                {product.RefrigerantType && renderSpecCard('❄️', 'Refrigerant', product.RefrigerantType, t('productDetail.tooltips.refrigerantType'))}
+                {product.InstallationType && renderSpecCard('🔧', 'Installation', product.InstallationType, t('productDetail.tooltips.installationType'))}
+                {product.Stock !== undefined && product.Stock !== null && renderSpecCard('📦', 'Stock', product.Stock > 0 ? `${product.Stock} available` : 'Out of stock', t('productDetail.tooltips.stock'))}
+              </div>
+            </div>
+
+            {/* Physical Characteristics Tab */}
+            <div className={`${styles.specsTabContent} ${activeSpecsTab === 'physical' ? styles.active : ''}`}>
+              <div className={styles.specsGrid}>
+                {product.IndoorDimensions && renderSpecCard('🏠', 'Indoor Dimensions', product.IndoorDimensions, t('productDetail.tooltips.dimensions'), true)}
+                {product.OutdoorDimensions && renderSpecCard('🏢', 'Outdoor Dimensions', product.OutdoorDimensions, t('productDetail.tooltips.dimensions'), true)}
+                {product.IndoorWeight && renderSpecCard('⚖️', 'Indoor Weight', `${product.IndoorWeight} ${t('buyPage.physicalCharacteristics.kg')}`, t('productDetail.tooltips.weight'))}
+                {product.OutdoorWeight && renderSpecCard('⚖️', 'Outdoor Weight', `${product.OutdoorWeight} ${t('buyPage.physicalCharacteristics.kg')}`, t('productDetail.tooltips.weight'))}
+                {renderSpecCard('🎨', t('productDetail.specs.color'), product.Colour, t('productDetail.tooltips.color'))}
+              </div>
             </div>
           </div>
 
@@ -838,7 +725,7 @@ export async function getStaticProps({ locale }) {
   
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common'])),
+      ...(await serverSideTranslations(locale || 'bg', ['common'])),
     },
   };
 }

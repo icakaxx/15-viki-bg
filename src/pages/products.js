@@ -10,7 +10,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 export async function getStaticProps({ locale }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common'])),
+      ...(await serverSideTranslations(locale || 'bg', ['common'])),
     },
   };
 }
@@ -48,7 +48,7 @@ const ProductsPage = () => {
       </Head>
 
       
-      <div className={styles.container}>
+      <div className={`${styles.container} ${styles.productsPageBackground}`}>
         <h1 className={styles.title}>{t('productsPage.title')}</h1>
         <p style={{ textAlign: 'center', fontSize: '1.2rem', color: '#2c5530', marginBottom: '2rem', maxWidth: 700, marginLeft: 'auto', marginRight: 'auto' }}>
           {i18n.language === 'bg'

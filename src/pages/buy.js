@@ -9,6 +9,7 @@ import QuantitySelector from '../components/QuantitySelector';
 import styles from '../styles/Page Styles/Products.module.css';
 import Image from 'next/image';
 
+
 const BuyPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,6 +71,7 @@ const BuyPage = () => {
         }
         const data = await response.json();
         const productsArray = data.products || data || [];
+        
         setProducts(productsArray);
         
         // Set initial price range based on products
@@ -632,6 +634,12 @@ const BuyPage = () => {
                 <div className={styles.grid}>
                   {currentProducts.map((product, index) => {
                   const discount = calculateDiscount(product.Price, product.PreviousPrice);
+                  // Use actual product data for promotional flags instead of config file
+                const flags = {
+                  IsNew: product.IsNew || false,
+                  IsBestseller: product.IsBestseller || false,
+                  IsFeatured: product.IsFeatured || false
+                };
                   
                   return (
                     <div key={product.ProductID} className={`${styles.card} ${product.IsArchived ? styles.outOfStock : ''}`}>
@@ -646,28 +654,28 @@ const BuyPage = () => {
                       
                       {/* Clickable Product Info Section */}
                       <Link href={`/buy/${product.ProductID}`} className={styles.productLink}>
-                        {/* Promotional Badges */}
-                        {(product.IsFeatured || product.IsBestseller || product.IsNew) && (
-                          <div className={styles.promotionalBadges}>
-                            {product.IsFeatured && (
-                              <span className={styles.badge} title={t('buyPage.badges.featured')}>
-                                ⭐
-                              </span>
-                            )}
-                            {product.IsBestseller && (
-                              <span className={styles.badge} title={t('buyPage.badges.bestseller')}>
-                                🏆
-                              </span>
-                            )}
-                            {product.IsNew && (
-                              <span className={styles.badge} title={t('buyPage.badges.new')}>
-                                🆕
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        
                         <div className={styles.imageContainer}>
+                          {/* Promotional Badges */}
+                          {(flags.IsFeatured || flags.IsBestseller || flags.IsNew) && (
+                            <div className={styles.promotionalBadges}>
+                              {flags.IsNew && (
+                                <span className={`${styles.badge} ${styles.new}`} title={t ? t('buyPage.badges.new') : 'New Product'}>
+                                  {t ? t('buyPage.badges.new') : 'NEW'}
+                                </span>
+                              )}
+                              {flags.IsBestseller && (
+                                <span className={`${styles.badge} ${styles.bestseller}`} title={t ? t('buyPage.badges.bestseller') : 'Bestseller'}>
+                                  {t ? t('buyPage.badges.bestseller') : 'BESTSELLER'}
+                                </span>
+                              )}
+                              {flags.IsFeatured && (
+                                <span className={`${styles.badge} ${styles.featured}`} title={t ? t('buyPage.badges.featured') : 'Featured Product'}>
+                                  {t ? t('buyPage.badges.featured') : 'FEATURED'}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
                           <Image
                             src={product.ImageURL || '/images/placeholder-ac.svg'}
                             alt={`${product.Brand} ${product.Model}`}
@@ -686,65 +694,46 @@ const BuyPage = () => {
                           
                           <div className={styles.specs}>
                             <div className={styles.spec}>
-                              <span className={styles.specLabel}>{t('buyPage.type')}:</span> {translateType(product.Type)}
+                              <span className={styles.specLabel}>{t ? t('buyPage.type') : 'Type'}:</span> {translateType(product.Type)}
                             </div>
                             <div className={styles.spec}>
-                              <span className={styles.specLabel}>{t('buyPage.capacity')}:</span> {product.CapacityBTU} {t('buyPage.btu')}
+                              <span className={styles.specLabel}>{t ? t('buyPage.capacity') : 'Capacity'}:</span> {product.CapacityBTU} {t ? t('buyPage.btu') : 'BTU'}
                             </div>
                             <div className={styles.spec}>
-                              <span className={styles.specLabel}>{t('buyPage.energyRating')}:</span> {product.EnergyRating}
+                              <span className={styles.specLabel}>{t ? t('buyPage.energyRating') : 'Energy Rating'}:</span> {product.EnergyRating}
                             </div>
                             {product.Colour && (
                               <div className={styles.spec}>
-                                <span className={styles.specLabel}>{t('buyPage.color')}:</span> {product.Colour}
+                                <span className={styles.specLabel}>{t ? t('buyPage.color') : 'Color'}:</span> {product.Colour}
                               </div>
                             )}
                             {product.NoiseLevel && (
                               <div className={styles.spec}>
-                                <span className={styles.specLabel}>{t('buyPage.noiseLevel')}:</span> {product.NoiseLevel}
+                                <span className={styles.specLabel}>{t ? t('buyPage.noiseLevel') : 'Noise'}:</span> {product.NoiseLevel} {t ? t('buyPage.units.dB') : 'dB'}
                               </div>
                             )}
                             {product.WarrantyPeriod && (
                               <div className={styles.spec}>
-                                <span className={styles.specLabel}>{t('buyPage.warranty')}:</span> {product.WarrantyPeriod}
+                                <span className={styles.specLabel}>{t ? t('buyPage.warranty') : 'Warranty'}:</span> {product.WarrantyPeriod}
                               </div>
                             )}
                           </div>
                           
-                          {/* Feature Icons */}
-                          <div className={styles.featureIcons}>
-                            {product.Features && product.Features.some(feature => 
-                              feature.toLowerCase().includes('wifi') || 
-                              feature.toLowerCase().includes('smart')
-                            ) && (
-                              <span className={styles.featureIcon} title={t('buyPage.features.wifi')}>
-                                📱
-                              </span>
-                            )}
-                            {product.Features && product.Features.some(feature => 
-                              feature.toLowerCase().includes('inverter')
-                            ) && (
-                              <span className={styles.featureIcon} title={t('buyPage.features.inverter')}>
-                                ⚡
-                              </span>
-                            )}
-                            {product.Features && product.Features.some(feature => 
-                              feature.toLowerCase().includes('heat') || 
-                              feature.toLowerCase().includes('heating')
-                            ) && (
-                              <span className={styles.featureIcon} title={t('buyPage.features.heatPump')}>
-                                🔥
-                              </span>
-                            )}
-                            {product.Features && product.Features.some(feature => 
-                              feature.toLowerCase().includes('eco') || 
-                              feature.toLowerCase().includes('energy')
-                            ) && (
-                              <span className={styles.featureIcon} title={t('buyPage.features.eco')}>
-                                🌱
-                              </span>
-                            )}
-                          </div>
+                          {/* Feature Tags */}
+                          {product.Features && product.Features.length > 0 && (
+                            <div className={styles.featureTags}>
+                              {product.Features.slice(0, 4).map((feature, featureIndex) => (
+                                <span key={featureIndex} className={styles.featureTag}>
+                                  {feature}
+                                </span>
+                              ))}
+                              {product.Features.length > 4 && (
+                                <span className={styles.featureTag}>
+                                  +{product.Features.length - 4} more
+                                </span>
+                              )}
+                            </div>
+                          )}
                           
                           {/* Stock Status */}
                           <div className={styles.stockStatus}>
@@ -782,10 +771,7 @@ const BuyPage = () => {
                               )}
                             </>
                           )}
-                          <div className={styles.installationInfo}>
-                            <span className={styles.installationLabel}>{t('buyPage.installationCost')}</span>
-                            <span className={styles.installationPrice}>+300 BGN / €153</span>
-                          </div>
+
                         </div>
                       </Link>
                       
@@ -1007,7 +993,7 @@ export async function getStaticProps({ locale }) {
   
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common'])),
+      ...(await serverSideTranslations(locale || 'bg', ['common'])),
     },
   };
 }

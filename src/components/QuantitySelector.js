@@ -1,12 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 import styles from '../styles/Component Styles/QuantitySelector.module.css';
 
 const QuantitySelector = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const { addToCart, getCartItemQuantity } = useCart();
   const { t } = useTranslation('common');
+  const router = useRouter();
   
   // Debug logging
   console.log('QuantitySelector rendered for product:', product?.ProductID);
@@ -34,18 +36,12 @@ const QuantitySelector = ({ product }) => {
     }
   };
 
-  const handleAddToCart = () => {
-    if (isOutOfStock) return; // Prevent adding archived products to cart
+  const handleBuyNow = () => {
+    if (isOutOfStock) return; // Prevent navigation for archived products
     
-    console.log('Add to cart clicked for product:', product?.ProductID, 'quantity:', quantity);
-    try {
-      addToCart(product, quantity);
-      // Reset quantity to 1 after adding to cart
-      setQuantity(1);
-      console.log('Successfully added to cart');
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-    }
+    console.log('Buy now clicked for product:', product?.ProductID);
+    // Navigate to product detail page where user can select accessories and installation
+    router.push(`/buy/${product.ProductID}`);
   };
 
   const handleQuantityInputChange = (e) => {
@@ -98,15 +94,15 @@ const QuantitySelector = ({ product }) => {
         </div>
       </div>
 
-      {/* Add to Cart Button - Disabled for archived products */}
+      {/* Buy Now Button - Navigates to product detail page */}
       <button
         type="button"
         className={`${styles.addToCartButton} ${isOutOfStock ? styles.disabled : ''}`}
-        onClick={handleAddToCart}
+        onClick={handleBuyNow}
         disabled={isOutOfStock}
-        aria-label={`${t ? t('buyPage.addToCart') : 'Add to Cart'} ${product?.Brand} ${product?.Model}`}
+        aria-label={`${t ? t('buyPage.buyButton') : 'Buy'} ${product?.Brand} ${product?.Model}`}
       >
-        {isOutOfStock ? 'Out of Stock' : (t ? t('buyPage.addToCart') : 'Add to Cart')}
+        {isOutOfStock ? 'Out of Stock' : (t ? t('buyPage.buyButton') : 'Buy')}
       </button>
 
       {/* Already in Cart Indicator - Hide for archived products */}

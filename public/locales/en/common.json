@@ -152,17 +152,17 @@
     "decreaseQuantity": "Decrease quantity", 
     "inCart": "In cart",
     "previousPrice": "Was:",
-    "energyRating": "Energy Rating:",
-    "capacity": "Capacity:",
-    "type": "Type:",
-    "brand": "Brand:",
-    "model": "Model:",
-    "price": "Price:",
-    "installationCost": "Installation:",
-    "stockStatus": "Stock:",
-    "roomSize": "Room Size:",
-    "noiseLevel": "Noise:",
-    "warranty": "Warranty:",
+    "energyRating": "Energy Rating",
+    "capacity": "Capacity",
+    "type": "Type",
+    "brand": "Brand",
+    "model": "Model",
+    "price": "Price",
+    "installationCost": "Installation",
+    "stockStatus": "Stock",
+    "roomSize": "Room Size",
+    "noiseLevel": "Noise",
+    "warranty": "Warranty",
     "discount": "Discount",
     "btu": "BTU",
     "color": "Color",
@@ -209,9 +209,9 @@
       "close": "Close"
     },
     "badges": {
-      "featured": "Featured Product",
-      "bestseller": "Bestseller",
-      "new": "New Product"
+      "featured": "FEATURED",
+      "bestseller": "BESTSELLER",
+      "new": "NEW"
     },
     "types": {
       "split": "Split",
@@ -227,6 +227,9 @@
       "indoorWeight": "Indoor Unit Weight (kg)",
       "outdoorWeight": "Outdoor Unit Weight (kg)",
       "kg": "kg"
+    },
+    "units": {
+      "dB": "dB"
     }
   },
   "cart": {

@@ -68,7 +68,8 @@ export default function Administration() {
         dimensions: '',
         indoor_dimensions: '',
         outdoor_dimensions: '',
-        weight: '',
+        indoor_weight: '',
+        outdoor_weight: '',
         noise_level: '',
         air_flow: '',
         room_size_recommendation: '',
@@ -105,8 +106,8 @@ export default function Administration() {
                 optional: []
             },
             features: {
-                required: ['features', 'is_featured', 'is_bestseller', 'is_new'],
-                optional: []
+                required: [],
+                optional: ['features', 'is_featured', 'is_bestseller', 'is_new']
             },
             description: {
                 required: ['description'],
@@ -212,7 +213,7 @@ export default function Administration() {
             totalCompleted,
             totalFields,
             progress: totalFields > 0 ? Math.round((totalCompleted / totalFields) * 100) : 0,
-            isComplete: totalRequired === 0 ? totalCompleted === totalFields : completedRequired === totalRequired,
+            isComplete: totalRequired === 0 ? true : completedRequired === totalRequired, // Features section is always complete since no required fields
             hasContent: totalCompleted > 0
         };
     };
@@ -228,6 +229,11 @@ export default function Administration() {
     const getSectionStatusLabel = (sectionName) => {
         const progress = getSectionProgress(sectionName);
         
+        if (sectionName === 'features') {
+            if (progress.hasContent) return 'Optional features added';
+            return 'Optional features';
+        }
+        
         if (progress.isComplete) return 'Completed';
         if (progress.hasContent) return 'In progress';
         return 'Not filled';
@@ -236,6 +242,11 @@ export default function Administration() {
     const getSectionStatusColor = (sectionName) => {
         const progress = getSectionProgress(sectionName);
         
+        if (sectionName === 'features') {
+            if (progress.hasContent) return '🟢';
+            return '⚪'; // Gray for optional
+        }
+        
         if (progress.isComplete) return '🟢';
         if (progress.hasContent) return '🟠';
         return '🔴';
@@ -243,8 +254,9 @@ export default function Administration() {
 
     // Field-level validation helpers with smart default detection
     const isFieldRequired = (fieldName) => {
-        // All fields are now required
-        return true;
+        // Promotional fields are now optional
+        const optionalFields = ['features', 'is_featured', 'is_bestseller', 'is_new'];
+        return !optionalFields.includes(fieldName);
     };
 
     const hasMeaningfulInput = (fieldName, value) => {
@@ -319,7 +331,7 @@ export default function Administration() {
                     technical: ['cop', 'scop', 'power_consumption', 'refrigerant_type', 'operating_temp_range'],
                     physical: ['indoor_dimensions', 'outdoor_dimensions', 'indoor_weight', 'outdoor_weight', 'colour', 'refrigerant_type'],
                     installation: ['room_size_recommendation', 'installation_type', 'warranty_period'],
-                    features: ['features', 'is_featured', 'is_bestseller', 'is_new'],
+                    features: [], // Features are now optional
                     description: ['description']
                 };
                 
@@ -420,7 +432,8 @@ export default function Administration() {
         dimensions: '',
         indoor_dimensions: '',
         outdoor_dimensions: '',
-        weight: '',
+        indoor_weight: '',
+        outdoor_weight: '',
         noise_level: '',
         air_flow: '',
         room_size_recommendation: '',
@@ -484,40 +497,58 @@ export default function Administration() {
             console.log('Raw products array:', productsArray);
             
             // Transform API response to match admin panel expected format
-            const transformedProducts = productsArray.map(product => ({
-                id: product.ProductID || product.id,
-                brand: product.Brand || product.brand,
-                model: product.Model || product.model,
-                type: product.Type || product.type,
-                capacity_btu: product.CapacityBTU || product.capacity_btu,
-                energy_rating: product.EnergyRating || product.energy_rating,
-                colour: product.Colour || product.colour,
-                price: product.Price || product.price,
-                previous_price: product.PreviousPrice || product.previous_price,
-                stock: product.Stock || product.stock,
-                discount: product.Discount || product.discount,
-                image_url: product.ImageURL || product.image_url,
-                is_featured: product.IsFeatured || product.is_featured,
-                is_bestseller: product.IsBestseller || product.is_bestseller,
-                is_new: product.IsNew || product.is_new,
-                is_archived: product.IsArchived || product.is_archived,
-                cop: product.COP || product.cop,
-                scop: product.SCOP || product.scop,
-                power_consumption: product.PowerConsumption || product.power_consumption,
-                refrigerant_type: product.RefrigerantType || product.refrigerant_type,
-                operating_temp_range: product.OperatingTempRange || product.operating_temp_range,
-                dimensions: product.Dimensions || product.dimensions,
-        
-                noise_level: product.NoiseLevel || product.noise_level,
-                air_flow: product.AirFlow || product.air_flow,
-                room_size_recommendation: product.RoomSizeRecommendation || product.room_size_recommendation,
-                installation_type: product.InstallationType || product.installation_type,
-                warranty_period: product.WarrantyPeriod || product.warranty_period,
-                features: product.Features || product.features || [],
-                description: product.Description || product.description,
-                created_at: product.CreatedAt || product.created_at,
-                updated_at: product.UpdatedAt || product.updated_at
-            }));
+            const transformedProducts = productsArray.map(product => {
+                try {
+                    console.log('Processing product:', product);
+                    console.log('Product tech specs after DB update:', {
+                        cop: product.COP,
+                        scop: product.SCOP,
+                        power_consumption: product.PowerConsumption,
+                        refrigerant_type: product.RefrigerantType,
+                        operating_temp_range: product.OperatingTempRange
+                    });
+                    return {
+                        id: product.ProductID || product.id,
+                        brand: product.Brand || product.brand || '',
+                        model: product.Model || product.model || '',
+                        type: product.Type || product.type || '',
+                        capacity_btu: product.CapacityBTU || product.capacity_btu || '',
+                        energy_rating: product.EnergyRating || product.energy_rating || '',
+                        colour: product.Colour || product.colour || '',
+                        price: product.Price || product.price || '',
+                        previous_price: product.PreviousPrice || product.previous_price || '',
+                        stock: product.Stock || product.stock || '',
+                        discount: product.Discount || product.discount || '',
+                        image_url: product.ImageURL || product.image_url || '',
+                        is_featured: product.IsFeatured || product.is_featured || false,
+                        is_bestseller: product.IsBestseller || product.is_bestseller || false,
+                        is_new: product.IsNew || product.is_new || false,
+                        is_archived: product.IsArchived || product.is_archived || false,
+                        cop: product.COP || product.cop || '',
+                        scop: product.SCOP || product.scop || '',
+                        power_consumption: product.PowerConsumption || product.power_consumption || '',
+                        refrigerant_type: product.RefrigerantType || product.refrigerant_type || '',
+                        operating_temp_range: product.OperatingTempRange || product.operating_temp_range || '',
+                        dimensions: product.Dimensions || product.dimensions || '',
+                        indoor_dimensions: product.IndoorDimensions || product.indoor_dimensions || '',
+                        outdoor_dimensions: product.OutdoorDimensions || product.outdoor_dimensions || '',
+                        indoor_weight: product.IndoorWeight || product.indoor_weight || '',
+                        outdoor_weight: product.OutdoorWeight || product.outdoor_weight || '',
+                        noise_level: product.NoiseLevel || product.noise_level || '',
+                        air_flow: product.AirFlow || product.air_flow || '',
+                        room_size_recommendation: product.RoomSizeRecommendation || product.room_size_recommendation || '',
+                        installation_type: product.InstallationType || product.installation_type || '',
+                        warranty_period: product.WarrantyPeriod || product.warranty_period || '',
+                        features: product.Features || product.features || [],
+                        description: product.Description || product.description || '',
+                        created_at: product.CreatedAt || product.created_at || '',
+                        updated_at: product.UpdatedAt || product.updated_at || ''
+                    };
+                } catch (error) {
+                    console.error('Error transforming product:', product, error);
+                    return null;
+                }
+            }).filter(product => product !== null);
             
             console.log('Transformed products:', transformedProducts);
             
@@ -561,7 +592,8 @@ export default function Administration() {
             dimensions: '',
             indoor_dimensions: '',
             outdoor_dimensions: '',
-            weight: '',
+            indoor_weight: '',
+            outdoor_weight: '',
             noise_level: '',
             air_flow: '',
             room_size_recommendation: '',
@@ -709,7 +741,8 @@ export default function Administration() {
                 cop: formData.cop ? parseFloat(formData.cop) : null,
                 scop: formData.scop ? parseFloat(formData.scop) : null,
                 power_consumption: formData.power_consumption ? parseFloat(formData.power_consumption) : null,
-                weight: formData.weight ? parseFloat(formData.weight) : null,
+                indoor_weight: formData.indoor_weight ? parseFloat(formData.indoor_weight) : null,
+                outdoor_weight: formData.outdoor_weight ? parseFloat(formData.outdoor_weight) : null,
                 noise_level: formData.noise_level ? parseInt(formData.noise_level) : null,
                 air_flow: formData.air_flow ? parseInt(formData.air_flow) : null,
                 // Convert empty strings to null for text fields
@@ -718,6 +751,8 @@ export default function Administration() {
                 energy_rating: formData.energy_rating || null,
                 image_url: formData.image_url || null,
                 dimensions: formData.dimensions || null,
+                indoor_dimensions: formData.indoor_dimensions || null,
+                outdoor_dimensions: formData.outdoor_dimensions || null,
                 operating_temp_range: formData.operating_temp_range || null,
                 room_size_recommendation: formData.room_size_recommendation || null,
                 installation_type: formData.installation_type || null,
@@ -751,6 +786,14 @@ export default function Administration() {
     };
 
     const handleEdit = (product) => {
+        console.log('handleEdit called with product:', product);
+        console.log('Product tech specs in handleEdit after DB update:', {
+            cop: product.cop,
+            scop: product.scop,
+            power_consumption: product.power_consumption,
+            refrigerant_type: product.refrigerant_type,
+            operating_temp_range: product.operating_temp_range
+        });
         setFormData({
             brand: product.brand || '',
             model: product.model || '',
@@ -774,6 +817,8 @@ export default function Administration() {
             dimensions: product.dimensions || '',
             indoor_dimensions: product.indoor_dimensions || '',
             outdoor_dimensions: product.outdoor_dimensions || '',
+            indoor_weight: product.indoor_weight ? product.indoor_weight.toString() : '',
+            outdoor_weight: product.outdoor_weight ? product.outdoor_weight.toString() : '',
             noise_level: product.noise_level ? product.noise_level.toString() : '',
             air_flow: product.air_flow ? product.air_flow.toString() : '',
             room_size_recommendation: product.room_size_recommendation || '',
@@ -812,15 +857,22 @@ export default function Administration() {
                 cop: formData.cop ? parseFloat(formData.cop) : null,
                 scop: formData.scop ? parseFloat(formData.scop) : null,
                 power_consumption: formData.power_consumption ? parseFloat(formData.power_consumption) : null,
-                weight: formData.weight ? parseFloat(formData.weight) : null,
+                indoor_weight: formData.indoor_weight ? parseFloat(formData.indoor_weight) : null,
+                outdoor_weight: formData.outdoor_weight ? parseFloat(formData.outdoor_weight) : null,
                 noise_level: formData.noise_level ? parseInt(formData.noise_level) : null,
                 air_flow: formData.air_flow ? parseInt(formData.air_flow) : null,
+                // Promotional flags - ensure they are boolean values
+                is_featured: Boolean(formData.is_featured),
+                is_bestseller: Boolean(formData.is_bestseller),
+                is_new: Boolean(formData.is_new),
                 // Convert empty strings to null for text fields
                 colour: formData.colour || null,
                 type: formData.type || null,
                 energy_rating: formData.energy_rating || null,
                 image_url: formData.image_url || null,
                 dimensions: formData.dimensions || null,
+                indoor_dimensions: formData.indoor_dimensions || null,
+                outdoor_dimensions: formData.outdoor_dimensions || null,
                 operating_temp_range: formData.operating_temp_range || null,
                 room_size_recommendation: formData.room_size_recommendation || null,
                 installation_type: formData.installation_type || null,
@@ -1841,7 +1893,7 @@ export async function getStaticProps({ locale }) {
   
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common'])),
+      ...(await serverSideTranslations(locale || 'bg', ['common'])),
     },
   };
 }

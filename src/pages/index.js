@@ -8,7 +8,7 @@ import styles from '../styles/Page Styles/index.module.css';
 export async function getStaticProps({ locale }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common'])),
+      ...(await serverSideTranslations(locale || 'bg', ['common'])),
     },
   };
 }

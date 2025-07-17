@@ -31,6 +31,10 @@ export default async function handler(req, res) {
         stock,
         discount,
         is_archived,
+        // Promotional flags
+        is_featured,
+        is_bestseller,
+        is_new,
         // Technical Performance
         cop,
         scop,
@@ -135,6 +139,10 @@ export default async function handler(req, res) {
             stock: stock !== undefined ? parseInt(stock) : 0,
             discount: discount !== undefined ? parseFloat(discount) : 0,
             is_archived: is_archived !== undefined ? is_archived : false,
+            // Promotional flags
+            is_featured: is_featured !== undefined ? is_featured : false,
+            is_bestseller: is_bestseller !== undefined ? is_bestseller : false,
+            is_new: is_new !== undefined ? is_new : false,
             // Technical Performance
             cop: cop !== undefined ? (cop ? parseFloat(cop) : null) : null,
             scop: scop !== undefined ? (scop ? parseFloat(scop) : null) : null,
@@ -198,6 +206,11 @@ export default async function handler(req, res) {
         if (stock !== undefined) updateData.stock = parseInt(stock);
         if (discount !== undefined) updateData.discount = parseFloat(discount);
         if (is_archived !== undefined) updateData.is_archived = is_archived;
+
+        // Promotional flags
+        if (is_featured !== undefined) updateData.is_featured = is_featured;
+        if (is_bestseller !== undefined) updateData.is_bestseller = is_bestseller;
+        if (is_new !== undefined) updateData.is_new = is_new;
 
         // Technical Performance
         if (cop !== undefined) updateData.cop = cop ? parseFloat(cop) : null;

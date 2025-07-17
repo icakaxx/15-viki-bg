@@ -6,6 +6,31 @@
   align-items: center;
   padding: 2rem;
   gap: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Solutions page specific background image with blur */
+.solutionsPageBackground {
+  position: relative;
+  z-index: 1;
+}
+
+.solutionsPageBackground::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg//ac-arch.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  filter: blur(5px);
+  opacity: 0.15;
+  z-index: -1;
 }
 .backButtonContainer {
   align-self: flex-start;

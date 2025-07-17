@@ -73,7 +73,7 @@ export default function SolutionPage({ solutionId: propSolutionId }) {
   if (!solution) return <div className={styles.notFound}>Solution not found</div>;
 
   return (
-    <div className={styles.pageContainer}>
+    <div className={`${styles.pageContainer} ${styles.solutionsPageBackground}`}>
       <div className={styles.backButtonContainer}>
         <a href="/products" className={styles.backButton}>← {t('nav.products')}</a>
       </div>
@@ -113,7 +113,7 @@ export async function getStaticPaths() {
 export async function getStaticProps({ locale, params }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common'])),
+      ...(await serverSideTranslations(locale || 'bg', ['common'])),
       // Pass the solution ID to avoid runtime lookups
       solutionId: params.solutionId
     },
