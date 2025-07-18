@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Page Styles/Products.module.css';
+import inquiryStyles from '../styles/Page Styles/InquiryPage.module.css';
 
 // Fixed Link import issue
 const InquiryPage = () => {
@@ -73,8 +74,7 @@ const InquiryPage = () => {
       </Head>
       
       <div className={styles.container}>
-        <h1 className={styles.title}>{t('inquiryPage.title')}</h1>
-        
+       
         {/* Hero Section */}
         <section style={{ marginBottom: '3rem', textAlign: 'center', padding: '2rem', backgroundColor: '#f8f9fa', borderRadius: '12px' }}>
           <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#333' }}>
@@ -85,7 +85,7 @@ const InquiryPage = () => {
           </p>
         </section>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem', alignItems: 'start' }}>
+        <div className={inquiryStyles.inquiryMainGrid}>
           {/* Contact Form */}
           <section style={{
             background: 'white',
@@ -110,9 +110,11 @@ const InquiryPage = () => {
             )}
 
             <form onSubmit={handleSubmit}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '1rem' }}>
+              {/* Grid for first 6 fields */}
+              <div className={inquiryStyles.inquiryFormGrid}>
+                {/* Row 1: Full Name + Email */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>
+                  <label className={inquiryStyles.inquiryLabel}>
                     {t('inquiryPage.form.name')} {t('inquiryPage.form.required')}
                   </label>
                   <input
@@ -121,17 +123,11 @@ const InquiryPage = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      fontSize: '1rem'
-                    }}
+                    className={inquiryStyles.inquiryInput}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>
+                  <label className={inquiryStyles.inquiryLabel}>
                     {t('inquiryPage.form.email')} {t('inquiryPage.form.required')}
                   </label>
                   <input
@@ -140,20 +136,12 @@ const InquiryPage = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      fontSize: '1rem'
-                    }}
+                    className={inquiryStyles.inquiryInput}
                   />
                 </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '1rem' }}>
+                {/* Row 2: Phone + Company */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>
+                  <label className={inquiryStyles.inquiryLabel}>
                     {t('inquiryPage.form.phone')}
                   </label>
                   <input
@@ -161,17 +149,11 @@ const InquiryPage = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      fontSize: '1rem'
-                    }}
+                    className={inquiryStyles.inquiryInput}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>
+                  <label className={inquiryStyles.inquiryLabel}>
                     {t('inquiryPage.form.company')}
                   </label>
                   <input
@@ -179,20 +161,12 @@ const InquiryPage = () => {
                     name="company"
                     value={formData.company}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      fontSize: '1rem'
-                    }}
+                    className={inquiryStyles.inquiryInput}
                   />
                 </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '1rem' }}>
+                {/* Row 3: Inquiry Type + Budget */}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>
+                  <label className={inquiryStyles.inquiryLabel}>
                     {t('inquiryPage.form.inquiryType')} {t('inquiryPage.form.required')}
                   </label>
                   <select
@@ -200,13 +174,7 @@ const InquiryPage = () => {
                     value={formData.inquiryType}
                     onChange={handleInputChange}
                     required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      fontSize: '1rem'
-                    }}
+                    className={inquiryStyles.inquirySelect}
                   >
                     <option value="">{t('inquiryPage.form.selectType')}</option>
                     {inquiryTypes.map((type, index) => (
@@ -215,20 +183,14 @@ const InquiryPage = () => {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>
+                  <label className={inquiryStyles.inquiryLabel}>
                     {t('inquiryPage.form.budget')}
                   </label>
                   <select
                     name="budget"
                     value={formData.budget}
                     onChange={handleInputChange}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #ddd',
-                      borderRadius: '8px',
-                      fontSize: '1rem'
-                    }}
+                    className={inquiryStyles.inquirySelect}
                   >
                     <option value="">{t('inquiryPage.form.selectBudget')}</option>
                     {budgetRanges.map((range, index) => (
@@ -237,9 +199,10 @@ const InquiryPage = () => {
                   </select>
                 </div>
               </div>
+              {/* Message field and submit button remain as before */}
 
               <div style={{ marginBottom: '2rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', color: '#333' }}>
+                <label className={inquiryStyles.inquiryLabel}>
                   {t('inquiryPage.form.message')} {t('inquiryPage.form.required')}
                 </label>
                 <textarea
@@ -249,39 +212,27 @@ const InquiryPage = () => {
                   required
                   rows="5"
                   placeholder={t('inquiryPage.form.messagePlaceholder')}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
-                    resize: 'vertical'
-                  }}
+                  className={inquiryStyles.inquiryTextarea}
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                style={{
-                  background: isSubmitting ? '#ccc' : 'linear-gradient(135deg, #2c5530 0%, #4a7c59 100%)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '1rem 2rem',
-                  borderRadius: '8px',
-                  fontSize: '1.1rem',
-                  fontWeight: '600',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  width: '100%'
-                }}
+                className={inquiryStyles.inquiryButton}
               >
                 {isSubmitting ? t('inquiryPage.form.submitting') : t('inquiryPage.form.submit')}
               </button>
+              {submitStatus === 'success' && (
+                <div className={inquiryStyles.inquirySuccess}>
+                  ✅ {t('inquiryPage.form.success')}
+                </div>
+              )}
             </form>
           </section>
 
-          {/* Sidebar Info */}
-          <section>
+          {/* Sidebar Info: wrap contact and why choose us */}
+          <div className={inquiryStyles.inquirySidebarCol}>
             {/* Contact Info */}
             <div style={{
               background: 'white',
@@ -351,7 +302,7 @@ const InquiryPage = () => {
                 </li>
               </ul>
             </div>
-          </section>
+          </div>
         </div>
 
         {/* CTA Section */}

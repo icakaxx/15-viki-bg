@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Page Styles/ContactPage.module.css';
 
 const ContactPage = () => {
   const { t } = useTranslation('common');
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const [mapUrl, setMapUrl] = useState('');
   const contactInfo = [
     {
       icon: '📞',
@@ -61,6 +61,12 @@ const ContactPage = () => {
       description: t('contactPage.departments.projects.description')
     }
   ];
+
+  useEffect(() => {
+    fetch('/api/maps-embed-url')
+      .then(res => res.json())
+      .then(data => setMapUrl(data.url));
+  }, []);
 
   return (
     <>
@@ -252,7 +258,7 @@ const ContactPage = () => {
                     loading="lazy"
                     allowFullScreen
                     referrerPolicy="no-referrer-when-downgrade"
-                    src={`https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=place_id:ChIJyUO26vXdq0ARjKoS9txlLIU`}
+                    src={mapUrl || ''}
                   ></iframe>
                 </div>
                 <div className={styles.buttonsCol}>

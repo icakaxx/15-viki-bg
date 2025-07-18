@@ -3,18 +3,29 @@ import Link from 'next/link';
 import { useCart } from '../contexts/CartContext';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Component Styles/CartIcon.module.css';
+import { FiShoppingCart } from 'react-icons/fi';
 
-const CartIcon = () => {
+const CartIcon = ({ onDropdownChange }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const { cart, removeFromCart, formatPrice, formatPriceEUR } = useCart();
   const { t } = useTranslation('common');
 
   const handleCartClick = () => {
-    setShowDropdown(!showDropdown);
+    setShowDropdown(prev => {
+      const newVal = !prev;
+      if (onDropdownChange) onDropdownChange(newVal);
+      return newVal;
+    });
   };
 
   const handleRemoveItem = (productId) => {
     removeFromCart(productId);
+  };
+
+  // If dropdown is closed by clicking overlay or close button, notify parent
+  const closeDropdown = () => {
+    setShowDropdown(false);
+    if (onDropdownChange) onDropdownChange(false);
   };
 
   return (
@@ -26,39 +37,7 @@ const CartIcon = () => {
         aria-label={`${t('cart.viewCart')} (${cart.totalItems})`}
         type="button"
       >
-        <svg
-          className={styles.cartIcon}
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M12.89 1.45l8 4A2 2 0 0122 7.24v9.53a2 2 0 01-1.11 1.79l-8 4a2 2 0 01-1.78 0l-8-4A2 2 0 012 16.76V7.24a2 2 0 011.11-1.79l8-4a2 2 0 011.78 0z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <polyline 
-            points="2.32,6.16 12,11 21.68,6.16" 
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <line 
-            x1="12" 
-            y1="22.76" 
-            x2="12" 
-            y2="11" 
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <FiShoppingCart className={styles.cartIcon} />
         
         {cart.totalItems > 0 && (
           <span className={styles.cartBadge}>
@@ -72,7 +51,7 @@ const CartIcon = () => {
         <>
           <div
             className={styles.overlay}
-            onClick={() => setShowDropdown(false)}
+            onClick={closeDropdown}
           />
           <div className={styles.cartDropdown}>
             <div className={styles.cartHeader}>
@@ -81,7 +60,7 @@ const CartIcon = () => {
               </h3>
               <button
                 className={styles.closeButton}
-                onClick={() => setShowDropdown(false)}
+                onClick={closeDropdown}
                 aria-label={t('common.close')}
                 type="button"
               >

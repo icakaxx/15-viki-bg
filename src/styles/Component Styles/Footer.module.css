@@ -416,6 +416,11 @@
 
 /* Responsive Design - Enhanced */
 @media (max-width: 1023px) {
+
+  .socialLinks {
+    gap: 0.5rem;
+    justify-content: center;
+  }
   .container {
     grid-template-columns: 1fr 1fr;
     gap: 3rem;
