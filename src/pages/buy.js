@@ -309,6 +309,18 @@ const BuyPage = () => {
     document.body.style.overflow = 'unset';
   };
 
+  // Only allow filter changes when mobileFiltersOpen is true
+  const handleFilterChangeMobileSafe = (filterType, value) => {
+    if (!mobileFiltersOpen) return;
+    handleFilterChange(filterType, value);
+  };
+
+  // Only allow price changes when mobileFiltersOpen is true
+  const handlePriceChangeMobileSafe = (min, max) => {
+    if (!mobileFiltersOpen) return;
+    handlePriceChange(min, max);
+  };
+
   const applyMobileFilters = () => {
     if (tempMobileFilters) {
       setFilters(tempMobileFilters);
@@ -546,10 +558,8 @@ const BuyPage = () => {
 
   const FilterSidebar = ({ isMobile = false }) => {
     const currentFilters = isMobile ? (tempMobileFilters || filters) : filters;
-    const filterChangeHandler = isMobile ? 
-      (filterType, value) => handleFilterChange(filterType, value) :
-      handleFilterChange;
-    const priceChangeHandler = isMobile ? handlePriceChange : handlePriceChange;
+    const filterChangeHandler = isMobile ? handleFilterChangeMobileSafe : handleFilterChange;
+    const priceChangeHandler = isMobile ? handlePriceChangeMobileSafe : handlePriceChange;
 
 
 
@@ -1008,148 +1018,146 @@ const BuyPage = () => {
         </div>
 
         {/* Mobile Filter Overlay */}
-        <div className={`${styles.mobileFilterOverlay} ${mobileFiltersOpen ? styles.active : ''}`}
-             onClick={closeMobileFilters}>
-          <div className={`${styles.mobileFilterPanel} ${mobileFiltersOpen ? styles.active : ''}`}
-               onClick={(e) => e.stopPropagation()}>
-            
-            <div className={styles.mobileFilterHeader}>
-              <h2 className={styles.filterTitle}>{t('buyPage.filters.title')}</h2>
-              <div className={styles.mobileFilterHeaderActions}>
+        {mobileFiltersOpen && (
+          <div className={`${styles.mobileFilterOverlay} ${styles.active}`}
+               onClick={closeMobileFilters}>
+            <div className={`${styles.mobileFilterPanel} ${styles.active}`}
+                 onClick={(e) => e.stopPropagation()}>
+              {/* ...filter content... */}
+              <div className={styles.mobileFilterHeader}>
+                <h2 className={styles.filterTitle}>{t('buyPage.filters.title')}</h2>
+                <div className={styles.mobileFilterHeaderActions}>
+                  <button 
+                    className={styles.mobileClearButton}
+                    onClick={clearAllFilters}>
+                    {t('buyPage.filters.clearAll')}
+                  </button>
+                  <button 
+                    className={styles.mobileCloseButton}
+                    onClick={closeMobileFilters}
+                    aria-label={t('buyPage.filters.close')}>
+                    ✕
+                  </button>
+                </div>
+              </div>
+              {/* Mobile Filter Content */}
+              <div className={styles.mobileFilterContent}>
+                {/* Brand Filter */}
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.brand')}</h3>
+                  <div className={styles.filterOptions}>
+                    {uniqueBrands.map(brand => (
+                      <label key={brand} className={styles.filterOption}>
+                        <input
+                          type="checkbox"
+                          className={styles.filterCheckbox}
+                          checked={(tempMobileFilters || filters).brands.includes(brand)}
+                          onChange={() => handleFilterChangeMobileSafe('brands', brand)}
+                        />
+                        <span className={styles.filterLabel}>{brand}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {/* Type Filter */}
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.type')}</h3>
+                  <div className={styles.filterOptions}>
+                    {uniqueTypes.map(type => (
+                      <label key={type} className={styles.filterOption}>
+                        <input
+                          type="checkbox"
+                          className={styles.filterCheckbox}
+                          checked={(tempMobileFilters || filters).types.includes(type)}
+                          onChange={() => handleFilterChangeMobileSafe('types', type)}
+                        />
+                        <span className={styles.filterLabel}>{translateType(type)}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {/* Capacity Filter */}
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.capacity')}</h3>
+                  <div className={styles.filterOptions}>
+                    {uniqueCapacities.map(capacity => (
+                      <label key={capacity} className={styles.filterOption}>
+                        <input
+                          type="checkbox"
+                          className={styles.filterCheckbox}
+                          checked={(tempMobileFilters || filters).capacities.includes(parseInt(capacity))}
+                          onChange={() => handleFilterChangeMobileSafe('capacities', parseInt(capacity))}
+                        />
+                        <span className={styles.filterLabel}>{capacity ? capacity.toLocaleString() : capacity} BTU</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {/* Energy Rating Filter */}
+                <div className={styles.filterGroup}>
+                  <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.energyRating')}</h3>
+                  <div className={styles.filterOptions}>
+                    {uniqueEnergyRatings.map(rating => (
+                      <label key={rating} className={styles.filterOption}>
+                        <input
+                          type="checkbox"
+                          className={styles.filterCheckbox}
+                          checked={(tempMobileFilters || filters).energyRatings.includes(rating)}
+                          onChange={() => handleFilterChangeMobileSafe('energyRatings', rating)}
+                        />
+                        <span className={styles.filterLabel}>{rating}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {/* Color Filter */}
+                {uniqueColors.length > 0 && (
+                  <div className={styles.filterGroup}>
+                    <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.color')}</h3>
+                    <div className={styles.filterOptions}>
+                      {uniqueColors.map(color => (
+                        <label key={color} className={styles.filterOption}>
+                          <input
+                            type="checkbox"
+                            className={styles.filterCheckbox}
+                            checked={(tempMobileFilters || filters).colors.includes(color)}
+                            onChange={() => handleFilterChangeMobileSafe('colors', color)}
+                          />
+                          <span className={styles.filterLabel}>{translateColor(color)}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Price Filter */}
+                <div className={styles.filterGroup}>
+                  <PriceFilter
+                    minValue={(tempMobileFilters || filters).priceRange.min}
+                    maxValue={(tempMobileFilters || filters).priceRange.max}
+                    onPriceChange={handlePriceChangeMobileSafe}
+                    minBound={priceBounds.min}
+                    maxBound={priceBounds.max}
+                  />
+                </div>
+              </div>
+              <div className={styles.mobileFilterActions}>
                 <button 
                   className={styles.mobileClearButton}
                   onClick={clearAllFilters}>
                   {t('buyPage.filters.clearAll')}
                 </button>
                 <button 
-                  className={styles.mobileCloseButton}
-                  onClick={closeMobileFilters}
-                  aria-label={t('buyPage.filters.close')}>
-                  ✕
+                  className={styles.mobileApplyButton}
+                  onClick={() => {
+                    applyMobileFilters();
+                    closeMobileFilters();
+                  }}>
+                  {t('buyPage.filters.apply')} ({getActiveFilterCount()})
                 </button>
               </div>
             </div>
-            
-            {/* Mobile Filter Content */}
-            <div className={styles.mobileFilterContent}>
-              {/* Brand Filter */}
-              <div className={styles.filterGroup}>
-                <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.brand')}</h3>
-                <div className={styles.filterOptions}>
-                  {uniqueBrands.map(brand => (
-                    <label key={brand} className={styles.filterOption}>
-                      <input
-                        type="checkbox"
-                        className={styles.filterCheckbox}
-                        checked={(tempMobileFilters || filters).brands.includes(brand)}
-                        onChange={() => handleFilterChange('brands', brand)}
-                      />
-                      <span className={styles.filterLabel}>{brand}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Type Filter */}
-              <div className={styles.filterGroup}>
-                <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.type')}</h3>
-                <div className={styles.filterOptions}>
-                  {uniqueTypes.map(type => (
-                    <label key={type} className={styles.filterOption}>
-                      <input
-                        type="checkbox"
-                        className={styles.filterCheckbox}
-                        checked={(tempMobileFilters || filters).types.includes(type)}
-                        onChange={() => handleFilterChange('types', type)}
-                      />
-                      <span className={styles.filterLabel}>{translateType(type)}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Capacity Filter */}
-              <div className={styles.filterGroup}>
-                <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.capacity')}</h3>
-                <div className={styles.filterOptions}>
-                  {uniqueCapacities.map(capacity => (
-                    <label key={capacity} className={styles.filterOption}>
-                      <input
-                        type="checkbox"
-                        className={styles.filterCheckbox}
-                        checked={(tempMobileFilters || filters).capacities.includes(parseInt(capacity))}
-                        onChange={() => handleFilterChange('capacities', parseInt(capacity))}
-                      />
-                      <span className={styles.filterLabel}>{capacity ? capacity.toLocaleString() : capacity} BTU</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Energy Rating Filter */}
-              <div className={styles.filterGroup}>
-                <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.energyRating')}</h3>
-                <div className={styles.filterOptions}>
-                  {uniqueEnergyRatings.map(rating => (
-                    <label key={rating} className={styles.filterOption}>
-                      <input
-                        type="checkbox"
-                        className={styles.filterCheckbox}
-                        checked={(tempMobileFilters || filters).energyRatings.includes(rating)}
-                        onChange={() => handleFilterChange('energyRatings', rating)}
-                      />
-                      <span className={styles.filterLabel}>{rating}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Color Filter */}
-              {uniqueColors.length > 0 && (
-                <div className={styles.filterGroup}>
-                  <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.color')}</h3>
-                  <div className={styles.filterOptions}>
-                    {uniqueColors.map(color => (
-                      <label key={color} className={styles.filterOption}>
-                        <input
-                          type="checkbox"
-                          className={styles.filterCheckbox}
-                          checked={(tempMobileFilters || filters).colors.includes(color)}
-                          onChange={() => handleFilterChange('colors', color)}
-                        />
-                        <span className={styles.filterLabel}>{translateColor(color)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Price Filter */}
-              <div className={styles.filterGroup}>
-                <PriceFilter
-                  minValue={(tempMobileFilters || filters).priceRange.min}
-                  maxValue={(tempMobileFilters || filters).priceRange.max}
-                  onPriceChange={handlePriceChange}
-                  minBound={priceBounds.min}
-                  maxBound={priceBounds.max}
-                />
-              </div>
-            </div>
-            
-            <div className={styles.mobileFilterActions}>
-              <button 
-                className={styles.mobileClearButton}
-                onClick={clearAllFilters}>
-                {t('buyPage.filters.clearAll')}
-              </button>
-              <button 
-                className={styles.mobileApplyButton}
-                onClick={applyMobileFilters}>
-                {t('buyPage.filters.apply')} ({getActiveFilterCount()})
-              </button>
-            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

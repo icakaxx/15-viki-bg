@@ -1,0 +1,79 @@
+/* Inquiry Page Form Styles */
+
+.inquiryFormGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.inquiryLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.inquiryInput,
+.inquirySelect,
+.inquiryTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.inquiryTextarea {
+  resize: vertical;
+}
+
+.inquiryButton {
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.inquiryButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.inquirySuccess {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.inquiryMainGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.inquirySidebarCol {
+  /* No extra styles needed, but class for clarity and future use */
+}
+
+@media (max-width: 600px) {
+  .inquiryFormGrid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .inquiryMainGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+} 

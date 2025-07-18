@@ -226,7 +226,7 @@
   display: inline-block;
 }
 .appleMapsIcon {
-  filter: invert(100%) brightness(2);
+  filter: brightness(0) invert(1);
 }
 .mapIframe {
   border: 0;

@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { FiPhone, FiMail, FiChevronUp } from "react-icons/fi";
+import { FiPhone, FiMail } from "react-icons/fi";
 import styles from "../../styles/Component Styles/Footer.module.css";
 import { useTranslation } from "next-i18next";
-import { useRouter } from "next/router";
 
 const Footer = () => {
   const { t } = useTranslation("common");
-  const router = useRouter();
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -156,12 +154,12 @@ const Footer = () => {
                 <div className={styles.contactDetails}>
                   <span className={styles.contactLabel}>{t('footer.contact.phone')}</span>
                   <a 
-                    href="tel:+359888123456" 
+                    href="tel:+359895460717" 
                     className={styles.contactLink}
-                    title="Call us at +359 888 123 456"
-                    aria-label="Call us at +359 888 123 456"
+                    title="Call us at +359 895 460 717"
+                    aria-label="Call us at +359 895 460 717"
                   >
-                    +359 888 123 456
+                    +359 895 460 717
                   </a>
                 </div>
               </div>
@@ -171,12 +169,12 @@ const Footer = () => {
                 <div className={styles.contactDetails}>
                   <span className={styles.contactLabel}>{t('footer.contact.email')}</span>
                   <a 
-                    href="mailto:info@bgviki15.bg" 
+                    href="mailto:bgviki.ltd@abv.bg" 
                     className={styles.contactLink}
                     title="Send us an email"
-                    aria-label="Send us an email at info@bgviki15.bg"
+                    aria-label="Send us an email at bgviki.ltd@abv.bg"
                   >
-                    info@bgviki15.bg
+                    bgviki.ltd@abv.bg
                   </a>
                 </div>
                             </div>
@@ -227,7 +225,7 @@ const Footer = () => {
                   </svg>
                 </a>
                 <a 
-                  href="https://wa.me/359888123456" 
+                  href="https://wa.me/359895460717" 
                   className={styles.socialLink}
                   target="_blank" 
                   rel="noopener noreferrer"

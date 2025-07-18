@@ -13,8 +13,6 @@
 
 /* Separate positioning class for easy dev console editing */
 .brandPosition {
-  transform: translateX(-100px);
-  left: -121px;
   position: relative;
 }
 

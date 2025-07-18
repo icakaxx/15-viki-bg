@@ -5,9 +5,9 @@ import logoContainerStyles from "../styles/Component Styles/LogoContainer.module
 import logoImageStyles from "../styles/Component Styles/LogoImage.module.css";
 import styles from "../styles/Component Styles/BrandContainer.module.css";
 
-const BrandContainer = () => {
+const BrandContainer = ({ className = "" }) => {
   return (
-    <Link href="/" className={`${styles.brandContainer} ${styles.brandPosition}`}>
+    <Link href="/" className={`${styles.brandContainer} ${className}`}>
       <div className={styles.brandWrapper}>
         {/* Company Name */}
         <div className={companyNameStyles.companyName}>
