@@ -353,7 +353,8 @@
         "cashHelp": "Payment upon delivery",
         "officeDetails": "You'll receive an SMS with the address and pickup hours.",
         "onlineDetails": "You'll receive a payment link after order confirmation.",
-        "cashDetails": "The courier will collect payment upon delivery."
+        "cashDetails": "The courier will collect payment upon delivery.",
+        "completePrevious": "Complete personal information first"
       },
       "validation": {
         "required": "This field is required",
@@ -361,8 +362,41 @@
         "invalidBulstat": "Bulstat must be exactly 9 digits",
         "selectPayment": "Please select a payment method"
       },
+      "stripe": {
+        "cardDetails": "Card Details",
+        "cardNumber": "Card Number",
+        "expiryDate": "Expiry Date",
+        "cvc": "CVC",
+        "cardholderName": "Cardholder Name",
+        "cardholderNamePlaceholder": "Full name",
+        "billingAddress": "Billing Address",
+        "billingAddressPlaceholder": "Street, number, city",
+        "securePayment": "Secure Payment",
+        "amount": "Amount",
+        "currency": "BGN",
+        "pay": "Finish with Payment",
+        "processing": "Processing payment...",
+        "paymentSuccess": "Payment successful!",
+        "paymentSuccessDetails": "Your payment has been processed successfully.",
+        "paymentError": "Payment Error",
+        "paymentErrorDetails": "Payment was unsuccessful. Please check your card details and try again.",
+        "paymentErrorInsufficientFunds": "Your card has insufficient funds. Please try a different card or contact your bank.",
+        "paymentErrorDeclined": "Your card was declined. Please try a different card or contact your bank.",
+        "paymentErrorExpired": "Your card has expired. Please use a different card.",
+        "paymentErrorInvalidCvc": "The CVC code is incorrect. Please check and try again.",
+        "paymentId": "Payment ID",
+        "orderSuccess": "Order Successful!",
+        "orderError": "Order Error",
+        "orderId": "Order ID",
+        "emailSent": "Confirmation email has been sent.",
+        "paymentSuccessMessage": "Payment successful! We will contact you soon to arrange delivery.",
+        "cardDetailsComplete": "Card details complete. You can now complete your order.",
+        "completePaymentFirst": "Please complete the online payment first.",
+        "notConfigured": "Stripe is not configured. Please contact the administrator."
+      },
       "submit": "Complete Order",
       "submitting": "Processing...",
+      "onlinePaymentNote": "Fill in your card details above to complete the order.",
       "next": "Next",
       "back": "Back",
       "review": "Review",
@@ -409,6 +443,22 @@
     "copyright": "© 2025 BGVIKI15 Ltd. All rights reserved.",
     "attribution": "Design: H&M WSPro",
     "admin": "Go to Administration"
+  },
+  "orderSuccess": {
+    "title": "Order Successful!",
+    "description": "Your order has been successfully placed. We will contact you soon.",
+    "message": "Thank you for your order! We have received your request and will contact you within 24 hours to arrange delivery.",
+    "orderId": "Order ID",
+    "paymentMethod": "Payment Method",
+    "paidByCard": "Paid by Card",
+    "nextSteps": {
+      "title": "What happens next?",
+      "contact": "We will contact you within 24 hours to confirm your order",
+      "delivery": "We will arrange delivery at your preferred time and location",
+      "questions": "If you have any questions, feel free to contact us"
+    },
+    "backToHome": "Back to Home",
+    "continueShopping": "Continue Shopping"
   },
   "country": "🇧🇬 Bulgaria",
   "inquiryPage": {

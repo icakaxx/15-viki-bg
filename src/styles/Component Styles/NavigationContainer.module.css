@@ -8,6 +8,7 @@
   justify-content: center;
   align-items: center;
   z-index: 10;
+  gap: 0.5rem;
 }
 
 .navList {
@@ -24,7 +25,7 @@
 .navLink {
   color: #2c5530;
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -103,7 +104,7 @@
   }
   
   .navLink {
-    font-size: 1rem;
+    font-size: 0.9rem;
     padding: 0.6rem 0.8rem;
   }
 }
