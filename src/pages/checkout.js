@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { useTranslation } from 'next-i18next';
 import { useCart } from '../contexts/CartContext';
+import StripePaymentForm from '../components/StripePaymentForm';
 import styles from '../styles/Page Styles/CheckoutPage.module.css';
 
 const CheckoutPage = () => {
@@ -32,6 +33,15 @@ const CheckoutPage = () => {
 
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showStripeForm, setShowStripeForm] = useState(false);
+  const [stripePaymentSuccess, setStripePaymentSuccess] = useState(false);
+  const [stripePaymentError, setStripePaymentError] = useState(null);
+  const [cardFormValid, setCardFormValid] = useState(false);
+
+  // Handle card form validation
+  const handleCardValidationChange = (isValid) => {
+    setCardFormValid(isValid);
+  };
 
   // Accordion state - which sections are expanded
   const [expandedSections, setExpandedSections] = useState({
@@ -107,6 +117,155 @@ const CheckoutPage = () => {
     if (formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: '' }));
     }
+    
+    // Show/hide Stripe form based on payment method
+    if (field === 'paymentMethod') {
+      setShowStripeForm(value === 'online');
+      setStripePaymentSuccess(false);
+      setStripePaymentError(null);
+    }
+  };
+
+  // Check if personal info is complete
+  const isPersonalInfoComplete = () => {
+    return formData.firstName.trim() && 
+           formData.middleName.trim() && 
+           formData.lastName.trim() && 
+           formData.phone.trim() && 
+           formData.town.trim();
+  };
+
+  // Check if invoice info is complete (if enabled)
+  const isInvoiceInfoComplete = () => {
+    if (!formData.invoiceEnabled) return true;
+    return formData.companyName.trim() && 
+           formData.address.trim() && 
+           formData.bulstat.trim() && 
+           (formData.mol.trim() || formData.molCustom.trim());
+  };
+
+  // Check if payment section should be enabled
+  const isPaymentSectionEnabled = () => {
+    return isPersonalInfoComplete() && isInvoiceInfoComplete();
+  };
+
+  // Check if submit button should be disabled
+  const isSubmitButtonDisabled = () => {
+    // Disable if form is submitting
+    if (isSubmitting) return true;
+    
+    // Check if all required form fields are filled
+    if (!isPersonalInfoComplete() || !isInvoiceInfoComplete() || !formData.paymentMethod) {
+      return true;
+    }
+    
+    return false;
+  };
+
+  // Prepare order data for Stripe payment
+  const prepareOrderData = () => {
+    return {
+      personalInfo: {
+        firstName: formData.firstName,
+        middleName: formData.middleName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        town: formData.town
+      },
+      invoiceInfo: {
+        invoiceEnabled: formData.invoiceEnabled,
+        companyName: formData.companyName || '',
+        address: formData.address || '',
+        bulstat: formData.bulstat || '',
+        mol: formData.mol || '',
+        molCustom: formData.molCustom || ''
+      },
+      paymentInfo: {
+        paymentMethod: formData.paymentMethod,
+        stripePaymentId: null
+      },
+      cartItems: cart.items.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        serviceOption: 'ac-only' // Installation is now handled per unit in cart
+      })),
+      sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+      totals: {
+        productsTotal: cart.totalPrice,
+        installationCost: 0, // Installation costs are now handled per unit in cart
+        grandTotal: grandTotal
+      }
+    };
+  };
+
+  // Submit order function for Stripe
+  const submitOrderFromStripe = async (orderData) => {
+    console.log('Submitting order from Stripe:', orderData);
+
+    const response = await fetch('/api/submit-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || 'Order submission failed');
+    }
+
+    return result;
+  };
+
+  // Stripe payment handlers
+  const handleStripePaymentSuccess = (paymentIntent) => {
+    setStripePaymentSuccess(true);
+    setStripePaymentError(null);
+    console.log('Payment successful:', paymentIntent);
+    
+    // Show success toast with payment details
+    showToast('success', t('checkout.form.stripe.paymentSuccess'), 
+      `${t('checkout.form.stripe.paymentId')}: ${paymentIntent.id}`);
+    
+    // Clear cart and redirect to success page
+    clearCart();
+    setTimeout(() => {
+      window.location.href = `/order-success?orderId=stripe_${paymentIntent.id}&paymentMethod=online`;
+    }, 2000);
+  };
+
+  const handleStripePaymentError = (error) => {
+    setStripePaymentError(error);
+    setStripePaymentSuccess(false);
+    console.error('Payment error:', error);
+    
+    // Show error toast
+    showToast('error', t('checkout.form.stripe.paymentError'), error);
+  };
+
+  // Toast notification function
+  const showToast = (type, title, message) => {
+    const toast = document.createElement('div');
+    toast.className = `toast toast${type.charAt(0).toUpperCase() + type.slice(1)}`;
+    toast.innerHTML = `
+      <div class="toast-header">
+        <span class="toast-icon">${type === 'success' ? '✅' : '❌'}</span>
+        <span class="toast-title">${title}</span>
+        <button class="toast-close" onclick="this.parentElement.parentElement.remove()">×</button>
+      </div>
+      <div class="toast-message">${message}</div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.remove();
+      }
+    }, 5000);
   };
 
   const validateForm = () => {
@@ -150,6 +309,34 @@ const CheckoutPage = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    // For online payment, process payment first
+    if (formData.paymentMethod === 'online') {
+      if (!cardFormValid) {
+        alert(t('checkout.form.stripe.completePaymentFirst'));
+        return;
+      }
+      
+      try {
+        // Process payment through Stripe
+        const result = await window.stripeProcessPayment();
+        
+        if (result.success) {
+          // Payment was successful, order will be submitted automatically
+          return;
+        } else {
+          // Payment failed, show error message
+          console.error('Payment failed:', result.error);
+          showToast('error', t('checkout.form.stripe.paymentError'), result.error);
+          return;
+        }
+      } catch (paymentError) {
+        console.error('Payment failed:', paymentError);
+        // Show error toast for payment failures
+        showToast('error', t('checkout.form.stripe.paymentError'), paymentError.message);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       // Format data for API
@@ -170,7 +357,8 @@ const CheckoutPage = () => {
           molCustom: formData.molCustom || ''
         },
         paymentInfo: {
-          paymentMethod: formData.paymentMethod
+          paymentMethod: formData.paymentMethod,
+          stripePaymentId: stripePaymentSuccess ? 'stripe_payment_completed' : null
         },
         cartItems: cart.items.map(item => ({
           productId: item.productId,
@@ -199,15 +387,22 @@ const CheckoutPage = () => {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        alert(`${t('checkout.formSuccess')} Order ID: ${result.orderId}`);
+        // Show success toast with order details
+        showToast('success', t('checkout.form.stripe.orderSuccess'), 
+          `${t('checkout.form.stripe.orderId')}: ${result.orderId}\n${t('checkout.form.stripe.emailSent')}`);
         clearCart();
+        
+        // Redirect to success page or show success message
+        setTimeout(() => {
+          window.location.href = `/order-success?orderId=${result.orderId}&paymentMethod=${formData.paymentMethod}`;
+        }, 2000);
       } else {
         throw new Error(result.error || 'Order submission failed');
       }
       
     } catch (error) {
       console.error('Order submission error:', error);
-      alert(`${t('checkout.formError')}: ${error.message}`);
+      showToast('error', t('checkout.form.stripe.orderError'), error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -378,6 +573,28 @@ const CheckoutPage = () => {
 
         {/* Checkout Form - Accordion Layout */}
         <form onSubmit={handleSubmit} className={styles.accordionForm}>
+          
+          {/* Progress Indicator */}
+          <div className={styles.progressIndicator}>
+            <div className={styles.progressStep}>
+              <div className={`${styles.progressDot} ${isPersonalInfoComplete() ? styles.completed : ''}`}>
+                {isPersonalInfoComplete() ? '✓' : '1'}
+              </div>
+              <span className={styles.progressLabel}>{t('checkout.form.personalInfo.title')}</span>
+            </div>
+            <div className={styles.progressStep}>
+              <div className={`${styles.progressDot} ${isInvoiceInfoComplete() ? styles.completed : ''}`}>
+                {isInvoiceInfoComplete() ? '✓' : '2'}
+              </div>
+              <span className={styles.progressLabel}>{t('checkout.form.invoice.title')}</span>
+            </div>
+            <div className={styles.progressStep}>
+              <div className={`${styles.progressDot} ${isPaymentSectionEnabled() ? styles.completed : ''}`}>
+                {isPaymentSectionEnabled() ? '✓' : '3'}
+              </div>
+              <span className={styles.progressLabel}>{t('checkout.form.payment.title')}</span>
+            </div>
+          </div>
             
           {/* 1. Personal Information */}
           <div className={styles.accordionSection}>
@@ -560,12 +777,19 @@ const CheckoutPage = () => {
           </div>
 
           {/* 4. Payment Method */}
-          <div className={styles.accordionSection}>
+          <div className={`${styles.accordionSection} ${!isPaymentSectionEnabled() ? styles.disabled : ''}`}>
             <div 
-              className={styles.accordionHeader}
-              onClick={() => toggleSection('payment')}
+              className={`${styles.accordionHeader} ${!isPaymentSectionEnabled() ? styles.disabled : ''}`}
+              onClick={() => isPaymentSectionEnabled() && toggleSection('payment')}
             >
-              <h3 className={styles.accordionTitle}>{t('checkout.form.payment.title')}</h3>
+              <h3 className={styles.accordionTitle}>
+                {t('checkout.form.payment.title')}
+                {!isPaymentSectionEnabled() && (
+                  <span className={styles.sectionLocked}>
+                    🔒 {t('checkout.form.payment.completePrevious')}
+                  </span>
+                )}
+              </h3>
               <span className={`${styles.accordionIcon} ${expandedSections.payment ? styles.expanded : ''}`}>
                 ▼
               </span>
@@ -617,6 +841,36 @@ const CheckoutPage = () => {
                 </div>
                 
                 {formErrors.paymentMethod && <span className={styles.error}>{formErrors.paymentMethod}</span>}
+                
+                {/* Stripe Payment Form */}
+                {showStripeForm && (
+                  <div className={styles.stripeSection}>
+                    {stripePaymentSuccess ? (
+                      <div className={styles.paymentSuccess}>
+                        <div className={styles.successIcon}>✅</div>
+                        <p>{t('checkout.form.stripe.paymentSuccess')}</p>
+                      </div>
+                    ) : (
+                      <>
+                        <StripePaymentForm
+                          amount={grandTotal}
+                          onPaymentSuccess={handleStripePaymentSuccess}
+                          onPaymentError={handleStripePaymentError}
+                          isProcessing={isSubmitting}
+                          setIsProcessing={setIsSubmitting}
+                          orderData={prepareOrderData()}
+                          onSubmitOrder={submitOrderFromStripe}
+                          onValidationChange={handleCardValidationChange}
+                        />
+                        {stripePaymentError && (
+                          <div className={styles.paymentError}>
+                            <p>{stripePaymentError}</p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -626,10 +880,25 @@ const CheckoutPage = () => {
             <button 
               type="submit" 
               className={styles.submitButton}
-              disabled={isSubmitting}
+              disabled={isSubmitButtonDisabled()}
             >
               {isSubmitting ? t('checkout.form.submitting') : t('checkout.form.submit')}
             </button>
+            {formData.paymentMethod === 'online' && (
+              <div className={styles.onlinePaymentNote}>
+                <p>{t('checkout.form.onlinePaymentNote')}</p>
+                {!cardFormValid && (
+                  <p style={{ color: '#dc2626', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                    {t('checkout.form.stripe.completePaymentFirst')}
+                  </p>
+                )}
+                {cardFormValid && (
+                  <p style={{ color: '#059669', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                    ✓ {t('checkout.form.stripe.cardDetailsComplete')}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
         </form>

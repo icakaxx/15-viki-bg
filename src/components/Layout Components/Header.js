@@ -91,10 +91,7 @@ const Header = () => {
 
             {/* Mobile Header - Logo left, Cart and Burger right */}
             <div className={styles.mobileHeader}>
-              {/* Left: Logo */}
-              <div className={styles.mobileLogo}>
-                <BrandContainer className={cartDropdownOpen ? styles.dimLogo : ''} />
-              </div>
+              
               {/* Right: Cart and Burger */}
               <div className={styles.mobileActions}>
                 <CartIcon onDropdownChange={setCartDropdownOpen} />

@@ -34,4 +34,10 @@
     font-size: 0.8rem;
     letter-spacing: 0.3px;
   }
+}
+
+@media (min-width: 769px) {
+  .companyName {
+    display: none !important;
+  }
 } 

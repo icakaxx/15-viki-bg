@@ -1,0 +1,243 @@
+.stripeContainer {
+  margin-top: 1rem;
+  padding: 0;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.paymentForm {
+  display: flex;
+  flex-direction: column;
+}
+
+.paymentHeader {
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.paymentTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.lockIcon {
+  font-size: 1.2rem;
+}
+
+.amountDisplay {
+  font-size: 1.5rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.textInput {
+  padding: 14px 12px;
+  border: 2px solid #e6e6e6;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  background-color: white;
+  color: #32325d;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: #2c5530;
+  box-shadow: 0 0 0 3px rgba(44, 85, 48, 0.1);
+}
+
+.textInput::placeholder {
+  color: #9ca3af;
+}
+
+.cardElementContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 2px solid #e6e6e6;
+  border-radius: 8px;
+  background-color: white;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.cardElementContainer:focus-within {
+  border-color: #2c5530;
+  box-shadow: 0 0 0 3px rgba(44, 85, 48, 0.1);
+}
+
+
+
+.completeIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #32a852;
+  font-weight: bold;
+  font-size: 1.1rem;
+  z-index: 1;
+}
+
+.paymentMethods {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  align-items: center;
+}
+
+.paymentMethodLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.paymentMethodLogo:hover {
+  opacity: 1;
+}
+
+.paymentMethodLogo svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.cardLabel {
+  font-weight: 600;
+  color: #32325d;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.cardElementContainer > div {
+  flex: 1;
+  padding: 14px 12px;
+  border: none;
+  background-color: transparent;
+  font-size: 16px;
+}
+
+.cardElementContainer > div:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.errorMessage {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.payButton {
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 2rem 2rem 2rem;
+  box-shadow: 0 2px 4px rgba(44, 85, 48, 0.3);
+}
+
+.payButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1e3a21 0%, #3a6b4a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(44, 85, 48, 0.4);
+}
+
+.payButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.payButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(44, 85, 48, 0.3);
+}
+
+/* Stripe Elements styling */
+.stripeContainer :global(.StripeElement) {
+  border: none;
+  background-color: transparent;
+}
+
+.stripeContainer :global(.StripeElement--focus) {
+  border: none;
+  box-shadow: none;
+}
+
+.stripeContainer :global(.StripeElement--invalid) {
+  border: none;
+}
+
+.stripeContainer :global(.StripeElement--complete) {
+  border: none;
+}
+
+.configError {
+  padding: 1rem;
+  background-color: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 6px;
+  color: #92400e;
+}
+
+.configError p {
+  margin: 0.5rem 0;
+}
+
+.configError small {
+  color: #78350f;
+  font-size: 0.8rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .textInput {
+    padding: 10px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .cardElementContainer > div {
+    padding: 10px;
+  }
+} 

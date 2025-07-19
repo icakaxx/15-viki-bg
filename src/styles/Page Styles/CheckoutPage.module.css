@@ -387,6 +387,75 @@
   margin: 0 auto;
 }
 
+/* Progress Indicator */
+.progressIndicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.progressStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  position: relative;
+}
+
+.progressStep:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  right: -50%;
+  width: 100%;
+  height: 2px;
+  background: #e0e0e0;
+  z-index: 1;
+}
+
+.progressStep:not(:last-child).completed::after {
+  background: #2c5530;
+}
+
+.progressDot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  z-index: 2;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.progressDot.completed {
+  background: #2c5530;
+  color: white;
+}
+
+.progressLabel {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+  font-weight: 500;
+}
+
+.progressStep:has(.progressDot.completed) .progressLabel {
+  color: #2c5530;
+  font-weight: 600;
+}
+
 .accordionSection {
   background: white;
   border: 1px solid #e0e0e0;
@@ -629,6 +698,27 @@
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.onlinePaymentNote {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 500px;
+}
+
+.onlinePaymentNote p {
+  margin: 0;
+  color: #0066cc;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .submitButton {
@@ -817,5 +907,148 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Stripe Payment Section */
+.stripeSection {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.paymentSuccess {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  color: #155724;
+}
+
+.successIcon {
+  font-size: 1.2rem;
+}
+
+.paymentError {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  color: #721c24;
+}
+
+.paymentError p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Disabled Section Styles */
+.accordionSection.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.accordionSection.disabled .accordionHeader {
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+}
+
+.accordionSection.disabled .accordionHeader:hover {
+  background-color: #f8f9fa;
+}
+
+.sectionLocked {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: normal;
+  margin-left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Toast Notifications */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  min-width: 300px;
+  max-width: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid;
+  animation: slideIn 0.3s ease-out;
+}
+
+.toastSuccess {
+  border-left-color: #32a852;
+}
+
+.toastError {
+  border-left-color: #fa755a;
+}
+
+.toastHeader {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px 8px 16px;
+  gap: 8px;
+}
+
+.toastIcon {
+  font-size: 1.2rem;
+}
+
+.toastTitle {
+  font-weight: 600;
+  color: #32325d;
+  flex: 1;
+}
+
+.toastClose {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #aab7c4;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.toastClose:hover {
+  background-color: #f6f9fc;
+  color: #32325d;
+}
+
+.toastMessage {
+  padding: 0 16px 12px 16px;
+  color: #525f7f;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 } 
