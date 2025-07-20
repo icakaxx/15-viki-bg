@@ -19,7 +19,7 @@
   justify-content: space-between;
   width: 100%;
   padding: 0 1rem;
-  min-height: 60px;
+  min-height: var(--header-height, 60px);
   margin: 0 auto;
   gap: 0.5rem;
   position: relative;
@@ -31,6 +31,7 @@
   flex-shrink: 0;
   min-width: 0;
   gap: 0.5rem;
+  gap: 1rem;
 }
 
 .centerNav {
@@ -46,8 +47,18 @@
   min-width: 0;
 }
 
-.companyAndNav {
+.langSeparator {
+  color: #2c5530;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin: 0 0.3rem;
+  opacity: 0.6;
+}
+
+.mobileHeader {
   display: flex;
+  width: 100%;
+  justify-content: flex-end;
   align-items: center;
   gap: 1rem;
 }
@@ -188,13 +199,7 @@
   box-shadow: 0 4px 15px rgba(44, 85, 48, 0.1);
 }
 
-.mobileHeader {
-  display: flex;
-  width: 100%;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1rem;
-}
+
 
 /* ========== Tablet (≥ 768px) ========== */
 @media (min-width: 768px) {
