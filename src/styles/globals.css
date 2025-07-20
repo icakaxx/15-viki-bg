@@ -43,34 +43,6 @@ body {
   border: 3px solid #F9F7F7;
 }
 
-.slick-slider {
-  position: relative;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.slick-slide div {
-  display: flex !important;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.slick-slide .image {
-  object-fit: cover;
-  border-radius: 2px;
-  min-width: 150px !important;
-  width: 80%;
-}
-
-.slick-slide.slick-active:not(.slick-current) .image,
-.slick-slide.slick-active.slick-current .image,
-.slick-slide:not(.slick-active) .image {
-  width: 100% !important;
-}
-
 /* Service Card Styles */
 .service-card {
   width: 400px;

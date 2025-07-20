@@ -34,18 +34,12 @@ const Header = () => {
   return (
     <>
       <header className={styles.header}>
-        <div className={styles.container}>
-          {/* Overlay for mobile cart dropdown */}
-          {cartDropdownOpen && (
-            <div className={styles.cartOverlay} />
-          )}
           <div className={styles.container}>
             {/* Group: Company + Navigation */}
               <div className={styles.leftSection}>
                 <BrandContainer />
               </div>
-              <nav className={navigationStyles.navigationContainer}>
-                <ul className={navigationStyles.navList}>
+                <div className={navigationStyles.navList}>
                   {navigationItems.map((item, index) => (
                     <li key={index}>
                       {item.href.startsWith('#') ? (
@@ -62,8 +56,7 @@ const Header = () => {
                       )}
                     </li>
                   ))}
-                </ul>
-              </nav>
+                </div>
             
 
             {/* Right Section - Cart, Language & Utilities */}
@@ -157,7 +150,6 @@ const Header = () => {
               </div>
             )}
           </div>
-        </div>
       </header>
     </>
   );
