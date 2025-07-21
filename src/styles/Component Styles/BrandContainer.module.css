@@ -29,13 +29,24 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 1500px) {
   .brandContainer {
-    padding: 0.25rem;
+    padding: 0.5vw;
   }
   
   .brandWrapper {
-    gap: 0.5rem;
-    min-height: 40px;
+    gap: 0.6vw;
+    min-height: 3.7vw;
+  }
+}
+
+@media (max-width: 800px) {
+  .brandContainer {
+    padding: 0.45rem;
+  }
+  
+  .brandWrapper {
+    gap: 0.8rem;
+    min-height: 50px;
   }
 } 
