@@ -29,9 +29,16 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 1500px) {
   .companyName {
-    font-size: 0.8rem;
-    letter-spacing: 0.3px;
+    font-size: 1.2vw;
+    letter-spacing: 0.03vw;
+  }
+}
+
+@media (max-width: 800px) {
+  .companyName {
+    font-size: 2.5vw;
+    letter-spacing: 0.1vw;
   }
 } 

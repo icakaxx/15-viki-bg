@@ -49,3 +49,36 @@
     height: 40px;
   }
 } 
+
+@media (max-width: 1500px) {
+  .logoContainer {
+    width: 10vw;
+    height: 3vw;
+  }
+  .logoImage {
+    width: 10vw;
+    height: 3vw;
+  }
+}
+
+@media (max-width: 1024px) {
+  .logoContainer {
+    width: 10vw;
+    height: 3vw;
+  }
+  .logoImage {
+    width: 10vw;
+    height: 3vw;
+  }
+}
+
+@media (max-width: 800px) {
+  .logoContainer {
+    width: 20vw;
+    height: 10vw;
+  }
+  .logoImage {
+    width: 17vw;
+    height: 7vw;
+  }
+}
