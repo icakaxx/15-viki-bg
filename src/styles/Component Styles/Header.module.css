@@ -317,6 +317,10 @@
   z-index: 1999;
 }
 
+.mobileLangSwitcher{
+  display: none;
+}
+
 @media (max-width: 760px) {
   .rightSection,
   .languageSwitcher {
