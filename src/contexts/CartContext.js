@@ -8,14 +8,15 @@ const calculateItemTotal = (item) => {
   if (!item) return 0;
   
   const basePrice = item.basePrice || item.product?.Price || 0;
-  // Accessories now scale with product quantity (no individual quantities)
+  // Accessories now have individual quantities
   const accessoryTotal = item.accessories?.reduce((sum, acc) => {
-    return sum + (acc.Price || 0);
+    const accessoryQuantity = acc.quantity || item.quantity; // Default to product quantity if not set
+    return sum + ((acc.Price || 0) * accessoryQuantity);
   }, 0) || 0;
   const installationCost = item.installation ? (item.installationPrice || 0) * item.quantity : 0;
   
-  // Total = (basePrice + accessoryTotal) * quantity + installationCost
-  return (basePrice + accessoryTotal) * item.quantity + installationCost;
+  // Total = (basePrice * quantity) + accessoryTotal + installationCost
+  return (basePrice * item.quantity) + accessoryTotal + installationCost;
 };
 
 // Cart Actions
@@ -26,6 +27,7 @@ const calculateItemTotal = (item) => {
   REMOVE_FROM_CART: 'REMOVE_FROM_CART',
   UPDATE_QUANTITY: 'UPDATE_QUANTITY',
   UPDATE_ITEM_ACCESSORIES: 'UPDATE_ITEM_ACCESSORIES',
+  UPDATE_ACCESSORY_QUANTITY: 'UPDATE_ACCESSORY_QUANTITY',
   UPDATE_ITEM_INSTALLATION: 'UPDATE_ITEM_INSTALLATION',
   CLEAR_CART: 'CLEAR_CART'
 };
@@ -84,8 +86,12 @@ const cartReducer = (state, action) => {
             : item
         );
       } else {
-        // Add new item with full configuration - accessories scale with product quantity
-        const accessoryTotal = accessories.reduce((sum, acc) => sum + (acc.Price || 0), 0);
+        // Add new item with full configuration - accessories have individual quantities
+        const accessoriesWithQuantity = accessories.map(acc => ({
+          ...acc,
+          quantity: quantity // Initialize with product quantity
+        }));
+        const accessoryTotal = accessoriesWithQuantity.reduce((sum, acc) => sum + ((acc.Price || 0) * acc.quantity), 0);
         const installationCostPerUnit = installation ? installationPrice : 0;
         
         newItems = [...state.items, {
@@ -93,13 +99,13 @@ const cartReducer = (state, action) => {
           productId: product.ProductID,
           quantity,
           product,
-          accessories: accessories, // No individual quantity needed
+          accessories: accessoriesWithQuantity,
           installation,
           installationPrice: installationPrice || 0,
           basePrice: product.Price,
           accessoryTotal,
           installationCostPerUnit,
-          itemTotalPrice: (product.Price + accessoryTotal) * quantity + (installationCostPerUnit * quantity)
+          itemTotalPrice: (product.Price * quantity) + accessoryTotal + (installationCostPerUnit * quantity)
         }];
       }
       
@@ -162,7 +168,41 @@ const cartReducer = (state, action) => {
           // Update accessories and recalculate totals
           const updatedItem = { ...item, accessories };
           const accessoryTotal = accessories.reduce((sum, acc) => {
-            return sum + (acc.Price || 0);
+            const accessoryQuantity = acc.quantity || item.quantity;
+            return sum + ((acc.Price || 0) * accessoryQuantity);
+          }, 0);
+          
+          updatedItem.accessoryTotal = accessoryTotal;
+          updatedItem.itemTotalPrice = calculateItemTotal(updatedItem);
+          
+          return updatedItem;
+        }
+        return item;
+      });
+      
+      const totalItems = newItems.reduce((sum, item) => sum + item.quantity, 0);
+      const totalPrice = newItems.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+      
+      return { items: newItems, totalItems, totalPrice };
+    }
+
+    case CART_ACTIONS.UPDATE_ACCESSORY_QUANTITY: {
+      const { cartItemId, accessoryIndex, quantity } = action.payload;
+      
+      const newItems = state.items.map(item => {
+        if (item.cartItemId === cartItemId) {
+          const updatedAccessories = [...item.accessories];
+          if (updatedAccessories[accessoryIndex]) {
+            updatedAccessories[accessoryIndex] = {
+              ...updatedAccessories[accessoryIndex],
+              quantity: Math.max(0, quantity) // Ensure quantity is not negative
+            };
+          }
+          
+          const updatedItem = { ...item, accessories: updatedAccessories };
+          const accessoryTotal = updatedAccessories.reduce((sum, acc) => {
+            const accessoryQuantity = acc.quantity || item.quantity;
+            return sum + ((acc.Price || 0) * accessoryQuantity);
           }, 0);
           
           updatedItem.accessoryTotal = accessoryTotal;
@@ -298,6 +338,13 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  const updateAccessoryQuantity = (cartItemId, accessoryIndex, quantity) => {
+    dispatch({
+      type: CART_ACTIONS.UPDATE_ACCESSORY_QUANTITY,
+      payload: { cartItemId, accessoryIndex, quantity }
+    });
+  };
+
   const updateItemInstallation = (cartItemId, installation) => {
     dispatch({
       type: CART_ACTIONS.UPDATE_ITEM_INSTALLATION,
@@ -348,6 +395,7 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     updateItemAccessories,
+    updateAccessoryQuantity,
     updateItemInstallation,
     clearCart,
     getCartItemQuantity,

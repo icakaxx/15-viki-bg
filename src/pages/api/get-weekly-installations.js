@@ -1,38 +1,46 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Helper function to format date as YYYY-MM-DD
+function formatDate(date) {
+  return date.toISOString().split('T')[0];
+}
+
 export default async function handler(req, res) {
   console.log('🚀 get-weekly-installations API called');
+  
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
+  }
   
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  
+  // Set CORS headers for actual requests
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   try {
     // Check environment variables
     console.log('🔍 Checking environment variables...');
+    console.log('🔍 NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET');
+    console.log('🔍 SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT SET');
+    
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing environment variables');
-      return res.status(500).json({ error: 'Server configuration error' });
+      console.error('❌ Missing Supabase environment variables');
+      return res.status(500).json({ 
+        error: 'Server configuration error - Supabase credentials not configured' 
+      });
     }
 
-    console.log('✅ Environment variables found');
-    console.log('🔧 Creating Supabase client...');
-    
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
-    
-    console.log('✅ Supabase client created successfully');
-
     const { startDate, endDate } = req.query;
-
-    // Add more detailed logging
-    console.log('🔍 API get-weekly-installations called');
-    console.log('📅 Query params:', req.query);
-    console.log('🌐 Request URL:', req.url);
-
-    // Validate required parameters
+    console.log('📅 Requested date range:', { startDate, endDate });
+    
     if (!startDate || !endDate) {
       console.error('❌ Missing parameters:', { startDate, endDate });
       return res.status(400).json({ 
@@ -40,9 +48,15 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`📊 Fetching installations from ${startDate} to ${endDate}`);
+    // Initialize Supabase client
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
 
-    // Fetch installations first
+    console.log('🔍 Querying installations for date range:', { startDate, endDate });
+
+    // Query installation_schedule table first
     const { data: installations, error } = await supabase
       .from('installation_schedule')
       .select(`
@@ -50,7 +64,10 @@ export default async function handler(req, res) {
         order_id,
         scheduled_date,
         time_slot,
+        end_date,
+        end_time_slot,
         notes,
+        created_by,
         created_at
       `)
       .gte('scheduled_date', startDate)
@@ -59,152 +76,164 @@ export default async function handler(req, res) {
       .order('time_slot', { ascending: true });
 
     if (error) {
-      console.error('❌ Error fetching installations:', error);
-      console.error('❌ Error details:', error.details || 'No details available');
-      console.error('❌ Error code:', error.code || 'No code available');
-      return res.status(500).json({ 
-        error: 'Failed to fetch installations',
-        details: error.message,
-        code: error.code
+      console.error('❌ Database query error:', error);
+      return res.status(500).json({
+        error: 'Database query failed',
+        message: error.message,
+        details: error
       });
     }
 
-    console.log(`✅ Successfully fetched ${installations?.length || 0} installations from database`);
+    console.log('📊 Raw installations from database:', installations);
 
-    // Get customer and product details for each installation
-    const installationsWithProducts = await Promise.all(
-      installations.map(async (installation) => {
-        try {
-          // Get customer data for this order
-          const { data: customer, error: customerError } = await supabase
-            .from('guest_orders')
-            .select('id, first_name, middle_name, last_name, phone, town')
-            .eq('id', installation.order_id)
-            .single();
-
-          if (customerError) {
-            console.warn(`Error fetching customer for order ${installation.order_id}:`, customerError);
-            return null; // Skip this installation if customer not found
-          }
-
-          // Get order status
-          const { data: orderStatus, error: statusError } = await supabase
-            .from('payment_and_tracking')
-            .select('status')
-            .eq('order_id', installation.order_id)
-            .single();
-
-          const currentStatus = orderStatus?.status || 'unknown';
-
-          // Get order items and products (using explicit join instead of foreign key)
-          const { data: orderItems, error: itemsError } = await supabase
-            .from('order_items')
-            .select(`
-              quantity,
-              service_option,
-              product_id
-            `)
-            .eq('order_id', installation.order_id);
-
-          // Get product details separately for each order item
-          let orderItemsWithProducts = [];
-          if (orderItems && !itemsError) {
-            for (const item of orderItems) {
-              // Try both possible column names for product ID
-              let { data: product, error: productError } = await supabase
-                .from('products')
-                .select('brand, model, type, price')
-                .eq('ProductID', item.product_id)
-                .single();
-
-              // If ProductID doesn't work, try 'id'
-              if (productError || !product) {
-                const result = await supabase
-                  .from('products')
-                  .select('brand, model, type, price')
-                  .eq('id', item.product_id)
-                  .single();
-                
-                product = result.data;
-                productError = result.error;
-              }
-
-              if (!productError && product) {
-                orderItemsWithProducts.push({
-                  quantity: item.quantity,
-                  service_option: item.service_option,
-                  products: product
-                });
-              }
-            }
-          }
-
-          if (itemsError) {
-            console.warn(`Error fetching items for order ${installation.order_id}:`, itemsError);
-          }
-
-          // Format customer name
-          const customerName = `${customer.first_name} ${customer.middle_name || ''} ${customer.last_name}`.trim();
-
-          // Format products summary
-          const products = orderItemsWithProducts || [];
-          const productsSummary = products.map(item => 
-            `${item.products.brand} ${item.products.model} (${item.quantity}x)`
-          ).join(', ');
-
-          const mainProduct = products[0]?.products;
-
-          return {
-            id: installation.id,
-            orderId: installation.order_id,
-            scheduledDate: installation.scheduled_date,
-            timeSlot: installation.time_slot,
-            notes: installation.notes,
-            customerName,
-            customerPhone: customer.phone,
-            customerTown: customer.town,
-            productCount: products.length,
-            productsSummary,
-            mainProductBrand: mainProduct?.brand,
-            mainProductModel: mainProduct?.model,
-            totalProducts: products.reduce((sum, item) => sum + item.quantity, 0),
-            orderStatus: currentStatus,
-            isCompleted: currentStatus === 'installed'
-          };
-        } catch (itemError) {
-          console.warn(`Error processing installation ${installation.id}:`, itemError);
-          
-          // Return installation with basic info even if detailed fetch fails
-          return {
-            id: installation.id,
-            orderId: installation.order_id,
-            scheduledDate: installation.scheduled_date,
-            timeSlot: installation.time_slot,
-            notes: installation.notes,
-            customerName: 'Unknown Customer',
-            customerPhone: 'Unknown',
-            customerTown: 'Unknown',
-            productCount: 0,
-            productsSummary: 'Error loading details',
-            mainProductBrand: 'Unknown',
-            mainProductModel: 'Unknown',
-            totalProducts: 0,
-            orderStatus: 'unknown',
-            isCompleted: false
-          };
+    if (!installations || installations.length === 0) {
+      console.log('📋 No installations found for the date range');
+      return res.status(200).json({
+        success: true,
+        installations: [],
+        count: 0,
+        period: {
+          startDate,
+          endDate
         }
-      })
-    );
+      });
+    }
 
-    // Filter out null results (where customer was not found)
-    const validInstallations = installationsWithProducts.filter(inst => inst !== null);
+    // Get unique order IDs to fetch order data
+    const orderIds = [...new Set(installations.map(inst => inst.order_id))];
+    console.log('📋 Order IDs to fetch:', orderIds);
 
-    console.log(`Found ${validInstallations.length} installations for the week`);
+    // Fetch order status data from payment_and_tracking
+    const { data: orderStatuses, error: orderStatusError } = await supabase
+      .from('payment_and_tracking')
+      .select(`
+        order_id,
+        status
+      `)
+      .in('order_id', orderIds);
+
+    if (orderStatusError) {
+      console.error('❌ Error fetching order status data:', orderStatusError);
+      return res.status(500).json({
+        error: 'Failed to fetch order status data',
+        message: orderStatusError.message,
+        details: orderStatusError
+      });
+    }
+
+    // Fetch customer data from guest_orders
+    const { data: customerData, error: customerError } = await supabase
+      .from('guest_orders')
+      .select(`
+        id,
+        first_name,
+        middle_name,
+        last_name,
+        phone
+      `)
+      .in('id', orderIds);
+
+    if (customerError) {
+      console.error('❌ Error fetching customer data:', customerError);
+      return res.status(500).json({
+        error: 'Failed to fetch customer data',
+        message: customerError.message,
+        details: customerError
+      });
+    }
+
+    console.log('📊 Order status data fetched:', orderStatuses);
+    console.log('📊 Customer data fetched:', customerData);
+
+    // Create maps for quick lookup
+    const orderStatusMap = {};
+    orderStatuses.forEach(order => {
+      orderStatusMap[order.order_id] = order;
+    });
+
+    const customerMap = {};
+    customerData.forEach(customer => {
+      customerMap[customer.id] = customer;
+    });
+
+    // Transform the data to match the frontend expectations
+    const transformedInstallations = installations.map(installation => {
+      // Debug: Log specific installation details for order ID 33
+      if (installation.order_id === 33) {
+        console.log('🔍 DEBUG - Order ID 33 details:', {
+          id: installation.id,
+          orderId: installation.order_id,
+          scheduledDate: installation.scheduled_date,
+          timeSlot: installation.time_slot,
+          endTimeSlot: installation.end_time_slot,
+          originalTimeSlot: installation.time_slot,
+          originalEndTimeSlot: installation.end_time_slot
+        });
+      }
+
+      // Fix installations with invalid end times (where end time is before start time)
+      let endTimeSlot = installation.end_time_slot || installation.time_slot;
+      
+      if (endTimeSlot <= installation.time_slot && endTimeSlot !== installation.time_slot) {
+        console.log('🔧 Fixing installation with invalid end time:', {
+          id: installation.id,
+          timeSlot: installation.time_slot,
+          endTimeSlot: endTimeSlot
+        });
+        
+        // Calculate correct end time (add 1 hour to start time)
+        const [startHours, startMinutes] = installation.time_slot.split(':').map(Number);
+        const startTotalMinutes = startHours * 60 + startMinutes;
+        const endTotalMinutes = startTotalMinutes + 60; // Add 1 hour
+        const endHours = Math.floor(endTotalMinutes / 60);
+        const endMinutes = endTotalMinutes % 60;
+        endTimeSlot = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+        
+        console.log('✅ Fixed end time to:', endTimeSlot);
+      }
+
+      // Get order status and customer data
+      const orderStatus = orderStatusMap[installation.order_id];
+      const customer = customerMap[installation.order_id];
+      
+      // Construct customer name from available fields
+      let customerName = 'Unknown';
+      if (customer) {
+        const nameParts = [
+          customer.first_name,
+          customer.middle_name,
+          customer.last_name
+        ].filter(part => part && part.trim());
+        customerName = nameParts.join(' ').trim() || 'Unknown';
+      }
+
+      return {
+        id: installation.id,
+        orderId: installation.order_id,
+        scheduledDate: installation.scheduled_date,
+        timeSlot: installation.time_slot,
+        endTimeSlot: endTimeSlot,
+        notes: installation.notes || '',
+        createdBy: installation.created_by,
+        createdAt: installation.created_at,
+        status: orderStatus?.status || 'pending',
+        customerName: customerName,
+        customerPhone: customer?.phone || '',
+        customerTown: customer?.town || ''
+      };
+    });
+
+    console.log('📋 Transformed installations:', transformedInstallations.map(inst => ({
+      id: inst.id,
+      scheduledDate: inst.scheduledDate,
+      timeSlot: inst.timeSlot,
+      customerName: inst.customerName
+    })));
 
     return res.status(200).json({
       success: true,
-      installations: validInstallations,
-      count: validInstallations.length,
+      installations: transformedInstallations,
+      count: transformedInstallations.length,
       period: {
         startDate,
         endDate

@@ -51,10 +51,16 @@
 .orderSummary {
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 2rem;
   height: fit-content;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.orderSummary:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 .summaryTitle {
@@ -217,6 +223,7 @@
   align-items: center;
   padding: 0.5rem 0;
   border-bottom: 1px solid #f0f0f0;
+  gap: 1rem;
 }
 
 .accessoryItem:last-child {
@@ -229,6 +236,7 @@
   align-items: center;
   gap: 0.5rem;
   flex: 1;
+  margin-right: 1rem;
 }
 
 .accessoryName {
@@ -250,6 +258,39 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   overflow: hidden;
+}
+
+.accessoryQuantityControls .quantityButton {
+  background: #f8f9fa;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-width: 24px;
+  height: 24px;
+}
+
+.accessoryQuantityControls .quantityButton:hover:not(:disabled) {
+  background: #e9ecef;
+}
+
+.accessoryQuantityControls .quantityButton:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.accessoryQuantityControls .quantityValue {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  min-width: 20px;
+  text-align: center;
+  background: white;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
 }
 
 .removeButton {

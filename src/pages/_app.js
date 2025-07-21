@@ -6,6 +6,7 @@ import '../styles/globals.css'
 import { CartProvider } from '../contexts/CartContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { appWithTranslation } from 'next-i18next';
+import '../lib/i18n';
 
 //Changing subset of 'Nunito' font to latin and setting it to its own variable
 const nunito = Nunito({

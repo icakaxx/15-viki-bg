@@ -3,10 +3,23 @@ import { createClient } from '@supabase/supabase-js';
 export default async function handler(req, res) {
   console.log('=== UPDATE ORDER STATUS API CALLED ===');
   
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
+  }
+  
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  
+  // Set CORS headers for actual requests
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   // Check if environment variables are available
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -23,8 +36,8 @@ export default async function handler(req, res) {
   );
 
   try {
-    const { orderId, newStatus, adminId, notes, installationDate } = req.body;
-    console.log('Request data:', { orderId, newStatus, adminId, notes, installationDate });
+    const { orderId, newStatus, adminId, notes, startInstallationDate, startInstallationHour, startInstallationMinute, endInstallationDate, endInstallationHour, endInstallationMinute } = req.body;
+    console.log('Request data:', { orderId, newStatus, adminId, notes, startInstallationDate, startInstallationHour, startInstallationMinute, endInstallationDate, endInstallationHour, endInstallationMinute });
 
     // Validate required parameters
     if (!orderId || !newStatus) {
@@ -34,7 +47,7 @@ export default async function handler(req, res) {
     }
 
     // Validate status values
-    const validStatuses = ['new', 'confirmed', 'installation_booked', 'installed', 'cancelled'];
+    const validStatuses = ['new', 'confirmed', 'installation_booked', 'installed', 'cancelled', 'returned_from_calendar'];
     if (!validStatuses.includes(newStatus)) {
       return res.status(400).json({ 
         error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` 
@@ -43,6 +56,11 @@ export default async function handler(req, res) {
 
     // Fetch current status - first check if payment tracking exists
     console.log(`Fetching current status for order ${orderId}...`);
+    
+    // Check if this is a mock order (orderId >= 1000)
+    const isMockOrder = orderId >= 1000;
+    console.log(`Order ${orderId} is mock order: ${isMockOrder}`);
+    
     let { data: currentOrder, error: fetchError } = await supabase
       .from('payment_and_tracking')
       .select('status, order_id')
@@ -55,19 +73,50 @@ export default async function handler(req, res) {
       // No payment tracking record exists yet - this is a new order
       console.log(`No payment tracking found for order ${orderId}, treating as new order`);
       
-      // Verify the order exists in guest_orders
-      const { data: guestOrder, error: guestError } = await supabase
-        .from('guest_orders')
-        .select('id')
-        .eq('id', orderId)
-        .single();
+      // For mock orders, create them in guest_orders using existing columns
+      if (isMockOrder) {
+        console.log(`Creating mock order ${orderId} in guest_orders table...`);
+        
+        // Create mock order using only existing columns
+        const { data: mockGuestOrder, error: mockGuestError } = await supabase
+          .from('guest_orders')
+          .insert([{
+            id: orderId,
+            first_name: 'Mock',
+            middle_name: 'Customer',
+            last_name: orderId.toString(),
+            phone: '+359 888 000 000',
+            town: 'Mock Town'
+          }])
+          .select()
+          .single();
 
-      if (guestError) {
-        console.error('Error fetching guest order:', guestError);
-        return res.status(404).json({ 
-          error: 'Order not found',
-          details: 'Order does not exist in guest_orders table'
-        });
+        if (mockGuestError && mockGuestError.code !== '23505') { // Ignore duplicate key errors
+          console.error('Error creating mock guest order:', mockGuestError);
+          return res.status(500).json({ 
+            error: 'Failed to create mock order',
+            details: mockGuestError.message
+          });
+        } else if (mockGuestError && mockGuestError.code === '23505') {
+          console.log(`Mock order ${orderId} already exists in guest_orders`);
+        } else {
+          console.log(`Successfully created mock order ${orderId} in guest_orders`);
+        }
+      } else {
+        // Verify the order exists in guest_orders (only for real orders)
+        const { data: guestOrder, error: guestError } = await supabase
+          .from('guest_orders')
+          .select('id')
+          .eq('id', orderId)
+          .single();
+
+        if (guestError) {
+          console.error('Error fetching guest order:', guestError);
+          return res.status(404).json({ 
+            error: 'Order not found',
+            details: 'Order does not exist in guest_orders table'
+          });
+        }
       }
 
       // Create payment tracking record
@@ -75,8 +124,8 @@ export default async function handler(req, res) {
         .from('payment_and_tracking')
         .insert([{ 
           order_id: orderId, 
-          status: 'new',
-          payment_method: null 
+          status: isMockOrder ? 'installation_booked' : 'new', // Mock orders are already booked
+          payment_method: isMockOrder ? 'mock' : null 
         }])
         .select()
         .single();
@@ -90,13 +139,40 @@ export default async function handler(req, res) {
       }
 
       currentOrder = newTracking;
-      oldStatus = 'new';
+      oldStatus = isMockOrder ? 'installation_booked' : 'new';
     } else if (fetchError) {
       console.error('Error fetching current order status:', fetchError);
-      return res.status(404).json({ 
-        error: 'Order not found',
-        details: fetchError.message
-      });
+      
+      // For mock orders, create a payment tracking record if it doesn't exist
+      if (isMockOrder) {
+        console.log(`Creating payment tracking record for mock order ${orderId}...`);
+        
+        const { data: newTracking, error: createError } = await supabase
+          .from('payment_and_tracking')
+          .insert([{ 
+            order_id: orderId, 
+            status: 'installation_booked', // Mock orders are already booked
+            payment_method: 'mock'
+          }])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating payment tracking for mock order:', createError);
+          return res.status(500).json({ 
+            error: 'Failed to create payment tracking record for mock order',
+            details: createError.message
+          });
+        }
+
+        currentOrder = newTracking;
+        oldStatus = 'installation_booked';
+      } else {
+        return res.status(404).json({ 
+          error: 'Order not found',
+          details: fetchError.message
+        });
+      }
     } else {
       oldStatus = currentOrder.status;
     }
@@ -131,9 +207,7 @@ export default async function handler(req, res) {
       old_status: oldStatus,
       new_status: newStatus,
       changed_by: adminId || null,
-      changed_at: installationDate && newStatus === 'installed' 
-        ? new Date(installationDate).toISOString() 
-        : new Date().toISOString(),
+      changed_at: new Date().toISOString(),
       notes: notes || `Status updated from ${oldStatus} to ${newStatus} by admin`
     };
     
@@ -144,6 +218,38 @@ export default async function handler(req, res) {
     if (historyError) {
       console.error('Error inserting status history:', historyError);
       console.warn('Status history insert failed, but order status was updated successfully');
+    }
+
+    // If status is being set to 'installation_booked', create installation schedule entries
+    if (newStatus === 'installation_booked' && startInstallationDate && endInstallationDate) {
+      console.log('Creating installation schedule entries...');
+      
+      try {
+        // Create installation schedule entry using the new time format
+        const installationData = {
+          order_id: orderId,
+          scheduled_date: startInstallationDate, // Already in YYYY-MM-DD format
+          time_slot: `${startInstallationHour}:${startInstallationMinute}`,
+          end_date: endInstallationDate,
+          end_time_slot: `${endInstallationHour}:${endInstallationMinute}`,
+          notes: notes || `Installation scheduled from ${startInstallationDate} ${startInstallationHour}:${startInstallationMinute} to ${endInstallationDate} ${endInstallationHour}:${endInstallationMinute}`,
+          created_at: new Date().toISOString()
+        };
+        
+        const { error: installationError } = await supabase
+          .from('installation_schedule')
+          .insert([installationData]);
+        
+        if (installationError) {
+          console.error('Error creating installation schedule:', installationError);
+          console.warn('Installation schedule creation failed, but order status was updated successfully');
+        } else {
+          console.log('Installation schedule created successfully');
+        }
+      } catch (dateError) {
+        console.error('Error parsing installation dates:', dateError);
+        console.warn('Installation schedule creation failed due to date parsing error');
+      }
     }
 
     console.log(`Order ${orderId} status successfully updated: ${oldStatus} → ${newStatus}`);

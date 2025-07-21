@@ -7,7 +7,7 @@ import StripePaymentForm from '../components/StripePaymentForm';
 import styles from '../styles/Page Styles/CheckoutPage.module.css';
 
 const CheckoutPage = () => {
-  const { cart, updateQuantity, removeFromCart, updateItemAccessories, updateItemInstallation, clearCart, formatPrice, formatPriceEUR } = useCart();
+  const { cart, updateQuantity, removeFromCart, updateItemAccessories, updateAccessoryQuantity, updateItemInstallation, clearCart, formatPrice, formatPriceEUR } = useCart();
   const { t } = useTranslation('common');
 
   // Form state
@@ -92,14 +92,30 @@ const CheckoutPage = () => {
     updateItemInstallation(cartItemId, installationStatus);
   };
 
-  // Handle removing accessories (no individual quantity changes needed)
-  const handleRemoveAccessory = (cartItemId, accessoryIndex) => {
-    const item = cart.items.find(item => item.cartItemId === cartItemId);
-    if (!item) return;
+  // Handle accessory quantity changes
+  const handleAccessoryQuantityChange = (cartItemId, accessoryIndex, newQuantity) => {
+    if (newQuantity < 0) {
+      // Remove accessory if quantity is 0 or less
+      if (confirm('Are you sure you want to remove this accessory?')) {
+        const item = cart.items.find(item => item.cartItemId === cartItemId);
+        if (item) {
+          const updatedAccessories = item.accessories.filter((_, index) => index !== accessoryIndex);
+          updateCartItemAccessories(cartItemId, updatedAccessories);
+        }
+      }
+    } else {
+      updateAccessoryQuantity(cartItemId, accessoryIndex, newQuantity);
+    }
+  };
 
+  // Handle removing accessories
+  const handleRemoveAccessory = (cartItemId, accessoryIndex) => {
     if (confirm('Are you sure you want to remove this accessory?')) {
-      const updatedAccessories = item.accessories.filter((_, index) => index !== accessoryIndex);
-      updateCartItemAccessories(cartItemId, updatedAccessories);
+      const item = cart.items.find(item => item.cartItemId === cartItemId);
+      if (item) {
+        const updatedAccessories = item.accessories.filter((_, index) => index !== accessoryIndex);
+        updateCartItemAccessories(cartItemId, updatedAccessories);
+      }
     }
   };
 
@@ -505,27 +521,50 @@ const CheckoutPage = () => {
                 {item.accessories && item.accessories.length > 0 && (
                   <div className={styles.accessoriesSection}>
                     <div className={styles.accessoriesTitle}>{t('productDetail.accessories')}:</div>
-                    {item.accessories.map((accessory, index) => (
-                      <div key={index} className={styles.accessoryItem}>
-                        <div className={styles.accessoryDetails}>
-                          <span className={styles.accessoryName}>
-                            • {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name} × {item.quantity}
-                          </span>
-                          <button
-                            className={styles.removeButton}
-                            onClick={() => handleRemoveAccessory(item.cartItemId, index)}
-                            aria-label="Remove accessory"
-                            title="Remove accessory"
-                          >
-                            🗑️
-                          </button>
+                    {item.accessories.map((accessory, index) => {
+                      const accessoryQuantity = accessory.quantity || item.quantity;
+                      return (
+                        <div key={index} className={styles.accessoryItem}>
+                          <div className={styles.accessoryDetails}>
+                            <span className={styles.accessoryName}>
+                              • {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
+                            </span>
+                            <div className={styles.accessoryQuantityControls}>
+                              <div className={styles.quantitySelector}>
+                                <button
+                                  className={styles.quantityButton}
+                                  onClick={() => handleAccessoryQuantityChange(item.cartItemId, index, accessoryQuantity - 1)}
+                                  disabled={accessoryQuantity <= 0}
+                                  aria-label="Decrease accessory quantity"
+                                >
+                                  −
+                                </button>
+                                <span className={styles.quantityValue}>{accessoryQuantity}</span>
+                                <button
+                                  className={styles.quantityButton}
+                                  onClick={() => handleAccessoryQuantityChange(item.cartItemId, index, accessoryQuantity + 1)}
+                                  aria-label="Increase accessory quantity"
+                                >
+                                  +
+                                </button>
+                              </div>
+                              <button
+                                className={styles.removeButton}
+                                onClick={() => handleRemoveAccessory(item.cartItemId, index)}
+                                aria-label="Remove accessory"
+                                title="Remove accessory"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                          <div className={styles.accessoryPrice}>
+                            <div>{formatPrice(accessory.Price * accessoryQuantity)}</div>
+                            <div className={styles.itemPriceEur}>{formatPriceEUR(accessory.Price * accessoryQuantity)}</div>
+                          </div>
                         </div>
-                        <div className={styles.accessoryPrice}>
-                          <div>{formatPrice(accessory.Price * item.quantity)}</div>
-                          <div className={styles.itemPriceEur}>{formatPriceEUR(accessory.Price * item.quantity)}</div>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
 

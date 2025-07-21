@@ -121,7 +121,10 @@ const ProductDetailPage = () => {
 
       try {
         // Fetch product details
-        const productResponse = await fetch(`/api/get-product?id=${productId}`);
+        // Force the correct port based on current server
+        const baseUrl = window.location.origin;
+        const productApiUrl = `${baseUrl}/api/get-product?id=${productId}`;
+        const productResponse = await fetch(productApiUrl);
         const productData = await productResponse.json();
 
         if (!productResponse.ok) {
@@ -134,7 +137,8 @@ const ProductDetailPage = () => {
         // Fetch accessories separately (non-blocking)
         try {
           setAccessoriesLoading(true);
-          const accessoriesResponse = await fetch('/api/get-accessories');
+          const accessoriesApiUrl = `${baseUrl}/api/get-accessories`;
+          const accessoriesResponse = await fetch(accessoriesApiUrl);
           const accessoriesData = await accessoriesResponse.json();
 
           if (accessoriesResponse.ok) {

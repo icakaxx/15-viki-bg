@@ -22,18 +22,20 @@ function getStatusColor(status) {
     'confirmed': '#2196f3',
     'installation_booked': '#9c27b0',
     'installed': '#4caf50',
-    'cancelled': '#f44336'
+    'cancelled': '#f44336',
+    'returned_from_calendar': '#ff6b35'
   };
   return statusColors[status] || '#666';
 }
 
-function getStatusLabel(status) {
+function getStatusLabel(status, t) {
   const statusLabels = {
-    'new': 'New',
-    'confirmed': 'Confirmed',
-    'installation_booked': 'Installation Booked',
-    'installed': 'Installed',
-    'cancelled': 'Cancelled'
+    'new': t('admin.orders.status.new'),
+    'confirmed': t('admin.orders.status.confirmed'),
+    'installation_booked': t('admin.orders.status.installation_booked'),
+    'installed': t('admin.orders.status.installed'),
+    'cancelled': t('admin.orders.status.cancelled'),
+    'returned_from_calendar': t('admin.orders.status.returned_from_calendar')
   };
   return statusLabels[status] || status;
 }
@@ -53,7 +55,12 @@ export default function OrdersManagementTab() {
   const [statusUpdateData, setStatusUpdateData] = useState({
     newStatus: '',
     notes: '',
-    installationDate: ''
+    startInstallationDate: '',
+    startInstallationHour: '08',
+    startInstallationMinute: '00',
+    endInstallationDate: '',
+    endInstallationHour: '17',
+    endInstallationMinute: '00'
   });
 
   useEffect(() => {
@@ -106,7 +113,7 @@ export default function OrdersManagementTab() {
 
   const handleStatusUpdate = async (orderId) => {
     if (!statusUpdateData.newStatus) {
-      alert('Please select a new status');
+      alert(t('admin.orders.errors.selectStatus'));
       return;
     }
 
@@ -121,7 +128,12 @@ export default function OrdersManagementTab() {
           orderId: orderId,
           newStatus: statusUpdateData.newStatus,
           notes: statusUpdateData.notes,
-          installationDate: statusUpdateData.installationDate,
+          startInstallationDate: statusUpdateData.startInstallationDate,
+          startInstallationHour: statusUpdateData.startInstallationHour,
+          startInstallationMinute: statusUpdateData.startInstallationMinute,
+          endInstallationDate: statusUpdateData.endInstallationDate,
+          endInstallationHour: statusUpdateData.endInstallationHour,
+          endInstallationMinute: statusUpdateData.endInstallationMinute,
           adminId: 'admin' // You can replace this with actual admin ID
         }),
       });
@@ -129,16 +141,25 @@ export default function OrdersManagementTab() {
       const data = await response.json();
       
       if (response.ok) {
-        alert('Order status updated successfully!');
-        setStatusUpdateData({ newStatus: '', notes: '', installationDate: '' });
+        alert(t('admin.orders.statusUpdated'));
+        setStatusUpdateData({ 
+          newStatus: '', 
+          notes: '', 
+          startInstallationDate: '', 
+          startInstallationHour: '08',
+          startInstallationMinute: '00',
+          endInstallationDate: '', 
+          endInstallationHour: '17',
+          endInstallationMinute: '00'
+        });
         fetchOrders(); // Refresh the orders list
         setShowOrderDetails(false);
         setSelectedOrder(null);
       } else {
-        alert('Error updating order status: ' + data.error);
+        alert(t('admin.orders.errors.updateFailed') + ': ' + data.error);
       }
     } catch (err) {
-      alert('Error updating order status: ' + err.message);
+      alert(t('admin.orders.errors.updateFailed') + ': ' + err.message);
     } finally {
       setUpdatingStatus(false);
     }
@@ -152,8 +173,42 @@ export default function OrdersManagementTab() {
   const closeOrderDetails = () => {
     setShowOrderDetails(false);
     setSelectedOrder(null);
-    setStatusUpdateData({ newStatus: '', notes: '', installationDate: '' });
+    setStatusUpdateData({ 
+      newStatus: '', 
+      notes: '', 
+      startInstallationDate: '', 
+      startInstallationHour: '08',
+      startInstallationMinute: '00',
+      endInstallationDate: '', 
+      endInstallationHour: '17',
+      endInstallationMinute: '00'
+    });
   };
+
+  // Helper function to set quick time
+  const setQuickTime = (type, hour, minute) => {
+    if (type === 'start') {
+      setStatusUpdateData(prev => ({
+        ...prev,
+        startInstallationHour: hour,
+        startInstallationMinute: minute
+      }));
+    } else {
+      setStatusUpdateData(prev => ({
+        ...prev,
+        endInstallationHour: hour,
+        endInstallationMinute: minute
+      }));
+    }
+  };
+
+  // Generate hour options (00-23)
+  const hourOptions = Array.from({ length: 24 }, (_, i) => 
+    i.toString().padStart(2, '0')
+  );
+
+  // Generate minute options (00, 15, 30, 45)
+  const minuteOptions = ['00', '15', '30', '45'];
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const startIndex = (page - 1) * PAGE_SIZE;
@@ -163,8 +218,8 @@ export default function OrdersManagementTab() {
   return (
     <div className={styles.ordersManagementSection}>
       <div className={styles.ordersHeader}>
-        <h2>📋 Orders Management</h2>
-        <p>Manage customer orders, update statuses, and track order progress</p>
+        <h2>📋 {t('admin.orders.title')}</h2>
+        <p>{t('admin.orders.description')}</p>
       </div>
 
       {/* Filters */}
@@ -172,7 +227,7 @@ export default function OrdersManagementTab() {
         <div className={styles.filterGroup}>
           <input
             type="text"
-            placeholder="Search by name, phone, or order ID..."
+            placeholder={t('admin.orders.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={styles.searchInput}
@@ -184,12 +239,12 @@ export default function OrdersManagementTab() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className={styles.statusFilter}
           >
-            <option value="">All Statuses</option>
-            <option value="new">New</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="installation_booked">Installation Booked</option>
-            <option value="installed">Installed</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="">{t('admin.orders.allStatuses')}</option>
+            <option value="new">{t('admin.orders.status.new')}</option>
+            <option value="confirmed">{t('admin.orders.status.confirmed')}</option>
+            <option value="installation_booked">{t('admin.orders.status.installation_booked')}</option>
+            <option value="installed">{t('admin.orders.status.installed')}</option>
+            <option value="cancelled">{t('admin.orders.status.cancelled')}</option>
           </select>
         </div>
         <div className={styles.filterGroup}>
@@ -198,7 +253,7 @@ export default function OrdersManagementTab() {
             className={styles.refreshButton}
             disabled={loading}
           >
-            {loading ? '🔄 Loading...' : '🔄 Refresh'}
+            {loading ? '🔄 Loading...' : `🔄 ${t('admin.orders.refresh')}`}
           </button>
         </div>
       </div>
@@ -227,13 +282,13 @@ export default function OrdersManagementTab() {
             {loading ? (
               <tr>
                 <td colSpan={7} className={styles.loadingCell}>
-                  🔄 Loading orders...
+                  🔄 {t('admin.orders.loading')}
                 </td>
               </tr>
             ) : currentOrders.length === 0 ? (
               <tr>
                 <td colSpan={7} className={styles.emptyCell}>
-                  {search || statusFilter ? 'No orders match your filters' : 'No orders found'}
+                  {search || statusFilter ? t('admin.orders.noOrdersMatchFilters') : t('admin.orders.noOrdersFound')}
                 </td>
               </tr>
             ) : (
@@ -249,7 +304,7 @@ export default function OrdersManagementTab() {
                       className={styles.statusBadge}
                       style={{ backgroundColor: getStatusColor(order.current_status) }}
                     >
-                      {getStatusLabel(order.current_status)}
+                      {getStatusLabel(order.current_status, t)}
                     </span>
                   </td>
                   <td>
@@ -257,7 +312,7 @@ export default function OrdersManagementTab() {
                       onClick={() => showOrderDetailsModal(order)}
                       className={styles.viewButton}
                     >
-                      👁️ View Details
+                      👁️ {t('admin.orders.orderDetails')}
                     </button>
                   </td>
                 </tr>
@@ -306,7 +361,7 @@ export default function OrdersManagementTab() {
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
-              <h3>Order Details - #{selectedOrder.order_id}</h3>
+              <h3>{t('admin.orders.orderDetails')} - #{selectedOrder.order_id}</h3>
               <button 
                 onClick={closeOrderDetails}
                 className={styles.modalCloseButton}
@@ -318,37 +373,37 @@ export default function OrdersManagementTab() {
             <div className={styles.modalBody}>
               <div className={styles.orderInfo}>
                 <div className={styles.infoSection}>
-                  <h4>📋 Customer Information</h4>
+                  <h4>📋 {t('admin.orders.customerInformation')}</h4>
                   <p><strong>Name:</strong> {selectedOrder.first_name} {selectedOrder.last_name}</p>
                   <p><strong>Phone:</strong> {selectedOrder.phone}</p>
                   <p><strong>Order Date:</strong> {formatDate(selectedOrder.order_created_at)}</p>
                 </div>
                 
                 <div className={styles.infoSection}>
-                  <h4>💳 Payment Information</h4>
+                  <h4>💳 {t('admin.orders.paymentInformation')}</h4>
                   <p><strong>Payment Method:</strong> {selectedOrder.payment_method || 'Not specified'}</p>
                   <p><strong>Current Status:</strong> 
                     <span 
                       className={styles.statusBadge}
                       style={{ backgroundColor: getStatusColor(selectedOrder.current_status) }}
                     >
-                      {getStatusLabel(selectedOrder.current_status)}
+                      {getStatusLabel(selectedOrder.current_status, t)}
                     </span>
                   </p>
                 </div>
               </div>
 
               <div className={styles.statusUpdateSection}>
-                <h4>🔄 Update Order Status</h4>
+                <h4>🔄 {t('admin.orders.updateOrderStatus')}</h4>
                 <div className={styles.statusUpdateForm}>
                   <div className={styles.formGroup}>
-                    <label>New Status:</label>
+                    <label>{t('admin.orders.newStatus')}:</label>
                     <select
                       value={statusUpdateData.newStatus}
                       onChange={(e) => setStatusUpdateData(prev => ({ ...prev, newStatus: e.target.value }))}
                       className={styles.statusSelect}
                     >
-                      <option value="">Select new status...</option>
+                      <option value="">{t('admin.orders.selectNewStatus')}</option>
                       <option value="new">New</option>
                       <option value="confirmed">Confirmed</option>
                       <option value="installation_booked">Installation Booked</option>
@@ -357,22 +412,216 @@ export default function OrdersManagementTab() {
                     </select>
                   </div>
                   
-                  <div className={styles.formGroup}>
-                    <label>Installation Date (if applicable):</label>
-                    <input
-                      type="datetime-local"
-                      value={statusUpdateData.installationDate}
-                      onChange={(e) => setStatusUpdateData(prev => ({ ...prev, installationDate: e.target.value }))}
-                      className={styles.dateInput}
-                    />
-                  </div>
+                  {statusUpdateData.newStatus === 'installation_booked' && (
+                    <>
+                      <div className={styles.formGroup}>
+                        <label>{t('admin.orders.startInstallationDate')}:</label>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <input
+                            type="date"
+                            value={statusUpdateData.startInstallationDate}
+                            onChange={(e) => setStatusUpdateData(prev => ({ ...prev, startInstallationDate: e.target.value }))}
+                            className={styles.dateInput}
+                            required
+                            style={{ flex: '1', minWidth: '150px' }}
+                          />
+                          <select
+                            value={statusUpdateData.startInstallationHour}
+                            onChange={(e) => setStatusUpdateData(prev => ({ ...prev, startInstallationHour: e.target.value }))}
+                            className={styles.timeSelect}
+                            style={{ width: '80px' }}
+                          >
+                            {hourOptions.map(hour => (
+                              <option key={hour} value={hour}>{hour}</option>
+                            ))}
+                          </select>
+                          <span>:</span>
+                          <select
+                            value={statusUpdateData.startInstallationMinute}
+                            onChange={(e) => setStatusUpdateData(prev => ({ ...prev, startInstallationMinute: e.target.value }))}
+                            className={styles.timeSelect}
+                            style={{ width: '80px' }}
+                          >
+                            {minuteOptions.map(minute => (
+                              <option key={minute} value={minute}>{minute}</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        {/* Quick time buttons for start */}
+                        <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => setQuickTime('start', '08', '00')}
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              fontSize: '0.8rem',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: statusUpdateData.startInstallationHour === '08' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                              color: statusUpdateData.startInstallationHour === '08' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            08:00
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setQuickTime('start', '09', '00')}
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              fontSize: '0.8rem',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: statusUpdateData.startInstallationHour === '09' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                              color: statusUpdateData.startInstallationHour === '09' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            09:00
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setQuickTime('start', '14', '00')}
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              fontSize: '0.8rem',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: statusUpdateData.startInstallationHour === '14' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                              color: statusUpdateData.startInstallationHour === '14' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            14:00
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setQuickTime('start', '15', '00')}
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              fontSize: '0.8rem',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: statusUpdateData.startInstallationHour === '15' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                              color: statusUpdateData.startInstallationHour === '15' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            15:00
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className={styles.formGroup}>
+                        <label>{t('admin.orders.endInstallationDate')}:</label>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <input
+                            type="date"
+                            value={statusUpdateData.endInstallationDate}
+                            onChange={(e) => setStatusUpdateData(prev => ({ ...prev, endInstallationDate: e.target.value }))}
+                            className={styles.dateInput}
+                            required
+                            style={{ flex: '1', minWidth: '150px' }}
+                          />
+                          <select
+                            value={statusUpdateData.endInstallationHour}
+                            onChange={(e) => setStatusUpdateData(prev => ({ ...prev, endInstallationHour: e.target.value }))}
+                            className={styles.timeSelect}
+                            style={{ width: '80px' }}
+                          >
+                            {hourOptions.map(hour => (
+                              <option key={hour} value={hour}>{hour}</option>
+                            ))}
+                          </select>
+                          <span>:</span>
+                          <select
+                            value={statusUpdateData.endInstallationMinute}
+                            onChange={(e) => setStatusUpdateData(prev => ({ ...prev, endInstallationMinute: e.target.value }))}
+                            className={styles.timeSelect}
+                            style={{ width: '80px' }}
+                          >
+                            {minuteOptions.map(minute => (
+                              <option key={minute} value={minute}>{minute}</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        {/* Quick time buttons for end */}
+                        <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => setQuickTime('end', '17', '00')}
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              fontSize: '0.8rem',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: statusUpdateData.endInstallationHour === '17' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                              color: statusUpdateData.endInstallationHour === '17' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            17:00
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setQuickTime('end', '18', '00')}
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              fontSize: '0.8rem',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: statusUpdateData.endInstallationHour === '18' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                              color: statusUpdateData.endInstallationHour === '18' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            18:00
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setQuickTime('end', '19', '00')}
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              fontSize: '0.8rem',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: statusUpdateData.endInstallationHour === '19' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                              color: statusUpdateData.endInstallationHour === '19' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            19:00
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setQuickTime('end', '20', '00')}
+                            style={{
+                              padding: '0.25rem 0.5rem',
+                              fontSize: '0.8rem',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              backgroundColor: statusUpdateData.endInstallationHour === '20' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                              color: statusUpdateData.endInstallationHour === '20' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            20:00
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  
+
                   
                   <div className={styles.formGroup}>
-                    <label>Notes:</label>
+                    <label>{t('admin.orders.notes')}:</label>
                     <textarea
                       value={statusUpdateData.notes}
                       onChange={(e) => setStatusUpdateData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder="Add any notes about this status change..."
+                      placeholder={t('admin.orders.notesPlaceholder')}
                       className={styles.notesTextarea}
                       rows="3"
                     />
@@ -384,13 +633,13 @@ export default function OrdersManagementTab() {
                       disabled={updatingStatus || !statusUpdateData.newStatus}
                       className={styles.updateStatusButton}
                     >
-                      {updatingStatus ? '🔄 Updating...' : '✅ Update Status'}
+                      {updatingStatus ? `🔄 ${t('admin.orders.updatingStatus')}` : `✅ ${t('admin.orders.updateStatus')}`}
                     </button>
                     <button
                       onClick={closeOrderDetails}
                       className={styles.cancelButton}
                     >
-                      Cancel
+                      {t('admin.orders.cancel')}
                     </button>
                   </div>
                 </div>

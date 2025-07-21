@@ -40,7 +40,10 @@ export default function AdminOrderHistoryTab() {
         sortBy,
         sortOrder
       });
-      const res = await fetch(`/api/get-installed-orders?${params}`);
+      // Force the correct port based on current server
+      const baseUrl = window.location.origin;
+      const apiUrl = `${baseUrl}/api/get-installed-orders?${params}`;
+      const res = await fetch(apiUrl);
       const data = await res.json();
       if (res.ok) {
         setOrders(data.data || []);

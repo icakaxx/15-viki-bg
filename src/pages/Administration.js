@@ -5,6 +5,7 @@ import styles from '../styles/Page Styles/Administration.module.css';
 import AdminOrderHistoryTab from '../components/AdminOrderHistoryTab';
 import WeeklyInstallationsTab from '../components/WeeklyInstallationsTab';
 import OrdersManagementTab from '../components/OrdersManagementTab';
+import InquiryManagementTab from '../components/InquiryManagementTab';
 
 export default function Administration() {
     const { t } = useTranslation('common');
@@ -1022,6 +1023,12 @@ export default function Administration() {
                 >
                     {t('admin.tabs.installations')}
                 </button>
+                <button
+                    className={`${styles.tab} ${activeTab === 'inquiries' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('inquiries')}
+                >
+                    {t('admin.tabs.inquiries')}
+                </button>
             </div>
 
             {/* Products Management Section */}
@@ -1883,6 +1890,11 @@ export default function Administration() {
             {/* Installations Tab */}
             {activeTab === 'installations' && (
                 <WeeklyInstallationsTab />
+            )}
+
+            {/* Inquiries Tab */}
+            {activeTab === 'inquiries' && (
+                <InquiryManagementTab />
             )}
         </div>
     );

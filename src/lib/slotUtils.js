@@ -119,6 +119,13 @@ export function generateConsecutiveSlots(startTime, duration) {
   let currentTime = startHours * 60 + startMinutes; // Convert to minutes
   const endTime = currentTime + (duration * 60); // Duration in minutes
   
+  console.log('🔧 generateConsecutiveSlots:', {
+    startTime,
+    duration,
+    startTotalMinutes: currentTime,
+    endTotalMinutes: endTime
+  });
+  
   while (currentTime < endTime) {
     const hours = Math.floor(currentTime / 60);
     const minutes = currentTime % 60;
@@ -131,6 +138,23 @@ export function generateConsecutiveSlots(startTime, duration) {
     currentTime += 30; // Move to next 30-minute slot
   }
   
+  // Ensure we have the correct number of slots for the duration
+  const expectedSlots = Math.ceil(duration * 2); // Each slot is 30 minutes
+  if (slots.length < expectedSlots) {
+    // Add more slots if we're missing some
+    for (let i = slots.length; i < expectedSlots; i++) {
+      const additionalTime = (startHours * 60 + startMinutes) + (i * 30);
+      const hours = Math.floor(additionalTime / 60);
+      const minutes = additionalTime % 60;
+      const timeSlot = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      
+      if (TIME_SLOTS.includes(timeSlot)) {
+        slots.push(timeSlot);
+      }
+    }
+  }
+  
+  console.log('🔧 Generated slots:', slots);
   return slots;
 }
 
@@ -142,6 +166,25 @@ export function generateConsecutiveSlots(startTime, duration) {
 export function getSlotsDuration(timeSlots) {
   if (!timeSlots || timeSlots.length === 0) return 0;
   return timeSlots.length * 0.5; // Each slot is 30 minutes = 0.5 hours
+}
+
+/**
+ * Calculate duration in hours between two time slots
+ * @param {string} startTime - Start time in HH:MM format
+ * @param {string} endTime - End time in HH:MM format
+ * @returns {number} Duration in hours
+ */
+export function getDurationFromTimeRange(startTime, endTime) {
+  if (!startTime || !endTime) return 0;
+  
+  const [startHours, startMinutes] = startTime.split(':').map(Number);
+  const [endHours, endMinutes] = endTime.split(':').map(Number);
+  
+  const startTotalMinutes = startHours * 60 + startMinutes;
+  const endTotalMinutes = endHours * 60 + endMinutes;
+  
+  const durationMinutes = endTotalMinutes - startTotalMinutes;
+  return Math.max(0, durationMinutes / 60); // Convert to hours, minimum 0
 }
 
 /**

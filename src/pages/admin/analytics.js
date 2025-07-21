@@ -92,10 +92,10 @@ const AnalyticsPage = () => {
         </Head>
         <div className={styles.container}>
           <div className={styles.error}>
-            <h2>{t('common.error')}</h2>
+            <h2>{t('error')}</h2>
             <p>{error}</p>
             <button onClick={fetchAnalytics} className={styles.button}>
-              {t('common.retry')}
+              {t('retry')}
             </button>
           </div>
         </div>

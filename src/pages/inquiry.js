@@ -30,21 +30,48 @@ const InquiryPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitStatus(null);
     
-    // Simulate form submission
-    setTimeout(() => {
-      setSubmitStatus('success');
-      setIsSubmitting(false);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        company: '',
-        inquiryType: '',
-        budget: '',
-        message: ''
+    try {
+      const response = await fetch('/api/submit-inquiry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.name,
+          emailAddress: formData.email,
+          phone: formData.phone,
+          companyOrganization: formData.company,
+          inquiryType: formData.inquiryType,
+          budget: formData.budget,
+          message: formData.message
+        })
       });
-    }, 2000);
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          company: '',
+          inquiryType: '',
+          budget: '',
+          message: ''
+        });
+      } else {
+        setSubmitStatus('error');
+        console.error('Inquiry submission failed:', data);
+      }
+    } catch (err) {
+      setSubmitStatus('error');
+      console.error('Error submitting inquiry:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const inquiryTypes = [

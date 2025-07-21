@@ -13,6 +13,7 @@
     "sunday": "Sunday"
   },
   "error": "Error:",
+  "retry": "Retry",
   "others": "others",
   "productsPage": {
     "title": "Products & Solutions",
@@ -634,7 +635,8 @@
       "products": "Product Management",
       "orders": "Order Management",
       "orderHistory": "Order History",
-      "installations": "Installations This Week"
+      "installations": "Installations This Week",
+      "inquiries": "Inquiry Management"
     },
     "products": {
       "title": "Products",
@@ -854,6 +856,7 @@
     },
     "orders": {
       "title": "Order Management",
+      "description": "Manage customer orders, update statuses, and track order progress",
       "noOrders": "No orders available",
       "orderNumber": "Order #",
       "phone": "Phone",
@@ -864,12 +867,32 @@
       "statusHistory": "Status History",
       "noHistory": "No history",
       "updating": "Updating...",
+      "searchPlaceholder": "Search by name, phone, or order ID...",
+      "allStatuses": "All Statuses",
+      "refresh": "Refresh",
+      "loading": "Loading orders...",
+      "noOrdersFound": "No orders found",
+      "noOrdersMatchFilters": "No orders match your filters",
+      "orderDetails": "View Details",
+      "customerInformation": "Customer Information",
+      "paymentInformation": "Payment Information",
+      "updateOrderStatus": "Update Order Status",
+      "newStatus": "New Status",
+      "selectNewStatus": "Select new status...",
+      "startInstallationDate": "Start Installation Date",
+      "endInstallationDate": "End Installation Date",
+      "notes": "Notes",
+      "notesPlaceholder": "Add any notes about this status change...",
+      "updateStatus": "Update Status",
+      "updatingStatus": "Updating...",
+      "cancel": "Cancel",
       "status": {
         "new": "New",
         "confirmed": "Confirmed",
         "installation_booked": "Installation Scheduled",
         "installed": "Installed",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "returned_from_calendar": "Returned from Calendar"
       },
       "statusChanged": "Status changed from",
       "to": "to",
@@ -878,7 +901,8 @@
       "unknownDate": "Unknown date",
       "errors": {
         "updateFailed": "Error updating status",
-        "loadFailed": "An error occurred while loading"
+        "loadFailed": "An error occurred while loading",
+        "selectStatus": "Please select a new status"
       },
       "history": {
         "title": "Order History",
@@ -944,9 +968,10 @@
       },
       "actions": {
         "cancel": "🗑️ Cancel",
+        "delete": "🗑️ Delete",
         "complete": "✅ Installation Completed",
         "completed": "Installation Completed",
-        "markAsCompleted": "Mark as Completed",
+        "markAsCompleted": "✅ Mark as Completed",
         "reschedule": "📅 Reschedule",
         "close": "Close"
       },
@@ -961,8 +986,8 @@
         "cancel": "Cancel"
       },
       "confirmCancel": {
-        "title": "Cancellation Confirmation",
-        "message": "Are you sure you want to cancel this installation?",
+        "title": "Delete Confirmation",
+        "message": "Choose how to proceed with this installation:",
         "details": {
           "date": "Date",
           "customer": "Customer",
@@ -970,9 +995,13 @@
         },
         "note": "Note",
         "noteMessage": "The order will be returned to \"confirmed\" status and can be rescheduled again.",
-        "cancelling": "Cancelling...",
+        "cancelling": "Processing...",
         "confirm": "🗑️ Cancel Installation",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "deleteFromDB": "🗑️ Delete from Database",
+        "returnToOrders": "📋 Return to Orders",
+        "deleteFromDBDesc": "Completely delete the installation from database",
+        "returnToOrdersDesc": "Return to order management with status \"Returned from calendar\""
       },
       "messages": {
         "cancelSuccess": "Installation was successfully cancelled",
@@ -986,7 +1015,10 @@
         "markAsInstalledError": "Error: {{error}}",
         "markAsInstalledErrorGeneric": "Error marking installation as completed",
         "cancelError": "Error: {{message}}",
-        "cancelErrorGeneric": "Error cancelling installation"
+        "cancelErrorGeneric": "Error cancelling installation",
+        "deleteFromDBSuccess": "Installation was successfully deleted from database",
+        "returnToOrdersSuccess": "Order was returned to order management",
+        "returnToOrdersReason": "Returned from calendar"
       }
     },
     "analytics": {
@@ -1115,6 +1147,110 @@
       "Condensate Tray": "Condensate Tray",
       "Condensate Tray with Heater and Thermostat": "Condensate Tray with Heater and Thermostat",
       "Anti-vibration Mount Kit": "Anti-vibration Mount Kit"
+    }
+  },
+  "inquiryManagement": {
+    "title": "Inquiry Management",
+    "tabTitle": "Inquiries",
+    "overview": {
+      "totalInquiries": "Total Inquiries",
+      "newInquiries": "New Inquiries",
+      "unreadCount": "{{count}} unread",
+      "todayInquiries": "Today's Inquiries"
+    },
+    "table": {
+      "columns": {
+        "dateTime": "Date/Time",
+        "customerName": "Customer Name",
+        "email": "Email",
+        "phone": "Phone",
+        "inquiryType": "Type",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "viewDetails": "View Details",
+        "markAsRead": "Mark as Read",
+        "markAsResponded": "Mark as Responded",
+        "archive": "Archive",
+        "delete": "Delete",
+        "copyEmail": "Copy Email"
+      }
+    },
+    "status": {
+      "new": "New",
+      "read": "Read",
+      "responded": "Responded",
+      "archived": "Archived"
+    },
+    "filters": {
+      "all": "All Inquiries",
+      "new": "New Only",
+      "unread": "Unread",
+      "responded": "Responded",
+      "archived": "Archived",
+      "byType": "Filter by Type",
+      "byDate": "Filter by Date"
+    },
+    "detailView": {
+      "title": "Inquiry Details",
+      "customerInfo": "Customer Information",
+      "inquiryDetails": "Inquiry Details",
+      "adminActions": "Admin Actions",
+      "responseHistory": "Response History",
+      "fields": {
+        "fullName": "Full Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "company": "Company/Organization",
+        "inquiryType": "Inquiry Type",
+        "budget": "Budget Range",
+        "message": "Message",
+        "submittedAt": "Submitted At",
+        "status": "Current Status"
+      },
+      "actions": {
+        "changeStatus": "Change Status",
+        "addNotes": "Add Admin Notes",
+        "sendResponse": "Send Response",
+        "markAsRead": "Mark as Read",
+        "archive": "Archive Inquiry",
+        "delete": "Delete Inquiry",
+        "saveNotes": "Save Notes",
+        "cancel": "Cancel"
+      }
+    },
+    "messages": {
+      "success": {
+        "inquirySubmitted": "Inquiry submitted successfully!",
+        "statusUpdated": "Status updated successfully",
+        "notesSaved": "Admin notes saved",
+        "inquiryArchived": "Inquiry archived",
+        "inquiryDeleted": "Inquiry deleted"
+      },
+      "error": {
+        "submissionFailed": "Failed to submit inquiry. Please try again.",
+        "updateFailed": "Failed to update status",
+        "loadFailed": "Failed to load inquiries",
+        "deleteFailed": "Failed to delete inquiry"
+      },
+      "confirm": {
+        "deleteInquiry": "Are you sure you want to delete this inquiry?",
+        "archiveInquiry": "Are you sure you want to archive this inquiry?",
+        "markAsRead": "Mark this inquiry as read?"
+      }
+    },
+    "bulkActions": {
+      "title": "Bulk Actions",
+      "markAsRead": "Mark Selected as Read",
+      "markAsResponded": "Mark Selected as Responded",
+      "archive": "Archive Selected",
+      "delete": "Delete Selected",
+      "noSelection": "Please select inquiries to perform bulk actions"
+    },
+    "search": {
+      "placeholder": "Search by name, email, or company...",
+      "noResults": "No inquiries found matching your search"
     }
   }
 } 

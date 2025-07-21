@@ -61,7 +61,7 @@ const CartIcon = ({ onDropdownChange }) => {
               <button
                 className={styles.closeButton}
                 onClick={closeDropdown}
-                aria-label={t('common.close')}
+                aria-label={t('close')}
                 type="button"
               >
                 ✕

@@ -3237,10 +3237,25 @@
 }
 
 .statusSelect:focus,
-.dateInput:focus {
+.dateInput:focus,
+.timeSelect:focus {
   outline: none;
   border-color: #0070f3;
   box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+}
+
+.timeSelect {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.timeSelect:hover {
+  border-color: #999;
 }
 
 .notesTextarea {
