@@ -34,19 +34,12 @@ const Header = () => {
   return (
     <>
       <header className={styles.header}>
-        <div className={styles.centeredContainer}>
-          {/* Overlay for mobile cart dropdown */}
-          {cartDropdownOpen && (
-            <div className={styles.cartOverlay} />
-          )}
           <div className={styles.container}>
             {/* Group: Company + Navigation */}
-            <div className={styles.companyAndNav}>
               <div className={styles.leftSection}>
-                <BrandContainer className={cartDropdownOpen ? styles.dimLogo : ''} />
+                <BrandContainer />
               </div>
-              <nav className={navigationStyles.navigationContainer} aria-label="Main navigation">
-                <ul className={navigationStyles.navList}>
+                <div className={navigationStyles.navList}>
                   {navigationItems.map((item, index) => (
                     <li key={index}>
                       {item.href.startsWith('#') ? (
@@ -63,9 +56,8 @@ const Header = () => {
                       )}
                     </li>
                   ))}
-                </ul>
-              </nav>
-            </div>
+                </div>
+            
 
             {/* Right Section - Cart, Language & Utilities */}
             <div className={styles.rightSection}>
@@ -92,25 +84,22 @@ const Header = () => {
             {/* Mobile Header - Logo left, Cart and Burger right */}
             <div className={styles.mobileHeader}>
               
-              {/* Right: Cart and Burger */}
-              <div className={styles.mobileActions}>
+             
                 <CartIcon onDropdownChange={setCartDropdownOpen} />
                 <button
                   className={styles.mobileMenuButton}
                   onClick={toggleMobileMenu}
-                  aria-label="Toggle mobile menu"
                   aria-expanded={mobileMenuOpen}
                   type="button"
                 >
                   <FiMenu className={styles.mobileIcon} />
                 </button>
-              </div>
             </div>
 
             {/* Mobile Navigation */}
             {mobileMenuOpen && (
               <div className={styles.mobileNav}>
-                <nav aria-label="Mobile navigation">
+                <nav>
                   <ul className={styles.mobileNavList}>
                     {navigationItems.map((item, index) => (
                       <li key={index}>
@@ -161,7 +150,6 @@ const Header = () => {
               </div>
             )}
           </div>
-        </div>
       </header>
     </>
   );

@@ -94,10 +94,6 @@
 
 /* Responsive adjustments */
 @media (max-width: 1200px) and (min-width: 1024px) {
-  .navigationContainer {
-    margin-left: 0.5rem;
-    margin-right: 2rem;
-  }
   
   .navList {
     gap: 1rem;
@@ -110,10 +106,6 @@
 }
 
 @media (max-width: 1100px) and (min-width: 1024px) {
-  .navigationContainer {
-    margin-left: 0.5rem;
-    margin-right: 1rem;
-  }
   
   .navList {
     gap: 0.8rem;
@@ -126,8 +118,8 @@
 }
 
 /* Hide desktop navigation on mobile */
-@media (max-width: 1023px) {
-  .navigationContainer {
+@media (max-width: 1600px) {
+  .navList {
     display: none;
   }
 } 

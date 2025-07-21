@@ -216,8 +216,6 @@ const CheckoutPage = () => {
 
   // Submit order function for Stripe
   const submitOrderFromStripe = async (orderData) => {
-    console.log('Submitting order from Stripe:', orderData);
-
     const response = await fetch('/api/submit-order', {
       method: 'POST',
       headers: {
@@ -239,12 +237,6 @@ const CheckoutPage = () => {
   const handleStripePaymentSuccess = (paymentIntent) => {
     setStripePaymentSuccess(true);
     setStripePaymentError(null);
-    console.log('Payment successful:', paymentIntent);
-    
-    // Show success toast with payment details
-    showToast('success', t('checkout.form.stripe.paymentSuccess'), 
-      `${t('checkout.form.stripe.paymentId')}: ${paymentIntent.id}`);
-    
     // Clear cart and redirect to success page
     clearCart();
     setTimeout(() => {
@@ -255,8 +247,6 @@ const CheckoutPage = () => {
   const handleStripePaymentError = (error) => {
     setStripePaymentError(error);
     setStripePaymentSuccess(false);
-    console.error('Payment error:', error);
-    
     // Show error toast
     showToast('error', t('checkout.form.stripe.paymentError'), error);
   };
@@ -341,13 +331,10 @@ const CheckoutPage = () => {
           return;
         } else {
           // Payment failed, show error message
-          console.error('Payment failed:', result.error);
           showToast('error', t('checkout.form.stripe.paymentError'), result.error);
           return;
         }
       } catch (paymentError) {
-        console.error('Payment failed:', paymentError);
-        // Show error toast for payment failures
         showToast('error', t('checkout.form.stripe.paymentError'), paymentError.message);
         return;
       }
@@ -379,17 +366,15 @@ const CheckoutPage = () => {
         cartItems: cart.items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          serviceOption: 'ac-only' // Installation is now handled per unit in cart
+          serviceOption: 'ac-only'
         })),
         sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
         totals: {
           productsTotal: cart.totalPrice,
-          installationCost: 0, // Installation costs are now handled per unit in cart
+          installationCost: 0,
           grandTotal: grandTotal
         }
       };
-
-      console.log('Submitting order:', orderData);
 
       // Submit to API
       const response = await fetch('/api/submit-order', {
@@ -408,7 +393,7 @@ const CheckoutPage = () => {
           `${t('checkout.form.stripe.orderId')}: ${result.orderId}\n${t('checkout.form.stripe.emailSent')}`);
         clearCart();
         
-        // Redirect to success page or show success message
+        // Redirect to success page
         setTimeout(() => {
           window.location.href = `/order-success?orderId=${result.orderId}&paymentMethod=${formData.paymentMethod}`;
         }, 2000);
@@ -417,7 +402,6 @@ const CheckoutPage = () => {
       }
       
     } catch (error) {
-      console.error('Order submission error:', error);
       showToast('error', t('checkout.form.stripe.orderError'), error.message);
     } finally {
       setIsSubmitting(false);

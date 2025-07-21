@@ -1334,7 +1334,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 1050px) {
   .container {
     padding: 1rem 0.5rem;
   }
@@ -1448,21 +1448,16 @@
   .container {
     padding: 1.5rem 1rem;
   }
-  
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 3rem;
-  }
 }
 
-@media (min-width: 1025px) and (max-width: 1440px) {
+@media (min-width: 1360px) and (max-width: 1918px) {
   .grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 4rem;
   }
 }
 
-@media (min-width: 1441px) {
+@media (min-width: 1919px) {
   .pageLayout {
     grid-template-columns: 320px 1fr;
     gap: 2.5rem;
