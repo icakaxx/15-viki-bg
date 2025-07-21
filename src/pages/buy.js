@@ -69,10 +69,13 @@ const BuyPage = () => {
         setLoading(true);
         // Include archived products so they show as "out of stock"
         const response = await fetch('/api/get-products?showArchived=true');
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
         const data = await response.json();
+
+        if (!response.ok) {
+          console.error('Failed to fetch products:', data);
+          throw new Error(data.error || 'Failed to fetch products');
+        }
+
         const productsArray = data.products || data || [];
         
         // Log all received image URLs
@@ -92,21 +95,15 @@ const BuyPage = () => {
           const calculatedMinPrice = Math.floor(Math.min(...prices) / 100) * 100;
           const calculatedMaxPrice = Math.ceil(Math.max(...prices) / 100) * 100;
           
-          // Update the price bounds state
           setPriceBounds({ min: calculatedMinPrice, max: calculatedMaxPrice });
-          
-          // Only set the initial range if it hasn't been set yet
           setFilters(prev => ({
             ...prev,
-            priceRange: { 
-              min: calculatedMinPrice, 
-              max: calculatedMaxPrice 
-            }
+            priceRange: { min: calculatedMinPrice, max: calculatedMaxPrice }
           }));
         }
       } catch (err) {
-        setError(err.message);
-        console.error('Error fetching products:', err);
+        console.error('Error in fetchProducts:', err);
+        setError(err.message || 'Failed to load products. Please try again later.');
       } finally {
         setLoading(false);
       }

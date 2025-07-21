@@ -48,8 +48,20 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 let supabase = null;
-if (supabaseUrl && supabaseKey) {
-    supabase = createClient(supabaseUrl, supabaseKey);
+try {
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('⚠️ Supabase credentials are missing:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseKey
+    });
+  } else {
+    supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: { persistSession: false }
+    });
+    console.log('✓ Supabase client initialized');
+  }
+} catch (error) {
+  console.error('⚠️ Failed to initialize Supabase client:', error);
 }
 
 export default async function handler(req, res) {
@@ -67,13 +79,21 @@ export default async function handler(req, res) {
         offset = '0'
     } = req.query;
 
-    // If Supabase is not configured, return filtered mock data
+    // If Supabase is not configured or failed to initialize
     if (!supabase) {
-        console.log('⚠️  Supabase not configured or not connected');
+        console.error('⚠️ Supabase client is not available');
+        return res.status(500).json({ 
+            error: 'Database connection not available',
+            details: {
+                hasUrl: !!supabaseUrl,
+                hasKey: !!supabaseKey
+            }
+        });
     }
 
-    // Use Supabase if configured
+    // Use Supabase
     try {
+        console.log('🔍 Querying Supabase for products...');
         // Start with basic columns that should always exist
         let query = supabase.from('products').select(`
             id,
