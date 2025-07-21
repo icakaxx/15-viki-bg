@@ -75,6 +75,15 @@ const BuyPage = () => {
         const data = await response.json();
         const productsArray = data.products || data || [];
         
+        // Log all received image URLs
+        console.log('Received Product Images:', productsArray.map(p => ({
+          id: p.ProductID,
+          brand: p.Brand,
+          model: p.Model,
+          imageUrl: p.ImageURL,
+          requestUrl: p.ImageURL || '/images/placeholder-ac.svg'
+        })));
+        
         setProducts(productsArray);
         
         // Set initial price range based on products
@@ -857,6 +866,14 @@ const BuyPage = () => {
                             priority={index < 6} // Priority loading for first 6 images
                             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             quality={85}
+                            onError={() => {
+                              console.log('Image failed to load:', {
+                                id: product.ProductID,
+                                brand: product.Brand,
+                                model: product.Model,
+                                attemptedUrl: product.ImageURL || '/images/placeholder-ac.svg'
+                              });
+                            }}
                           />
                         </div>
                         

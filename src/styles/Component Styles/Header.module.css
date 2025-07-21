@@ -453,8 +453,7 @@
       height: 1.1rem;
     }
     .mobileLangOption{
-     
-      display: flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
@@ -466,8 +465,6 @@
      
     }
     .mobileLangOption{
-    
       display: flex;
-    
     }
   }
