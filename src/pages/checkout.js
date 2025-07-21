@@ -221,10 +221,6 @@ const CheckoutPage = () => {
   const handleStripePaymentSuccess = (paymentIntent) => {
     setStripePaymentSuccess(true);
     setStripePaymentError(null);
-    // Show success toast with payment details
-    showToast('success', t('checkout.form.stripe.paymentSuccess'), 
-      `${t('checkout.form.stripe.paymentId')}: ${paymentIntent.id}`);
-    
     // Clear cart and redirect to success page
     clearCart();
     setTimeout(() => {

@@ -118,9 +118,6 @@ const CheckoutForm = ({ amount, onPaymentSuccess, onPaymentError, isProcessing, 
         onPaymentError(translatedError);
         return { success: false, error: translatedError };
       } else if (paymentIntent.status === 'succeeded') {
-        // Show success message
-        showToast('success', t('checkout.form.stripe.paymentSuccess'), t('checkout.form.stripe.paymentSuccessMessage'));
-        
         // Automatically submit the order with payment comment
         if (orderData && onSubmitOrder) {
           try {

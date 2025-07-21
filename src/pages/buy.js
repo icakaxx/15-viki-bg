@@ -729,7 +729,6 @@ const BuyPage = () => {
         <meta property="og:type" content="website" />
       </Head>
       <div className={styles.container}>
-        <h1 className={styles.title}>{t('buyPage.title')}</h1>
         
         <div className={styles.pageLayout}>
           {/* Desktop Sidebar */}

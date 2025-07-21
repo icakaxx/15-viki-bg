@@ -389,7 +389,6 @@
         "orderError": "Order Error",
         "orderId": "Order ID",
         "emailSent": "Confirmation email has been sent.",
-        "paymentSuccessMessage": "Payment successful! We will contact you soon to arrange delivery.",
         "cardDetailsComplete": "Card details complete. You can now complete your order.",
         "completePaymentFirst": "Please complete the online payment first.",
         "notConfigured": "Stripe is not configured. Please contact the administrator."
