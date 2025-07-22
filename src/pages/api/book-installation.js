@@ -199,7 +199,7 @@ export default async function handler(req, res) {
         new_status: 'installation_booked',
         changed_by: adminId || null,
         changed_at: new Date().toISOString(),
-        notes: `Installation scheduled for ${scheduledDate} ${timeRange} (${installationDuration}h)${notes ? `. Notes: ${notes}` : ''}`
+        notes: `INSTALLATION_SCHEDULED_MESSAGE:${scheduledDate}:${timeRange}:${installationDuration}${notes ? `:${notes}` : ''}`
       }]);
 
     if (historyError) {
@@ -216,7 +216,7 @@ export default async function handler(req, res) {
       scheduledDate: scheduledDate,
       timeSlots: uniqueSlots,
       duration: installationDuration,
-      message: `Installation scheduled for ${scheduledDate} ${timeRange} (${installationDuration} hours)`
+      message: `INSTALLATION_SCHEDULED_MESSAGE:${scheduledDate}:${timeRange}:${installationDuration}`
     });
 
   } catch (error) {

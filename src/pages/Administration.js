@@ -1852,7 +1852,8 @@ export default function Administration() {
                     {/* Products List */}
                     {!showForm && (
                         <div className={styles.productsSection}>
-                            <h3>Products ({products.length})</h3>
+                            <h3>{t('admin.products.section.title')} ({products.length})</h3>
+                            <p>{t('admin.products.section.description')}</p>
                             <div className={styles.productsList}>
                                 {products.map(product => (
                                     <div key={product.id} className={styles.productCard}>
@@ -1866,7 +1867,7 @@ export default function Administration() {
                                                 onClick={() => handleEdit(product)}
                                                 className={styles.editButton}
                                             >
-                                                Edit
+                                                {t('admin.products.actions.edit')}
                                             </button>
                                         </div>
                                     </div>

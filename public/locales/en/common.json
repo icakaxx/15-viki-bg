@@ -638,8 +638,13 @@
       "inquiries": "Inquiry Management"
     },
     "products": {
-      "title": "Products",
+      "title": "Product Management",
+      "description": "Add, edit, and manage air conditioners and accessories",
       "addNew": "Add New Product",
+      "section": {
+        "title": "Products",
+        "description": "ACs that can be edited"
+      },
       "edit": "Edit Product", 
       "brand": "Brand",
       "model": "Model",
@@ -885,6 +890,26 @@
       "updateStatus": "Update Status",
       "updatingStatus": "Updating...",
       "cancel": "Cancel",
+      "table": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "phone": "Phone",
+        "created": "Created",
+        "paymentMethod": "Payment Method",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "modal": {
+        "name": "Name",
+        "phone": "Phone",
+        "orderDate": "Order Date",
+        "paymentMethod": "Payment Method",
+        "currentStatus": "Current Status"
+      },
+      "messages": {
+        "installationScheduled": "Installation scheduled",
+        "statusChanged": "Status changed from"
+      },
       "status": {
         "new": "New",
         "confirmed": "Confirmed",
@@ -1151,6 +1176,7 @@
   "inquiryManagement": {
     "title": "Inquiry Management",
     "tabTitle": "Inquiries",
+    "loading": "Loading inquiries...",
     "overview": {
       "totalInquiries": "Total Inquiries",
       "newInquiries": "New Inquiries",
@@ -1189,7 +1215,15 @@
       "responded": "Responded",
       "archived": "Archived",
       "byType": "Filter by Type",
-      "byDate": "Filter by Date"
+      "byDate": "Filter by Date",
+      "types": {
+        "residential": "Residential",
+        "commercial": "Commercial",
+        "industrial": "Industrial",
+        "service": "Service",
+        "consultation": "Consultation",
+        "other": "Other"
+      }
     },
     "detailView": {
       "title": "Inquiry Details",
@@ -1249,7 +1283,8 @@
     },
     "search": {
       "placeholder": "Search by name, email, or company...",
-      "noResults": "No inquiries found matching your search"
+      "noResults": "No inquiries found matching your search",
+      "retry": "Retry"
     }
   }
 } 

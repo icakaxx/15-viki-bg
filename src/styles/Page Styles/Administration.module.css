@@ -2846,10 +2846,11 @@
   background: white;
   border-radius: 12px;
   padding: 0;
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
-  overflow: hidden;
+  max-width: 600px;
+  width: 95%;
+  max-height: 85vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
@@ -2891,6 +2892,9 @@
 
 .modalBody {
   padding: 1.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .modalBody p {
@@ -2903,6 +2907,8 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  max-height: 50vh;
+  overflow-y: auto;
 }
 
 .validationError {
@@ -2913,6 +2919,7 @@
   border-radius: 6px;
   border-left: 4px solid #dc3545;
   font-size: 0.9rem;
+  word-wrap: break-word;
 }
 
 .modalFooter {
@@ -3341,5 +3348,24 @@
   .paginationButton {
     padding: 0.5rem 0.75rem;
     font-size: 0.8rem;
+  }
+  
+  /* Modal mobile optimizations */
+  .modalContent {
+    max-width: 95vw;
+    width: 95vw;
+    max-height: 90vh;
+    margin: 2.5vh auto;
+  }
+  
+  .modalBody {
+    padding: 1rem;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+  .validationErrors {
+    max-height: 40vh;
+    overflow-y: auto;
   }
 }

@@ -129,7 +129,8 @@ export default async function handler(req, res) {
         first_name,
         middle_name,
         last_name,
-        phone
+        phone,
+        town
       `)
       .in('id', orderIds);
 

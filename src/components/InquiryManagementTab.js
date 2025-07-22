@@ -157,7 +157,7 @@ export default function InquiryManagementTab() {
   if (loading && inquiries.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <div>Loading inquiries...</div>
+        <div>{t('inquiryManagement.loading') || 'Loading inquiries...'}</div>
       </div>
     );
   }
@@ -165,12 +165,12 @@ export default function InquiryManagementTab() {
   if (error) {
     return (
       <div style={{ textAlign: 'center', padding: '2rem', color: '#dc3545' }}>
-        <div>Error: {error}</div>
+        <div>{t('inquiryManagement.messages.error.loadFailed')}: {error}</div>
         <button 
           onClick={fetchInquiries}
           style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}
         >
-          Retry
+          {t('inquiryManagement.search.retry') || 'Retry'}
         </button>
       </div>
     );
@@ -237,12 +237,12 @@ export default function InquiryManagementTab() {
           style={{ padding: '0.5rem', borderRadius: '4px' }}
         >
           <option value="all">{t('inquiryManagement.filters.byType')}</option>
-          <option value="residential">Residential</option>
-          <option value="commercial">Commercial</option>
-          <option value="industrial">Industrial</option>
-          <option value="service">Service</option>
-          <option value="consultation">Consultation</option>
-          <option value="other">Other</option>
+          <option value="residential">{t('inquiryManagement.filters.types.residential')}</option>
+          <option value="commercial">{t('inquiryManagement.filters.types.commercial')}</option>
+          <option value="industrial">{t('inquiryManagement.filters.types.industrial')}</option>
+          <option value="service">{t('inquiryManagement.filters.types.service')}</option>
+          <option value="consultation">{t('inquiryManagement.filters.types.consultation')}</option>
+          <option value="other">{t('inquiryManagement.filters.types.other')}</option>
         </select>
 
         <input
@@ -257,7 +257,7 @@ export default function InquiryManagementTab() {
           onClick={fetchInquiries}
           style={{ padding: '0.5rem 1rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px' }}
         >
-          Refresh
+          {t('admin.orders.refresh')}
         </button>
       </div>
 

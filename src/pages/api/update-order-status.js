@@ -208,7 +208,7 @@ export default async function handler(req, res) {
       new_status: newStatus,
       changed_by: adminId || null,
       changed_at: new Date().toISOString(),
-      notes: notes || `Status updated from ${oldStatus} to ${newStatus} by admin`
+      notes: notes || `STATUS_CHANGE_MESSAGE:${oldStatus}:${newStatus}`
     };
     
     const { error: historyError } = await supabase
@@ -232,7 +232,7 @@ export default async function handler(req, res) {
           time_slot: `${startInstallationHour}:${startInstallationMinute}`,
           end_date: endInstallationDate,
           end_time_slot: `${endInstallationHour}:${endInstallationMinute}`,
-          notes: notes || `Installation scheduled from ${startInstallationDate} ${startInstallationHour}:${startInstallationMinute} to ${endInstallationDate} ${endInstallationHour}:${endInstallationMinute}`,
+          notes: notes || `INSTALLATION_SCHEDULED_MESSAGE:${startInstallationDate}:${startInstallationHour}:${startInstallationMinute}:${endInstallationDate}:${endInstallationHour}:${endInstallationMinute}`,
           created_at: new Date().toISOString()
         };
         
@@ -260,7 +260,7 @@ export default async function handler(req, res) {
       orderId: orderId,
       oldStatus: oldStatus,
       newStatus: newStatus,
-      message: `Order status updated from ${oldStatus} to ${newStatus}`,
+      message: `STATUS_CHANGE_MESSAGE:${oldStatus}:${newStatus}`,
       timestamp: new Date().toISOString()
     });
 

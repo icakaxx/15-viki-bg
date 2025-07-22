@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Page Styles/Administration.module.css';
+import { translateServerMessage } from '../lib/messageTranslator';
 
 const PAGE_SIZE = 10;
 
@@ -269,13 +270,13 @@ export default function OrdersManagementTab() {
         <table className={styles.ordersTable}>
           <thead>
             <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Phone</th>
-              <th>Created</th>
-              <th>Payment Method</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>{t('admin.orders.table.orderId')}</th>
+              <th>{t('admin.orders.table.customer')}</th>
+              <th>{t('admin.orders.table.phone')}</th>
+              <th>{t('admin.orders.table.created')}</th>
+              <th>{t('admin.orders.table.paymentMethod')}</th>
+              <th>{t('admin.orders.table.status')}</th>
+              <th>{t('admin.orders.table.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -330,7 +331,7 @@ export default function OrdersManagementTab() {
             disabled={page === 1}
             className={styles.paginationButton}
           >
-            ‹ Previous
+            ‹ {t('admin.orders.history.previousPage')}
           </button>
           
           {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -351,7 +352,7 @@ export default function OrdersManagementTab() {
             disabled={page === totalPages}
             className={styles.paginationButton}
           >
-            Next ›
+            {t('admin.orders.history.nextPage')} ›
           </button>
         </div>
       )}
@@ -374,15 +375,15 @@ export default function OrdersManagementTab() {
               <div className={styles.orderInfo}>
                 <div className={styles.infoSection}>
                   <h4>📋 {t('admin.orders.customerInformation')}</h4>
-                  <p><strong>Name:</strong> {selectedOrder.first_name} {selectedOrder.last_name}</p>
-                  <p><strong>Phone:</strong> {selectedOrder.phone}</p>
-                  <p><strong>Order Date:</strong> {formatDate(selectedOrder.order_created_at)}</p>
+                  <p><strong>{t('admin.orders.modal.name')}:</strong> {selectedOrder.first_name} {selectedOrder.last_name}</p>
+                  <p><strong>{t('admin.orders.modal.phone')}:</strong> {selectedOrder.phone}</p>
+                  <p><strong>{t('admin.orders.modal.orderDate')}:</strong> {formatDate(selectedOrder.order_created_at)}</p>
                 </div>
                 
                 <div className={styles.infoSection}>
                   <h4>💳 {t('admin.orders.paymentInformation')}</h4>
-                  <p><strong>Payment Method:</strong> {selectedOrder.payment_method || 'Not specified'}</p>
-                  <p><strong>Current Status:</strong> 
+                  <p><strong>{t('admin.orders.modal.paymentMethod')}:</strong> {selectedOrder.payment_method || 'Not specified'}</p>
+                  <p><strong>{t('admin.orders.modal.currentStatus')}:</strong> 
                     <span 
                       className={styles.statusBadge}
                       style={{ backgroundColor: getStatusColor(selectedOrder.current_status) }}
@@ -404,11 +405,11 @@ export default function OrdersManagementTab() {
                       className={styles.statusSelect}
                     >
                       <option value="">{t('admin.orders.selectNewStatus')}</option>
-                      <option value="new">New</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="installation_booked">Installation Booked</option>
-                      <option value="installed">Installed</option>
-                      <option value="cancelled">Cancelled</option>
+                      <option value="new">{t('admin.orders.status.new')}</option>
+                      <option value="confirmed">{t('admin.orders.status.confirmed')}</option>
+                      <option value="installation_booked">{t('admin.orders.status.installation_booked')}</option>
+                      <option value="installed">{t('admin.orders.status.installed')}</option>
+                      <option value="cancelled">{t('admin.orders.status.cancelled')}</option>
                     </select>
                   </div>
                   
