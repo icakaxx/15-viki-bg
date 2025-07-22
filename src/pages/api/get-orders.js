@@ -44,7 +44,9 @@ export default async function handler(req, res) {
           created_at,
           payment_and_tracking!inner (
             payment_method,
-            status
+            status,
+            total_amount,
+            paid_amount
           )
         `)
         .neq('payment_and_tracking.status', 'installed')
@@ -66,10 +68,18 @@ export default async function handler(req, res) {
         phone: order.phone,
         order_created_at: order.created_at,
         payment_method: order.payment_and_tracking?.[0]?.payment_method || 'unknown',
-        current_status: order.payment_and_tracking?.[0]?.status || 'new'
+        current_status: order.payment_and_tracking?.[0]?.status || 'new',
+        total_amount: order.payment_and_tracking?.[0]?.total_amount || 0,
+        paid_amount: order.payment_and_tracking?.[0]?.paid_amount || 0
       })) || [];
 
-      console.log('API: Orders loaded via manual join:', data);
+      console.log('API: Orders loaded via manual join:', data.map(order => ({
+        order_id: order.order_id,
+        name: `${order.first_name} ${order.last_name}`,
+        status: order.current_status,
+        total_amount: `${order.total_amount} BGN`,
+        paid_amount: `${order.paid_amount} BGN`
+      })));
     } else if (error) {
       console.error('API: Error loading orders:', error);
       return res.status(500).json({ 
@@ -77,7 +87,13 @@ export default async function handler(req, res) {
         details: error.message
       });
     } else {
-      console.log('API: Orders loaded via view:', data);
+      console.log('API: Orders loaded via view:', data.map(order => ({
+        order_id: order.order_id,
+        name: `${order.first_name} ${order.last_name}`,
+        status: order.current_status,
+        total_amount: `${order.total_amount} BGN`,
+        paid_amount: `${order.paid_amount} BGN`
+      })));
     }
 
     return res.status(200).json({ 

@@ -173,7 +173,8 @@ export default async function handler(req, res) {
       payment_method: paymentInfo.paymentMethod,
       status: 'new', // Updated to use new status system
       includes_installation: hasInstallation,
-      total_amount: calculatedTotal
+      total_amount: calculatedTotal,
+      paid_amount: paymentInfo.paymentMethod === 'online' ? calculatedTotal : 0 // Set paid_amount based on payment method
     };
     console.log('Payment data to insert:', paymentData);
     

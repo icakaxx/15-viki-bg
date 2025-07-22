@@ -896,6 +896,8 @@
         "phone": "Phone",
         "created": "Created",
         "paymentMethod": "Payment Method",
+        "totalAmount": "Total Amount",
+        "paidAmount": "Paid Amount",
         "status": "Status",
         "actions": "Actions"
       },
@@ -904,6 +906,8 @@
         "phone": "Phone",
         "orderDate": "Order Date",
         "paymentMethod": "Payment Method",
+        "totalAmount": "Total Amount",
+        "paidAmount": "Paid Amount",
         "currentStatus": "Current Status"
       },
       "messages": {

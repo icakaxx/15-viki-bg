@@ -41,6 +41,15 @@ function getStatusLabel(status, t) {
   return statusLabels[status] || status;
 }
 
+function getPaymentMethodLabel(method) {
+  const paymentLabels = {
+    'cash': 'наложен платеж',
+    'office': 'в офис',
+    'online': 'с карта'
+  };
+  return paymentLabels[method] || method || 'Not specified';
+}
+
 export default function OrdersManagementTab() {
   const { t } = useTranslation('common');
   const [orders, setOrders] = useState([]);
@@ -275,6 +284,8 @@ export default function OrdersManagementTab() {
               <th>{t('admin.orders.table.phone')}</th>
               <th>{t('admin.orders.table.created')}</th>
               <th>{t('admin.orders.table.paymentMethod')}</th>
+              <th>{t('admin.orders.table.totalAmount')}</th>
+              <th>{t('admin.orders.table.paidAmount')}</th>
               <th>{t('admin.orders.table.status')}</th>
               <th>{t('admin.orders.table.actions')}</th>
             </tr>
@@ -282,13 +293,13 @@ export default function OrdersManagementTab() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className={styles.loadingCell}>
+                <td colSpan={9} className={styles.loadingCell}>
                   🔄 {t('admin.orders.loading')}
                 </td>
               </tr>
             ) : currentOrders.length === 0 ? (
               <tr>
-                <td colSpan={7} className={styles.emptyCell}>
+                <td colSpan={9} className={styles.emptyCell}>
                   {search || statusFilter ? t('admin.orders.noOrdersMatchFilters') : t('admin.orders.noOrdersFound')}
                 </td>
               </tr>
@@ -299,7 +310,9 @@ export default function OrdersManagementTab() {
                   <td>{order.first_name} {order.last_name}</td>
                   <td>{order.phone}</td>
                   <td>{formatDate(order.order_created_at)}</td>
-                  <td>{order.payment_method || 'Not specified'}</td>
+                  <td>{getPaymentMethodLabel(order.payment_method)}</td>
+                  <td>{order.total_amount ? `${order.total_amount.toFixed(2)} лв.` : '-'}</td>
+                  <td>{order.paid_amount ? `${order.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</td>
                   <td>
                     <span 
                       className={styles.statusBadge}
@@ -382,7 +395,9 @@ export default function OrdersManagementTab() {
                 
                 <div className={styles.infoSection}>
                   <h4>💳 {t('admin.orders.paymentInformation')}</h4>
-                  <p><strong>{t('admin.orders.modal.paymentMethod')}:</strong> {selectedOrder.payment_method || 'Not specified'}</p>
+                  <p><strong>{t('admin.orders.modal.paymentMethod')}:</strong> {getPaymentMethodLabel(selectedOrder.payment_method)}</p>
+                  <p><strong>{t('admin.orders.modal.totalAmount')}:</strong> {selectedOrder.total_amount ? `${selectedOrder.total_amount.toFixed(2)} лв.` : '-'}</p>
+                  <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${selectedOrder.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</p>
                   <p><strong>{t('admin.orders.modal.currentStatus')}:</strong> 
                     <span 
                       className={styles.statusBadge}

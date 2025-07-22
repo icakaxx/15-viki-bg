@@ -198,17 +198,23 @@ const CheckoutPage = () => {
       },
       paymentInfo: {
         paymentMethod: formData.paymentMethod,
-        stripePaymentId: null
+        stripePaymentId: null,
+        totalAmount: grandTotal,
+        paid_amount: formData.paymentMethod === 'online' ? grandTotal : 0 // Set paid_amount based on payment method
       },
       cartItems: cart.items.map(item => ({
         productId: item.productId,
         quantity: item.quantity,
-        serviceOption: 'ac-only' // Installation is now handled per unit in cart
+        serviceOption: 'ac-only',
+        product: item.product,
+        accessories: item.accessories,
+        installation: item.installation,
+        installationPrice: item.installationPrice
       })),
       sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
       totals: {
         productsTotal: cart.totalPrice,
-        installationCost: 0, // Installation costs are now handled per unit in cart
+        installationCost: 0,
         grandTotal: grandTotal
       }
     };
@@ -361,12 +367,18 @@ const CheckoutPage = () => {
         },
         paymentInfo: {
           paymentMethod: formData.paymentMethod,
-          stripePaymentId: stripePaymentSuccess ? 'stripe_payment_completed' : null
+          stripePaymentId: stripePaymentSuccess ? 'stripe_payment_completed' : null,
+          totalAmount: grandTotal,
+          paid_amount: formData.paymentMethod === 'online' ? grandTotal : 0 // Set paid_amount based on payment method
         },
         cartItems: cart.items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
-          serviceOption: 'ac-only'
+          serviceOption: 'ac-only',
+          product: item.product,
+          accessories: item.accessories,
+          installation: item.installation,
+          installationPrice: item.installationPrice
         })),
         sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
         totals: {

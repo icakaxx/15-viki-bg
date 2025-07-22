@@ -1005,6 +1005,8 @@
         "phone": "Телефон",
         "created": "Създадена",
         "paymentMethod": "Метод на плащане",
+        "totalAmount": "Обща сума",
+        "paidAmount": "Платена сума",
         "status": "Статус",
         "actions": "Действия"
       },
@@ -1013,6 +1015,8 @@
         "phone": "Телефон",
         "orderDate": "Дата на поръчка",
         "paymentMethod": "Метод на плащане",
+        "totalAmount": "Обща сума",
+        "paidAmount": "Платена сума",
         "currentStatus": "Текущ статус"
       },
       "messages": {

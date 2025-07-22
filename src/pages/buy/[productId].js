@@ -539,12 +539,6 @@ const ProductDetailPage = () => {
             {/* Technical Details Tab */}
             <div className={`${styles.specsTabContent} ${activeTab === 'technical' ? styles.active : ''}`}>
               <div className={styles.specsGrid}>
-                {product.COP && renderSpecCard('⚡', 'COP', product.COP, t('productDetail.tooltips.cop'))}
-                {product.SCOP && renderSpecCard('🔥', 'SCOP', product.SCOP, t('productDetail.tooltips.scop'))}
-                {product.NoiseLevel && renderSpecCard('🔇', t('productDetail.specs.noise'), product.NoiseLevel, t('productDetail.tooltips.noiseLevel'))}
-                {product.PowerConsumption && renderSpecCard('⚡', t('productDetail.specs.power'), product.PowerConsumption, t('productDetail.tooltips.powerConsumption'))}
-                {product.AirFlow && renderSpecCard('💨', t('productDetail.specs.airflow'), product.AirFlow, t('productDetail.tooltips.airFlow'))}
-                {product.OperatingTempRange && renderSpecCard('🌡️', t('productDetail.specs.operatingRange'), product.OperatingTempRange, t('productDetail.tooltips.operatingTempRange'))}
                 {product.RefrigerantType && renderSpecCard('❄️', t('productDetail.specs.refrigerant'), product.RefrigerantType, t('productDetail.tooltips.refrigerantType'))}
                 {product.InstallationType && renderSpecCard('🔧', t('productDetail.specs.installation'), product.InstallationType, t('productDetail.tooltips.installationType'))}
                 {product.Stock !== undefined && product.Stock !== null && renderSpecCard('📦', t('productDetail.specs.stock'), product.Stock > 0 ? `${product.Stock} ${t('productDetail.stock.available')}` : t('productDetail.stock.outOfStockShort'), t('productDetail.tooltips.stock'))}
