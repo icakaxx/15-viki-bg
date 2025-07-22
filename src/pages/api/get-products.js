@@ -44,116 +44,24 @@ const transformProduct = (product) => {
     };
 };
 
-// Mock data for testing when Supabase is not configured
-const mockProducts = [
-    {
-        id: 1,
-        brand: "Daikin",
-        model: "FTXS35K",
-        colour: "White",
-        type: "Split",
-        capacity_btu: 12000,
-        energy_rating: "A++",
-        price: 899.00,
-        previous_price: 999.00,
-        image_url: "https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/daikin-ftxs35k.jpg",
-        stock: 15,
-        discount: 10.00,
-        is_archived: false,
-        is_featured: true,
-        is_bestseller: false,
-        is_new: false,
-        created_at: "2024-01-01T00:00:00Z",
-        updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-        id: 2,
-        brand: "Mitsubishi",
-        model: "MSZ-LN35VG",
-        colour: "White",
-        type: "Split",
-        capacity_btu: 12000,
-        energy_rating: "A+++",
-        price: 1099.00,
-        previous_price: 1199.00,
-        image_url: "https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/mitsubishi-msz-ln35vg.jpg",
-        stock: 8,
-        discount: 8.33,
-        is_archived: false,
-        is_featured: false,
-        is_bestseller: true,
-        is_new: false,
-        created_at: "2024-01-01T00:00:00Z",
-        updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-        id: 3,
-        brand: "LG",
-        model: "ArtCool Gallery",
-        colour: "Black",
-        type: "Split",
-        capacity_btu: 9000,
-        energy_rating: "A++",
-        price: 749.00,
-        previous_price: 849.00,
-        image_url: "https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/lg-artcool-gallery.jpg",
-        stock: 12,
-        discount: 11.78,
-        is_archived: false,
-        is_featured: false,
-        is_bestseller: false,
-        is_new: true,
-        created_at: "2024-01-01T00:00:00Z",
-        updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-        id: 4,
-        brand: "Gree",
-        model: "Fairy",
-        colour: "White",
-        type: "Split",
-        capacity_btu: 9000,
-        energy_rating: "A++",
-        price: 549.00,
-        previous_price: 649.00,
-        image_url: "https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/gree-fairy.jpg",
-        stock: 20,
-        discount: 15.41,
-        is_archived: false,
-        is_featured: true,
-        is_bestseller: true,
-        is_new: false,
-        created_at: "2024-01-01T00:00:00Z",
-        updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-        id: 5,
-        brand: "Samsung",
-        model: "WindFree",
-        colour: "White",
-        type: "Split",
-        capacity_btu: 12000,
-        energy_rating: "A+++",
-        price: 999.00,
-        previous_price: 1099.00,
-        image_url: "https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/samsung-windfree.jpg",
-        stock: 5,
-        discount: 9.10,
-        is_archived: false,
-        is_featured: false,
-        is_bestseller: false,
-        is_new: true,
-        created_at: "2024-01-01T00:00:00Z",
-        updated_at: "2024-01-01T00:00:00Z"
-    }
-];
-
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 let supabase = null;
-if (supabaseUrl && supabaseKey) {
-    supabase = createClient(supabaseUrl, supabaseKey);
+try {
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('⚠️ Supabase credentials are missing:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseKey
+    });
+  } else {
+    supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: { persistSession: false }
+    });
+    console.log('✓ Supabase client initialized');
+  }
+} catch (error) {
+  console.error('⚠️ Failed to initialize Supabase client:', error);
 }
 
 export default async function handler(req, res) {
@@ -171,60 +79,21 @@ export default async function handler(req, res) {
         offset = '0'
     } = req.query;
 
-    // If Supabase is not configured, return filtered mock data
+    // If Supabase is not configured or failed to initialize
     if (!supabase) {
-        console.log('⚠️  Supabase not configured, using mock data');
-        
-        let filteredProducts = mockProducts;
-        
-        // Apply archived filter
-        if (showArchived === 'false') {
-            filteredProducts = filteredProducts.filter(p => !p.is_archived);
-        }
-        
-        // Apply search filter
-        if (search) {
-            const searchTerm = search.toLowerCase();
-            filteredProducts = filteredProducts.filter(p => 
-                p.brand.toLowerCase().includes(searchTerm) ||
-                p.model.toLowerCase().includes(searchTerm)
-            );
-        }
-        
-        // Apply sorting
-        filteredProducts.sort((a, b) => {
-            let aVal = a[sortBy];
-            let bVal = b[sortBy];
-            
-            if (typeof aVal === 'string') {
-                aVal = aVal.toLowerCase();
-                bVal = bVal.toLowerCase();
+        console.error('⚠️ Supabase client is not available');
+        return res.status(500).json({ 
+            error: 'Database connection not available',
+            details: {
+                hasUrl: !!supabaseUrl,
+                hasKey: !!supabaseKey
             }
-            
-            if (sortOrder === 'desc') {
-                return bVal > aVal ? 1 : -1;
-            } else {
-                return aVal > bVal ? 1 : -1;
-            }
-        });
-        
-        // Apply pagination
-        const limitNum = parseInt(limit);
-        const offsetNum = parseInt(offset);
-        const paginatedProducts = filteredProducts.slice(offsetNum, offsetNum + limitNum);
-        
-        // Transform products to match frontend expectations
-        const transformedProducts = paginatedProducts.map(transformProduct);
-        
-        return res.status(200).json({ 
-            products: transformedProducts,
-            total: filteredProducts.length,
-            hasMore: offsetNum + limitNum < filteredProducts.length
         });
     }
 
-    // Use Supabase if configured
+    // Use Supabase
     try {
+        console.log('🔍 Querying Supabase for products...');
         // Start with basic columns that should always exist
         let query = supabase.from('products').select(`
             id,
@@ -283,17 +152,6 @@ export default async function handler(req, res) {
 
     if (error) {
             console.error('Error fetching products from Supabase:', error);
-            // Fallback to mock data on error
-            const filteredMockProducts = mockProducts.filter(p => 
-                showArchived === 'true' || !p.is_archived
-            );
-            const transformedMockProducts = filteredMockProducts.slice(0, parseInt(limit)).map(transformProduct);
-            return res.status(200).json({ 
-                products: transformedMockProducts,
-                total: filteredMockProducts.length,
-                hasMore: false,
-                fallback: true
-            });
         }
 
         // Get total count for pagination
@@ -318,16 +176,6 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('Supabase connection error:', error);
-        // Fallback to mock data on connection error
-        const filteredMockProducts = mockProducts.filter(p => 
-            showArchived === 'true' || !p.is_archived
-        );
-        const transformedMockProducts = filteredMockProducts.slice(0, parseInt(limit)).map(transformProduct);
-        return res.status(200).json({ 
-            products: transformedMockProducts,
-            total: filteredMockProducts.length,
-            hasMore: false,
-            fallback: true
-        });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 }

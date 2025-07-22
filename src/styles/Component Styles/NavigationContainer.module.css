@@ -117,8 +117,30 @@
   }
 }
 
-/* Hide desktop navigation on mobile */
+
 @media (max-width: 1600px) {
+  .navList {
+    font-size: 1.1vw;
+    gap: 0.7vw;
+  }
+  
+  .navLink {
+    font-size: 1.2vw;
+    padding: 0.5vw 0.7vw;
+  }
+
+  .navLink::after {
+    bottom: 0.6vw;
+    height: 0.2vw;
+  }
+
+  .navLink:hover::after,
+  .activeNavLink::after {
+    width: calc(100% - 1.3vw);
+  }
+}
+/* Hide desktop navigation on mobile */
+@media (max-width: 800px) {
   .navList {
     display: none;
   }

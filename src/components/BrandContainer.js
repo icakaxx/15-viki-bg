@@ -9,10 +9,6 @@ const BrandContainer = ({ className = "" }) => {
   return (
     <Link href="/" className={`${styles.brandContainer} ${className}`}>
       <div className={styles.brandWrapper}>
-        {/* Company Name */}
-        <div className={companyNameStyles.companyName}>
-          БГВИКИ15 ЕООД
-        </div>
         
         {/* Logo */}
         <div className={logoContainerStyles.logoContainer}>
@@ -21,6 +17,10 @@ const BrandContainer = ({ className = "" }) => {
             alt="VIKI15 EOOD Logo" 
             className={logoImageStyles.logoImage}
           />
+        </div>
+        {/* Company Name */}
+        <div className={companyNameStyles.companyName}>
+          БГВИКИ15 ЕООД
         </div>
       </div>
     </Link>
