@@ -3270,7 +3270,6 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 1rem;
-  width: 100%;
   resize: vertical;
   min-height: 80px;
 }
@@ -3367,5 +3366,98 @@
   .validationErrors {
     max-height: 40vh;
     overflow-y: auto;
+  }
+}
+
+/* Products Modal Styles */
+.productsSection {
+  margin-top: 1rem;
+}
+
+.productsTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.productRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.productImage {
+  flex-shrink: 0;
+}
+
+.productInfo {
+  flex: 2;
+  font-size: 0.95rem;
+}
+
+.productQuantity {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.productPrice {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: right;
+}
+
+.productTotal {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  text-align: right;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-top: 2px solid #333;
+  background: #f8f9fa;
+}
+
+.totalLabel {
+  font-size: 1rem;
+}
+
+.totalAmount {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+/* Responsive design for products */
+@media (max-width: 768px) {
+  .productRow {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .productInfo,
+  .productQuantity,
+  .productPrice,
+  .productTotal {
+    flex: none;
+  }
+  
+  .totalRow {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }

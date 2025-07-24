@@ -33,10 +33,10 @@ export default async function handler(req, res) {
 
     // Get order status history
     const { data, error } = await supabase
-      .from('order_status_history')
+      .from('order_status_view')
       .select('*')
       .eq('order_id', orderId)
-      .order('changed_at', { ascending: false });
+      .order('changed_at', { descending: true });
 
     if (error) {
       if (error.code === '42P01') {

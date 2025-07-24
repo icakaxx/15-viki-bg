@@ -245,15 +245,15 @@ export default async function handler(req, res) {
     const historyNotes = `Rescheduled from ${oldDate} ${oldTime} → ${new_date} ${new_time}${reason ? `. Reason: ${reason}` : ''}`;
     
     const { error: historyError } = await supabase
-      .from('order_status_history')
-      .insert([{
+      .from('orders')
+      .update([{
         order_id: existingInstallation.order_id,
-        old_status: 'installation_booked',
-        new_status: 'installation_booked',
+        status: 'installation_booked',
         changed_by: admin_id || null,
         changed_at: new Date().toISOString(),
-        notes: historyNotes
-      }]);
+        notes: historyNotes,
+        modifiedDT: new Date().toISOString()
+      }]).eq('order_id', existingInstallation.order_id);
 
     if (historyError) {
       console.error('Error logging reschedule history:', historyError);

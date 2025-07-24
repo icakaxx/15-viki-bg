@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Page Styles/Administration.module.css';
-import { translateServerMessage } from '../lib/messageTranslator';
 
 const PAGE_SIZE = 10;
 
@@ -62,6 +61,10 @@ export default function OrdersManagementTab() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [showOrderProducts, setShowOrderProducts] = useState(false);
+  const [orderProducts, setOrderProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [includesInstallation, setIncludesInstallation] = useState(false);
   const [statusUpdateData, setStatusUpdateData] = useState({
     newStatus: '',
     notes: '',
@@ -94,7 +97,8 @@ export default function OrdersManagementTab() {
             order.first_name?.toLowerCase().includes(searchLower) ||
             order.last_name?.toLowerCase().includes(searchLower) ||
             order.phone?.includes(search) ||
-            order.order_id?.toString().includes(search)
+            order.order_id?.toString().includes(search) ||
+            order.notes?.toLowerCase().includes(searchLower)
           );
         }
         
@@ -178,6 +182,16 @@ export default function OrdersManagementTab() {
   const showOrderDetailsModal = (order) => {
     setSelectedOrder(order);
     setShowOrderDetails(true);
+    setStatusUpdateData({ 
+      notes: order.notes,
+      newStatus: order.current_status,
+      startInstallationDate: '',
+      startInstallationHour: '08',
+      startInstallationMinute: '00',
+      endInstallationDate: '',
+      endInstallationHour: '17',
+      endInstallationMinute: '00'
+    });
   };
 
   const closeOrderDetails = () => {
@@ -193,6 +207,39 @@ export default function OrdersManagementTab() {
       endInstallationHour: '17',
       endInstallationMinute: '00'
     });
+  };
+
+  const showOrderProductsModal = async (order) => {
+    setSelectedOrder(order);
+    setShowOrderProducts(true);
+    setLoadingProducts(true);
+    
+    try {
+      const response = await fetch(`/api/get-order-products?orderId=${order.order_id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setOrderProducts(data.products || []);
+        setIncludesInstallation(data.includesInstallation || false);
+      } else {
+        console.error('Failed to load products:', data.error);
+        setOrderProducts([]);
+        setIncludesInstallation(false);
+      }
+    } catch (err) {
+      console.error('Error loading products:', err);
+      setOrderProducts([]);
+      setIncludesInstallation(false);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const closeOrderProducts = () => {
+    setShowOrderProducts(false);
+    setSelectedOrder(null);
+    setOrderProducts([]);
+    setIncludesInstallation(false);
   };
 
   // Helper function to set quick time
@@ -322,12 +369,22 @@ export default function OrdersManagementTab() {
                     </span>
                   </td>
                   <td>
-                    <button
-                      onClick={() => showOrderDetailsModal(order)}
-                      className={styles.viewButton}
-                    >
-                      👁️ {t('admin.orders.orderDetails')}
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <button
+                        onClick={() => showOrderDetailsModal(order)}
+                        className={styles.viewButton}
+                        style={{ width: '100px' }}
+                      >
+                        👁️ {t('admin.orders.orderDetails')}
+                      </button>
+                      <button
+                        onClick={() => showOrderProductsModal(order)}
+                        className={styles.viewButton}
+                        style={{ width: '100px' }}
+                      >
+                        📦 {t('admin.orders.products.button')}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -659,6 +716,94 @@ export default function OrdersManagementTab() {
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Products Modal */}
+      {showOrderProducts && selectedOrder && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h3>{t('admin.orders.products.title')} - #{selectedOrder.order_id}</h3>
+              <button 
+                onClick={closeOrderProducts}
+                className={styles.modalCloseButton}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              <div className={styles.orderInfo}>
+                <div className={styles.infoSection}>
+                  <p><strong>{t('admin.orders.products.includesInstallation')}:</strong> {includesInstallation ? t('admin.orders.products.yes') : t('admin.orders.products.no')}</p>
+                </div>
+              </div>
+
+              <div className={styles.productsSection}>
+                {loadingProducts ? (
+                  <div style={{ textAlign: 'center', padding: '2rem' }}>
+                    🔄 {t('admin.orders.products.loading')}
+                  </div>
+                ) : orderProducts.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem' }}>
+                    {t('admin.orders.products.noProducts')}
+                  </div>
+                ) : (
+                  <div>
+                    <div className={styles.productsTable}>
+                      {orderProducts.map((product, index) => (
+                        <div key={index} className={styles.productRow}>
+                          <div className={styles.productImage}>
+                            {product.image_url ? (
+                              <img 
+                                src={product.image_url} 
+                                alt={`${product.brand} ${product.model}`}
+                                style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
+                              />
+                            ) : (
+                              <div style={{ 
+                                width: '60px', 
+                                height: '60px', 
+                                backgroundColor: '#f0f0f0', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                borderRadius: '4px',
+                                fontSize: '20px'
+                              }}>
+                                📦
+                              </div>
+                            )}
+                          </div>
+                          <div className={styles.productInfo}>
+                            <strong>{product.brand} {product.model}</strong>
+                          </div>
+                          <div className={styles.productQuantity}>
+                            {t('admin.orders.products.quantity')}: {product.quantity}
+                          </div>
+                          <div className={styles.productPrice}>
+                            {product.price ? `${parseFloat(product.price).toFixed(2)} лв.` : '-'}
+                          </div>
+                          <div className={styles.productTotal}>
+                            {product.total_price ? `${product.total_price.toFixed(2)} лв.` : '-'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className={styles.totalRow}>
+                      <div className={styles.totalLabel}>
+                        <strong>{t('admin.orders.products.total')}:</strong>
+                      </div>
+                      <div className={styles.totalAmount}>
+                        <strong>{orderProducts.reduce((sum, product) => sum + (product.total_price || 0), 0).toFixed(2)} лв.</strong>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

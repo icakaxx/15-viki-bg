@@ -910,6 +910,19 @@
         "paidAmount": "Paid Amount",
         "currentStatus": "Current Status"
       },
+      "products": {
+        "title": "Order Products",
+        "button": "Products",
+        "loading": "Loading products...",
+        "noProducts": "No products found for this order",
+        "includesInstallation": "Includes Installation",
+        "yes": "Yes",
+        "no": "No",
+        "quantity": "Qty",
+        "price": "Price",
+        "total": "Total",
+        "close": "Close"
+      },
       "messages": {
         "installationScheduled": "Installation scheduled",
         "statusChanged": "Status changed from"

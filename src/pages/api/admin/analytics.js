@@ -187,7 +187,7 @@ export default async function handler(req, res) {
     console.log('📅 Fetching sales over time...');
     try {
       const { data: timeData, error: timeError } = await supabase
-        .from('guest_orders')
+        .from('orders')
         .select('created_at')
         .order('created_at', { ascending: true });
 
@@ -218,7 +218,7 @@ export default async function handler(req, res) {
     try {
       // Total orders
       const { count: totalOrdersCount, error: ordersCountError } = await supabase
-        .from('guest_orders')
+        .from('orders')
         .select('*', { count: 'exact', head: true });
 
       if (!ordersCountError) {

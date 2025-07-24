@@ -108,16 +108,19 @@ export default async function handler(req, res) {
       });
     }
 
-    // Insert into guest_orders table
+    // Insert into orders table
     console.log('Inserting guest order...');
     const { data: orderData, error: orderError } = await supabase
-      .from('guest_orders')
+      .from('orders')
       .insert([{
         first_name: personalInfo.firstName,
         middle_name: personalInfo.middleName,
         last_name: personalInfo.lastName,
         phone: personalInfo.phone,
         town: personalInfo.town,
+        status: 'new',
+        notes: 'Поръчка създадена автоматично от системата',
+        modifiedDT: new Date().toISOString()
       }])
       .select()
       .single();
@@ -126,7 +129,7 @@ export default async function handler(req, res) {
 
     if (orderError) throw orderError;
 
-    const orderId = orderData.id;
+    const orderId = orderData.order_id;
 
     // Insert invoice information if enabled (optional - skip if table doesn't exist)
     if (invoiceInfo.invoiceEnabled) {
@@ -171,7 +174,6 @@ export default async function handler(req, res) {
     const paymentData = {
       order_id: orderId,
       payment_method: paymentInfo.paymentMethod,
-      status: 'new', // Updated to use new status system
       includes_installation: hasInstallation,
       total_amount: calculatedTotal,
       paid_amount: paymentInfo.paymentMethod === 'online' ? calculatedTotal : 0 // Set paid_amount based on payment method
@@ -200,30 +202,6 @@ export default async function handler(req, res) {
         console.warn('Payment table insert failed - continuing without payment tracking for now');
       } else {
         console.log('Payment info inserted successfully');
-        
-        // Insert initial status history entry
-        console.log('Creating initial status history entry...');
-        try {
-          const { data: historyResult, error: historyError } = await supabase
-            .from('order_status_history')
-            .insert([{
-              order_id: orderId,
-              old_status: null, // null for initial creation
-              new_status: 'new',
-              changed_by: null, // null indicates system/automatic change
-              notes: 'Order created automatically by system'
-            }]);
-          
-          if (historyError) {
-            console.error('Status history insert error:', historyError);
-            console.warn('Status history insert failed - continuing without history tracking');
-          } else {
-            console.log('Initial status history entry created successfully');
-          }
-        } catch (historyInsertError) {
-          console.error('Status history insert try-catch error:', historyInsertError);
-          console.warn('Status history insert failed - continuing without history tracking');
-        }
       }
     } catch (insertError) {
       console.error('Payment insert try-catch error:', insertError);

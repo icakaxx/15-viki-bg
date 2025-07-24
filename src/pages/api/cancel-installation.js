@@ -122,8 +122,8 @@ export default async function handler(req, res) {
     // 4. Revert order status back to 'confirmed' (policy decision)
     const newStatus = 'confirmed';
     const { error: statusUpdateError } = await supabase
-      .from('payment_and_tracking')
-      .update({ status: newStatus })
+      .from('orders')
+      .update({ status: newStatus, modifiedDT: new Date().toISOString() })
       .eq('order_id', existingInstallation.order_id);
 
     if (statusUpdateError) {
@@ -149,15 +149,14 @@ export default async function handler(req, res) {
     const historyNotes = `Installation cancelled. Was scheduled for ${cancelledDate} at ${cancelledTime}${reason ? `. Reason: ${reason}` : ''}`;
     
     const { error: historyError } = await supabase
-      .from('order_status_history')
-      .insert([{
+      .from('orders')
+      .update([{
         order_id: existingInstallation.order_id,
-        old_status: currentStatus,
-        new_status: newStatus,
+        status: newStatus,
         changed_by: admin_id || null,
         changed_at: new Date().toISOString(),
         notes: historyNotes
-      }]);
+      }]).eq('order_id', existingInstallation.order_id);
 
     if (historyError) {
       console.error('Error logging cancellation history:', historyError);

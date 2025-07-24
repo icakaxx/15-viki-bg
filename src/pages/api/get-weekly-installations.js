@@ -105,7 +105,7 @@ export default async function handler(req, res) {
 
     // Fetch order status data from payment_and_tracking
     const { data: orderStatuses, error: orderStatusError } = await supabase
-      .from('payment_and_tracking')
+      .from('orders')
       .select(`
         order_id,
         status
@@ -121,18 +121,18 @@ export default async function handler(req, res) {
       });
     }
 
-    // Fetch customer data from guest_orders
+    // Fetch customer data from orders
     const { data: customerData, error: customerError } = await supabase
-      .from('guest_orders')
+      .from('orders')
       .select(`
-        id,
+        order_id,
         first_name,
         middle_name,
         last_name,
         phone,
         town
       `)
-      .in('id', orderIds);
+      .in('order_id', orderIds);
 
     if (customerError) {
       console.error('❌ Error fetching customer data:', customerError);
@@ -154,24 +154,12 @@ export default async function handler(req, res) {
 
     const customerMap = {};
     customerData.forEach(customer => {
-      customerMap[customer.id] = customer;
+      customerMap[customer.order_id] = customer;
     });
 
     // Transform the data to match the frontend expectations
     const transformedInstallations = installations.map(installation => {
-      // Debug: Log specific installation details for order ID 33
-      if (installation.order_id === 33) {
-        console.log('🔍 DEBUG - Order ID 33 details:', {
-          id: installation.id,
-          orderId: installation.order_id,
-          scheduledDate: installation.scheduled_date,
-          timeSlot: installation.time_slot,
-          endTimeSlot: installation.end_time_slot,
-          originalTimeSlot: installation.time_slot,
-          originalEndTimeSlot: installation.end_time_slot
-        });
-      }
-
+      
       // Fix installations with invalid end times (where end time is before start time)
       let endTimeSlot = installation.end_time_slot || installation.time_slot;
       
