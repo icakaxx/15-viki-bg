@@ -1,29 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-/**
- * Example request:
- *   /api/get-installed-orders?page=1&limit=20&search=toshiba&sortBy=installation_date&sortOrder=desc
- *
- * Example response:
- * {
- *   data: [
- *     {
- *       id: 123,
- *       installation_date: '2024-05-01T12:00:00Z',
- *       customer_name: 'Ivan Ivanov',
- *       customer_phone: '+359888123456',
- *       products: [
- *         { brand: 'Toshiba', model: 'RAS-B13J2KVG-E', price: 1200, quantity: 1, service: 'Installation' }
- *       ],
- *       products_count: 1,
- *       total_price_bgn: 1300.00,
- *       total_price_eur: 663.27
- *     }
- *   ],
- *   totalCount: 42
- * }
- */
-
 const EUR_RATE = 1.96; // BGN to EUR
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -61,45 +37,23 @@ export default async function handler(req, res) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // Compose SQL query for installed orders
-  // Note: This uses Supabase RPC for complex joins/aggregations, or you can use a view.
-  // For now, use SQL via supabase.rpc if available, else fallback to JS joins (less efficient).
-
-  // --- SQL for reference (not executed directly here):
-  // SELECT go.id, go.name, go.phone, ...
-  //   MAX(osh.changed_at) as installation_date
-  //   SUM(oi.price * oi.quantity) + go.install_fee as total_price
-  //   ARRAY_AGG(jsonb_build_object('brand', p.brand, 'model', p.model, 'price', oi.price, 'quantity', oi.quantity, 'service', oi.service)) as products
-  // FROM guest_orders go
-  // JOIN payment_and_tracking pt ON pt.order_id = go.id AND pt.status = 'installed'
-  // JOIN order_status_history osh ON osh.order_id = go.id AND osh.new_status = 'installed'
-  // JOIN order_items oi ON oi.order_id = go.id
-  // JOIN products p ON p.id = oi.product_id
-  // WHERE ...
-  // GROUP BY go.id
-  // ORDER BY installation_date DESC
-  // LIMIT ... OFFSET ...
-
-  // Note: We'll fetch and filter the data using Supabase client instead of raw SQL
-
   try {
     console.log('📊 Fetching installed orders...');
     
     // First, get orders with 'installed' status
     let query = supabase
-      .from('payment_and_tracking')
-      .select(`
-        order_id,
-        guest_orders!inner (
-          id,
-          first_name,
-          middle_name,
-          last_name,
-          phone,
-          created_at
-        )
-      `)
-      .eq('status', 'installed');
+    .from('orders')
+    .select(`
+      order_id,
+      first_name,
+      middle_name,
+      last_name,
+      phone,
+      created_at,
+      installation_schedule!inner(scheduled_date)
+    `)
+    .eq('status', 'installed');
+  
 
     const { data: installedOrders, error: ordersError } = await query;
 
@@ -112,7 +66,6 @@ export default async function handler(req, res) {
     }
 
     console.log(`Found ${installedOrders?.length || 0} installed orders`);
-
     if (!installedOrders || installedOrders.length === 0) {
       return res.status(200).json({
         data: [],
@@ -124,15 +77,17 @@ export default async function handler(req, res) {
     const ordersWithDetails = await Promise.all(
       installedOrders.map(async (orderData) => {
         const orderId = orderData.order_id;
-        const guest = orderData.guest_orders;
+        const guest = orderData.first_name + ' ' + orderData.middle_name + ' ' + orderData.last_name;
+        const phone = orderData.phone;
+        const installation_date = orderData.installation_schedule[0]?.scheduled_date;
 
         try {
           // Get installation date from order status history
           const { data: statusHistory } = await supabase
-            .from('order_status_history')
+            .from('orders')
             .select('changed_at')
             .eq('order_id', orderId)
-            .eq('new_status', 'installed')
+            .eq('status', 'installed')
             .order('changed_at', { ascending: false })
             .limit(1);
 
@@ -207,14 +162,14 @@ export default async function handler(req, res) {
           }
 
           // Format customer name
-          const customerName = `${guest.first_name} ${guest.middle_name || ''} ${guest.last_name}`.trim();
+          const customerName = guest;
 
           // Apply search filter
           if (search) {
             const searchLower = search.toLowerCase();
             const matchesSearch = 
               customerName.toLowerCase().includes(searchLower) ||
-              guest.phone.toLowerCase().includes(searchLower) ||
+              (guest && guest.phone && guest.phone.toLowerCase().includes(searchLower)) ||
               products.some(p => 
                 p.brand.toLowerCase().includes(searchLower) ||
                 p.model.toLowerCase().includes(searchLower)
@@ -226,10 +181,10 @@ export default async function handler(req, res) {
           }
 
           const orderResult = {
-            id: orderId,
-            installation_date: statusHistory?.[0]?.changed_at || guest.created_at,
+            order_id: orderId,
+            installation_date: installation_date,
             customer_name: customerName,
-            customer_phone: guest.phone,
+            customer_phone:phone,
             products: products,
             products_count: products.length,
             total_price_bgn: Math.round(totalPrice * 100) / 100,

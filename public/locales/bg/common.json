@@ -1019,6 +1019,19 @@
         "paidAmount": "Платена сума",
         "currentStatus": "Текущ статус"
       },
+      "products": {
+        "title": "Продукти от поръчката",
+        "button": "Продукти",
+        "loading": "Зареждане на продукти...",
+        "noProducts": "Няма намерени продукти за тази поръчка",
+        "includesInstallation": "Включва монтаж",
+        "yes": "Да",
+        "no": "Не",
+        "quantity": "Бр.",
+        "price": "Цена",
+        "total": "Общо",
+        "close": "Затвори"
+      },
       "messages": {
         "installationScheduled": "Монтажът е насрочен",
         "statusChanged": "Статусът е променен от"

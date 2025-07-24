@@ -121,8 +121,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       inquiryId: updatedInquiry.id,
-      oldStatus,
-      newStatus: updatedInquiry.status,
+      status: updatedInquiry.status,
       message: 'Inquiry updated successfully',
       timestamp: new Date().toISOString()
     });

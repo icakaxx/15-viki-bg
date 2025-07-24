@@ -35,21 +35,22 @@ export default async function handler(req, res) {
       
       // Get orders with payment info using manual join, excluding installed orders
       const { data: ordersData, error: ordersError } = await supabase
-        .from('guest_orders')
+        .from('orders')
         .select(`
-          id,
+          order_id,
           first_name,
           last_name,
           phone,
           created_at,
+          status,
+          notes,
           payment_and_tracking!inner (
             payment_method,
-            status,
             total_amount,
             paid_amount
           )
         `)
-        .neq('payment_and_tracking.status', 'installed')
+        .neq('orders.status', 'installed')
         .order('created_at', { ascending: false });
 
       if (ordersError) {
@@ -68,7 +69,7 @@ export default async function handler(req, res) {
         phone: order.phone,
         order_created_at: order.created_at,
         payment_method: order.payment_and_tracking?.[0]?.payment_method || 'unknown',
-        current_status: order.payment_and_tracking?.[0]?.status || 'new',
+        current_status: order.status || 'new',
         total_amount: order.payment_and_tracking?.[0]?.total_amount || 0,
         paid_amount: order.payment_and_tracking?.[0]?.paid_amount || 0
       })) || [];
@@ -92,7 +93,8 @@ export default async function handler(req, res) {
         name: `${order.first_name} ${order.last_name}`,
         status: order.current_status,
         total_amount: `${order.total_amount} BGN`,
-        paid_amount: `${order.paid_amount} BGN`
+        paid_amount: `${order.paid_amount} BGN`,
+        notes: order.notes
       })));
     }
 

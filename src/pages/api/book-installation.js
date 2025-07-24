@@ -62,7 +62,7 @@ export default async function handler(req, res) {
 
     // 2. Verify order exists and is in correct status
     const { data: orderData, error: orderError } = await supabase
-      .from('payment_and_tracking')
+      .from('orders')
       .select('status, order_id')
       .eq('order_id', orderId)
       .single();
@@ -167,8 +167,8 @@ export default async function handler(req, res) {
 
     // 4. Update order status to 'installation_booked'
     const { error: statusUpdateError } = await supabase
-      .from('payment_and_tracking')
-      .update({ status: 'installation_booked' })
+      .from('orders')
+      .update({ status: 'installation_booked', modifiedDT: new Date().toISOString() })
       .eq('order_id', orderId);
 
     if (statusUpdateError) {
@@ -192,11 +192,10 @@ export default async function handler(req, res) {
       : uniqueSlots[0];
     
     const { error: historyError } = await supabase
-      .from('order_status_history')
+      .from('orders')
       .insert([{
         order_id: orderId,
-        old_status: 'confirmed',
-        new_status: 'installation_booked',
+        status: 'installation_booked',
         changed_by: adminId || null,
         changed_at: new Date().toISOString(),
         notes: `INSTALLATION_SCHEDULED_MESSAGE:${scheduledDate}:${timeRange}:${installationDuration}${notes ? `:${notes}` : ''}`

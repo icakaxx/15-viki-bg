@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     console.log(`Order ${orderId} is mock order: ${isMockOrder}`);
     
     let { data: currentOrder, error: fetchError } = await supabase
-      .from('payment_and_tracking')
+      .from('orders')
       .select('status, order_id')
       .eq('order_id', orderId)
       .single();
@@ -73,59 +73,30 @@ export default async function handler(req, res) {
       // No payment tracking record exists yet - this is a new order
       console.log(`No payment tracking found for order ${orderId}, treating as new order`);
       
-      // For mock orders, create them in guest_orders using existing columns
-      if (isMockOrder) {
-        console.log(`Creating mock order ${orderId} in guest_orders table...`);
-        
-        // Create mock order using only existing columns
-        const { data: mockGuestOrder, error: mockGuestError } = await supabase
-          .from('guest_orders')
-          .insert([{
-            id: orderId,
-            first_name: 'Mock',
-            middle_name: 'Customer',
-            last_name: orderId.toString(),
-            phone: '+359 888 000 000',
-            town: 'Mock Town'
-          }])
-          .select()
-          .single();
-
-        if (mockGuestError && mockGuestError.code !== '23505') { // Ignore duplicate key errors
-          console.error('Error creating mock guest order:', mockGuestError);
-          return res.status(500).json({ 
-            error: 'Failed to create mock order',
-            details: mockGuestError.message
-          });
-        } else if (mockGuestError && mockGuestError.code === '23505') {
-          console.log(`Mock order ${orderId} already exists in guest_orders`);
-        } else {
-          console.log(`Successfully created mock order ${orderId} in guest_orders`);
-        }
-      } else {
-        // Verify the order exists in guest_orders (only for real orders)
+        // Verify the order exists in orders (only for real orders)
         const { data: guestOrder, error: guestError } = await supabase
-          .from('guest_orders')
-          .select('id')
-          .eq('id', orderId)
+          .from('orders')
+          .select('order_id')
+          .eq('order_id', orderId)
           .single();
 
         if (guestError) {
           console.error('Error fetching guest order:', guestError);
           return res.status(404).json({ 
-            error: 'Order not found',
-            details: 'Order does not exist in guest_orders table'
+            error: 'Order not found, id: ' + orderId,
+            details: 'Order does not exist in orders table'
           });
-        }
+        
       }
 
       // Create payment tracking record
       const { data: newTracking, error: createError } = await supabase
-        .from('payment_and_tracking')
+        .from('orders')
         .insert([{ 
-          order_id: orderId, 
+          id: orderId, 
           status: isMockOrder ? 'installation_booked' : 'new', // Mock orders are already booked
-          payment_method: isMockOrder ? 'mock' : null 
+          payment_method: isMockOrder ? 'mock' : null,
+          modifiedDT: new Date().toISOString()
         }])
         .select()
         .single();
@@ -143,37 +114,12 @@ export default async function handler(req, res) {
     } else if (fetchError) {
       console.error('Error fetching current order status:', fetchError);
       
-      // For mock orders, create a payment tracking record if it doesn't exist
-      if (isMockOrder) {
-        console.log(`Creating payment tracking record for mock order ${orderId}...`);
-        
-        const { data: newTracking, error: createError } = await supabase
-          .from('payment_and_tracking')
-          .insert([{ 
-            order_id: orderId, 
-            status: 'installation_booked', // Mock orders are already booked
-            payment_method: 'mock'
-          }])
-          .select()
-          .single();
 
-        if (createError) {
-          console.error('Error creating payment tracking for mock order:', createError);
-          return res.status(500).json({ 
-            error: 'Failed to create payment tracking record for mock order',
-            details: createError.message
-          });
-        }
-
-        currentOrder = newTracking;
-        oldStatus = 'installation_booked';
-      } else {
         return res.status(404).json({ 
-          error: 'Order not found',
+          error: 'Order not found, id: ' + orderId,
           details: fetchError.message
         });
-      }
-    } else {
+      } else {
       oldStatus = currentOrder.status;
     }
 
@@ -188,8 +134,8 @@ export default async function handler(req, res) {
 
     // Update payment_and_tracking status
     const { error: updateError } = await supabase
-      .from('payment_and_tracking')
-      .update({ status: newStatus })
+      .from('orders')
+      .update({ status: newStatus,notes:notes, modifiedDT: new Date().toISOString() })
       .eq('order_id', orderId);
 
     if (updateError) {
@@ -204,15 +150,14 @@ export default async function handler(req, res) {
     console.log('Inserting status change into history...');
     const historyData = {
       order_id: orderId,
-      old_status: oldStatus,
-      new_status: newStatus,
+      status: newStatus,
       changed_by: adminId || null,
       changed_at: new Date().toISOString(),
       notes: notes || `STATUS_CHANGE_MESSAGE:${oldStatus}:${newStatus}`
     };
     
     const { error: historyError } = await supabase
-      .from('order_status_history')
+      .from('orders')
       .insert([historyData]);
 
     if (historyError) {
