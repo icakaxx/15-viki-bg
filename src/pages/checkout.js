@@ -18,9 +18,11 @@ const CheckoutPage = () => {
     lastName: '',
     phone: '',
     town: '',
+    address: '',
+    email: '',
     
     // Invoice Information
-    invoiceEnabled: false,
+    invoiceEnabled: '', // Changed to empty string - options: '', 'yes', 'no'
     companyName: '',
     address: '',
     bulstat: '',
@@ -37,6 +39,7 @@ const CheckoutPage = () => {
   const [stripePaymentSuccess, setStripePaymentSuccess] = useState(false);
   const [stripePaymentError, setStripePaymentError] = useState(null);
   const [cardFormValid, setCardFormValid] = useState(false);
+  const [orderCompleted, setOrderCompleted] = useState(false);
 
   // Handle card form validation
   const handleCardValidationChange = (isValid) => {
@@ -90,6 +93,20 @@ const CheckoutPage = () => {
   // Helper function to update installation status
   const updateCartItemInstallation = (cartItemId, installationStatus) => {
     updateItemInstallation(cartItemId, installationStatus);
+  };
+
+  // Handle installation change for all units of a product type
+  const handleInstallationChange = (productKey, hasInstallation) => {
+    // Find all cart items for this product type
+    const productItems = cart.items.filter(item => {
+      const itemProductKey = `${item.product.Brand}-${item.product.Model}`;
+      return itemProductKey === productKey;
+    });
+
+    // Update installation status for all items of this product type
+    productItems.forEach(item => {
+      updateCartItemInstallation(item.cartItemId, hasInstallation);
+    });
   };
 
   // Handle accessory quantity changes
@@ -148,16 +165,27 @@ const CheckoutPage = () => {
            formData.middleName.trim() && 
            formData.lastName.trim() && 
            formData.phone.trim() && 
-           formData.town.trim();
+           formData.town.trim() &&
+           formData.address.trim();
   };
 
   // Check if invoice info is complete (if enabled)
   const isInvoiceInfoComplete = () => {
-    if (!formData.invoiceEnabled) return true;
-    return formData.companyName.trim() && 
-           formData.address.trim() && 
-           formData.bulstat.trim() && 
-           (formData.mol.trim() || formData.molCustom.trim());
+    // If no option is selected, invoice info is not complete
+    if (formData.invoiceEnabled === '') return false;
+    
+    // If "no" is selected, invoice info is complete
+    if (formData.invoiceEnabled === 'no') return true;
+    
+    // If "yes" is selected, all invoice fields must be filled
+    if (formData.invoiceEnabled === 'yes') {
+      return formData.companyName.trim() && 
+             formData.address.trim() && 
+             formData.bulstat.trim() && 
+             (formData.mol.trim() || formData.molCustom.trim());
+    }
+    
+    return false;
   };
 
   // Check if payment section should be enabled
@@ -180,16 +208,19 @@ const CheckoutPage = () => {
 
   // Prepare order data for Stripe payment
   const prepareOrderData = () => {
+    console.log( "grandTotal :" + cart.totalPrice);
     return {
       personalInfo: {
         firstName: formData.firstName,
         middleName: formData.middleName,
         lastName: formData.lastName,
         phone: formData.phone,
-        town: formData.town
+        town: formData.town,
+        address: formData.address,
+        email: formData.email
       },
       invoiceInfo: {
-        invoiceEnabled: formData.invoiceEnabled,
+        invoiceEnabled: formData.invoiceEnabled === 'yes',
         companyName: formData.companyName || '',
         address: formData.address || '',
         bulstat: formData.bulstat || '',
@@ -243,6 +274,7 @@ const CheckoutPage = () => {
   const handleStripePaymentSuccess = (paymentIntent) => {
     setStripePaymentSuccess(true);
     setStripePaymentError(null);
+    setOrderCompleted(true);
     // Clear cart and redirect to success page
     clearCart();
     setTimeout(() => {
@@ -293,9 +325,17 @@ const CheckoutPage = () => {
       errors.phone = t('checkout.form.validation.invalidPhone');
     }
     if (!formData.town.trim()) errors.town = t('checkout.form.validation.required');
+    if (!formData.address.trim()) errors.address = t('checkout.form.validation.required');
 
-    // Invoice validation (if enabled)
-    if (formData.invoiceEnabled) {
+    // Email validation (optional - only validate format if provided)
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = t('checkout.form.validation.invalidEmail');
+    }
+
+    // Invoice validation
+    if (!formData.invoiceEnabled) {
+      errors.invoiceEnabled = t('checkout.form.validation.required');
+    } else if (formData.invoiceEnabled === 'yes') {
       if (!formData.companyName.trim()) errors.companyName = t('checkout.form.validation.required');
       if (!formData.address.trim()) errors.address = t('checkout.form.validation.required');
       if (!formData.bulstat.trim()) {
@@ -347,6 +387,7 @@ const CheckoutPage = () => {
     }
 
     setIsSubmitting(true);
+    console.log( "grandTotal :" + cart.totalPrice);
     try {
       // Format data for API
       const orderData = {
@@ -355,10 +396,12 @@ const CheckoutPage = () => {
           middleName: formData.middleName,
           lastName: formData.lastName,
           phone: formData.phone,
-          town: formData.town
+          town: formData.town,
+          address: formData.address,
+          email: formData.email
         },
         invoiceInfo: {
-          invoiceEnabled: formData.invoiceEnabled,
+          invoiceEnabled: formData.invoiceEnabled === 'yes',
           companyName: formData.companyName || '',
           address: formData.address || '',
           bulstat: formData.bulstat || '',
@@ -368,8 +411,8 @@ const CheckoutPage = () => {
         paymentInfo: {
           paymentMethod: formData.paymentMethod,
           stripePaymentId: stripePaymentSuccess ? 'stripe_payment_completed' : null,
-          totalAmount: grandTotal,
-          paid_amount: formData.paymentMethod === 'online' ? grandTotal : 0 // Set paid_amount based on payment method
+          totalAmount: cart.totalPrice,
+          paid_amount: formData.paymentMethod === 'online' ? cart.totalPrice : 0 // Set paid_amount based on payment method
         },
         cartItems: cart.items.map(item => ({
           productId: item.productId,
@@ -384,7 +427,7 @@ const CheckoutPage = () => {
         totals: {
           productsTotal: cart.totalPrice,
           installationCost: 0,
-          grandTotal: grandTotal
+          grandTotal: cart.totalPrice
         }
       };
 
@@ -403,6 +446,7 @@ const CheckoutPage = () => {
         // Show success toast with order details
         showToast('success', t('checkout.form.stripe.orderSuccess'), 
           `${t('checkout.form.stripe.orderId')}: ${result.orderId}\n${t('checkout.form.stripe.emailSent')}`);
+        setOrderCompleted(true);
         clearCart();
         
         // Redirect to success page
@@ -429,12 +473,24 @@ const CheckoutPage = () => {
         </Head>
         <div className={styles.container}>
           <h1 className={styles.title}>{t('checkout.title')}</h1>
-          <div className={styles.emptyCart}>
-            <p>{t('checkout.emptyCart')}</p>
-            <Link href="/buy" className={styles.button}>
-              {t('checkout.continueShopping')}
-            </Link>
-          </div>
+          {orderCompleted ? (
+            <div className={styles.orderSuccess}>
+              <div className={styles.successIcon}>✅</div>
+              <h2>{t('checkout.form.stripe.orderSuccess')}</h2>
+              <p>{t('checkout.orderSuccessMessage')}</p>
+              <div className={styles.loadingSpinner}>
+                <div className={styles.spinner}></div>
+                <p>{t('checkout.redirecting')}</p>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.emptyCart}>
+              <p>{t('checkout.emptyCart')}</p>
+              <Link href="/buy" className={styles.button}>
+                {t('checkout.continueShopping')}
+              </Link>
+            </div>
+          )}
         </div>
       </>
     );
@@ -594,14 +650,9 @@ const CheckoutPage = () => {
           
           {/* Totals */}
           <div className={styles.totals}>
-            <div className={styles.totalRow}>
-              <span>{t('checkout.total')} ({t('buyPage.title')}):</span>
-              <span>{formatPrice(cart.totalPrice)} / {formatPriceEUR(cart.totalPrice)}</span>
-            </div>
-            {/* Installation costs are now handled per unit in cart, so this total row is no longer needed */}
             <div className={styles.grandTotal}>
               <span>{t('checkout.total')}:</span>
-              <span>{formatPrice(grandTotal)} / {formatPriceEUR(grandTotal)}</span>
+              <span>{formatPrice(cart.totalPrice)} / {formatPriceEUR(cart.totalPrice)}</span>
             </div>
           </div>
         </div>
@@ -706,6 +757,32 @@ const CheckoutPage = () => {
                     />
                     {formErrors.town && <span className={styles.error}>{formErrors.town}</span>}
                   </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label htmlFor="address">{t('checkout.form.personalInfo.address')} *</label>
+                    <input
+                      type="text"
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => handleInputChange('address', e.target.value)}
+                      className={formErrors.address ? styles.inputError : ''}
+                      placeholder={t('checkout.form.personalInfo.addressPlaceholder')}
+                    />
+                    {formErrors.address && <span className={styles.error}>{formErrors.address}</span>}
+                  </div>
+                  
+                  <div className={styles.formGroup}>
+                    <label htmlFor="email">{t('checkout.form.personalInfo.email')}</label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      className={formErrors.email ? styles.inputError : ''}
+                      placeholder={t('checkout.form.personalInfo.emailPlaceholder')}
+                    />
+                    {formErrors.email && <span className={styles.error}>{formErrors.email}</span>}
+                  </div>
                 </div>
               </div>
             )}
@@ -729,17 +806,33 @@ const CheckoutPage = () => {
                 <p className={styles.sectionSubtitle}>{t('checkout.form.invoice.subtitle')}</p>
                 
                 <div className={styles.formGroup}>
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={formData.invoiceEnabled}
-                      onChange={(e) => handleInputChange('invoiceEnabled', e.target.checked)}
-                    />
-                    {t('checkout.form.invoice.enable')}
-                  </label>
+                  <label>{t('checkout.form.invoice.needInvoice')} *</label>
+                  <div className={styles.radioGroup}>
+                    <label className={styles.radioOption}>
+                      <input
+                        type="radio"
+                        name="invoiceEnabled"
+                        value="yes"
+                        checked={formData.invoiceEnabled === 'yes'}
+                        onChange={(e) => handleInputChange('invoiceEnabled', e.target.value)}
+                      />
+                      {t('checkout.form.invoice.yes')}
+                    </label>
+                    <label className={styles.radioOption}>
+                      <input
+                        type="radio"
+                        name="invoiceEnabled"
+                        value="no"
+                        checked={formData.invoiceEnabled === 'no'}
+                        onChange={(e) => handleInputChange('invoiceEnabled', e.target.value)}
+                      />
+                      {t('checkout.form.invoice.no')}
+                    </label>
+                  </div>
+                  {formErrors.invoiceEnabled && <span className={styles.error}>{formErrors.invoiceEnabled}</span>}
                 </div>
                 
-                {formData.invoiceEnabled && (
+                {formData.invoiceEnabled === 'yes' && (
                   <div className={styles.invoiceSection}>
                     <div className={styles.formGroup}>
                       <label htmlFor="companyName">{t('checkout.form.invoice.companyName')} *</label>

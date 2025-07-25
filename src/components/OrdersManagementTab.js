@@ -62,6 +62,7 @@ export default function OrdersManagementTab() {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [showOrderProducts, setShowOrderProducts] = useState(false);
+  const [showCombinedModal, setShowCombinedModal] = useState(false);
   const [orderProducts, setOrderProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [includesInstallation, setIncludesInstallation] = useState(false);
@@ -242,6 +243,61 @@ export default function OrdersManagementTab() {
     setIncludesInstallation(false);
   };
 
+  // Show combined modal (desktop view)
+  const showCombinedOrderModal = async (order) => {
+    setSelectedOrder(order);
+    setShowCombinedModal(true);
+    setStatusUpdateData({ 
+      notes: order.notes,
+      newStatus: order.current_status,
+      startInstallationDate: '',
+      startInstallationHour: '08',
+      startInstallationMinute: '00',
+      endInstallationDate: '',
+      endInstallationHour: '17',
+      endInstallationMinute: '00'
+    });
+    
+    // Load products for the combined view
+    setLoadingProducts(true);
+    try {
+      const response = await fetch(`/api/get-order-products?orderId=${order.order_id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setOrderProducts(data.products || []);
+        setIncludesInstallation(data.includesInstallation || false);
+      } else {
+        console.error('Failed to load products:', data.error);
+        setOrderProducts([]);
+        setIncludesInstallation(false);
+      }
+    } catch (err) {
+      console.error('Error loading products:', err);
+      setOrderProducts([]);
+      setIncludesInstallation(false);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const closeCombinedModal = () => {
+    setShowCombinedModal(false);
+    setSelectedOrder(null);
+    setOrderProducts([]);
+    setIncludesInstallation(false);
+    setStatusUpdateData({ 
+      newStatus: '', 
+      notes: '', 
+      startInstallationDate: '', 
+      startInstallationHour: '08',
+      startInstallationMinute: '00',
+      endInstallationDate: '', 
+      endInstallationHour: '17',
+      endInstallationMinute: '00'
+    });
+  };
+
   // Helper function to set quick time
   const setQuickTime = (type, hour, minute) => {
     if (type === 'start') {
@@ -369,21 +425,33 @@ export default function OrdersManagementTab() {
                     </span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <div className={styles.actionButtons}>
+                      {/* Desktop: Single combined button */}
                       <button
-                        onClick={() => showOrderDetailsModal(order)}
-                        className={styles.viewButton}
-                        style={{ width: '100px' }}
+                        onClick={() => showCombinedOrderModal(order)}
+                        className={`${styles.viewButton} ${styles.desktopOnly}`}
+                        style={{ width: '120px' }}
                       >
                         👁️ {t('admin.orders.orderDetails')}
                       </button>
-                      <button
-                        onClick={() => showOrderProductsModal(order)}
-                        className={styles.viewButton}
-                        style={{ width: '100px' }}
-                      >
-                        📦 {t('admin.orders.products.button')}
-                      </button>
+                      
+                      {/* Mobile: Two separate buttons */}
+                      <div className={`${styles.mobileButtons} ${styles.mobileOnly}`}>
+                        <button
+                          onClick={() => showOrderDetailsModal(order)}
+                          className={styles.viewButton}
+                          style={{ width: '100px' }}
+                        >
+                          👁️ {t('admin.orders.orderDetails')}
+                        </button>
+                        <button
+                          onClick={() => showOrderProductsModal(order)}
+                          className={styles.viewButton}
+                          style={{ width: '100px' }}
+                        >
+                          📦 {t('admin.orders.products.button')}
+                        </button>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -447,6 +515,9 @@ export default function OrdersManagementTab() {
                   <h4>📋 {t('admin.orders.customerInformation')}</h4>
                   <p><strong>{t('admin.orders.modal.name')}:</strong> {selectedOrder.first_name} {selectedOrder.last_name}</p>
                   <p><strong>{t('admin.orders.modal.phone')}:</strong> {selectedOrder.phone}</p>
+                  <p><strong>{t('admin.orders.modal.town')}:</strong> {selectedOrder.town || '-'}</p>
+                  <p><strong>{t('admin.orders.modal.address')}:</strong> {selectedOrder.address || '-'}</p>
+                  <p><strong>{t('admin.orders.modal.email')}:</strong> {selectedOrder.email || '-'}</p>
                   <p><strong>{t('admin.orders.modal.orderDate')}:</strong> {formatDate(selectedOrder.order_created_at)}</p>
                 </div>
                 
@@ -737,12 +808,6 @@ export default function OrdersManagementTab() {
             </div>
             
             <div className={styles.modalBody}>
-              <div className={styles.orderInfo}>
-                <div className={styles.infoSection}>
-                  <p><strong>{t('admin.orders.products.includesInstallation')}:</strong> {includesInstallation ? t('admin.orders.products.yes') : t('admin.orders.products.no')}</p>
-                </div>
-              </div>
-
               <div className={styles.productsSection}>
                 {loadingProducts ? (
                   <div style={{ textAlign: 'center', padding: '2rem' }}>
@@ -756,42 +821,114 @@ export default function OrdersManagementTab() {
                   <div>
                     <div className={styles.productsTable}>
                       {orderProducts.map((product, index) => (
-                        <div key={index} className={styles.productRow}>
-                          <div className={styles.productImage}>
-                            {product.image_url ? (
-                              <img 
-                                src={product.image_url} 
-                                alt={`${product.brand} ${product.model}`}
-                                style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
-                              />
-                            ) : (
-                              <div style={{ 
-                                width: '60px', 
-                                height: '60px', 
-                                backgroundColor: '#f0f0f0', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                borderRadius: '4px',
-                                fontSize: '20px'
-                              }}>
-                                📦
+                        <React.Fragment key={index}>
+                          {/* Main Product Row */}
+                          <div className={styles.productRow}>
+                            <div className={styles.productImage}>
+                              {product.image_url ? (
+                                <img 
+                                  src={product.image_url} 
+                                  alt={`${product.brand} ${product.model}`}
+                                  style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
+                                />
+                              ) : (
+                                <div style={{ 
+                                  width: '60px', 
+                                  height: '60px', 
+                                  backgroundColor: '#f0f0f0', 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  justifyContent: 'center', 
+                                  borderRadius: '4px',
+                                  fontSize: '20px'
+                                }}>
+                                  📦
+                                </div>
+                              )}
+                            </div>
+                            <div className={styles.productInfo}>
+                              <strong>{product.brand} {product.model}</strong>
+                            </div>
+                            <div className={styles.productQuantity}>
+                              {t('admin.orders.products.quantity')}: {product.quantity}
+                            </div>
+                            <div className={styles.productPrice}>
+                              <div>{product.price ? `${parseFloat(product.price).toFixed(2)} лв.` : '-'}</div>
+                              <div style={{ fontSize: '0.85em', color: '#666' }}>
+                                {product.price ? `${(parseFloat(product.price) / 1.96).toFixed(2)} €` : '-'}
                               </div>
-                            )}
+                            </div>
+                            <div className={styles.productTotal}>
+                              <div>{product.total_price ? `${product.total_price.toFixed(2)} лв.` : '-'}</div>
+                              <div style={{ fontSize: '0.85em', color: '#666' }}>
+                                {product.total_price ? `${(product.total_price / 1.96).toFixed(2)} €` : '-'}
+                              </div>
+                            </div>
                           </div>
-                          <div className={styles.productInfo}>
-                            <strong>{product.brand} {product.model}</strong>
-                          </div>
-                          <div className={styles.productQuantity}>
-                            {t('admin.orders.products.quantity')}: {product.quantity}
-                          </div>
-                          <div className={styles.productPrice}>
-                            {product.price ? `${parseFloat(product.price).toFixed(2)} лв.` : '-'}
-                          </div>
-                          <div className={styles.productTotal}>
-                            {product.total_price ? `${product.total_price.toFixed(2)} лв.` : '-'}
-                          </div>
-                        </div>
+
+                          {/* Accessory Rows */}
+                          {product.accessories && product.accessories.length > 0 && 
+                            product.accessories.map((accessory, accIndex) => {
+                              const accessoryTotal = (accessory.price || 0) * (accessory.quantity || 1);
+                              return (
+                                <div key={`${index}-acc-${accIndex}`} className={styles.productRow} style={{
+                                  backgroundColor: '#f9f9f9',
+                                  paddingLeft: '2rem',
+                                  borderLeft: '3px solid #e0e0e0',
+                                  fontSize: '0.9rem'
+                                }}>
+                                  <div className={styles.productInfo} style={{ gridColumn: '1 / 3' }}>
+                                    <span>• {t(`productDetail.accessoryNames.${accessory.name}`) || accessory.name}</span>
+                                  </div>
+                                  <div className={styles.productQuantity}>
+                                    {t('admin.orders.products.quantity')}: {accessory.quantity || 1}
+                                  </div>
+                                  <div className={styles.productPrice}>
+                                    <div>{accessory.price ? `${parseFloat(accessory.price).toFixed(2)} лв.` : '-'}</div>
+                                    <div style={{ fontSize: '0.85em', color: '#666' }}>
+                                      {accessory.price ? `${(parseFloat(accessory.price) / 1.96).toFixed(2)} €` : '-'}
+                                    </div>
+                                  </div>
+                                  <div className={styles.productTotal}>
+                                    <div>{accessoryTotal ? `${accessoryTotal.toFixed(2)} лв.` : '-'}</div>
+                                    <div style={{ fontSize: '0.85em', color: '#666' }}>
+                                      {accessoryTotal ? `${(accessoryTotal / 1.96).toFixed(2)} €` : '-'}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          }
+
+                          {/* Installation Row */}
+                          {product.includes_installation && (
+                            <div className={styles.productRow} style={{
+                              backgroundColor: '#e8f5e8',
+                              paddingLeft: '2rem',
+                              borderLeft: '3px solid #4caf50',
+                              fontSize: '0.9rem'
+                            }}>
+                              <div className={styles.productInfo} style={{ gridColumn: '1 / 3' }}>
+                                <span>• {t('admin.orders.products.installation')}</span>
+                              </div>
+                              <div className={styles.productQuantity}>
+                                {t('admin.orders.products.quantity')}: {product.quantity}
+                              </div>
+                              <div className={styles.productPrice}>
+                                <div>300.00 лв.</div>
+                                <div style={{ fontSize: '0.85em', color: '#666' }}>
+                                  153.06 €
+                                </div>
+                              </div>
+                              <div className={styles.productTotal}>
+                                <div>{(300 * product.quantity).toFixed(2)} лв.</div>
+                                <div style={{ fontSize: '0.85em', color: '#666' }}>
+                                  {(153.06 * product.quantity).toFixed(2)} €
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </React.Fragment>
                       ))}
                     </div>
                     <div className={styles.totalRow}>
@@ -799,11 +936,275 @@ export default function OrdersManagementTab() {
                         <strong>{t('admin.orders.products.total')}:</strong>
                       </div>
                       <div className={styles.totalAmount}>
-                        <strong>{orderProducts.reduce((sum, product) => sum + (product.total_price || 0), 0).toFixed(2)} лв.</strong>
+                        <div>
+                          <strong>{(() => {
+                            const productTotal = orderProducts.reduce((sum, product) => sum + (product.total_price || 0), 0);
+                            const accessoryTotal = orderProducts.reduce((sum, product) => {
+                              if (product.accessories && product.accessories.length > 0) {
+                                return sum + product.accessories.reduce((accSum, acc) => accSum + ((acc.price || 0) * (acc.quantity || 1)), 0);
+                              }
+                              return sum;
+                            }, 0);
+                            const installationTotal = orderProducts.reduce((sum, product) => {
+                              if (product.includes_installation) {
+                                return sum + (300 * product.quantity);
+                              }
+                              return sum;
+                            }, 0);
+                            return (productTotal + accessoryTotal + installationTotal).toFixed(2);
+                          })()} лв.</strong>
+                        </div>
+                        <div style={{ fontSize: '0.85em', color: '#666' }}>
+                          <strong>{(() => {
+                            const productTotal = orderProducts.reduce((sum, product) => sum + (product.total_price || 0), 0);
+                            const accessoryTotal = orderProducts.reduce((sum, product) => {
+                              if (product.accessories && product.accessories.length > 0) {
+                                return sum + product.accessories.reduce((accSum, acc) => accSum + ((acc.price || 0) * (acc.quantity || 1)), 0);
+                              }
+                              return sum;
+                            }, 0);
+                            const installationTotal = orderProducts.reduce((sum, product) => {
+                              if (product.includes_installation) {
+                                return sum + (153.06 * product.quantity);
+                              }
+                              return sum;
+                            }, 0);
+                            return ((productTotal + accessoryTotal + installationTotal) / 1.96).toFixed(2);
+                          })()} €</strong>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Combined Modal (Desktop View) */}
+      {showCombinedModal && selectedOrder && (
+        <div className={styles.modalOverlay}>
+          <div className={`${styles.modalContent} ${styles.combinedModal}`}>
+            <div className={styles.modalHeader}>
+              <h3>{t('admin.orders.orderDetails')} - #{selectedOrder.order_id}</h3>
+              <button 
+                onClick={closeCombinedModal}
+                className={styles.modalCloseButton}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className={styles.combinedModalBody}>
+              {/* Left Side - Order Details */}
+              <div className={styles.orderDetailsPanel}>
+                <div className={styles.orderInfo}>
+                  <div className={styles.infoSection}>
+                    <h4>📋 {t('admin.orders.customerInformation')}</h4>
+                    <p><strong>{t('admin.orders.modal.name')}:</strong> {selectedOrder.first_name} {selectedOrder.last_name}</p>
+                    <p><strong>{t('admin.orders.modal.phone')}:</strong> {selectedOrder.phone}</p>
+                    <p><strong>{t('admin.orders.modal.town')}:</strong> {selectedOrder.town || '-'}</p>
+                    <p><strong>{t('admin.orders.modal.address')}:</strong> {selectedOrder.address || '-'}</p>
+                    <p><strong>{t('admin.orders.modal.email')}:</strong> {selectedOrder.email || '-'}</p>
+                    <p><strong>{t('admin.orders.modal.orderDate')}:</strong> {formatDate(selectedOrder.order_created_at)}</p>
+                  </div>
+                  
+                  <div className={styles.infoSection}>
+                    <h4>💳 {t('admin.orders.paymentInformation')}</h4>
+                    <p><strong>{t('admin.orders.modal.paymentMethod')}:</strong> {getPaymentMethodLabel(selectedOrder.payment_method)}</p>
+                    <p><strong>{t('admin.orders.modal.totalAmount')}:</strong> {selectedOrder.total_amount ? `${selectedOrder.total_amount.toFixed(2)} лв.` : '-'}</p>
+                    <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${selectedOrder.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</p>
+                    <p><strong>{t('admin.orders.modal.currentStatus')}:</strong> 
+                      <span 
+                        className={styles.statusBadge}
+                        style={{ backgroundColor: getStatusColor(selectedOrder.current_status) }}
+                      >
+                        {getStatusLabel(selectedOrder.current_status, t)}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.statusUpdateSection}>
+                  <h4>🔄 {t('admin.orders.updateOrderStatus')}</h4>
+                  <div className={styles.statusUpdateForm}>
+                    <div className={styles.formGroup}>
+                      <label>{t('admin.orders.newStatus')}:</label>
+                      <select
+                        value={statusUpdateData.newStatus}
+                        onChange={(e) => setStatusUpdateData(prev => ({ ...prev, newStatus: e.target.value }))}
+                        className={styles.statusSelect}
+                      >
+                        <option value="">{t('admin.orders.selectNewStatus')}</option>
+                        <option value="new">{t('admin.orders.status.new')}</option>
+                        <option value="confirmed">{t('admin.orders.status.confirmed')}</option>
+                        <option value="installation_booked">{t('admin.orders.status.installation_booked')}</option>
+                        <option value="installed">{t('admin.orders.status.installed')}</option>
+                        <option value="cancelled">{t('admin.orders.status.cancelled')}</option>
+                      </select>
+                    </div>
+                    
+                    <div className={styles.formGroup}>
+                      <label>{t('admin.orders.notes')}:</label>
+                      <textarea
+                        value={statusUpdateData.notes}
+                        onChange={(e) => setStatusUpdateData(prev => ({ ...prev, notes: e.target.value }))}
+                        placeholder={t('admin.orders.notesPlaceholder')}
+                        className={styles.notesTextarea}
+                        rows="3"
+                      />
+                    </div>
+                    
+                    <div className={styles.statusUpdateActions}>
+                      <button
+                        onClick={() => handleStatusUpdate(selectedOrder.order_id)}
+                        disabled={updatingStatus || !statusUpdateData.newStatus}
+                        className={styles.updateStatusButton}
+                      >
+                        {updatingStatus ? `🔄 ${t('admin.orders.updatingStatus')}` : `✅ ${t('admin.orders.updateStatus')}`}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side - Products */}
+              <div className={styles.productsPanel}>
+                <h4>📦 {t('admin.orders.products.title')}</h4>
+                <div className={styles.productsSection}>
+                  {loadingProducts ? (
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>
+                      🔄 {t('admin.orders.products.loading')}
+                    </div>
+                  ) : orderProducts.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>
+                      {t('admin.orders.products.noProducts')}
+                    </div>
+                  ) : (
+                    <div>
+                      <div className={styles.productsTable}>
+                        {orderProducts.map((product, index) => (
+                          <React.Fragment key={index}>
+                            {/* Main Product Row */}
+                            <div className={styles.productRow}>
+                              <div className={styles.productImage}>
+                                {product.image_url ? (
+                                  <img 
+                                    src={product.image_url} 
+                                    alt={`${product.brand} ${product.model}`}
+                                    style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                                  />
+                                ) : (
+                                  <div style={{ 
+                                    width: '40px', 
+                                    height: '40px', 
+                                    backgroundColor: '#f0f0f0', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    borderRadius: '4px',
+                                    fontSize: '16px'
+                                  }}>
+                                    📦
+                                  </div>
+                                )}
+                              </div>
+                              <div className={styles.productInfo}>
+                                <strong style={{ fontSize: '0.9rem' }}>{product.brand} {product.model}</strong>
+                              </div>
+                              <div className={styles.productQuantity}>
+                                <small>{t('admin.orders.products.quantity')}: {product.quantity}</small>
+                              </div>
+                              <div className={styles.productPrice}>
+                                <div style={{ fontSize: '0.85rem' }}>{product.price ? `${parseFloat(product.price).toFixed(2)} лв.` : '-'}</div>
+                              </div>
+                              <div className={styles.productTotal}>
+                                <div style={{ fontSize: '0.85rem' }}>{product.total_price ? `${product.total_price.toFixed(2)} лв.` : '-'}</div>
+                              </div>
+                            </div>
+
+                            {/* Accessory Rows */}
+                            {product.accessories && product.accessories.length > 0 && 
+                              product.accessories.map((accessory, accIndex) => {
+                                const accessoryTotal = (accessory.price || 0) * (accessory.quantity || 1);
+                                return (
+                                  <div key={`${index}-acc-${accIndex}`} className={styles.productRow} style={{
+                                    backgroundColor: '#f9f9f9',
+                                    paddingLeft: '1rem',
+                                    borderLeft: '2px solid #e0e0e0',
+                                    fontSize: '0.8rem'
+                                  }}>
+                                    <div className={styles.productInfo} style={{ gridColumn: '1 / 3' }}>
+                                      <span>• {t(`productDetail.accessoryNames.${accessory.name}`) || accessory.name}</span>
+                                    </div>
+                                    <div className={styles.productQuantity}>
+                                      <small>{t('admin.orders.products.quantity')}: {accessory.quantity || 1}</small>
+                                    </div>
+                                    <div className={styles.productPrice}>
+                                      <div style={{ fontSize: '0.75rem' }}>{accessory.price ? `${parseFloat(accessory.price).toFixed(2)} лв.` : '-'}</div>
+                                    </div>
+                                    <div className={styles.productTotal}>
+                                      <div style={{ fontSize: '0.75rem' }}>{accessoryTotal ? `${accessoryTotal.toFixed(2)} лв.` : '-'}</div>
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            }
+
+                            {/* Installation Row */}
+                            {product.includes_installation && (
+                              <div className={styles.productRow} style={{
+                                backgroundColor: '#e8f5e8',
+                                paddingLeft: '1rem',
+                                borderLeft: '2px solid #4caf50',
+                                fontSize: '0.8rem'
+                              }}>
+                                <div className={styles.productInfo} style={{ gridColumn: '1 / 3' }}>
+                                  <span>• {t('admin.orders.products.installation')}</span>
+                                </div>
+                                <div className={styles.productQuantity}>
+                                  <small>{t('admin.orders.products.quantity')}: {product.quantity}</small>
+                                </div>
+                                <div className={styles.productPrice}>
+                                  <div style={{ fontSize: '0.75rem' }}>300.00 лв.</div>
+                                </div>
+                                <div className={styles.productTotal}>
+                                  <div style={{ fontSize: '0.75rem' }}>{(300 * product.quantity).toFixed(2)} лв.</div>
+                                </div>
+                              </div>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                      <div className={styles.totalRow}>
+                        <div className={styles.totalLabel}>
+                          <strong style={{ fontSize: '0.9rem' }}>{t('admin.orders.products.total')}:</strong>
+                        </div>
+                        <div className={styles.totalAmount}>
+                          <div>
+                            <strong style={{ fontSize: '0.9rem' }}>{(() => {
+                              const productTotal = orderProducts.reduce((sum, product) => sum + (product.total_price || 0), 0);
+                              const accessoryTotal = orderProducts.reduce((sum, product) => {
+                                if (product.accessories && product.accessories.length > 0) {
+                                  return sum + product.accessories.reduce((accSum, acc) => accSum + ((acc.price || 0) * (acc.quantity || 1)), 0);
+                                }
+                                return sum;
+                              }, 0);
+                              const installationTotal = orderProducts.reduce((sum, product) => {
+                                if (product.includes_installation) {
+                                  return sum + (300 * product.quantity);
+                                }
+                                return sum;
+                              }, 0);
+                              return (productTotal + accessoryTotal + installationTotal).toFixed(2);
+                            })()} лв.</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

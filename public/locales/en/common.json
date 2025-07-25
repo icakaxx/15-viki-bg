@@ -289,6 +289,8 @@
     "noProductSelected": "No product selected",
     "emptyCart": "Your cart is empty. Add some products first!",
     "continueShopping": "Continue Shopping",
+    "orderSuccessMessage": "Your order has been submitted successfully! You will be redirected to the confirmation page shortly.",
+    "redirecting": "Redirecting...",
     "orderSummary": "Order Summary",
     "items": "items",
     "total": "Total",
@@ -315,12 +317,18 @@
         "phone": "Mobile Phone",
         "phoneHelp": "For contact regarding your order",
         "town": "Town/City",
-        "townPlaceholder": "e.g., Sofia, Plovdiv, Varna..."
+        "townPlaceholder": "e.g., Sofia, Plovdiv, Varna...",
+        "address": "Address",
+        "addressPlaceholder": "Street, number, entrance, apartment...",
+        "email": "Email Address (optional)",
+        "emailPlaceholder": "your.email@example.com"
       },
       "services": {
-        "title": "Service Selection",
-        "subtitle": "For each AC unit, choose whether you want the product only or include installation",
+        "title": "Installation Services",
+        "subtitle": "For each AC model, choose installation for all units or none",
+        "units": "units",
         "acOnly": "AC Only",
+        "acOnlyDesc": "Product delivery only",
         "acWithInstallation": "AC + Installation",
         "installationFee": "Installation fee: +300 BGN / €153 per AC unit",
         "totalInstallation": "Total installations",
@@ -329,6 +337,9 @@
       "invoice": {
         "title": "Invoice Information",
         "subtitle": "Fill out only if you want a company invoice",
+        "needInvoice": "Do you need a company invoice?",
+        "yes": "Yes",
+        "no": "No",
         "enable": "I want a company invoice",
         "companyName": "Company Name",
         "address": "Address",
@@ -360,6 +371,7 @@
       "validation": {
         "required": "This field is required",
         "invalidPhone": "Please enter a valid phone number",
+        "invalidEmail": "Please enter a valid email address",
         "invalidBulstat": "Bulstat must be exactly 9 digits",
         "selectPayment": "Please select a payment method"
       },
@@ -904,6 +916,9 @@
       "modal": {
         "name": "Name",
         "phone": "Phone",
+        "town": "Town/City",
+        "address": "Address",
+        "email": "Email",
         "orderDate": "Order Date",
         "paymentMethod": "Payment Method",
         "totalAmount": "Total Amount",
@@ -916,6 +931,9 @@
         "loading": "Loading products...",
         "noProducts": "No products found for this order",
         "includesInstallation": "Includes Installation",
+        "accessories": "Accessories",
+        "installation": "Installation Service",
+        "totalAccessories": "Total Accessories",
         "yes": "Yes",
         "no": "No",
         "quantity": "Qty",
