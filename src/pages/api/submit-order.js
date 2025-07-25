@@ -118,6 +118,8 @@ export default async function handler(req, res) {
         last_name: personalInfo.lastName,
         phone: personalInfo.phone,
         town: personalInfo.town,
+        address: personalInfo.address,
+        email: personalInfo.email,
         status: 'new',
         notes: 'Поръчка създадена автоматично от системата',
         modifiedDT: new Date().toISOString()
@@ -168,15 +170,11 @@ export default async function handler(req, res) {
     // Insert payment and tracking information with initial status
     console.log('Inserting payment info...');
     
-    // Check if any cart item has installation
-    const hasInstallation = cartItems.some(item => item.installation);
-    
     const paymentData = {
       order_id: orderId,
       payment_method: paymentInfo.paymentMethod,
-      includes_installation: hasInstallation,
-      total_amount: calculatedTotal,
-      paid_amount: paymentInfo.paymentMethod === 'online' ? calculatedTotal : 0 // Set paid_amount based on payment method
+      total_amount: paymentInfo.totalAmount, // Use frontend total
+      paid_amount: paymentInfo.paymentMethod === 'online' ? paymentInfo.totalAmount : 0
     };
     console.log('Payment data to insert:', paymentData);
     
@@ -215,6 +213,13 @@ export default async function handler(req, res) {
       product_id: item.productId,
       quantity: item.quantity,
       service_option: item.serviceOption,
+      includes_installation: item.installation,
+      accessories: item.accessories && item.accessories.length > 0 ? item.accessories.map(acc => ({
+        accessory_id: acc.AccessoryID || acc.accessory_id,
+        name: acc.Name || acc.name,
+        quantity: acc.quantity || 1,
+        price: acc.Price || acc.price
+      })) : null
     }));
 
     console.log('Order items to insert:', orderItems);
@@ -235,49 +240,6 @@ export default async function handler(req, res) {
     } catch (insertError) {
       console.error('Order items insert try-catch error:', insertError);
       console.warn('Order items table insert failed - continuing without item tracking for now');
-    }
-
-    // Insert order accessories (new functionality)
-    console.log('Inserting order accessories...');
-    const allAccessories = [];
-    
-    cartItems.forEach(item => {
-      if (item.accessories && item.accessories.length > 0) {
-        item.accessories.forEach(accessory => {
-          // Add one accessory entry per quantity of the item
-          for (let i = 0; i < item.quantity; i++) {
-            allAccessories.push({
-              order_id: orderId,
-              accessory_id: accessory.AccessoryID,
-              price_at_order: accessory.Price
-            });
-          }
-        });
-      }
-    });
-
-    if (allAccessories.length > 0) {
-      console.log('Accessories to insert:', allAccessories);
-      
-      try {
-        const { data: accessoriesResult, error: accessoriesError } = await supabase
-          .from('order_accessories')
-          .insert(allAccessories);
-        
-        console.log('Order accessories insert result:', { accessoriesResult, accessoriesError });
-        
-        if (accessoriesError) {
-          console.error('Order accessories insert error:', accessoriesError);
-          console.warn('Order accessories table insert failed - continuing without accessory tracking');
-        } else {
-          console.log('Order accessories inserted successfully');
-        }
-      } catch (insertError) {
-        console.error('Order accessories insert try-catch error:', insertError);
-        console.warn('Order accessories table insert failed - continuing without accessory tracking');
-      }
-    } else {
-      console.log('No accessories to insert');
     }
 
     console.log('Order successfully created with ID:', orderId);

@@ -31,28 +31,15 @@ export default async function handler(req, res) {
 
     console.log(`Loading products for order ${orderId}...`);
 
-    // Get installation status from payment_and_tracking
-    const { data: paymentData, error: paymentError } = await supabase
-      .from('payment_and_tracking')
-      .select('includes_installation')
-      .eq('order_id', orderId)
-      .single();
-
-    if (paymentError) {
-      console.error('Error fetching payment data:', paymentError);
-      return res.status(404).json({ 
-        error: 'Order not found in payment tracking',
-        details: paymentError.message
-      });
-    }
-
     // Get order items
     const { data: orderItems, error: itemsError } = await supabase
       .from('order_items')
       .select(`
         quantity,
         service_option,
-        product_id
+        product_id,
+        accessories,
+        includes_installation
       `)
       .eq('order_id', orderId);
 
@@ -68,10 +55,13 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         products: [],
-        includesInstallation: paymentData.includes_installation || false,
+        includesInstallation: false,
         message: 'No products found for this order'
       });
     }
+
+    // Check if any order item includes installation
+    const includesInstallation = orderItems.some(item => item.includes_installation);
 
     // Get product details for each item
     const productsPromises = orderItems.map(async (item) => {
@@ -103,6 +93,8 @@ export default async function handler(req, res) {
           image_url: product.image_url,
           quantity: item.quantity,
           service_option: item.service_option,
+          accessories: item.accessories || [],
+          includes_installation: item.includes_installation || false,
           total_price: parseFloat(product.price) * item.quantity
         };
       } else {
@@ -115,6 +107,8 @@ export default async function handler(req, res) {
           image_url: null,
           quantity: item.quantity,
           service_option: item.service_option,
+          accessories: item.accessories || [],
+          includes_installation: item.includes_installation || false,
           total_price: 0
         };
       }
@@ -127,7 +121,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ 
       success: true,
       products: products,
-      includesInstallation: paymentData.includes_installation || false,
+      includesInstallation: includesInstallation,
       count: products.length
     });
 

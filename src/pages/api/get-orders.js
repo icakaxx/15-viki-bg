@@ -41,6 +41,9 @@ export default async function handler(req, res) {
           first_name,
           last_name,
           phone,
+          town,
+          address,
+          email,
           created_at,
           status,
           notes,
@@ -63,15 +66,19 @@ export default async function handler(req, res) {
 
       // Transform the data to match expected format
       data = ordersData?.map(order => ({
-        order_id: order.id,
+        order_id: order.order_id,
         first_name: order.first_name,
         last_name: order.last_name,
         phone: order.phone,
+        town: order.town,
+        address: order.address,
+        email: order.email,
         order_created_at: order.created_at,
         payment_method: order.payment_and_tracking?.[0]?.payment_method || 'unknown',
         current_status: order.status || 'new',
         total_amount: order.payment_and_tracking?.[0]?.total_amount || 0,
-        paid_amount: order.payment_and_tracking?.[0]?.paid_amount || 0
+        paid_amount: order.payment_and_tracking?.[0]?.paid_amount || 0,
+        notes: order.notes
       })) || [];
 
       console.log('API: Orders loaded via manual join:', data.map(order => ({
