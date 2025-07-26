@@ -15,7 +15,6 @@ const newProducts = [
         brand: "Daikin",
         model: "Perfera FTXM35R",
         colour: "White",
-        type: "Split",
         capacity_btu: 12000,
         energy_rating: "A+++",
         price: 1299.00,
@@ -26,7 +25,6 @@ const newProducts = [
         cop: 4.2,
         scop: 4.8,
         power_consumption: 1.1,
-        refrigerant_type: "R32",
         operating_temp_range: "-15°C to +50°C",
         indoor_dimensions: "295×790×220 mm",
         outdoor_dimensions: "550×780×285 mm",
@@ -44,7 +42,6 @@ const newProducts = [
         brand: "Mitsubishi",
         model: "Diamond Premium MSZ-AP35VG",
         colour: "White",
-        type: "Split",
         capacity_btu: 12000,
         energy_rating: "A+++",
         price: 1599.00,
@@ -55,7 +52,6 @@ const newProducts = [
         cop: 4.5,
         scop: 5.1,
         power_consumption: 1.0,
-        refrigerant_type: "R32",
         operating_temp_range: "-20°C to +55°C",
         indoor_dimensions: "295×790×220 mm",
         outdoor_dimensions: "550×780×285 mm",
@@ -73,7 +69,6 @@ const newProducts = [
         brand: "LG",
         model: "ArtCool Mirror LS-Q126C",
         colour: "Mirror Black",
-        type: "Split",
         capacity_btu: 12000,
         energy_rating: "A+++",
         price: 1399.00,
@@ -84,7 +79,6 @@ const newProducts = [
         cop: 4.3,
         scop: 4.9,
         power_consumption: 1.05,
-        refrigerant_type: "R32",
         operating_temp_range: "-15°C to +50°C",
         indoor_dimensions: "295×790×220 mm",
         outdoor_dimensions: "550×780×285 mm",
@@ -102,7 +96,6 @@ const newProducts = [
         brand: "Samsung",
         model: "WindFree Premium AR12TXCJAK",
         colour: "White",
-        type: "Split",
         capacity_btu: 12000,
         energy_rating: "A+++",
         price: 1199.00,
@@ -113,7 +106,6 @@ const newProducts = [
         cop: 4.1,
         scop: 4.7,
         power_consumption: 1.15,
-        refrigerant_type: "R32",
         operating_temp_range: "-15°C to +50°C",
         indoor_dimensions: "295×790×220 mm",
         outdoor_dimensions: "550×780×285 mm",
@@ -131,7 +123,6 @@ const newProducts = [
         brand: "Gree",
         model: "U-Crown Pro GWH12AC-K6DNA1A",
         colour: "White",
-        type: "Split",
         capacity_btu: 12000,
         energy_rating: "A++",
         price: 899.00,
@@ -142,7 +133,6 @@ const newProducts = [
         cop: 3.9,
         scop: 4.5,
         power_consumption: 1.2,
-        refrigerant_type: "R32",
         operating_temp_range: "-15°C to +50°C",
         indoor_dimensions: "295×790×220 mm",
         outdoor_dimensions: "550×780×285 mm",
@@ -160,7 +150,6 @@ const newProducts = [
         brand: "Panasonic",
         model: "Premium XE Series CS-XE12PKEW",
         colour: "White",
-        type: "Split",
         capacity_btu: 12000,
         energy_rating: "A+++",
         price: 1349.00,
@@ -171,7 +160,6 @@ const newProducts = [
         cop: 4.4,
         scop: 5.0,
         power_consumption: 1.02,
-        refrigerant_type: "R32",
         operating_temp_range: "-20°C to +55°C",
         indoor_dimensions: "295×790×220 mm",
         outdoor_dimensions: "550×780×285 mm",
@@ -189,7 +177,6 @@ const newProducts = [
         brand: "Toshiba",
         model: "SHRM-i Series RAS-12SKVP-E",
         colour: "White",
-        type: "Split",
         capacity_btu: 12000,
         energy_rating: "A+++",
         price: 1149.00,
@@ -200,7 +187,6 @@ const newProducts = [
         cop: 4.0,
         scop: 4.6,
         power_consumption: 1.1,
-        refrigerant_type: "R32",
         operating_temp_range: "-15°C to +50°C",
         indoor_dimensions: "295×790×220 mm",
         outdoor_dimensions: "550×780×285 mm",
@@ -218,7 +204,6 @@ const newProducts = [
         brand: "Hitachi",
         model: "Premium RAS-X12CKX",
         colour: "White",
-        type: "Split",
         capacity_btu: 12000,
         energy_rating: "A+++",
         price: 1249.00,
@@ -229,7 +214,6 @@ const newProducts = [
         cop: 4.2,
         scop: 4.8,
         power_consumption: 1.08,
-        refrigerant_type: "R32",
         operating_temp_range: "-15°C to +50°C",
         indoor_dimensions: "295×790×220 mm",
         outdoor_dimensions: "550×780×285 mm",
@@ -276,11 +260,10 @@ export default async function handler(req, res) {
                 // Check for duplicates
                 const { data: existingProducts, error: checkError } = await supabase
                     .from('products')
-                    .select('id, brand, model, capacity_btu, type')
+                    .select('id, brand, model, capacity_btu')
                     .eq('brand', product.brand)
                     .eq('model', product.model)
                     .eq('capacity_btu', product.capacity_btu)
-                    .eq('type', product.type)
                     .eq('is_archived', false);
 
                 if (checkError) {

@@ -638,8 +638,8 @@ const CheckoutPage = () => {
                         </button>
                       </div>
                       <div className={styles.installationPrice}>
-                        <div>{formatPrice(item.installationPrice || 0)}</div>
-                        <div className={styles.itemPriceEur}>{formatPriceEUR(item.installationPrice || 0)}</div>
+                        <div>{formatPrice((item.installationPrice || 0) * item.quantity)}</div>
+                        <div className={styles.itemPriceEur}>{formatPriceEUR((item.installationPrice || 0) * item.quantity)}</div>
                       </div>
                     </div>
                   </div>
