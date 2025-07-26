@@ -1,0 +1,26 @@
+/* Logo Image Styles - Separate module for easy dev console editing */
+.logoImage {
+  position: relative;
+  object-fit: contain;
+  filter: brightness() contrast(1.05) saturate(1.1);
+  border-radius: 39px;
+  flex-shrink: 0;
+  width: 188px;
+  height: 49px;
+  transition: all .4s cubic-bezier(.4, 0, .2, 1);
+  display: block;
+}
+
+/* Hover effect for logo image */
+.logoImage:hover {
+  transform: scale(1.03) translateY(-1px);
+  filter: brightness(1.1) contrast(1.1) saturate(1.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .logoImage {
+    width: 120px;
+    height: 40px;
+  }
+} 

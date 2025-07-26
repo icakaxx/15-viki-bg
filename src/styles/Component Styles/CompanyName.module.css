@@ -1,0 +1,44 @@
+/* Company Name Styles - Separate module for easy dev console editing */
+.companyName {
+  color: #2c5530;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  opacity: .9;
+  white-space: nowrap;
+  -webkit-text-fill-color: transparent;
+  z-index: 10;
+  text-overflow: unset;
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  max-width: none;
+  font-family: Seymour One, sans-serif;
+  font-size: 1.3rem;
+  font-style: normal;
+  font-weight: 800;
+  position: relative;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+/* Hover effect for company name */
+.companyName:hover {
+  opacity: 1;
+  transform: scale(1.02);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1500px) {
+  .companyName {
+    font-size: 1.2vw;
+    letter-spacing: 0.03vw;
+  }
+}
+
+@media (max-width: 800px) {
+  .companyName {
+    font-size: 2.5vw;
+    letter-spacing: 0.1vw;
+  }
+} 

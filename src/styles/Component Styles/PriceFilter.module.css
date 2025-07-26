@@ -1,0 +1,406 @@
+/* Price Filter Component Styles */
+.priceFilter {
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #444;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.inputRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* Removed input group focus states since we're using individual inputs */
+
+.prefix {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: fit-content;
+  margin-right: 2px;
+}
+
+.input {
+  text-align: center;
+  color: #333;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+  width: 60px;
+  max-width: 70px;
+  padding: 6px 8px;
+  font-size: 18px;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.input:focus {
+  border-color: #2c5530;
+  box-shadow: 0 0 0 2px rgba(44, 85, 48, 0.1);
+}
+
+.input:disabled {
+  color: #999;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+.input::placeholder {
+  color: #aaa;
+}
+
+.input.error {
+  border-color: #dc3545;
+}
+
+.input.error:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+}
+
+/* Remove number input arrows in Chrome, Safari, Edge */
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove number input arrows in Firefox */
+.input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.currency {
+  color: #666;
+  white-space: nowrap;
+  margin-left: 2px;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.separator {
+  color: #666;
+  margin: 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  align-items: center;
+}
+
+.applyBtn {
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  border: none;
+  border-radius: 8px;
+  min-width: -moz-fit-content;
+  min-width: fit-content;
+  padding: 10px 16px;
+  font-size: 18px;
+  font-weight: 600;
+  transition: all .2s;
+}
+
+.applyBtn:hover:not(.disabled) {
+  background: linear-gradient(135deg, #1e3a21 0%, #2c5530 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(44, 85, 48, 0.3);
+}
+
+.applyBtn:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(44, 85, 48, 0.3);
+}
+
+.applyBtn.disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.resetBtn {
+  background: none;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.resetBtn:hover {
+  background: #dc3545;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.resetBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.resetBtn:disabled {
+  background: none;
+  color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.errorMessages {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.errorMessage {
+  font-size: 12px;
+  color: #dc3545;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.errorMessage::before {
+  content: "⚠";
+  color: #dc3545;
+}
+
+.helperText {
+  color: #666;
+  margin-top: .5rem;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+/* Dual Range Slider Styles */
+.sliderContainer {
+  margin: 1rem 0;
+}
+
+.sliderTrack {
+  position: relative;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  cursor: pointer;
+  margin: 1rem 0;
+}
+
+.sliderRange {
+  position: absolute;
+  height: 100%;
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  border-radius: 3px;
+}
+
+.sliderThumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border: 3px solid #2c5530;
+  border-radius: 50%;
+  cursor: grab;
+  top: -7px;
+  transform: translateX(-50%);
+  transition: all 0.2s ease;
+}
+
+.sliderThumb:hover {
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 4px 8px rgba(44, 85, 48, 0.3);
+}
+
+.sliderThumb:active {
+  cursor: grabbing;
+  transform: translateX(-50%) scale(1.2);
+}
+
+.sliderLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .inputRow {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  
+  .inputGroup {
+    flex-shrink: 0;
+  }
+  
+  .input {
+    width: 55px;
+    max-width: 65px;
+  }
+  
+  .separator {
+    margin: 0 6px;
+  }
+  
+  .buttonRow {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  .applyBtn,
+  .resetBtn {
+    width: 100%;
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .priceFilter {
+    margin-bottom: 1rem;
+  }
+  
+  .label {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .inputGroup {
+    padding: 10px;
+  }
+  
+  .prefix,
+  .currency {
+    font-size: 13px;
+  }
+  
+  .input {
+    font-size: 13px;
+  }
+  
+  .buttonRow {
+    margin-top: 0.5rem;
+  }
+  
+  .applyBtn,
+  .resetBtn {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .inputRow {
+    gap: 0.5rem;
+  }
+  
+  .input {
+    width: 55px;
+    max-width: 65px;
+    text-align: right;
+  }
+  
+  .applyBtn,
+  .resetBtn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .inputGroup {
+    border-width: 2px;
+  }
+  
+  .applyBtn {
+    background: #000;
+    border: 2px solid #000;
+  }
+  
+  .resetBtn {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .inputGroup,
+  .applyBtn,
+  .resetBtn {
+    transition: none;
+  }
+  
+  .applyBtn:hover:not(.disabled),
+  .resetBtn:hover {
+    transform: none;
+  }
+}
+
+/* Focus indicators for keyboard navigation */
+.applyBtn:focus,
+.resetBtn:focus,
+.input:focus {
+  outline: 2px solid #2c5530;
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .inputGroup {
+    background: #2a2a2a;
+    border-color: #555;
+  }
+  
+  .inputGroup:focus-within {
+    border-color: #4a7c59;
+  }
+  
+  .input {
+    color: #fff;
+  }
+  
+  .prefix,
+  .currency {
+    color: #ccc;
+  }
+  
+  .helperText {
+    color: #999;
+  }
+} 

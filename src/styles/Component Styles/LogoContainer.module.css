@@ -1,0 +1,84 @@
+/* Logo Container Styles - Separate module for easy dev console editing */
+.logoContainer {
+  z-index: 1000;
+  cursor: default;
+  pointer-events: auto;
+  box-sizing: border-box;
+  border-radius: 39px;
+  width: 188px;
+  height: 49px;
+  margin: 0;
+  padding: 0;
+  transition: all .4s cubic-bezier(.4, 0, .2, 1);
+  position: relative;
+  overflow: visible;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(44, 85, 48, 0.1) 0%, rgba(74, 124, 89, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 12px;
+}
+
+.logoContainer:hover::before {
+  opacity: 1;
+}
+
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .logoContainer {
+    width: 120px;
+    height: 40px;
+  }
+  
+  .logoImage {
+    width: 120px;
+    height: 40px;
+  }
+} 
+
+@media (max-width: 1500px) {
+  .logoContainer {
+    width: 10vw;
+    height: 3vw;
+  }
+  .logoImage {
+    width: 10vw;
+    height: 3vw;
+  }
+}
+
+@media (max-width: 1024px) {
+  .logoContainer {
+    width: 10vw;
+    height: 3vw;
+  }
+  .logoImage {
+    width: 10vw;
+    height: 3vw;
+  }
+}
+
+@media (max-width: 800px) {
+  .logoContainer {
+    width: 20vw;
+    height: 10vw;
+  }
+  .logoImage {
+    width: 17vw;
+    height: 7vw;
+  }
+}

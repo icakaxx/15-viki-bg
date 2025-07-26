@@ -1,0 +1,52 @@
+/* Brand Container - Flexbox wrapper for logo and company name */
+.brandContainer {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.5rem;
+  border-radius: 8px;
+  position: relative;
+  overflow: visible;
+}
+
+/* Separate positioning class for easy dev console editing */
+.brandPosition {
+  position: relative;
+}
+
+.brandContainer:hover {
+  box-shadow: 0 4px 12px rgba(44, 85, 48, 0.1);
+}
+
+.brandWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+  min-height: 50px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1500px) {
+  .brandContainer {
+    padding: 0.5vw;
+  }
+  
+  .brandWrapper {
+    gap: 0.6vw;
+    min-height: 3.7vw;
+  }
+}
+
+@media (max-width: 800px) {
+  .brandContainer {
+    padding: 0.45rem;
+  }
+  
+  .brandWrapper {
+    gap: 0.8rem;
+    min-height: 50px;
+  }
+} 

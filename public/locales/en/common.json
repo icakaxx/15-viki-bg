@@ -1,0 +1,1331 @@
+{
+  "metaTitle": "BGVIKI15 Ltd - Air Conditioners and HVAC Solutions",
+  "metaDescription": "BGVIKI15 Ltd - Quality and reliable solutions since 2000. Air conditioners, HVAC, and energy-efficient solutions in Bulgaria.",
+  "close": "Close",
+  "today": "Today",
+  "weekdays": {
+    "monday": "Monday",
+    "tuesday": "Tuesday", 
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
+  "error": "Error:",
+  "retry": "Retry",
+  "others": "others",
+  "productsPage": {
+    "title": "Products & Solutions",
+    "metaDescription": "Complete range of air conditioners and climate solutions for home, office and industry. Professional services and maintenance.",
+    "hero": {
+      "title": "Complete Climate Solutions",
+      "subtitle": "From residential air conditioners to complex industrial systems - we offer quality products and professional services for all your needs.",
+      "cta": "View All Products"
+    },
+    "categories": {
+      "title": "Product Categories",
+      "residential": {
+        "title": "Residential Air Conditioners",
+        "description": "Energy-efficient solutions for home",
+        "features": {
+          "split": "Split systems",
+          "multiSplit": "Multi-split systems",
+          "inverter": "Inverter technology",
+          "wifi": "Wi-Fi control"
+        }
+      },
+      "commercial": {
+        "title": "Commercial Systems",
+        "description": "Professional solutions for business",
+        "features": {
+          "vrf": "VRF systems",
+          "cassette": "Cassette air conditioners",
+          "ducted": "Ducted systems",
+          "central": "Central control"
+        }
+      },
+      "industrial": {
+        "title": "Industrial Solutions",
+        "description": "Powerful systems for large facilities",
+        "features": {
+          "chillers": "Chillers",
+          "rooftop": "Rooftop units",
+          "precision": "Precision air conditioners",
+          "ventilation": "Ventilation systems"
+        }
+      }
+    },
+    "services": {
+      "title": "Our Services",
+      "consultation": {
+        "title": "Consultation & Design",
+        "description": "Professional needs assessment and project design for optimal climate solutions tailored to your specific requirements"
+      },
+      "installation": {
+        "title": "Installation & Commissioning",
+        "description": "Quality installation by certified technicians with proper testing and commissioning to ensure optimal performance"
+      },
+      "maintenance": {
+        "title": "Service & Maintenance",
+        "description": "Regular maintenance and quick repairs when needed to keep your systems running efficiently and extend their lifespan"
+      },
+      "warranty": {
+        "title": "Warranty Service",
+        "description": "Full warranty and post-warranty service with comprehensive support and technical assistance throughout the product lifecycle"
+      }
+    },
+    "cta": {
+      "title": "Ready to start? Contact us!",
+      "subtitle": "Our experts will help you choose the most suitable solution for your needs.",
+      "inquiry": "Make an Inquiry",
+      "contact": "Contact Us"
+    }
+  },
+  "solutions": {
+    "air_conditioning": {
+      "title": "Air Conditioner Sales and Installation",
+      "short": "Efficient and reliable air conditioners for home and business – sales, installation, and professional consultation.",
+      "details": "Detailed description for air conditioner sales and installation.",
+      "benefits": [
+        "High energy efficiency",
+        "Reliability and long lifespan",
+        "Easy maintenance"
+      ]
+    },
+    "chillers": {
+      "title": "Chillers – Industrial and Commercial Cooling Solutions for Buildings and Technological Processes",
+      "short": "Flexible and energy-efficient chillers for any needs – from offices to industrial facilities.",
+      "p1": "Chillers are essential for large-scale cooling in commercial and industrial buildings.",
+      "p2": "They work by removing heat from a liquid via a vapor-compression or absorption refrigeration cycle.",
+      "p3": "Our chillers are energy-efficient and designed for reliable, long-term operation.",
+      "p4": "We offer installation, maintenance, and support for all types of chiller systems."
+    },
+    "vrv_vrf": {
+      "title": "VRV/VRF Systems",
+      "short": "High-efficiency air conditioning and heating systems for large facilities like offices, hotels, and shopping centers.",
+      "p1": "VRV/VRF systems provide flexible and efficient climate control for buildings of all sizes.",
+      "p2": "They allow for individual temperature control in different zones, maximizing comfort.",
+      "p3": "Our solutions are suitable for offices, hotels, and residential complexes.",
+      "p4": "We ensure professional installation and ongoing technical support."
+    },
+    "heat_pumps": {
+      "title": "Heat Pumps – Modern Energy-Efficient Solutions for Heating and Cooling Residential and Commercial Buildings",
+      "short": "Modern energy-efficient solutions for heating and cooling residential and commercial buildings",
+      "p1": "Heat pumps are an eco-friendly solution for both heating and cooling your property.",
+      "p2": "They transfer heat from the outside air or ground into your building, reducing energy costs.",
+      "p3": "Our heat pumps are suitable for homes, offices, and industrial facilities.",
+      "p4": "We provide expert consultation, installation, and maintenance services."
+    },
+    "cold_rooms": {
+      "title": "Cold Rooms – Design and Installation for Storage of Food Products, Medical Materials, and More",
+      "short": "Optimal storage conditions for food products, medical materials, and other perishable goods",
+      "p1": "Cold rooms are vital for the storage of perishable goods in the food and pharmaceutical industries.",
+      "p2": "We design and build custom cold rooms to meet your specific requirements.",
+      "p3": "Our systems ensure precise temperature control and energy efficiency.",
+      "p4": "We offer full service from project planning to installation and maintenance."
+    },
+    "ventilation": {
+      "title": "Ventilation Systems – Solutions for Clean Air, Recuperation, and Optimal Circulation in All Types of Premises",
+      "short": "Solutions for clean air, recuperation, and optimal circulation in all types of premises",
+      "p1": "Proper ventilation is crucial for healthy indoor air quality and comfort.",
+      "p2": "We offer advanced ventilation systems for homes, offices, and industrial spaces.",
+      "p3": "Our solutions help remove pollutants, control humidity, and save energy.",
+      "p4": "We provide design, installation, and regular maintenance for all ventilation systems."
+    }
+  },
+  "nav": {
+    "about": "About",
+    "products": "Products & Solutions",
+    "buy": "Buy ACs",
+    "inquiry": "Make an inquiry",
+    "contact": "Contact"
+  },
+  "buyPage": {
+    "title": "Buy Air Conditioners",
+    "loading": "Loading products...",
+    "error": "Error loading products",
+    "noProducts": "No products found",
+    "buyButton": "Buy",
+    "addToCart": "Add to Cart",
+    "quantity": "Quantity",
+    "increaseQuantity": "Increase quantity",
+    "decreaseQuantity": "Decrease quantity", 
+    "inCart": "In cart",
+    "previousPrice": "Was:",
+    "energyRating": "Energy Rating",
+    "capacity": "Capacity",
+    "type": "Type",
+    "brand": "Brand",
+    "model": "Model",
+    "price": "Price",
+    "installationCost": "Installation",
+    "stockStatus": "Stock",
+    "roomSize": "Room Size",
+    "noiseLevel": "Noise",
+    "warranty": {
+      "label": "Warranty",
+      "years": "years"
+    },
+    "discount": {
+      "off": "OFF"
+    },
+    "btu": "BTU",
+    "color": "Color",
+    "priceNote": "EUR prices are approximate",
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "features": {
+      "wifi": "WiFi Control",
+      "inverter": "Inverter Technology",
+      "heatPump": "Heat Pump",
+      "eco": "Eco Mode",
+      "sleepMode": "Sleep Mode",
+      "autoRestart": "Auto Restart",
+      "diamondFilter": "Diamond Filter",
+      "airPurification": "Air Purification",
+      "windFreeMode": "WindFree Mode",
+      "nanoeG": "Nanoe-G",
+      "galleryDesign": "Gallery Design",
+      "smartControl": "Smart Control",
+      "energySaving": "Energy Saving",
+      "autoClean": "Auto Clean",
+      "quietOperation": "Quiet Operation",
+      "dualFilter": "Dual Filter",
+      "antiFungus": "Anti-fungus"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "page": "Page",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "sort": {
+      "groupPrice": "Price",
+      "groupCapacity": "Capacity",
+      "groupEnergy": "Energy Class",
+      "label": "Sort by",
+      "default": "Default",
+      "priceLow": "Price: Low to High",
+      "priceHigh": "Price: High to Low",
+      "capacityLow": "Capacity: Low to High",
+      "capacityHigh": "Capacity: High to Low",
+      "energyBest": "Energy Class: Best to Worst",
+      "energyWorst": "Energy Class: Worst to Best"
+    },
+    "filters": {
+      "title": "Filters",
+      "clearAll": "Clear All",
+      "brand": "Brand",
+      "type": "Type",
+      "capacity": "Capacity (BTU)",
+      "energyRating": "Energy Rating",
+      "color": "Color",
+      "priceRange": "Price Range",
+      "priceFrom": "From",
+      "priceTo": "To",
+      "from": "from",
+      "to": "to",
+      "bgn": "BGN",
+      "apply": "Apply",
+      "reset": "Reset",
+      "showingResults": "Showing",
+      "results": "results",
+      "noResults": "No products match the selected filters",
+      "invalidPriceRange": "Please enter a valid price range.",
+      "priceMinError": "Minimum price cannot be below {{min}} BGN.",
+      "priceMaxError": "Maximum price cannot be above {{max}} BGN.",
+      "priceHelp": "Enter a price between {{min}} BGN and {{max}} BGN.",
+      "close": "Close"
+    },
+    "badges": {
+      "featured": "FEATURED",
+      "bestseller": "BESTSELLER",
+      "new": "NEW"
+    },
+    "actionButtons": {
+      "redButton": "ACTION 1",
+      "greenButton": "ACTION 2",
+      "moreSpecs": "+{{count}} More",
+      "buyOnInstallment": "See credit plans"
+    },
+    "types": {
+      "split": "Split",
+      "cassette": "Cassette",
+      "multiSplit": "Multi-Split",
+      "ducted": "Ducted",
+      "window": "Window",
+      "portable": "Portable"
+    },
+    "physicalCharacteristics": {
+      "indoorDimensions": "Indoor Unit Dimensions (W×H×D)",
+      "outdoorDimensions": "Outdoor Unit Dimensions (W×H×D)",
+      "indoorWeight": "Indoor Unit Weight (kg)",
+      "outdoorWeight": "Outdoor Unit Weight (kg)",
+      "kg": "kg"
+    },
+    "units": {
+      "dB": "dB"
+    },
+    "colors": {
+      "white": "White",
+      "black": "Black",
+      "silver": "Silver",
+      "gray": "Gray",
+      "beige": "Beige",
+      "brown": "Brown"
+    }
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "viewCart": "View cart",
+    "empty": "Your cart is empty",
+    "quantity": "Qty",
+    "total": "Total",
+    "checkout": "Checkout",
+    "remove": "Remove"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "productTitle": "Selected Product:",
+    "loadingProduct": "Loading product...",
+    "productNotFound": "Product not found",
+    "noProductSelected": "No product selected",
+    "emptyCart": "Your cart is empty. Add some products first!",
+    "continueShopping": "Continue Shopping",
+    "orderSuccessMessage": "Your order has been submitted successfully! You will be redirected to the confirmation page shortly.",
+    "redirecting": "Redirecting...",
+    "orderSummary": "Order Summary",
+    "items": "items",
+    "total": "Total",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "removeItem": "Remove",
+    "clearCart": "Clear Cart",
+    "confirmRemove": "Are you sure you want to remove this item from your cart?",
+    "confirmRemoveInstallation": "Are you sure you want to remove the installation service?",
+    "removeInstallation": "Remove Installation",
+    "nextSteps": "Next Steps",
+    "orderTotal": "Order Total",
+    "checkoutInfo": "Checkout page for product ID:",
+    "formComingSoon": "Contact form and payment processing will be implemented here.",
+    "formSubmitting": "Submitting...",
+    "formSuccess": "Thank you! We'll contact you soon.",
+    "formError": "An error occurred. Please try again.",
+    "form": {
+      "personalInfo": {
+        "title": "Personal Information",
+        "firstName": "First Name",
+        "middleName": "Middle Name",
+        "lastName": "Last Name",
+        "phone": "Mobile Phone",
+        "phoneHelp": "For contact regarding your order",
+        "town": "Town/City",
+        "townPlaceholder": "e.g., Sofia, Plovdiv, Varna...",
+        "address": "Address",
+        "addressPlaceholder": "Street, number, entrance, apartment...",
+        "email": "Email Address (optional)",
+        "emailPlaceholder": "your.email@example.com"
+      },
+      "services": {
+        "title": "Installation Services",
+        "subtitle": "For each AC model, choose installation for all units or none",
+        "units": "units",
+        "acOnly": "AC Only",
+        "acOnlyDesc": "Product delivery only",
+        "acWithInstallation": "AC + Installation",
+        "installationFee": "Installation fee: +300 BGN / €153 per AC unit",
+        "totalInstallation": "Total installations",
+        "installations": "installations"
+      },
+      "invoice": {
+        "title": "Invoice Information",
+        "subtitle": "Fill out only if you want a company invoice",
+        "needInvoice": "Do you need a company invoice?",
+        "yes": "Yes",
+        "no": "No",
+        "enable": "I want a company invoice",
+        "companyName": "Company Name",
+        "address": "Address",
+        "bulstat": "Bulstat",
+        "bulstatHelp": "9 digits",
+        "vatNumber": "VAT Number",
+        "mol": "MOL",
+        "molSuggestions": {
+          "manager": "Manager",
+          "director": "Director",
+          "owner": "Owner",
+          "representative": "Representative",
+          "custom": "Other..."
+        }
+      },
+      "payment": {
+        "title": "Payment Method",
+        "office": "Office Pickup",
+        "online": "Online Payment",
+        "cash": "Cash on Delivery",
+        "onlineHelp": "Bank transfer or card payment",
+        "officeHelp": "Free pickup from our office",
+        "cashHelp": "Payment upon delivery",
+        "officeDetails": "You'll receive an SMS with the address and pickup hours.",
+        "onlineDetails": "You'll receive a payment link after order confirmation.",
+        "cashDetails": "The courier will collect payment upon delivery.",
+        "completePrevious": "Complete personal information first"
+      },
+      "validation": {
+        "required": "This field is required",
+        "invalidPhone": "Please enter a valid phone number",
+        "invalidEmail": "Please enter a valid email address",
+        "invalidBulstat": "Bulstat must be exactly 9 digits",
+        "selectPayment": "Please select a payment method"
+      },
+      "stripe": {
+        "cardDetails": "Card Details",
+        "cardNumber": "Card Number",
+        "expiryDate": "Expiry Date",
+        "cvc": "CVC",
+        "cardholderName": "Cardholder Name",
+        "cardholderNamePlaceholder": "Full name",
+        "billingAddress": "Billing Address",
+        "billingAddressPlaceholder": "Street, number, city",
+        "securePayment": "Secure Payment",
+        "amount": "Amount",
+        "currency": "BGN",
+        "pay": "Finish with Payment",
+        "processing": "Processing payment...",
+        "paymentSuccess": "Payment successful!",
+        "paymentSuccessDetails": "Your payment has been processed successfully.",
+        "paymentError": "Payment Error",
+        "paymentErrorDetails": "Payment was unsuccessful. Please check your card details and try again.",
+        "paymentErrorInsufficientFunds": "Your card has insufficient funds. Please try a different card or contact your bank.",
+        "paymentErrorDeclined": "Your card was declined. Please try a different card or contact your bank.",
+        "paymentErrorExpired": "Your card has expired. Please use a different card.",
+        "paymentErrorInvalidCvc": "The CVC code is incorrect. Please check and try again.",
+        "paymentId": "Payment ID",
+        "orderSuccess": "Order Successful!",
+        "orderError": "Order Error",
+        "orderId": "Order ID",
+        "emailSent": "Confirmation email has been sent.",
+        "cardDetailsComplete": "Card details complete. You can now complete your order.",
+        "completePaymentFirst": "Please complete the online payment first.",
+        "notConfigured": "Stripe is not configured. Please contact the administrator."
+      },
+      "submit": "Complete Order",
+      "submitting": "Processing...",
+      "onlinePaymentNote": "Fill in your card details above to complete the order.",
+      "next": "Next",
+      "back": "Back",
+      "review": "Review",
+      "shipping": {
+        "title": "Shipping Address",
+        "address": "Address",
+        "addressPlaceholder": "Street, number, entrance, apartment",
+        "city": "City",
+        "postalCode": "Postal Code"
+      },
+      "billing": {
+        "title": "Billing Information",
+        "needInvoice": "I need a company invoice"
+      },
+      "review": {
+        "title": "Review & Confirm"
+      }
+    }
+  },
+  "footer": {
+    "brandInfo": {
+      "tagline": "Quality and reliable solutions since 2000"
+    },
+    "navigation": {
+      "title": "Navigation",
+      "about": "About",
+      "products": "Products & Solutions",
+      "buy": "Buy ACs",
+      "inquiry": "Make an inquiry",
+      "contact": "Contact"
+    },
+    "contact": {
+      "title": "Contact",
+      "phone": "Phone",
+      "email": "Email",
+      "social": "Social Media"
+    },
+    "socialLabels": {
+      "facebook": "Follow us on Facebook",
+      "instagram": "Follow us on Instagram",
+      "whatsapp": "Contact us on WhatsApp"
+    },
+    "backToTop": "Back to top",
+    "copyright": "© 2025 BGVIKI15 Ltd. All rights reserved.",
+    "attribution": "Design: H&M WSPro",
+    "admin": "Go to Administration"
+  },
+  "orderSuccess": {
+    "title": "Order Successful!",
+    "description": "Your order has been successfully placed. We will contact you soon.",
+    "message": "Thank you for your order! We have received your request and will contact you within 24 hours to arrange delivery.",
+    "orderId": "Order ID",
+    "paymentMethod": "Payment Method",
+    "paidByCard": "Paid by Card",
+    "nextSteps": {
+      "title": "What happens next?",
+      "contact": "We will contact you within 24 hours to confirm your order",
+      "delivery": "We will arrange delivery at your preferred time and location",
+      "questions": "If you have any questions, feel free to contact us"
+    },
+    "backToHome": "Back to Home",
+    "continueShopping": "Continue Shopping"
+  },
+  "country": "🇧🇬 Bulgaria",
+  "inquiryPage": {
+    "title": "Make an Inquiry",
+    "metaDescription": "Make an inquiry for air conditioners and climate solutions. Free consultation and quote from experts.",
+    "hero": {
+      "title": "Free Consultation & Quote",
+      "subtitle": "Share your needs with us and we'll offer you the most suitable solution. Our experts will contact you within 24 hours."
+    },
+    "form": {
+      "title": "Inquiry Form",
+      "success": "Thank you! Your inquiry has been sent successfully. We'll contact you soon.",
+      "name": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone",
+      "company": "Company/Organization",
+      "inquiryType": "Inquiry Type",
+      "budget": "Budget",
+      "message": "Message",
+      "messagePlaceholder": "Describe your needs, room dimensions, special requirements...",
+      "submit": "Send Inquiry",
+      "submitting": "Sending...",
+      "required": "*",
+      "selectType": "Select type...",
+      "selectBudget": "Select budget...",
+      "types": {
+        "residential": "Residential Air Conditioners",
+        "commercial": "Commercial Systems",
+        "industrial": "Industrial Solutions",
+        "service": "Service & Maintenance",
+        "consultation": "Consultation",
+        "other": "Other"
+      },
+      "budgetRanges": {
+        "under1000": "Up to 1000 BGN",
+        "1000to3000": "1000 - 3000 BGN",
+        "3000to5000": "3000 - 5000 BGN",
+        "5000to10000": "5000 - 10000 BGN",
+        "over10000": "Over 10000 BGN",
+        "unsure": "Not sure"
+      }
+    },
+    "contact": {
+      "title": "Contact Directly",
+      "phone": "Phone",
+      "email": "Email",
+      "hours": "Working Hours",
+      "hoursDetails": "Mon - Fri: 9:00 - 18:00\nSaturday: 9:00 - 14:00"
+    },
+    "whyChooseUs": {
+      "title": "Why Choose Us?",
+      "experience": "Over 20 years of industry experience",
+      "certified": "Certified technicians and installers",
+      "freeConsultation": "Free consultation and site visit",
+      "warranty": "Warranty and after-sales service",
+      "competitive": "Competitive prices"
+    },
+    "productsCta": {
+      "title": "Prefer to browse products first?",
+      "subtitle": "Explore our complete range of air conditioners and solutions.",
+      "button": "Browse Products"
+    }
+  },
+  "contactPage": {
+    "title": "Contact",
+    "metaDescription": "Contact BGVIKI15 Ltd for air conditioners and climate solutions. Address, phones, emails and working hours.",
+    "hero": {
+      "title": "Contact Us",
+      "subtitle": "We're here to answer all your questions and help you choose the most suitable climate solution."
+    },
+    "info": {
+      "phone": {
+        "title": "Phone",
+        "description": "Call for quick consultation",
+        "details": ["+359895460717"]
+      },
+      "email": {
+        "title": "Email",
+        "description": "Send us an inquiry by email",
+        "details": ["bgviki.ltd@abv.bg"]
+      },
+      "address": {
+        "title": "Address",
+        "description": "Visit our office and showroom",
+        "details": {
+          "0": "Lovech Center, ul. 'Targovska' 60, 5500 Lovech, Bulgaria",
+          "1": ""
+        }
+      },
+      "hours": {
+        "title": "Working Hours",
+        "description": "We're available during business days",
+        "schedule": {
+          "0": "Monday - Friday: 9:00 – 18:00",
+          "1": "Saturday: 10:00 – 14:00",
+          "2": "Sunday: Closed"
+        }
+      }
+    },
+    "company": {
+      "title": "About the Company",
+      "name": "BGVIKI15 Ltd",
+      "description1": "Since 2000, we have been a leading supplier of climate solutions in Bulgaria. We specialize in the sale, installation and service of air conditioners for residential, commercial and industrial applications.",
+      "description2": "Our team of certified technicians and engineers has over 20 years of experience in the industry and is ready to offer you the most suitable solution for your needs.",
+      "businessInfo": {
+        "title": "Business Information:",
+        "eik": "UIC:",
+        "vat": "VAT Number:",
+        "headquarters": "Headquarters:",
+        "bank": "Bank:",
+        "iban": "IBAN:",
+        "bic": "BIC:"
+      },
+      "certificates": {
+        "title": "Licenses & Certificates:",
+        "trading": "License for trading climate equipment",
+        "refrigerant": "Certificate for working with refrigerants",
+        "iso": "ISO 9001:2015 - Quality Management System",
+        "partners": "Partner certificates from leading manufacturers"
+      }
+    },
+    "quickContact": {
+      "title": "Quick Contact",
+      "subtitle": "Need urgent help or consultation?",
+      "callNow": "Call Now",
+      "sendEmail": "Send Email"
+    },
+    "emergency": {
+      "title": "Emergency Line",
+      "description": "24/7 technical support for emergencies"
+    },
+    "departments": {
+      "title": "Departments & Specialists",
+      "sales": {
+        "name": "Sales",
+        "description": "For product and pricing inquiries"
+      },
+      "support": {
+        "name": "Technical Support",
+        "description": "For service and technical assistance"
+      },
+      "projects": {
+        "name": "Projects",
+        "description": "For large and corporate projects"
+      }
+    },
+    "cta": {
+      "title": "Ready for the next step?",
+      "subtitle": "Make an inquiry or browse our products today.",
+      "inquiry": "Make an Inquiry",
+      "products": "Browse Products"
+    },
+    "map": {
+      "howToFindUs": "How to find us",
+      "googleMaps": "View in Google Maps",
+      "waze": "View in Waze",
+      "appleMaps": "View in Apple Maps"
+    }
+  },
+  "admin": {
+    "login": {
+      "title": "Admin Panel Login",
+      "username": "Username",
+      "password": "Password",
+      "loginButton": "Login",
+      "invalidCredentials": "Invalid login credentials"
+    },
+    "header": {
+      "title": "Admin Panel",
+      "logout": "Logout"
+    },
+    "tabs": {
+      "products": "Product Management",
+      "orders": "Order Management",
+      "orderHistory": "Order History",
+      "installations": "Installations This Week",
+      "inquiries": "Inquiry Management"
+    },
+    "products": {
+      "title": "Product Management",
+      "description": "Add, edit, and manage air conditioners and accessories",
+      "addNew": "Add New Product",
+      "section": {
+        "title": "Products",
+        "description": "ACs that can be edited"
+      },
+      "edit": "Edit Product", 
+      "brand": "Brand",
+      "model": "Model",
+      "color": "Color",
+      "type": "Type",
+      "capacity": "Capacity (BTU)",
+      "energyRating": "Energy Rating",
+      "price": "Price (€)",
+      "previousPrice": "Previous Price (€)",
+      "stock": "Stock Quantity",
+      "discount": "Discount (%)",
+      "discountedPrice": "Discounted Price",
+      "image": "Image",
+      "actions": "Actions",
+      "save": "Save",
+      "add": "Add",
+      "cancel": "Cancel",
+      "editButton": "Edit",
+      "archiveButton": "Archive",
+      "showArchived": "Show Archived",
+      "search": "Search (brand/model)",
+      "sortBy": "Sort By",
+      "lowStock": "Low Stock",
+      "archived": "Archived",
+      "addSuccess": "Product added successfully!",
+      "editSuccess": "Product edited successfully!",
+      "archiveSuccess": "Product archived successfully!",
+      "addError": "Error adding product",
+      "editError": "Error editing product",
+      "archiveError": "Error archiving product",
+      "duplicateError": "Product with these specifications already exists",
+      "confirmArchive": "Are you sure you want to archive '{product}'?",
+      "noProducts": "No products found",
+      "loading": "Loading...",
+      "tabs": {
+        "basic": "Basic Info",
+        "technical": "Technical Specs",
+        "physical": "Physical Details",
+        "installation": "Installation & Warranty",
+        "features": "Features & Accessories",
+        "description": "Description & Promo"
+      },
+      "technical": {
+        "cop": "COP (Coefficient of Performance)",
+        "scop": "SCOP (Seasonal COP)",
+        "powerConsumption": "Power Consumption",
+        "refrigerantType": "Refrigerant Type",
+        "operatingTempRange": "Operating Temperature Range",
+        "copHint": "Higher is better (typically 3.5 - 5.0)",
+        "scopHint": "Seasonal performance rating",
+        "powerHint": "e.g., \"2.1 kW\" or \"1800W\"",
+        "refrigerantHint": "R32 is most eco-friendly",
+        "tempRangeHint": "e.g., \"-15°C to +50°C\""
+      },
+      "physical": {
+        "dimensions": "Dimensions (H×W×D)",
+        "weight": "Weight",
+        "noiseLevel": "Noise Level",
+        "airFlow": "Air Flow Rate",
+        "dimensionsHint": "Height × Width × Depth",
+        "weightHint": "Indoor unit weight",
+        "noiseHint": "Indoor unit noise level",
+        "airFlowHint": "Maximum air flow rate"
+      },
+      "features": {
+        "warrantyPeriod": "Warranty Period",
+        "roomSizeRecommendation": "Room Size Recommendation",
+        "installationType": "Installation Type",
+        "description": "Product Description",
+        "productFeatures": "Product Features",
+        "addFeature": "Add",
+        "removeFeature": "Remove",
+        "roomSizeHint": "Recommended room size",
+        "featuresHint": "Common features: Wi-Fi Control, Timer, Sleep Mode, Auto Restart, etc."
+      },
+      "placeholders": {
+        "brandExample": "e.g., Daikin, Mitsubishi",
+        "modelExample": "e.g., FTXS35K",
+        "priceExample": "599.99",
+        "previousPriceExample": "699.99",
+        "stockExample": "10",
+        "discountExample": "10",
+        "copExample": "4.2",
+        "scopExample": "4.0",
+        "powerExample": "2.1 kW",
+        "tempRangeExample": "-15°C to +50°C",
+        "dimensionsExample": "795 x 295 x 203 mm",
+        "weightExample": "9.5 kg",
+        "noiseExample": "19-23 dB",
+        "airFlowExample": "540 m³/h",
+        "roomSizeExample": "15-25 m²",
+        "descriptionExample": "Detailed product description...",
+        "featureExample": "Add a feature...",
+        "imageUrlExample": "https://example.com/image.jpg",
+        "indoorDimensionsHint": "e.g. 890×295×204 mm",
+        "outdoorDimensionsHint": "e.g. 780×540×285 mm"
+      },
+      "sections": {
+        "basic": "Basic Information",
+        "technical": "Technical Specifications", 
+        "physical": "Physical Characteristics",
+        "installation": "Installation & Warranty",
+        "features": "Features & Promotions",
+        "description": "Description"
+      },
+      "fields": {
+        "previousPrice": "Previous Price",
+        "stockQuantity": "Stock Quantity",
+        "imageUrl": "Image URL",
+        "imageUpload": "Product Image",
+        "scop": "SCOP (Seasonal COP)",
+        "powerConsumption": "Power Consumption",
+        "operatingTempRange": "Operating Temperature Range",
+        "dimensions": "Dimensions",
+        "weight": "Weight",
+        "noiseLevel": "Noise Level",
+        "airFlow": "Air Flow",
+        "installationType": "Installation Type",
+        "roomSizeRecommendation": "Room Size Recommendation",
+        "warrantyPeriod": "Warranty Period",
+        "isFeatured": "Featured Product",
+        "isBestseller": "Bestseller",
+        "isNew": "New Product",
+        "description": "Description",
+        "indoorDimensions": "Indoor Unit Dimensions",
+        "outdoorDimensions": "Outdoor Unit Dimensions",
+        "indoorWeight": "Indoor Unit Weight",
+        "outdoorWeight": "Outdoor Unit Weight"
+      },
+      "hints": {
+        "copHint": "Higher is better (typically 3-6)",
+        "scopHint": "For heating efficiency",
+        "powerHint": "e.g. 2.5 kW",
+        "tempRangeHint": "e.g. -15°C to +50°C",
+        "dimensionsHint": "e.g. 890×295×204 mm",
+        "indoorDimensionsHint": "e.g. 890×295×204 mm",
+        "outdoorDimensionsHint": "e.g. 780×540×285 mm",
+        "weightHint": "e.g. 12.5 kg",
+        "indoorWeightHint": "e.g. 12.5 kg",
+        "outdoorWeightHint": "e.g. 35.8 kg",
+        "noiseHint": "e.g. 22 dB",
+        "airFlowHint": "e.g. 780 m³/h",
+        "roomSizeHint": "e.g. 25-35 m²"
+      },
+      "dropdowns": {
+        "selectType": "Select type...",
+        "selectRating": "Select rating...",
+        "selectPeriod": "Select period...",
+        "types": {
+          "split": "Split",
+          "multiSplit": "Multi-Split",
+          "cassette": "Cassette",
+          "ducted": "Ducted",
+          "portable": "Portable"
+        },
+        "energyRatings": {
+          "aPlusPlus": "A+++",
+          "aPlus": "A++",
+          "a": "A+",
+          "b": "A",
+          "c": "B",
+          "d": "C"
+        },
+        "refrigerantTypes": {
+          "r32": "R32",
+          "r410a": "R410A",
+          "r134a": "R134a",
+          "r290": "R290"
+        },
+        "installationTypes": {
+          "wallMounted": "Wall-mounted",
+          "ceilingMounted": "Ceiling-mounted",
+          "floorStanding": "Floor-standing",
+          "ducted": "Ducted",
+          "cassette": "Cassette"
+        },
+        "warrantyPeriods": {
+          "1year": "1 year",
+          "2years": "2 years",
+          "3years": "3 years",
+          "5years": "5 years",
+          "7years": "7 years",
+          "10years": "10 years"
+        },
+        "selectRefrigerant": "Select refrigerant type..."
+      },
+      "formCards": {
+        "productIdentity": "Product Identity",
+        "productDetails": "Product Details",
+        "performanceMetrics": "Performance Metrics",
+        "physicalSpecs": "Physical Specifications",
+        "installationDetails": "Installation Details",
+        "promotionalTags": "Promotional Tags",
+        "productDescription": "Product Description",
+        "productFeatures": "Product Features"
+      },
+      "status": {
+        "completed": "Completed",
+        "inProgress": "In Progress",
+        "pending": "Pending",
+        "required": "Required",
+        "optional": "Optional"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "addProduct": "Add Product",
+        "updateProduct": "Update Product",
+        "edit": "Edit"
+      },
+      "selectImage": "Select Image",
+      "uploading": "Uploading...",
+      "currentImage": "Current Image"
+    },
+    "orders": {
+      "title": "Order Management",
+      "description": "Manage customer orders, update statuses, and track order progress",
+      "noOrders": "No orders available",
+      "orderNumber": "Order #",
+      "phone": "Phone",
+      "created": "Created",
+      "payment": "Payment",
+      "showHistory": "Show History",
+      "hideHistory": "Hide History",
+      "statusHistory": "Status History",
+      "noHistory": "No history",
+      "updating": "Updating...",
+      "searchPlaceholder": "Search by name, phone, or order ID...",
+      "allStatuses": "All Statuses",
+      "refresh": "Refresh",
+      "loading": "Loading orders...",
+      "noOrdersFound": "No orders found",
+      "noOrdersMatchFilters": "No orders match your filters",
+      "orderDetails": "View Details",
+      "customerInformation": "Customer Information",
+      "paymentInformation": "Payment Information",
+      "updateOrderStatus": "Update Order Status",
+      "newStatus": "New Status",
+      "selectNewStatus": "Select new status...",
+      "startInstallationDate": "Start Installation Date",
+      "endInstallationDate": "End Installation Date",
+      "notes": "Notes",
+      "notesPlaceholder": "Add any notes about this status change...",
+      "updateStatus": "Update Status",
+      "updatingStatus": "Updating...",
+      "cancel": "Cancel",
+      "table": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "phone": "Phone",
+        "created": "Created",
+        "paymentMethod": "Payment Method",
+        "totalAmount": "Total Amount",
+        "paidAmount": "Paid Amount",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "modal": {
+        "name": "Name",
+        "phone": "Phone",
+        "town": "Town/City",
+        "address": "Address",
+        "email": "Email",
+        "orderDate": "Order Date",
+        "paymentMethod": "Payment Method",
+        "totalAmount": "Total Amount",
+        "paidAmount": "Paid Amount",
+        "currentStatus": "Current Status"
+      },
+      "products": {
+        "title": "Order Products",
+        "button": "Products",
+        "loading": "Loading products...",
+        "noProducts": "No products found for this order",
+        "includesInstallation": "Includes Installation",
+        "accessories": "Accessories",
+        "installation": "Installation Service",
+        "totalAccessories": "Total Accessories",
+        "yes": "Yes",
+        "no": "No",
+        "quantity": "Qty",
+        "price": "Price",
+        "total": "Total",
+        "close": "Close"
+      },
+      "messages": {
+        "installationScheduled": "Installation scheduled",
+        "statusChanged": "Status changed from"
+      },
+      "status": {
+        "new": "New",
+        "confirmed": "Confirmed",
+        "installation_booked": "Installation Scheduled",
+        "installed": "Installed",
+        "cancelled": "Cancelled",
+        "returned_from_calendar": "Returned from Calendar"
+      },
+      "statusChanged": "Status changed from",
+      "to": "to",
+      "initialStatus": "Created as",
+      "statusUpdated": "Status updated successfully",
+      "unknownDate": "Unknown date",
+      "errors": {
+        "updateFailed": "Error updating status",
+        "loadFailed": "An error occurred while loading",
+        "selectStatus": "Please select a new status"
+      },
+      "history": {
+        "title": "Order History",
+        "description": "All installed orders with filtering, search and pagination",
+        "searchPlaceholder": "Search by customer, phone, brand, model...",
+        "dateRangePlaceholder": "Date range (coming soon)",
+        "productTypePlaceholder": "Product type (coming soon)",
+        "installationDate": "Inst. Date",
+        "customer": "Customer",
+        "phone": "Phone",
+        "products": "Products",
+        "total": "Total (BGN/€)",
+        "actions": "Actions",
+        "loading": "Loading...",
+        "error": "Error loading",
+        "noOrders": "No orders found",
+        "detailsButton": "Details",
+        "previousPage": "Previous",
+        "nextPage": "Next"
+      },
+      "installationDatePicker": {
+        "title": "Installation Date",
+        "description": "Please enter the installation date:",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      },
+      "callReminder": {
+        "message": "Please call the customer before confirming this order.",
+        "callCompleted": "Call completed"
+      },
+      "installationScheduling": {
+        "title": "Select installation date and time",
+        "loadingSlots": "Loading available slots..."
+      }
+    },
+    "installations": {
+      "title": "Installations This Week",
+      "loading": "Loading installations...",
+      "totalCount": "Total installations for the week:",
+      "noInstallations": "No installations scheduled for this week",
+      "previousWeek": "← Previous Week",
+      "nextWeek": "Next Week →",
+      "completedLabel": "[COMPLETED]",
+      "timeSlot": "Time",
+      "pastSlot": "Past",
+      "available": "Available",
+      "statusLabels": {
+        "completed": "Completed",
+        "scheduled": "Scheduled"
+      },
+      "details": {
+        "title": "Installation Details",
+        "dateTime": "Date & Time",
+        "customer": "Customer",
+        "phone": "Phone",
+        "town": "Town",
+        "orderId": "Order #",
+        "status": "Status",
+        "products": "Products",
+        "totalProducts": "Total Products",
+        "notes": "Notes",
+        "at": "at"
+      },
+      "actions": {
+        "cancel": "🗑️ Cancel",
+        "delete": "🗑️ Delete",
+        "complete": "✅ Installation Completed",
+        "completed": "Installation Completed",
+        "markAsCompleted": "✅ Mark as Completed",
+        "reschedule": "📅 Reschedule",
+        "close": "Close"
+      },
+      "reschedule": {
+        "title": "Reschedule Installation",
+        "currentTime": "Current Time",
+        "customer": "Customer",
+        "order": "Order",
+        "chooseNewTime": "Choose New Time",
+        "currentSlot": "Current",
+        "rescheduling": "Rescheduling...",
+        "cancel": "Cancel"
+      },
+      "confirmCancel": {
+        "title": "Delete Confirmation",
+        "message": "Choose how to proceed with this installation:",
+        "details": {
+          "date": "Date",
+          "customer": "Customer",
+          "order": "Order"
+        },
+        "note": "Note",
+        "noteMessage": "The order will be returned to \"confirmed\" status and can be rescheduled again.",
+        "cancelling": "Processing...",
+        "confirm": "🗑️ Cancel Installation",
+        "cancel": "Cancel",
+        "deleteFromDB": "🗑️ Delete from Database",
+        "returnToOrders": "📋 Return to Orders",
+        "deleteFromDBDesc": "Completely delete the installation from database",
+        "returnToOrdersDesc": "Return to order management with status \"Returned from calendar\""
+      },
+      "messages": {
+        "cancelSuccess": "Installation was successfully cancelled",
+        "cancelReason": "Cancelled by administrator",
+        "rescheduleReason": "Rescheduled by administrator",
+        "errorLoadingSlots": "Error loading available slots",
+        "rescheduleSuccess": "Installation was successfully rescheduled for {{date}} at {{time}}",
+        "rescheduleError": "Error: {{message}}",
+        "rescheduleErrorGeneric": "Error rescheduling installation",
+        "markAsInstalledSuccess": "Installation was successfully marked as completed",
+        "markAsInstalledError": "Error: {{error}}",
+        "markAsInstalledErrorGeneric": "Error marking installation as completed",
+        "cancelError": "Error: {{message}}",
+        "cancelErrorGeneric": "Error cancelling installation",
+        "deleteFromDBSuccess": "Installation was successfully deleted from database",
+        "returnToOrdersSuccess": "Order was returned to order management",
+        "returnToOrdersReason": "Returned from calendar"
+      }
+    },
+    "analytics": {
+      "title": "Analytics Dashboard",
+      "loading": "Loading analytics...",
+      "refresh": "Refresh Data",
+      "totalOrders": "Total Orders",
+      "totalRevenue": "Total Revenue",
+      "installationRate": "Installation Rate",
+      "accessoryOrders": "Accessory Orders",
+      "installationStats": "Installation Statistics",
+      "withInstallation": "With Installation",
+      "withoutInstallation": "Without Installation",
+      "accessoryUsage": "Accessory Usage",
+      "accessoryName": "Accessory Name",
+      "timesOrdered": "Times Ordered",
+      "percentage": "Percentage",
+      "chart": "Chart",
+      "noAccessoryData": "No accessory data available",
+      "topSellingByBTU": "Top Selling by BTU Capacity",
+      "btuCapacity": "BTU Capacity",
+      "unitsSold": "Units Sold",
+      "noBTUData": "No BTU data available",
+      "topSellingByEnergyRating": "Top Selling by Energy Rating",
+      "energyRating": "Energy Rating",
+      "noEnergyRatingData": "No energy rating data available",
+      "salesOverTime": "Sales Over Time",
+      "noTimeData": "No sales data available"
+    }
+  },
+  "productDetail": {
+    "loading": "Loading",
+    "notFound": "Product not found",
+    "backToBuy": "Back to Products",
+    "technicalSpecs": "Technical Specifications",
+    "specsTabs": {
+      "overview": "Overview",
+      "technical": "Technical Details",
+      "physical": "Physical Characteristics"
+    },
+    "features": "Features",
+    "options": "Options & Accessories",
+    "accessories": "Accessories",
+    "total": "Total",
+    "addToCart": "Add to Cart",
+    "outOfStock": "Out of Stock",
+    "metaTitle": "Air Conditioner",
+    "metaDescription": "Professional air conditioner with installation and warranty",
+    "stock": {
+      "inStock": "In Stock",
+      "lowStock": "Low Stock",
+      "outOfStock": "Out of Stock",
+      "available": "available",
+      "outOfStockShort": "Out of stock"
+    },
+    "specs": {
+      "capacity": "Capacity",
+      "energyRating": "Energy Rating",
+      "type": "Type",
+      "warranty": "Warranty",
+      "noise": "Noise Level",
+      "power": "Power Consumption",
+      "airflow": "Air Flow",
+      "dimensions": "Dimensions",
+      "weight": "Weight",
+      "color": "Color",
+      "operatingRange": "Operating Range",
+      "refrigerant": "Refrigerant",
+      "installation": "Installation",
+      "stock": "Stock",
+      "indoorDimensions": "Indoor Dimensions",
+      "outdoorDimensions": "Outdoor Dimensions",
+      "indoorWeight": "Indoor Weight",
+      "outdoorWeight": "Outdoor Weight",
+      "roomSize": "Room Size"
+    },
+    "tooltips": {
+      "cop": "Coefficient of Performance - Higher values mean better energy efficiency for cooling",
+      "scop": "Seasonal COP - Average efficiency throughout the year including heating mode",
+      "powerConsumption": "Maximum electrical power consumption when the unit is running at full capacity",
+      "refrigerantType": "Type of refrigerant gas used - R32 is more eco-friendly than older types",
+      "operatingTempRange": "Temperature range within which the unit can operate effectively",
+      "dimensions": "Physical dimensions of the indoor unit: Width × Height × Depth",
+      "weight": "Weight of the indoor unit - important for wall mounting considerations",
+      "noiseLevel": "Sound level during operation - lower values mean quieter operation",
+      "airFlow": "Maximum air circulation capacity - higher values cool larger spaces faster",
+      "installationType": "Recommended installation method for optimal performance",
+      "stock": "Current availability - shows how many units are in stock",
+      "color": "Available color options for the unit casing",
+      "roomSizeRecommendation": "Recommended room size for optimal cooling efficiency"
+    },
+    "installation": {
+      "title": "Professional Installation",
+      "description": "Professional installation service by certified technicians",
+      "perUnit": "per unit"
+    },
+    "loadingAccessories": "Loading accessories",
+    "noAccessories": "No accessories available for this product",
+    "warranty": {
+      "default": "2 years",
+      "years": "years"
+    },
+    "currency": {
+      "bgn": "BGN",
+      "eur": "EUR"
+    },
+    "pricing": {
+      "was": "Was:",
+      "save": "Save",
+      "discount": "Discount"
+    },
+    "quantity": {
+      "label": "Quantity",
+      "min": "Minimum quantity: 1",
+      "max": "Maximum quantity: 10"
+    },
+    "priceBreakdown": {
+      "product": "Product",
+      "accessories": "Accessories",
+      "installation": "Installation",
+      "subtotal": "Subtotal",
+      "each": "each",
+      "perUnit": "per unit"
+    },
+    "accessoryNames": {
+      "Condensate Tray": "Condensate Tray",
+      "Condensate Tray with Heater and Thermostat": "Condensate Tray with Heater and Thermostat",
+      "Anti-vibration Mount Kit": "Anti-vibration Mount Kit"
+    }
+  },
+  "inquiryManagement": {
+    "title": "Inquiry Management",
+    "tabTitle": "Inquiries",
+    "loading": "Loading inquiries...",
+    "overview": {
+      "totalInquiries": "Total Inquiries",
+      "newInquiries": "New Inquiries",
+      "unreadCount": "{{count}} unread",
+      "todayInquiries": "Today's Inquiries"
+    },
+    "table": {
+      "columns": {
+        "dateTime": "Date/Time",
+        "customerName": "Customer Name",
+        "email": "Email",
+        "phone": "Phone",
+        "inquiryType": "Type",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "viewDetails": "View Details",
+        "markAsRead": "Mark as Read",
+        "markAsResponded": "Mark as Responded",
+        "archive": "Archive",
+        "delete": "Delete",
+        "copyEmail": "Copy Email"
+      }
+    },
+    "status": {
+      "new": "New",
+      "read": "Read",
+      "responded": "Responded",
+      "archived": "Archived"
+    },
+    "filters": {
+      "all": "All Inquiries",
+      "new": "New Only",
+      "unread": "Unread",
+      "responded": "Responded",
+      "archived": "Archived",
+      "byType": "Filter by Type",
+      "byDate": "Filter by Date",
+      "types": {
+        "residential": "Residential",
+        "commercial": "Commercial",
+        "industrial": "Industrial",
+        "service": "Service",
+        "consultation": "Consultation",
+        "other": "Other"
+      }
+    },
+    "detailView": {
+      "title": "Inquiry Details",
+      "customerInfo": "Customer Information",
+      "inquiryDetails": "Inquiry Details",
+      "adminActions": "Admin Actions",
+      "responseHistory": "Response History",
+      "fields": {
+        "fullName": "Full Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "company": "Company/Organization",
+        "inquiryType": "Inquiry Type",
+        "budget": "Budget Range",
+        "message": "Message",
+        "submittedAt": "Submitted At",
+        "status": "Current Status"
+      },
+      "actions": {
+        "changeStatus": "Change Status",
+        "addNotes": "Add Admin Notes",
+        "sendResponse": "Send Response",
+        "markAsRead": "Mark as Read",
+        "archive": "Archive Inquiry",
+        "delete": "Delete Inquiry",
+        "saveNotes": "Save Notes",
+        "cancel": "Cancel"
+      }
+    },
+    "messages": {
+      "success": {
+        "inquirySubmitted": "Inquiry submitted successfully!",
+        "statusUpdated": "Status updated successfully",
+        "notesSaved": "Admin notes saved",
+        "inquiryArchived": "Inquiry archived",
+        "inquiryDeleted": "Inquiry deleted"
+      },
+      "error": {
+        "submissionFailed": "Failed to submit inquiry. Please try again.",
+        "updateFailed": "Failed to update status",
+        "loadFailed": "Failed to load inquiries",
+        "deleteFailed": "Failed to delete inquiry"
+      },
+      "confirm": {
+        "deleteInquiry": "Are you sure you want to delete this inquiry?",
+        "archiveInquiry": "Are you sure you want to archive this inquiry?",
+        "markAsRead": "Mark this inquiry as read?"
+      }
+    },
+    "bulkActions": {
+      "title": "Bulk Actions",
+      "markAsRead": "Mark Selected as Read",
+      "markAsResponded": "Mark Selected as Responded",
+      "archive": "Archive Selected",
+      "delete": "Delete Selected",
+      "noSelection": "Please select inquiries to perform bulk actions"
+    },
+    "search": {
+      "placeholder": "Search by name, email, or company...",
+      "noResults": "No inquiries found matching your search",
+      "retry": "Retry"
+    }
+  }
+} 
