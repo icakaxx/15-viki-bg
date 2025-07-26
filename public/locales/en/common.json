@@ -245,6 +245,15 @@
       "bestseller": "BESTSELLER",
       "new": "NEW"
     },
+    "discount": {
+      "off": "OFF"
+    },
+    "actionButtons": {
+      "redButton": "ACTION 1",
+      "greenButton": "ACTION 2",
+      "moreSpecs": "+{{count}} More",
+      "buyOnInstallment": "See credit plans"
+    },
     "types": {
       "split": "Split",
       "cassette": "Cassette",

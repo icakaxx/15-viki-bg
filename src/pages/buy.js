@@ -47,7 +47,6 @@ const BuyPage = () => {
   // Filter states
   const [filters, setFilters] = useState({
     brands: [],
-    types: [],
     capacities: [],
     energyRatings: [],
     colors: [],
@@ -62,6 +61,8 @@ const BuyPage = () => {
 
   // Price bounds state
   const [priceBounds, setPriceBounds] = useState({ min: 0, max: 10000 });
+  
+
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -112,7 +113,6 @@ const BuyPage = () => {
   // Get unique filter options and counts
   const filterOptions = useMemo(() => {
     const brands = {};
-    const types = {};
     const capacities = {};
     const energyRatings = {};
     const colors = {};
@@ -121,8 +121,7 @@ const BuyPage = () => {
       // Count brands
       brands[product.Brand] = (brands[product.Brand] || 0) + 1;
       
-      // Count types
-      types[product.Type] = (types[product.Type] || 0) + 1;
+
       
       // Count capacities
       const capacity = product.CapacityBTU;
@@ -137,12 +136,11 @@ const BuyPage = () => {
       }
     });
 
-    return { brands, types, capacities, energyRatings, colors };
+    return { brands, capacities, energyRatings, colors };
   }, [products]);
 
   // Get unique values for filters
   const uniqueBrands = [...new Set(products.map(p => p.Brand))].filter(Boolean).sort();
-  const uniqueTypes = [...new Set(products.map(p => p.Type))].filter(Boolean).sort();
   const uniqueCapacities = [...new Set(products.map(p => p.CapacityBTU))].filter(val => val != null && val !== undefined && !isNaN(val)).sort((a, b) => a - b);
   const uniqueEnergyRatings = [...new Set(products.map(p => p.EnergyRating))].filter(Boolean).sort();
   const uniqueColors = [...new Set(products.map(p => p.Colour))].filter(Boolean).sort();
@@ -157,10 +155,7 @@ const BuyPage = () => {
         return false;
       }
       
-      // Type filter
-      if (activeFilters.types.length > 0 && !activeFilters.types.includes(product.Type)) {
-        return false;
-      }
+
       
       // Capacity filter
       if (activeFilters.capacities.length > 0 && !activeFilters.capacities.includes(product.CapacityBTU)) {
@@ -272,7 +267,6 @@ const BuyPage = () => {
     
     const defaultFilters = {
       brands: [],
-      types: [],
       capacities: [],
       energyRatings: [],
       colors: [],
@@ -291,7 +285,6 @@ const BuyPage = () => {
     // Create a clean copy of current filters for mobile editing
     setTempMobileFilters({
       brands: [...filters.brands],
-      types: [...filters.types],
       capacities: [...filters.capacities],
       energyRatings: [...filters.energyRatings],
       colors: [...filters.colors],
@@ -332,7 +325,6 @@ const BuyPage = () => {
     const activeFilters = tempMobileFilters || filters;
     let count = 0;
     count += activeFilters.brands.length;
-    count += activeFilters.types.length;
     count += activeFilters.capacities.length;
     count += activeFilters.energyRatings.length;
     count += activeFilters.colors.length;
@@ -376,12 +368,7 @@ const BuyPage = () => {
     }).format(eurPrice);
   };
 
-  // Helper function to translate AC types
-  const translateType = (type) => {
-    if (!type) return '';
-    const typeKey = type.toLowerCase();
-    return t(`buyPage.types.${typeKey}`) || type;
-  };
+
 
   // Helper function to translate features
   const translateFeature = (feature) => {
@@ -468,6 +455,8 @@ const BuyPage = () => {
     
     return warranty; // Return original if no translation found
   };
+
+
 
   // Handle escape key and back button
   useEffect(() => {
@@ -599,23 +588,7 @@ const BuyPage = () => {
               </div>
             </div>
 
-            {/* Type Filter */}
-            <div className={styles.filterGroup}>
-              <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.type')}</h3>
-              <div className={styles.filterOptions}>
-                {uniqueTypes.map(type => (
-                  <label key={type} className={styles.filterOption}>
-                    <input
-                      type="checkbox"
-                      className={styles.filterCheckbox}
-                      checked={currentFilters.types.includes(type)}
-                      onChange={() => filterChangeHandler('types', type)}
-                    />
-                    <span className={styles.filterLabel}>{translateType(type)}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+
 
             {/* Capacity Filter */}
             <div className={styles.filterGroup}>
@@ -806,12 +779,33 @@ const BuyPage = () => {
               <>
                 <div className={styles.grid}>
                   {currentProducts.map((product, index) => {
-                  const discount = calculateDiscount(product.Price, product.PreviousPrice);
+                  // Dynamic discount calculation system
+                  let discount, previousPrice, currentPrice, calculatedPrice;
+                  
+                  if (product.Discount > 0) {
+                    // If discount percentage is provided, calculate the discounted price dynamically
+                    discount = product.Discount;
+                    previousPrice = product.PreviousPrice || product.Price; // Original price (before discount)
+                    calculatedPrice = previousPrice * (1 - discount / 100); // Calculate discounted price
+                    currentPrice = calculatedPrice; // Use calculated price for display
+                  } else if (product.PreviousPrice && product.PreviousPrice > product.Price) {
+                    // If previous price is provided and higher than current price, calculate discount
+                    discount = calculateDiscount(product.Price, product.PreviousPrice);
+                    previousPrice = product.PreviousPrice;
+                    currentPrice = product.Price;
+                  } else {
+                    // No discount
+                    discount = 0;
+                    previousPrice = null;
+                    currentPrice = product.Price;
+                  }
+                  
                   // Use actual product data for promotional flags instead of config file
                 const flags = {
                   IsNew: product.IsNew || false,
                   IsBestseller: product.IsBestseller || false,
-                  IsFeatured: product.IsFeatured || false
+                  IsFeatured: product.IsFeatured || false,
+                  HasDiscount: discount > 0
                 };
                   
                   return (
@@ -829,7 +823,7 @@ const BuyPage = () => {
                       <Link href={`/buy/${product.ProductID}`} className={styles.productLink}>
                         <div className={styles.imageContainer}>
                           {/* Promotional Badges */}
-                          {(flags.IsFeatured || flags.IsBestseller || flags.IsNew) && (
+                          {(flags.IsFeatured || flags.IsBestseller || flags.IsNew || flags.HasDiscount) && (
                             <div className={styles.promotionalBadges}>
                               {flags.IsNew && (
                                 <span className={`${styles.badge} ${styles.new}`} title={t ? t('buyPage.badges.new') : 'New Product'}>
@@ -844,6 +838,11 @@ const BuyPage = () => {
                               {flags.IsFeatured && (
                                 <span className={`${styles.badge} ${styles.featured}`} title={t ? t('buyPage.badges.featured') : 'Featured Product'}>
                                   {t ? t('buyPage.badges.featured') : 'FEATURED'}
+                                </span>
+                              )}
+                              {flags.HasDiscount && (
+                                <span className={`${styles.badge} ${styles.discount}`} title={`${discount}% discount`}>
+                                  🔥 {discount}% {t ? t('buyPage.discount.off') : 'OFF'}
                                 </span>
                               )}
                             </div>
@@ -866,9 +865,6 @@ const BuyPage = () => {
                           </h2>
                           
                           <div className={styles.specs}>
-                            <div className={styles.spec}>
-                              <span className={styles.specLabel}>{t ? t('buyPage.type') : 'Type'}:</span> {translateType(product.Type)}
-                            </div>
                             <div className={styles.spec}>
                               <span className={styles.specLabel}>{t ? t('buyPage.capacity') : 'Capacity'}:</span> {product.CapacityBTU} BTU
                             </div>
@@ -927,27 +923,74 @@ const BuyPage = () => {
                               </span>
                             )}
                           </div>
+                          
+                          {/* Installment Text */}
+                          <div className={styles.installmentText}>
+                            {t('buyPage.actionButtons.buyOnInstallment')}
+                          </div>
+                          
+                          {/* Action Buttons */}
+                          <div className={styles.actionButtons}>
+                            <button 
+                              className={`${styles.actionButton} ${styles.actionButtonRed}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // TODO: Add red button functionality
+                                console.log('Red button clicked for product:', product.ProductID);
+                              }}
+                            >
+                              <img 
+                                src="https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg//UniCredit.jpg"
+                                alt="UniCredit"
+                                className={styles.buttonImage}
+                              />
+                            </button>
+                            <button 
+                              className={`${styles.actionButton} ${styles.actionButtonGreen}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // TODO: Add green button functionality
+                                console.log('Green button clicked for product:', product.ProductID);
+                              }}
+                            >
+                              <img 
+                                src="https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg//dsk.png"
+                                alt="DSK"
+                                className={styles.buttonImage}
+                              />
+                            </button>
+                          </div>
                         </div>
                         
                         <div className={styles.pricing}>
-                          <div className={styles.priceContainer}>
-                            <span className={styles.price}>
-                              {formatPrice(product.Price)} / {formatPriceEUR(product.Price)}
-                            </span>
-                          </div>
-                          {product.PreviousPrice && product.PreviousPrice > product.Price && (
+                          {discount > 0 ? (
                             <>
-                              <div className={styles.previousPriceContainer}>
-                                <span className={styles.previousPrice}>
-                                  {formatPrice(product.PreviousPrice)} / {formatPriceEUR(product.PreviousPrice)}
+                              {/* Original Price (Crossed Out) */}
+                              <div className={styles.originalPriceContainer}>
+                                <span className={styles.originalPrice}>
+                                  {formatPrice(previousPrice)} / {formatPriceEUR(previousPrice)}
                                 </span>
                               </div>
-                              {discount && (
-                                <span className={styles.discount}>-{discount}%</span>
-                              )}
+                              {/* Current Price (Dynamically Calculated) */}
+                              <div className={styles.currentPriceContainer}>
+                                <span className={styles.currentPrice}>
+                                  {formatPrice(currentPrice)} / {formatPriceEUR(currentPrice)}
+                                </span>
+                                {discount && (
+                                  <span className={styles.discountBadge}>-{discount}%</span>
+                                )}
+                              </div>
                             </>
+                          ) : (
+                            /* Regular Price (No Discount) */
+                            <div className={styles.priceContainer}>
+                              <span className={styles.price}>
+                                {formatPrice(currentPrice)} / {formatPriceEUR(currentPrice)}
+                              </span>
+                            </div>
                           )}
-
                         </div>
                       </Link>
                       
@@ -1058,23 +1101,7 @@ const BuyPage = () => {
                     ))}
                   </div>
                 </div>
-                {/* Type Filter */}
-                <div className={styles.filterGroup}>
-                  <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.type')}</h3>
-                  <div className={styles.filterOptions}>
-                    {uniqueTypes.map(type => (
-                      <label key={type} className={styles.filterOption}>
-                        <input
-                          type="checkbox"
-                          className={styles.filterCheckbox}
-                          checked={(tempMobileFilters || filters).types.includes(type)}
-                          onChange={() => handleFilterChangeMobileSafe('types', type)}
-                        />
-                        <span className={styles.filterLabel}>{translateType(type)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+
                 {/* Capacity Filter */}
                 <div className={styles.filterGroup}>
                   <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.capacity')}</h3>

@@ -19,7 +19,6 @@ export default async function handler(req, res) {
         brand, 
         model, 
         colour, 
-        type, 
         capacity_btu, 
         energy_rating, 
         price,
@@ -31,7 +30,6 @@ export default async function handler(req, res) {
         cop = null,
         scop = null,
         power_consumption = null,
-        refrigerant_type = 'R32',
         operating_temp_range = null,
         // Physical Characteristics
         indoor_dimensions = null,
@@ -107,7 +105,6 @@ export default async function handler(req, res) {
             brand,
             model,
             colour,
-            type,
             capacity_btu,
             energy_rating,
             price: parseFloat(price),
@@ -120,7 +117,6 @@ export default async function handler(req, res) {
             cop: cop ? parseFloat(cop) : null,
             scop: scop ? parseFloat(scop) : null,
             power_consumption,
-            refrigerant_type,
             operating_temp_range,
             // Physical Characteristics
             indoor_dimensions,
@@ -146,15 +142,14 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Server-side duplicate check: brand + model + capacity_btu + type
-        if (capacity_btu && type) {
+        // Server-side duplicate check: brand + model + capacity_btu
+        if (capacity_btu) {
             const { data: existingProducts, error: checkError } = await supabase
                 .from('products')
-                .select('id, brand, model, capacity_btu, type')
+                .select('id, brand, model, capacity_btu')
                 .eq('brand', brand)
                 .eq('model', model)
                 .eq('capacity_btu', capacity_btu)
-                .eq('type', type)
                 .eq('is_archived', false);
 
             if (checkError) {
@@ -165,7 +160,7 @@ export default async function handler(req, res) {
             if (existingProducts && existingProducts.length > 0) {
                 return res.status(409).json({ 
                     error: 'Product already exists',
-                    message: `A product with brand "${brand}", model "${model}", capacity "${capacity_btu} BTU", and type "${type}" already exists.`,
+                    message: `A product with brand "${brand}", model "${model}", and capacity "${capacity_btu} BTU" already exists.`,
                     existingProduct: existingProducts[0]
                 });
             }
@@ -176,7 +171,6 @@ export default async function handler(req, res) {
             brand,
             model,
             colour,
-            type,
             capacity_btu: capacity_btu ? parseInt(capacity_btu) : null,
             energy_rating,
             price: parseFloat(price),
@@ -189,7 +183,6 @@ export default async function handler(req, res) {
             cop: cop ? parseFloat(cop) : null,
             scop: scop ? parseFloat(scop) : null,
             power_consumption,
-            refrigerant_type,
             operating_temp_range,
             // Physical Characteristics
             indoor_dimensions,

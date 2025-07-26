@@ -229,7 +229,7 @@
     "discount": {
       "off": "ОТСТЪПКА"
     },
-    "btu": "БТЕ",
+          "btu": "BTU",
     "color": "Цвят",
     "priceNote": "Цените в евро са приблизителни",
     "inStock": "В наличност",
@@ -279,7 +279,7 @@
       "clearAll": "Изчисти всички",
       "brand": "Марка",
       "type": "Тип",
-      "capacity": "Мощност (БТЕ)",
+      "capacity": "Мощност (BTU)",
       "energyRating": "Енергиен клас",
       "color": "Цвят",
       "priceRange": "Ценови диапазон",
@@ -303,6 +303,15 @@
       "featured": "ПРЕПОРЪЧАН",
       "bestseller": "НАЙ-ПРОДАВАН",
       "new": "НОВ"
+    },
+    "discount": {
+      "off": "ОТСТЪПКА"
+    },
+    "actionButtons": {
+      "redButton": "ДЕЙСТВИЕ 1",
+      "greenButton": "ДЕЙСТВИЕ 2",
+      "moreSpecs": "+{{count}} Още",
+      "buyOnInstallment": "Купи на изплащане"
     },
     "types": {
       "split": "Разделен",
