@@ -50,15 +50,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // If Supabase is not configured, return mock data
-  if (!supabase) {
-    console.log('⚠️  Supabase not configured, using mock analytics data');
-    return res.status(200).json(mockAnalytics);
-  }
-
-  try {
-    console.log('📊 Fetching analytics data from Supabase...');
-    
+  try {    
     // Initialize results
     const analyticsData = {
       accessoryUsage: [],
@@ -71,13 +63,11 @@ export default async function handler(req, res) {
     };
 
     // 1. Accessory Usage
-    console.log('📈 Fetching accessory usage...');
     try {
       const { data: accessoryData, error: accessoryError } = await supabase
         .rpc('get_accessory_usage');
 
       if (accessoryError) {
-        console.warn('Accessory usage query failed:', accessoryError);
         // Fallback query
         const { data: fallbackAccessoryData, error: fallbackAccessoryError } = await supabase
           .from('order_accessories')
@@ -106,7 +96,6 @@ export default async function handler(req, res) {
     }
 
     // 2. Installation Statistics
-    console.log('🔧 Fetching installation statistics...');
     try {
       const { data: installationData, error: installationError } = await supabase
         .from('payment_and_tracking')
@@ -130,7 +119,6 @@ export default async function handler(req, res) {
     }
 
     // 3. Top Selling by BTU
-    console.log('⚡ Fetching top selling by BTU...');
     try {
       const { data: btuData, error: btuError } = await supabase
         .from('order_items')
@@ -159,7 +147,6 @@ export default async function handler(req, res) {
     }
 
     // 4. Top Selling by Energy Rating
-    console.log('🌟 Fetching top selling by energy rating...');
     try {
       const { data: energyData, error: energyError } = await supabase
         .from('order_items')
@@ -184,7 +171,6 @@ export default async function handler(req, res) {
     }
 
     // 5. Sales Over Time (weekly)
-    console.log('📅 Fetching sales over time...');
     try {
       const { data: timeData, error: timeError } = await supabase
         .from('orders')
@@ -214,7 +200,6 @@ export default async function handler(req, res) {
     }
 
     // 6. Total Orders and Revenue
-    console.log('💰 Calculating totals...');
     try {
       // Total orders
       const { count: totalOrdersCount, error: ordersCountError } = await supabase
@@ -255,23 +240,12 @@ export default async function handler(req, res) {
       console.error('Error calculating totals:', err);
     }
 
-    console.log('✅ Analytics data compiled successfully');
-    console.log('📊 Results:', {
-      accessoryUsageCount: analyticsData.accessoryUsage.length,
-      totalOrders: analyticsData.totalOrders,
-      totalRevenue: analyticsData.totalRevenue,
-      btuCategoriesCount: analyticsData.topSellingByBTU.length,
-      energyRatingsCount: analyticsData.topSellingByEnergyRating.length,
-      timePeriodsCount: analyticsData.salesOverTime.length
-    });
-
     return res.status(200).json(analyticsData);
 
   } catch (error) {
     console.error('Analytics API error:', error);
-    
+
     // Return mock data as fallback
-    console.log('📊 Returning mock analytics data due to error');
     return res.status(200).json({
       ...mockAnalytics,
       error: 'Using mock data due to database error',

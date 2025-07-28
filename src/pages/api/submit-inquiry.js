@@ -44,12 +44,7 @@ export default async function handler(req, res) {
       message 
     } = req.body;
 
-    console.log('Inquiry submission received:', {
-      fullName,
-      emailAddress,
-      inquiryType,
-      hasMessage: !!message
-    });
+
 
     // Validate required fields
     if (!fullName || !emailAddress || !inquiryType || !message) {
@@ -81,7 +76,7 @@ export default async function handler(req, res) {
       created_at: new Date().toISOString()
     };
 
-    console.log('Saving inquiry to database:', inquiryData);
+
 
     // Insert inquiry into database
     const { data: savedInquiry, error: insertError } = await supabase
@@ -98,7 +93,7 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('Inquiry saved successfully:', savedInquiry.id);
+
 
     // Return success response
     return res.status(200).json({

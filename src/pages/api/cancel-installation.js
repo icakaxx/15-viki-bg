@@ -42,25 +42,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Cancelling installation ${searchId}`);
-
-    // Check if this is a mock order (order_id >= 1000)
-    const isMockOrder = searchId >= 1000;
-    
-    if (isMockOrder) {
-      console.log(`Mock order ${searchId} detected - returning success for testing`);
-      return res.status(200).json({
-        success: true,
-        order_id: searchId,
-        installation_id: searchId,
-        cancelled_schedule: {
-          date: '2025-07-26', // Mock cancelled date
-          time: '08:00'       // Mock cancelled time
-        },
-        message: 'Mock installation cancelled successfully'
-      });
-    }
-
     // 1. Fetch existing installation schedule
     let query = supabase
       .from('installation_schedule')
@@ -77,7 +58,6 @@ export default async function handler(req, res) {
       : await query.maybeSingle(); // Use .maybeSingle() when searching by order_id
 
     if (fetchError || !existingInstallation) {
-      console.error('Error fetching existing installation:', fetchError);
       return res.status(404).json({ 
         error: 'Installation not found',
         message: `No installation schedule found for ${searchField} ${searchId}`
@@ -96,7 +76,6 @@ export default async function handler(req, res) {
       .single();
 
     if (orderError) {
-      console.error('Error fetching order status:', orderError);
       return res.status(404).json({ 
         error: 'Order not found in payment tracking',
         details: orderError.message
@@ -112,7 +91,6 @@ export default async function handler(req, res) {
       .eq('id', installationId);
 
     if (deleteError) {
-      console.error('Error deleting installation schedule:', deleteError);
       return res.status(500).json({ 
         error: 'Failed to cancel installation schedule',
         details: deleteError.message
@@ -127,7 +105,6 @@ export default async function handler(req, res) {
       .eq('order_id', existingInstallation.order_id);
 
     if (statusUpdateError) {
-      console.error('Error updating order status:', statusUpdateError);
       // Try to restore the installation schedule if status update fails
       await supabase
         .from('installation_schedule')
@@ -159,11 +136,8 @@ export default async function handler(req, res) {
       }]).eq('order_id', existingInstallation.order_id);
 
     if (historyError) {
-      console.error('Error logging cancellation history:', historyError);
       // Don't fail the entire request if history logging fails, but warn
     }
-
-    console.log(`Installation successfully cancelled for order ${existingInstallation.order_id}. Schedule was: ${cancelledDate} ${cancelledTime}`);
 
     return res.status(200).json({
       success: true,
@@ -182,7 +156,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error in cancel-installation:', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message || 'Unknown error occurred'

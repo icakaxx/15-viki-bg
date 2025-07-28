@@ -234,23 +234,6 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Mock mode - if Supabase is not configured
-    if (!supabase) {
-        console.log('⚠️  Supabase not configured, simulating multiple product creation');
-        const mockProducts = newProducts.map((product, index) => ({
-            ...product,
-            id: Math.floor(Math.random() * 1000) + 200 + index,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        }));
-        
-        return res.status(201).json({ 
-            message: 'Products added successfully (mock mode)',
-            products: mockProducts,
-            count: mockProducts.length
-        });
-    }
-
     try {
         const addedProducts = [];
         const errors = [];
@@ -267,7 +250,6 @@ export default async function handler(req, res) {
                     .eq('is_archived', false);
 
                 if (checkError) {
-                    console.error('Error checking for duplicates:', checkError);
                     errors.push(`Error checking duplicates for ${product.brand} ${product.model}: ${checkError.message}`);
                     continue;
                 }
@@ -285,13 +267,11 @@ export default async function handler(req, res) {
                     .single();
 
                 if (insertError) {
-                    console.error('Error inserting product:', insertError);
                     errors.push(`Error adding ${product.brand} ${product.model}: ${insertError.message}`);
                 } else {
                     addedProducts.push(insertedProduct);
                 }
             } catch (error) {
-                console.error('Error processing product:', error);
                 errors.push(`Error processing ${product.brand} ${product.model}: ${error.message}`);
             }
         }
@@ -304,7 +284,6 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('Error adding products:', error);
         return res.status(500).json({ 
             error: 'Internal server error',
             message: error.message 

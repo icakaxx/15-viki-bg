@@ -56,7 +56,7 @@ try {
     supabase = createClient(supabaseUrl, supabaseKey, {
       auth: { persistSession: false }
     });
-    console.log('✓ Supabase client initialized');
+
   }
 } catch (error) {
   console.error('⚠️ Failed to initialize Supabase client:', error);
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
 
     // Use Supabase
     try {
-        console.log('🔍 Querying Supabase for products...');
+
         // Start with basic columns that should always exist
         let query = supabase.from('products').select(`
             id,

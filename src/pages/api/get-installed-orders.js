@@ -38,7 +38,6 @@ export default async function handler(req, res) {
   );
 
   try {
-    console.log('📊 Fetching installed orders...');
     
     // First, get orders with 'installed' status
     let query = supabase
@@ -65,7 +64,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Found ${installedOrders?.length || 0} installed orders`);
     if (!installedOrders || installedOrders.length === 0) {
       return res.status(200).json({
         data: [],
@@ -105,7 +103,6 @@ export default async function handler(req, res) {
             console.warn(`Error fetching order items for order ${orderId}:`, itemsError);
           }
           
-          console.log(`Order ${orderId} has ${orderItems?.length || 0} items`);
 
           // Get product details for each item
           const products = [];
@@ -113,7 +110,6 @@ export default async function handler(req, res) {
 
           if (orderItems) {
             for (const item of orderItems) {
-              console.log(`Looking for product with ID: ${item.product_id}`);
               
               // Try both possible column names for product ID
               let { data: product, error: productError } = await supabase
@@ -124,7 +120,6 @@ export default async function handler(req, res) {
 
               // If ProductID doesn't work, try 'id'
               if (productError || !product) {
-                console.log(`ProductID lookup failed, trying 'id' column...`);
                 const result = await supabase
                   .from('products')
                   .select('brand, model, price')
@@ -136,7 +131,6 @@ export default async function handler(req, res) {
               }
 
               if (product && !productError) {
-                console.log(`Found product: ${product.brand} ${product.model} - €${product.price}`);
                 const itemPrice = parseFloat(product.price) * item.quantity;
                 totalPrice += itemPrice;
 
@@ -191,7 +185,6 @@ export default async function handler(req, res) {
             total_price_eur: Math.round((totalPrice / EUR_RATE) * 100) / 100
           };
 
-          console.log(`Order ${orderId} summary: ${products.length} products, total: ${totalPrice} BGN`);
           return orderResult;
 
         } catch (detailError) {
@@ -232,8 +225,6 @@ export default async function handler(req, res) {
     // Apply pagination
     const totalCount = validOrders.length;
     const paginatedOrders = validOrders.slice(offset, offset + limit);
-
-    console.log(`Returning ${paginatedOrders.length} orders (${totalCount} total)`);
 
     return res.status(200).json({
       data: paginatedOrders,

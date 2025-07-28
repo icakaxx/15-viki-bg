@@ -14,8 +14,6 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    console.log('Edit product API received data:', req.body);
-
     // Validate required fields
     const { 
         id,
@@ -55,17 +53,14 @@ export default async function handler(req, res) {
     } = req.body;
 
     // Server-side validation
-    console.log('Validation check - id:', id, 'brand:', brand, 'model:', model, 'price:', price);
     
     if (!id) {
-        console.log('Validation failed: Missing id');
         return res.status(400).json({ 
             error: 'Missing required field: id' 
         });
     }
 
     if (!brand || !model || price === undefined) {
-        console.log('Validation failed: Missing required fields. brand:', !!brand, 'model:', !!model, 'price defined:', price !== undefined);
         return res.status(400).json({ 
             error: 'Missing required fields: brand, model, price',
             details: {
@@ -122,7 +117,6 @@ export default async function handler(req, res) {
 
     // Mock mode - if Supabase is not configured
     if (!supabase) {
-        console.log('⚠️  Supabase not configured, simulating product update');
         const mockProduct = {
             id,
             brand,

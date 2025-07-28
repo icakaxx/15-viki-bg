@@ -24,21 +24,6 @@ export default async function handler(req, res) {
         });
     }
 
-    // Mock mode - if Supabase is not configured
-    if (!supabase) {
-        console.log('⚠️  Supabase not configured, simulating product archiving');
-        const mockProduct = {
-            id,
-            is_archived: true,
-            updated_at: new Date().toISOString()
-        };
-        
-        return res.status(200).json({ 
-            message: 'Product archived successfully (mock mode)',
-            product: mockProduct 
-        });
-    }
-
     try {
         // Check if product exists and is not already archived
         const { data: existingProduct, error: checkError } = await supabase
@@ -54,7 +39,6 @@ export default async function handler(req, res) {
                     message: `Product with id ${id} does not exist.`
                 });
             }
-            console.error('Error checking product existence:', checkError);
             return res.status(500).json({ error: 'Database error during product check' });
         }
 
@@ -74,7 +58,6 @@ export default async function handler(req, res) {
             .single();
 
         if (error) {
-            console.error('Archive error:', error);
             return res.status(500).json({ 
                 error: 'Database error',
                 message: error.message 
@@ -87,7 +70,6 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('Unexpected error in archive-product:', error);
         return res.status(500).json({ 
             error: 'Unexpected server error',
             message: error.message 

@@ -2,11 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
   // Debug environment variables
-  console.log('Environment variables:', {
-    SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'present' : 'missing',
-    SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'present' : 'missing',
-    NODE_ENV: process.env.NODE_ENV
-  });
 
   if (req.method === 'GET') {
     return res.status(200).json({ 
@@ -50,13 +45,6 @@ export default async function handler(req, res) {
     } = req.body;
 
     // Debug request data
-    console.log('Request body received:', {
-      hasPersonalInfo: !!personalInfo,
-      hasInvoiceInfo: !!invoiceInfo,
-      hasPaymentInfo: !!paymentInfo,
-      hasCartItems: !!cartItems,
-      cartItemsCount: cartItems?.length || 0
-    });
 
     // Validate required data
     if (!personalInfo || !personalInfo.firstName || !personalInfo.lastName || !personalInfo.phone) {
@@ -96,8 +84,7 @@ export default async function handler(req, res) {
       calculatedTotal += itemTotal;
     }
 
-    console.log('Backend calculated total:', calculatedTotal);
-    console.log('Frontend reported total:', paymentInfo.totalAmount);
+
 
     // Optional: Validate total (with small tolerance for floating point differences)
     if (paymentInfo.totalAmount && Math.abs(calculatedTotal - paymentInfo.totalAmount) > 0.01) {
@@ -109,7 +96,6 @@ export default async function handler(req, res) {
     }
 
     // Insert into orders table
-    console.log('Inserting guest order...');
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert([{
@@ -127,7 +113,7 @@ export default async function handler(req, res) {
       .select()
       .single();
 
-    console.log('Guest order result:', { orderData, orderError });
+
 
     if (orderError) throw orderError;
 
@@ -135,7 +121,6 @@ export default async function handler(req, res) {
 
     // Insert invoice information if enabled (optional - skip if table doesn't exist)
     if (invoiceInfo.invoiceEnabled) {
-      console.log('Inserting invoice info...');
       const invoiceData = {
         order_id: orderId,
         invoice_enabled: invoiceInfo.invoiceEnabled,
@@ -146,20 +131,20 @@ export default async function handler(req, res) {
         mol_custom: invoiceInfo.molCustom,
       };
       
-      console.log('Invoice data to insert:', invoiceData);
+
       
       try {
         const { data: invoiceResult, error: invoiceError } = await supabase
           .from('invoice_info')
           .insert([invoiceData]);
         
-        console.log('Invoice insert result:', { invoiceResult, invoiceError });
+
         
         if (invoiceError) {
           console.error('Invoice insert error:', invoiceError);
           console.warn('Invoice table insert failed - continuing without invoice tracking for now');
         } else {
-          console.log('Invoice info inserted successfully');
+
         }
       } catch (insertError) {
         console.error('Invoice insert try-catch error:', insertError);
@@ -168,7 +153,6 @@ export default async function handler(req, res) {
     }
 
     // Insert payment and tracking information with initial status
-    console.log('Inserting payment info...');
     
     const paymentData = {
       order_id: orderId,
@@ -176,7 +160,7 @@ export default async function handler(req, res) {
       total_amount: paymentInfo.totalAmount, // Use frontend total
       paid_amount: paymentInfo.paymentMethod === 'online' ? paymentInfo.totalAmount : 0
     };
-    console.log('Payment data to insert:', paymentData);
+
     
     try {
       const { data: paymentResult, error: paymentError } = await supabase
@@ -185,7 +169,7 @@ export default async function handler(req, res) {
         .select()
         .single();
       
-      console.log('Payment insert result:', { paymentResult, paymentError });
+
       
       if (paymentError) {
         console.error('Payment insert error details:', {
@@ -199,7 +183,7 @@ export default async function handler(req, res) {
         // Log the error but don't fail the entire order - table might not exist yet
         console.warn('Payment table insert failed - continuing without payment tracking for now');
       } else {
-        console.log('Payment info inserted successfully');
+
       }
     } catch (insertError) {
       console.error('Payment insert try-catch error:', insertError);
@@ -207,7 +191,6 @@ export default async function handler(req, res) {
     }
 
     // Insert order items (optional - skip if table doesn't exist)
-    console.log('Inserting order items...');
     const orderItems = cartItems.map(item => ({
       order_id: orderId,
       product_id: item.productId,
@@ -222,27 +205,27 @@ export default async function handler(req, res) {
       })) : null
     }));
 
-    console.log('Order items to insert:', orderItems);
+
 
     try {
       const { data: itemsResult, error: itemsError } = await supabase
         .from('order_items')
         .insert(orderItems);
       
-      console.log('Order items insert result:', { itemsResult, itemsError });
+
       
       if (itemsError) {
         console.error('Order items insert error:', itemsError);
         console.warn('Order items table insert failed - continuing without item tracking for now');
       } else {
-        console.log('Order items inserted successfully');
+
       }
     } catch (insertError) {
       console.error('Order items insert try-catch error:', insertError);
       console.warn('Order items table insert failed - continuing without item tracking for now');
     }
 
-    console.log('Order successfully created with ID:', orderId);
+
     return res.status(200).json({ success: true, orderId });
   } catch (error) {
     console.error('Order submission error:', error);

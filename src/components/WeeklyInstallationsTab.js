@@ -34,16 +34,7 @@ function getMergedInstallationsForDate(date, installations) {
   const dateStr = formatDate(date);
   const dayInstallations = installations.filter(inst => inst.scheduledDate === dateStr);
   
-  console.log('🔍 getMergedInstallationsForDate debug:', {
-    dateStr,
-    totalInstallations: installations.length,
-    dayInstallations: dayInstallations.map(inst => ({
-      id: inst.id,
-      timeSlot: inst.timeSlot,
-      endTimeSlot: inst.endTimeSlot,
-      customerName: inst.customerName
-    }))
-  });
+
   
   if (dayInstallations.length === 0) return [];
   
@@ -54,20 +45,14 @@ function getMergedInstallationsForDate(date, installations) {
     const startTime = installation.timeSlot;
     const endTime = installation.endTimeSlot || startTime;
 
-    console.log('🔍 Processing installation:', {
-      id: installation.id,
-      startTime,
-      endTime,
-      timeSlot: installation.timeSlot,
-      endTimeSlot: installation.endTimeSlot
-    });
+ 
 
     // Calculate which time slots this installation covers
     let startIndex = TIME_SLOTS.indexOf(startTime);
     
     // If startTime is not exactly in TIME_SLOTS, find the closest slot
     if (startIndex === -1) {
-      console.log('⚠️ Start time not found exactly in TIME_SLOTS, finding closest match:', startTime);
+
       
       // Find the closest slot that starts at or after the start time
       const [startHours, startMinutes] = startTime.split(':').map(Number);
@@ -79,7 +64,7 @@ function getMergedInstallationsForDate(date, installations) {
         
         if (slotTotalMinutes >= startTotalMinutes) {
           startIndex = i;
-          console.log(`🔧 Found closest start slot: ${TIME_SLOTS[i]} (index ${i}) for ${startTime}`);
+
           break;
         }
       }
@@ -87,12 +72,12 @@ function getMergedInstallationsForDate(date, installations) {
       // If still not found, use the first slot
       if (startIndex === -1) {
         startIndex = 0;
-        console.log(`🔧 Using first slot as fallback for ${startTime}`);
+
       }
     }
 
     if (startIndex === -1) {
-      console.warn('⚠️ Could not find startTime in TIME_SLOTS:', startTime);
+
       return;
     }
 
@@ -110,19 +95,11 @@ function getMergedInstallationsForDate(date, installations) {
     // Calculate end index based on required slots
     const endIndex = Math.min(startIndex + actualSlots - 1, TIME_SLOTS.length - 1);
 
-    console.log('🔍 Calculated indices:', { 
-      startIndex, 
-      endIndex, 
-      startTime, 
-      endTime,
-      durationMinutes,
-      requiredSlots,
-      actualSlots
-    });
+ 
 
     const coveredSlots = TIME_SLOTS.slice(startIndex, endIndex + 1);
 
-    console.log('🔍 Covered slots:', coveredSlots);
+ 
 
     mergedGroups.push({
       installation,
@@ -135,12 +112,7 @@ function getMergedInstallationsForDate(date, installations) {
     });
   });
   
-  console.log('🔍 Final merged groups:', mergedGroups.map(group => ({
-    id: group.installation.id,
-    startSlot: group.startSlot,
-    endSlot: group.endSlot,
-    rowSpan: group.rowSpan
-  })));
+
   
   return mergedGroups.sort((a, b) => a.startIndex - b.startIndex);
 }
@@ -189,8 +161,7 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
   const [touchEnd, setTouchEnd] = useState(null);
 
   useEffect(() => {
-    console.log('🌐 Current window location:', window.location.href);
-    console.log('🔧 Current port:', window.location.port);
+
     fetchInstallations();
   }, [currentWeek]);
 
@@ -252,35 +223,21 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
       const startDate = formatDate(weekDates[0]);
       const endDate = formatDate(weekDates[6]);
 
-      console.log('📅 Current week dates:', {
-        currentWeek: currentWeek.toISOString(),
-        weekDates: weekDates.map(d => formatDate(d)),
-        startDate,
-        endDate,
-        today: new Date().toISOString().split('T')[0]
-      });
+
 
       // Use relative URL to ensure correct port
       const apiUrl = `/api/get-weekly-installations?startDate=${startDate}&endDate=${endDate}`;
-      console.log('🔗 Calling API:', apiUrl);
-      console.log('🌐 Current location:', window.location.origin);
+
       
       const response = await fetch(apiUrl);
-      console.log('📡 Response status:', response.status);
+
       
       const data = await response.json();
-      console.log('📊 Response data:', data);
-      console.log('📊 Response data.installations:', data.installations);
-      console.log('📊 Response data.installations.length:', data.installations?.length);
+
 
       if (response.ok) {
         const fetchedInstallations = data.installations || [];
-        console.log('📋 Fetched installations:', fetchedInstallations.map(inst => ({
-          id: inst.id,
-          scheduledDate: inst.scheduledDate,
-          timeSlot: inst.timeSlot,
-          customerName: inst.customerName
-        })));
+
         setInstallations(fetchedInstallations);
       } else {
         setError(data.error || 'Failed to load installations');
@@ -302,14 +259,7 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
     
     // Debug logging
     if (installations.length > 0) {
-      console.log('🔍 getInstallationForSlot debug:', {
-        lookingFor: { dateStr, timeSlot },
-        availableInstallations: installations.map(inst => ({
-          scheduledDate: inst.scheduledDate,
-          timeSlot: inst.timeSlot,
-          customerName: inst.customerName
-        }))
-      });
+
     }
     
     return installation;
@@ -335,12 +285,7 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
   function checkTimeRangeConflict(newDate, newStartTime, installationDuration) {
     if (!availableSlots[newDate]) return false;
     
-    console.log('🔍 checkTimeRangeConflict called:', {
-      newDate,
-      newStartTime,
-      installationDuration,
-      availableSlotsForDate: availableSlots[newDate] ? Object.keys(availableSlots[newDate]) : 'no data'
-    });
+
     
     // Calculate the time slots that would be needed for this installation
     const startIndex = TIME_SLOTS.indexOf(newStartTime);
@@ -376,15 +321,7 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
     
     const requiredSlots = endIndex - startIndex;
     
-    console.log('🔍 Range calculation:', {
-      startIndex,
-      endIndex,
-      startTime: TIME_SLOTS[startIndex],
-      calculatedEndTime,
-      actualEndTime: TIME_SLOTS[endIndex],
-      requiredSlots,
-      slotsToCheck: TIME_SLOTS.slice(startIndex, endIndex + 1)
-    });
+
     
     // Check if any slot in the range is already booked (excluding current appointment)
     for (let i = 0; i < requiredSlots; i++) {
@@ -399,20 +336,15 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
         newDate === selectedInstallation.scheduledDate && 
         timeSlot === selectedInstallation.timeSlot;
       
-      console.log(`🔍 Checking slot ${timeSlot}:`, {
-        slot,
-        isBooked: slot?.booked,
-        isAvailable: slot?.available,
-        isCurrentAppointment
-      });
+
       
       if (slot && slot.booked && !isCurrentAppointment) {
-        console.log(`❌ Conflict found at ${timeSlot} (not current appointment)`);
+
         return true; // Conflict found with another appointment
       }
     }
     
-    console.log('✅ No conflicts found');
+
     return false; // No conflicts
   }
 
@@ -450,12 +382,12 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
       // Use current window location for API calls
       const baseUrl = window.location.origin;
       const apiUrl = `${baseUrl}/api/get-available-slots?startDate=${startDate}&endDate=${endDate}`;
-      console.log('🔗 Calling get-available-slots API:', apiUrl);
+
       
       const response = await fetch(apiUrl);
       const data = await response.json();
       
-      console.log('📊 API Response received:', data);
+
       
       if (response.ok) {
         setAvailableSlots(data.availableSlots || {});
@@ -464,17 +396,13 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
         if (selectedInstallation) {
           const currentDate = selectedInstallation.scheduledDate;
           const daySlots = data.availableSlots?.[currentDate];
-          console.log('🔍 Booked slots for current date:', {
-            date: currentDate,
-            daySlots: daySlots,
-            bookedSlots: daySlots ? Object.entries(daySlots).filter(([time, slot]) => slot.booked).map(([time, slot]) => time) : []
-          });
+
         }
       } else {
         showToast(t('admin.installations.messages.errorLoadingSlots'));
       }
     } catch (err) {
-      console.error('❌ Error fetching available slots:', err);
+
       showToast(t('admin.installations.messages.errorLoadingSlots'));
     }
   }
@@ -488,7 +416,7 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
       // Use current window location for API calls
       const baseUrl = window.location.origin;
       const apiUrl = `${baseUrl}/api/reschedule-installation`;
-      console.log('🔗 Reschedule installation API URL:', apiUrl);
+
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -555,18 +483,11 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
         installationDate: selectedInstallation.scheduledDate
       };
       
-      console.log('🎯 Marking installation as completed with data:', installationData);
-      console.log('🔍 Selected installation object:', selectedInstallation);
-      console.log('🌐 Window location details:', {
-        href: window.location.href,
-        origin: window.location.origin,
-        port: window.location.port,
-        hostname: window.location.hostname
-      });
+
       // Use current window location for API calls
       const baseUrl = window.location.origin;
       const apiUrl = `${baseUrl}/api/update-order-status`;
-      console.log('🔗 API URL:', apiUrl);
+
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -577,7 +498,6 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
       });
 
       const data = await response.json();
-      console.log('📡 Mark as Installed API Response:', { status: response.status, data });
 
       if (response.ok) {
         setShowDetailsModal(false);
@@ -606,19 +526,12 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
     
     try {
       // Debug window location - CACHE BUST v2
-      console.log('🔍 Window location debug:', {
-        origin: window.location.origin,
-        href: window.location.href,
-        port: window.location.port,
-        hostname: window.location.hostname,
-        timestamp: new Date().toISOString()
-      });
+
       
       // Use current window location for API calls (with fallback)
       const baseUrl = window.location.origin || `http://localhost:${window.location.port || '3008'}`;
       const apiUrl = `${baseUrl}/api/cancel-installation`;
-      console.log('🔗 Cancel installation API URL:', apiUrl);
-      console.log('🚨 CACHE BUST TEST - If you see localhost:3000, clear your browser cache!');
+
       const response = await fetch(apiUrl, {
         method: 'DELETE',
         headers: {
@@ -663,7 +576,7 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
     
     try {
       // First, cancel the installation from the calendar
-      console.log('🗑️ Cancelling installation from calendar:', selectedInstallation.id);
+
       const baseUrl = window.location.origin;
       const cancelApiUrl = `${baseUrl}/api/cancel-installation`;
       
@@ -695,7 +608,7 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
         installationDate: null
       };
       
-      console.log('🔄 Returning installation to orders with data:', orderData);
+
       const updateApiUrl = `${baseUrl}/api/update-order-status`;
       
       const updateResponse = await fetch(updateApiUrl, {
@@ -723,7 +636,7 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
         showToast(t('admin.installations.messages.cancelError', { message: updateData.error || t('admin.installations.messages.cancelErrorGeneric') }));
       }
     } catch (err) {
-      console.error('Error returning to orders:', err);
+
       showToast(t('admin.installations.messages.cancelErrorGeneric'));
     } finally {
       setDeleteLoading(false);
@@ -1023,23 +936,6 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
                     // Get merged installations for all days
                     const mergedInstallations = weekDates.map(date => getMergedInstallationsForDate(date, installations));
                     
-                    // Debug logging for the first time slot
-                    if (timeIndex === 0) {
-                      console.log('🔍 Main rendering debug:', {
-                        weekDates: weekDates.map(d => formatDate(d)),
-                        installationsCount: installations.length,
-                        mergedInstallations: mergedInstallations.map((day, index) => ({
-                          date: formatDate(weekDates[index]),
-                          count: day.length,
-                          installations: day.map(group => ({
-                            id: group.installation.id,
-                            startSlot: group.startSlot,
-                            endSlot: group.endSlot
-                          }))
-                        }))
-                      });
-                    }
-                    
                     return (
                       <tr key={timeSlot}>
                         <td style={{ 
@@ -1055,24 +951,6 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
                           const mergedGroup = getInstallationForSlotInMerged(date, timeSlot, mergedInstallations[dayIndex]);
                           const isToday = formatDate(date) === formatDate(new Date());
                           const isPast = date < new Date() && !isToday;
-                          
-                          // Debug logging for specific time slot and date
-                          if (timeSlot === '10:30' && formatDate(date) === '2025-07-22') {
-                            console.log('🔍 Looking for 10:30 on 2025-07-22:', {
-                              mergedGroup: mergedGroup ? {
-                                id: mergedGroup.installation.id,
-                                startSlot: mergedGroup.startSlot,
-                                endSlot: mergedGroup.endSlot,
-                                coveredSlots: mergedGroup.coveredSlots
-                              } : null,
-                              dayInstallations: mergedInstallations[dayIndex].map(group => ({
-                                id: group.installation.id,
-                                startSlot: group.startSlot,
-                                endSlot: group.endSlot,
-                                coveredSlots: group.coveredSlots
-                              }))
-                            });
-                          }
                           
                           // Skip rendering if this slot is part of a merged installation that starts later
                           if (mergedGroup && mergedGroup.startIndex > timeIndex) {

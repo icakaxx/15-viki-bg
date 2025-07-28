@@ -11,18 +11,8 @@ export default async function handler(req, res) {
     try {
         const { id } = req.body;
 
-        console.log('🔍 API received delete request for ID:', id);
-        console.log('🔍 ID type:', typeof id);
-        console.log('🔍 Full request body:', req.body);
-
         if (!id) {
             return res.status(400).json({ message: 'Product ID is required' });
-        }
-
-        // Check if Supabase is configured
-        if (!supabaseUrl || !supabaseServiceKey) {
-            console.error('Supabase configuration missing');
-            return res.status(500).json({ message: 'Database configuration error' });
         }
 
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -35,7 +25,6 @@ export default async function handler(req, res) {
             .single();
 
         if (fetchError) {
-            console.error('Error fetching product:', fetchError);
             return res.status(404).json({ message: 'Product not found' });
         }
 
@@ -46,7 +35,6 @@ export default async function handler(req, res) {
             .eq('id', id);
 
         if (deleteError) {
-            console.error('Error deleting product:', deleteError);
             return res.status(500).json({ message: 'Failed to delete product from database' });
         }
 
@@ -64,25 +52,20 @@ export default async function handler(req, res) {
                     .remove([filePath]);
 
                 if (storageError) {
-                    console.warn('Warning: Could not delete image from storage:', storageError);
                     // Don't fail the request if image deletion fails
                 } else {
-                    console.log('✅ Image deleted from storage:', filePath);
                 }
             } catch (storageError) {
-                console.warn('Warning: Error deleting image from storage:', storageError);
                 // Don't fail the request if image deletion fails
             }
         }
 
-        console.log('✅ Product deleted successfully:', id);
         return res.status(200).json({ 
             message: 'Product deleted successfully',
             deletedProductId: id
         });
 
     } catch (error) {
-        console.error('Error in delete-product API:', error);
         return res.status(500).json({ 
             message: 'Internal server error',
             error: error.message 

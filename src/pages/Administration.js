@@ -12,9 +12,7 @@ export default function Administration() {
     const router = useRouter();
     const locale = router.locale || 'bg';
     
-    // Debug info
-    console.log('Admin Panel - Current locale:', locale);
-    console.log('Admin Panel - Test translation:', t('admin.header.title'));
+    
     
     // Authentication state
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -135,39 +133,6 @@ export default function Administration() {
                 completedOptional++;
             }
         });
-
-        // Debug log for physical section (after hasMeaningfulInput and counts)
-        if (sectionName === 'physical') {
-            const debugFields = [
-                'indoor_dimensions',
-                'outdoor_dimensions',
-                'indoor_weight',
-                'outdoor_weight',
-                'colour'
-            ];
-            const debugInfo = debugFields.map(field => ({
-                field,
-                value: formData[field],
-                filled: hasMeaningfulInput(field, formData[field])
-            }));
-            console.log('Physical section debug:', debugInfo, 'Completed:', completedRequired, 'of', config.required.length);
-        }
-
-        // Debug log for technical section
-        if (sectionName === 'technical') {
-            const debugFields = [
-                'cop',
-                'scop',
-                'power_consumption',
-                'operating_temp_range'
-            ];
-            const debugInfo = debugFields.map(field => ({
-                field,
-                value: formData[field],
-                filled: hasMeaningfulInput(field, formData[field])
-            }));
-            console.log('Technical section debug:', debugInfo, 'Completed:', completedRequired, 'of', config.required.length);
-        }
 
         const totalCompleted = completedRequired + completedOptional;
         const totalFields = totalRequired + totalOptional;
@@ -441,7 +406,6 @@ export default function Administration() {
         
         // If it's a local path that doesn't exist, use placeholder
         if (imageUrl.startsWith('/images/products/')) {
-            console.warn('Using placeholder for old local image path:', imageUrl);
             return '/images/placeholder-ac.svg';
         }
         
@@ -459,7 +423,7 @@ export default function Administration() {
     // Load products from API
     const loadProducts = async () => {
         try {
-            console.log('Loading products...');
+            
             const response = await fetch('/api/get-products');
             
             if (!response.ok) {
@@ -467,22 +431,16 @@ export default function Administration() {
             }
             
             const data = await response.json();
-            console.log('API Response:', data);
+            
             
             // Extract products array from API response
             const productsArray = Array.isArray(data.products) ? data.products : [];
-            console.log('Raw products array:', productsArray);
+            
             
             // Transform API response to match admin panel expected format
             const transformedProducts = productsArray.map(product => {
                 try {
-                    console.log('Processing product:', product);
-                    console.log('Product tech specs after DB update:', {
-                        cop: product.COP,
-                        scop: product.SCOP,
-                        power_consumption: product.PowerConsumption,
-                        operating_temp_range: product.OperatingTempRange
-                    });
+                    
                     return {
                         id: product.ProductID || product.id,
                         brand: product.Brand || product.brand || '',
@@ -526,7 +484,7 @@ export default function Administration() {
                 }
             }).filter(product => product !== null);
             
-            console.log('Transformed products:', transformedProducts);
+
             
             setProducts(transformedProducts);
             setFilteredProducts(transformedProducts);
@@ -651,7 +609,7 @@ export default function Administration() {
                     image_url: publicUrl
                 }));
                 
-                console.log('✅ Image uploaded to Supabase:', publicUrl);
+                
             } else {
                 // FALLBACK MOCK IMPLEMENTATION (when Supabase not configured):
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -669,7 +627,7 @@ export default function Administration() {
                     image_url: mockSupabaseUrl
                 }));
                 
-                console.log('⚠️ Using mock upload (Supabase not configured):', mockSupabaseUrl);
+                
             }
 
             alert('Image uploaded successfully!');
@@ -733,7 +691,7 @@ export default function Administration() {
                 description: formData.description || null
             };
 
-            console.log('Sending product data:', cleanedData);
+            
 
             const response = await fetch('/api/add-product', {
                 method: 'POST',
@@ -759,29 +717,6 @@ export default function Administration() {
     };
 
     const handleEdit = (product) => {
-        console.log('=== HANDLE EDIT DEBUG ===');
-        console.log('handleEdit called with product:', product);
-        console.log('Product keys:', Object.keys(product));
-        console.log('Product values:', Object.values(product));
-        console.log('Product tech specs in handleEdit after DB update:', {
-            cop: product.COP,
-            scop: product.SCOP,
-            power_consumption: product.PowerConsumption,
-            operating_temp_range: product.OperatingTempRange
-        });
-        console.log('Product physical specs:', {
-            indoor_dimensions: product.IndoorDimensions,
-            outdoor_dimensions: product.OutdoorDimensions,
-            indoor_weight: product.IndoorWeight,
-            outdoor_weight: product.OutdoorWeight,
-            noise_level: product.NoiseLevel,
-            air_flow: product.AirFlow
-        });
-        console.log('Product installation specs:', {
-            room_size_recommendation: product.RoomSizeRecommendation,
-            installation_type: product.InstallationType,
-            warranty_period: product.WarrantyPeriod
-        });
         setFormData({
             brand: product.brand || '',
             model: product.model || '',
@@ -813,37 +748,6 @@ export default function Administration() {
             features: product.features || [],
             description: product.description || ''
         });
-        
-        console.log('Form data after setFormData:', {
-            cop: product.COP ? product.COP.toString() : '',
-            scop: product.SCOP ? product.SCOP.toString() : '',
-            power_consumption: product.PowerConsumption ? product.PowerConsumption.toString() : '',
-            operating_temp_range: product.OperatingTempRange || '',
-            indoor_dimensions: product.IndoorDimensions || '',
-            outdoor_dimensions: product.OutdoorDimensions || '',
-            indoor_weight: product.IndoorWeight ? product.IndoorWeight.toString() : '',
-            outdoor_weight: product.OutdoorWeight ? product.OutdoorWeight.toString() : '',
-            noise_level: product.NoiseLevel ? product.NoiseLevel.toString() : '',
-            air_flow: product.AirFlow ? product.AirFlow.toString() : '',
-            room_size_recommendation: product.RoomSizeRecommendation || '',
-            installation_type: product.InstallationType || '',
-            warranty_period: product.WarrantyPeriod || ''
-        });
-        
-        // Test: Check if formData is actually being set
-        setTimeout(() => {
-            console.log('=== FORM DATA TEST ===');
-            console.log('formData.cop:', formData.cop);
-            console.log('formData.scop:', formData.scop);
-            console.log('formData.power_consumption:', formData.power_consumption);
-            console.log('formData.operating_temp_range:', formData.operating_temp_range);
-            console.log('formData.indoor_dimensions:', formData.indoor_dimensions);
-            console.log('formData.outdoor_dimensions:', formData.outdoor_dimensions);
-            console.log('formData.indoor_weight:', formData.indoor_weight);
-            console.log('formData.outdoor_weight:', formData.outdoor_weight);
-            console.log('formData.noise_level:', formData.noise_level);
-            console.log('formData.air_flow:', formData.air_flow);
-        }, 100);
         
         setIsEditing(true);
         setEditingId(product.id);
@@ -897,8 +801,6 @@ export default function Administration() {
                 description: formData.description || null
             };
 
-            console.log('Updating product data:', cleanedData);
-
             const response = await fetch('/api/edit-product', {
                 method: 'POST',
                 headers: {
@@ -927,9 +829,6 @@ export default function Administration() {
             return;
         }
 
-        console.log('🔍 Deleting product with ID:', productId);
-        console.log('🔍 Product ID type:', typeof productId);
-
         try {
             const response = await fetch('/api/delete-product', {
                 method: 'POST',
@@ -944,11 +843,9 @@ export default function Administration() {
                 alert(t('admin.products.deleteSuccess'));
             } else {
                 const error = await response.json();
-                console.error('API Error:', error);
                 alert(t('admin.products.deleteError') + ' ' + error.message);
             }
         } catch (error) {
-            console.error('Error deleting product:', error);
             alert(t('admin.products.deleteError') + ' ' + error.message);
         }
     };

@@ -130,7 +130,6 @@ export default async function handler(req, res) {
 
     // If Supabase is not configured, return mock data
     if (!supabase) {
-        console.log('⚠️  Supabase not configured, using mock data');
         
         const mockProduct = mockProducts.find(p => p.id === parseInt(id));
         
@@ -190,7 +189,6 @@ export default async function handler(req, res) {
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Product not found' });
             }
-            console.error('Error fetching product from Supabase:', error);
             
             // Fallback to mock data
             const mockProduct = mockProducts.find(p => p.id === parseInt(id));
@@ -213,7 +211,6 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('Supabase connection error:', error);
         
         // Fallback to mock data on connection error
         const mockProduct = mockProducts.find(p => p.id === parseInt(id));

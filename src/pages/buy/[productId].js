@@ -136,10 +136,8 @@ const ProductDetailPage = () => {
           const accessoriesData = await accessoriesResponse.json();
 
           if (accessoriesResponse.ok) {
-            console.log('✅ Loaded accessories:', accessoriesData.accessories?.length || 0, 'items');
             setAccessories(accessoriesData.accessories || []);
           } else {
-            console.warn('⚠️ Failed to load accessories:', accessoriesData.error);
             setAccessories([]); // Fallback to empty array
           }
         } catch (accessoryErr) {

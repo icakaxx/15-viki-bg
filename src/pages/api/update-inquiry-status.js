@@ -41,12 +41,7 @@ export default async function handler(req, res) {
       adminId 
     } = req.body;
 
-    console.log('Updating inquiry status:', {
-      inquiryId,
-      status,
-      hasAdminNotes: !!adminNotes,
-      adminId
-    });
+
 
     // Validate required parameters
     if (!inquiryId) {
@@ -97,7 +92,7 @@ export default async function handler(req, res) {
       updateData.responded_by = adminId || null;
     }
 
-    console.log('Updating inquiry with data:', updateData);
+
 
     // Update inquiry
     const { data: updatedInquiry, error: updateError } = await supabase
@@ -115,7 +110,7 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('Inquiry updated successfully:', updatedInquiry.id);
+
 
     // Return success response
     return res.status(200).json({

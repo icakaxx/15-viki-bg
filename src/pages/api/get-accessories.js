@@ -27,11 +27,8 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    console.log('🛠️ Get-accessories API called');
-
     // Check if Supabase is configured
     if (!supabase) {
-        console.error('❌ Supabase not configured');
         return res.status(500).json({ 
             error: 'Database not configured',
             accessories: []
@@ -51,7 +48,6 @@ export default async function handler(req, res) {
             .order('price', { ascending: true });
 
         if (error) {
-            console.error('❌ Error fetching accessories from Supabase:', error);
             return res.status(500).json({ 
                 error: 'Failed to fetch accessories',
                 accessories: []
@@ -61,19 +57,11 @@ export default async function handler(req, res) {
         // Transform accessories to match frontend expectations
         const transformedAccessories = (data || []).map(transformAccessory);
         
-        console.log('✅ Successfully fetched', transformedAccessories.length, 'accessories from database');
-        console.log('📋 Accessories:', transformedAccessories.map(acc => ({ 
-            id: acc.AccessoryID, 
-            name: acc.Name, 
-            price: acc.Price 
-        })));
-        
         return res.status(200).json({ 
             accessories: transformedAccessories
         });
 
     } catch (error) {
-        console.error('❌ Database connection error:', error);
         return res.status(500).json({ 
             error: 'Database connection failed',
             accessories: []
