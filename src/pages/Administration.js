@@ -922,6 +922,37 @@ export default function Administration() {
         }
     };
 
+    const handleDelete = async (productId) => {
+        if (!confirm(t('admin.products.deleteConfirm'))) {
+            return;
+        }
+
+        console.log('🔍 Deleting product with ID:', productId);
+        console.log('🔍 Product ID type:', typeof productId);
+
+        try {
+            const response = await fetch('/api/delete-product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: productId }),
+            });
+
+            if (response.ok) {
+                loadProducts();
+                alert(t('admin.products.deleteSuccess'));
+            } else {
+                const error = await response.json();
+                console.error('API Error:', error);
+                alert(t('admin.products.deleteError') + ' ' + error.message);
+            }
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            alert(t('admin.products.deleteError') + ' ' + error.message);
+        }
+    };
+
     // Basic authentication check
     if (!isLoggedIn) {
         const handleLogin = () => {
@@ -1853,6 +1884,12 @@ export default function Administration() {
                                                 className={styles.editButton}
                                             >
                                                 {t('admin.products.actions.edit')}
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDelete(product.id)}
+                                                className={styles.deleteButton}
+                                            >
+                                                {t('admin.products.actions.delete')}
                                             </button>
                                         </div>
                                     </div>

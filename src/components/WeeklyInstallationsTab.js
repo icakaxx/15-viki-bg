@@ -932,9 +932,16 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
   return (
     <div style={{ padding: '2rem' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h2>{t('admin.installations.title')}</h2>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ 
+            display: 'flex', 
+            gap: '1rem', 
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            width: '100%',
+          }}>
             <button
               onClick={() => navigateWeek(-1)}
               style={{
@@ -942,12 +949,21 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
                 border: '1px solid #ccc',
                 borderRadius: '4px',
                 backgroundColor: 'white',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                minWidth: '120px',
+                fontSize: '0.9rem'
               }}
             >
               {t('admin.installations.previousWeek')}
             </button>
-            <span style={{ fontWeight: 'bold' }}>{weekRange}</span>
+            <span style={{ 
+              fontWeight: 'bold', 
+              textAlign: 'center',
+              minWidth: '120px',
+              fontSize: '0.9rem'
+            }}>
+              {weekRange}
+            </span>
             <button
               onClick={() => navigateWeek(1)}
               style={{
@@ -955,7 +971,9 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
                 border: '1px solid #ccc',
                 borderRadius: '4px',
                 backgroundColor: 'white',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                minWidth: '120px',
+                fontSize: '0.9rem'
               }}
             >
               {t('admin.installations.nextWeek')}
