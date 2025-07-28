@@ -653,23 +653,9 @@ export default function Administration() {
                 
                 console.log('✅ Image uploaded to Supabase:', publicUrl);
             } else {
-                // FALLBACK MOCK IMPLEMENTATION (when Supabase not configured):
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // Create a preview URL for the uploaded file
-                const previewUrl = URL.createObjectURL(file);
-                setImagePreview(previewUrl);
-                
-                // Mock Supabase URL structure for consistency
-                const mockSupabaseUrl = `https://mock.supabase.co/storage/v1/object/public/images-viki15bg/products/${fileName}`;
-                
-                // Update form data with the mock URL
-                setFormData(prev => ({
-                    ...prev,
-                    image_url: mockSupabaseUrl
-                }));
-                
-                console.log('⚠️ Using mock upload (Supabase not configured):', mockSupabaseUrl);
+                console.error('Supabase not configured for image upload');
+                alert('Image upload not available. Please configure Supabase storage.');
+                return;
             }
 
             alert('Image uploaded successfully!');
