@@ -873,7 +873,8 @@
         "cancel": "Cancel",
         "addProduct": "Add Product",
         "updateProduct": "Update Product",
-        "edit": "Edit"
+        "edit": "Edit",
+        "delete": "Delete"
       },
       "selectImage": "Select Image",
       "uploading": "Uploading...",
@@ -1294,7 +1295,8 @@
         "archive": "Archive Inquiry",
         "delete": "Delete Inquiry",
         "saveNotes": "Save Notes",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "postInquiry": "Update"
       }
     },
     "messages": {

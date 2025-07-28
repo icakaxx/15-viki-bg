@@ -379,86 +379,132 @@ export default function OrdersManagementTab() {
           </div>
         )}
         
-        <table className={styles.ordersTable}>
-          <thead>
-            <tr>
-              <th>{t('admin.orders.table.orderId')}</th>
-              <th>{t('admin.orders.table.customer')}</th>
-              <th>{t('admin.orders.table.phone')}</th>
-              <th>{t('admin.orders.table.created')}</th>
-              <th>{t('admin.orders.table.paymentMethod')}</th>
-              <th>{t('admin.orders.table.totalAmount')}</th>
-              <th>{t('admin.orders.table.paidAmount')}</th>
-              <th>{t('admin.orders.table.status')}</th>
-              <th>{t('admin.orders.table.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+        {/* Desktop Table View */}
+        <div className={styles.desktopOnly}>
+          <table className={styles.ordersTable}>
+            <thead>
               <tr>
-                <td colSpan={9} className={styles.loadingCell}>
-                  🔄 {t('admin.orders.loading')}
-                </td>
+                <th>{t('admin.orders.table.orderId')}</th>
+                <th>{t('admin.orders.table.customer')}</th>
+                <th>{t('admin.orders.table.phone')}</th>
+                <th>{t('admin.orders.table.created')}</th>
+                <th>{t('admin.orders.table.paymentMethod')}</th>
+                <th>{t('admin.orders.table.totalAmount')}</th>
+                <th>{t('admin.orders.table.paidAmount')}</th>
+                <th>{t('admin.orders.table.status')}</th>
+                <th>{t('admin.orders.table.actions')}</th>
               </tr>
-            ) : currentOrders.length === 0 ? (
-              <tr>
-                <td colSpan={9} className={styles.emptyCell}>
-                  {search || statusFilter ? t('admin.orders.noOrdersMatchFilters') : t('admin.orders.noOrdersFound')}
-                </td>
-              </tr>
-            ) : (
-              currentOrders.map(order => (
-                <tr key={order.order_id} className={styles.orderRow}>
-                  <td>#{order.order_id}</td>
-                  <td>{order.first_name} {order.last_name}</td>
-                  <td>{order.phone}</td>
-                  <td>{formatDate(order.order_created_at)}</td>
-                  <td>{getPaymentMethodLabel(order.payment_method)}</td>
-                  <td>{order.total_amount ? `${order.total_amount.toFixed(2)} лв.` : '-'}</td>
-                  <td>{order.paid_amount ? `${order.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</td>
-                  <td>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={9} className={styles.loadingCell}>
+                    🔄 {t('admin.orders.loading')}
+                  </td>
+                </tr>
+              ) : currentOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className={styles.emptyCell}>
+                    {search || statusFilter ? t('admin.orders.noOrdersMatchFilters') : t('admin.orders.noOrdersFound')}
+                  </td>
+                </tr>
+              ) : (
+                currentOrders.map(order => (
+                  <tr key={order.order_id} className={styles.orderRow}>
+                    <td>#{order.order_id}</td>
+                    <td>{order.first_name} {order.last_name}</td>
+                    <td>{order.phone}</td>
+                    <td>{formatDate(order.order_created_at)}</td>
+                    <td>{getPaymentMethodLabel(order.payment_method)}</td>
+                    <td>{order.total_amount ? `${order.total_amount.toFixed(2)} лв.` : '-'}</td>
+                    <td>{order.paid_amount ? `${order.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</td>
+                    <td>
+                      <span 
+                        className={styles.statusBadge}
+                        style={{ backgroundColor: getStatusColor(order.current_status) }}
+                      >
+                        {getStatusLabel(order.current_status, t)}
+                      </span>
+                    </td>
+                    <td>
+                      <div className={styles.actionButtons}>
+                        <button
+                          onClick={() => showCombinedOrderModal(order)}
+                          className={styles.viewButton}
+                          style={{ width: '120px' }}
+                        >
+                          👁️ {t('admin.orders.orderDetails')}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className={styles.mobileOnly}>
+          {loading ? (
+            <div className={styles.loadingCell}>
+              🔄 {t('admin.orders.loading')}
+            </div>
+          ) : currentOrders.length === 0 ? (
+            <div className={styles.emptyCell}>
+              {search || statusFilter ? t('admin.orders.noOrdersMatchFilters') : t('admin.orders.noOrdersFound')}
+            </div>
+          ) : (
+            <div className={styles.mobileOrdersList}>
+              {currentOrders.map(order => (
+                <div key={order.order_id} className={styles.mobileOrderCard}>
+                  <div className={styles.mobileOrderHeader}>
+                    <div className={styles.mobileOrderCustomer}>
+                      <strong>{order.first_name} {order.last_name}</strong>
+                      <span className={styles.mobileOrderPhone}>{order.phone}</span>
+                    </div>
                     <span 
                       className={styles.statusBadge}
                       style={{ backgroundColor: getStatusColor(order.current_status) }}
                     >
                       {getStatusLabel(order.current_status, t)}
                     </span>
-                  </td>
-                  <td>
-                    <div className={styles.actionButtons}>
-                      {/* Desktop: Single combined button */}
-                      <button
-                        onClick={() => showCombinedOrderModal(order)}
-                        className={`${styles.viewButton} ${styles.desktopOnly}`}
-                        style={{ width: '120px' }}
-                      >
-                        👁️ {t('admin.orders.orderDetails')}
-                      </button>
-                      
-                      {/* Mobile: Two separate buttons */}
-                      <div className={`${styles.mobileButtons} ${styles.mobileOnly}`}>
-                        <button
-                          onClick={() => showOrderDetailsModal(order)}
-                          className={styles.viewButton}
-                          style={{ width: '100px' }}
-                        >
-                          👁️ {t('admin.orders.orderDetails')}
-                        </button>
-                        <button
-                          onClick={() => showOrderProductsModal(order)}
-                          className={styles.viewButton}
-                          style={{ width: '100px' }}
-                        >
-                          📦 {t('admin.orders.products.button')}
-                        </button>
-                      </div>
+                  </div>
+                  
+                  <div className={styles.mobileOrderDetails}>
+                    <div className={styles.mobileOrderInfo}>
+                      <span className={styles.mobileOrderLabel}>{t('admin.orders.table.paymentMethod')}:</span>
+                      <span>{getPaymentMethodLabel(order.payment_method)}</span>
                     </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                    <div className={styles.mobileOrderInfo}>
+                      <span className={styles.mobileOrderLabel}>{t('admin.orders.table.totalAmount')}:</span>
+                      <span>{order.total_amount ? `${order.total_amount.toFixed(2)} лв.` : '-'}</span>
+                    </div>
+                    <div className={styles.mobileOrderInfo}>
+                      <span className={styles.mobileOrderLabel}>{t('admin.orders.table.paidAmount')}:</span>
+                      <span>{order.paid_amount ? `${order.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</span>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.mobileOrderActions}>
+                    <button
+                      onClick={() => showOrderDetailsModal(order)}
+                      className={styles.viewButton}
+                    >
+                      👁️ {t('admin.orders.orderDetails')}
+                    </button>
+                    <button
+                      onClick={() => showOrderProductsModal(order)}
+                      className={styles.viewButton}
+                    >
+                      📦 {t('admin.orders.products.button')}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Pagination */}

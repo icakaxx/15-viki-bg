@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
+import styles from '../styles/Page Styles/Administration.module.css';
 
 const ADMIN_ID = 1; // Default admin ID
 
@@ -20,6 +21,10 @@ export default function InquiryManagementTab() {
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [pendingChanges, setPendingChanges] = useState({
+    status: null,
+    adminNotes: null
+  });
   
   // Filters and pagination
   const [filters, setFilters] = useState({
@@ -92,6 +97,10 @@ export default function InquiryManagementTab() {
   function showInquiryDetails(inquiry) {
     setSelectedInquiry(inquiry);
     setShowDetailModal(true);
+    setPendingChanges({
+      status: inquiry.status,
+      adminNotes: inquiry.admin_notes || ''
+    });
   }
 
   // Update inquiry status
@@ -118,12 +127,28 @@ export default function InquiryManagementTab() {
         if (selectedInquiry && selectedInquiry.id === inquiryId) {
           setSelectedInquiry(prev => ({ ...prev, status: newStatus, admin_notes: adminNotes }));
         }
+        // Reset pending changes after successful update
+        setPendingChanges({
+          status: newStatus,
+          adminNotes: adminNotes || ''
+        });
       } else {
         showToast(t('inquiryManagement.messages.error.updateFailed'));
       }
     } catch (err) {
       showToast(t('inquiryManagement.messages.error.updateFailed'));
     }
+  }
+
+  // Post inquiry changes
+  async function postInquiryChanges() {
+    if (!selectedInquiry) return;
+    
+    await updateInquiryStatus(
+      selectedInquiry.id, 
+      pendingChanges.status, 
+      pendingChanges.adminNotes
+    );
   }
 
   // Get status badge color
@@ -177,7 +202,7 @@ export default function InquiryManagementTab() {
   }
 
   return (
-    <div style={{ padding: '1rem' }}>
+    <div className={styles.ordersManagementSection}>
       {/* Toast Message */}
       {toastMessage && (
         <div style={{
@@ -195,10 +220,8 @@ export default function InquiryManagementTab() {
       )}
 
       {/* Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-          {t('inquiryManagement.title') || 'Inquiry Management (Fallback)'}
-        </h1>
+      <div className={styles.ordersHeader}>
+        <h2>{t('inquiryManagement.title') || 'Inquiry Management (Fallback)'}</h2>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <div>
             <strong>{t('inquiryManagement.overview.totalInquiries') || 'Total Inquiries'}:</strong> {pagination.total}
@@ -212,135 +235,217 @@ export default function InquiryManagementTab() {
       </div>
 
       {/* Filters */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '1rem', 
-        marginBottom: '2rem',
-        flexWrap: 'wrap',
-        alignItems: 'center'
-      }}>
-        <select
-          value={filters.status}
-          onChange={(e) => handleFilterChange('status', e.target.value)}
-          style={{ padding: '0.5rem', borderRadius: '4px' }}
-        >
-          <option value="all">{t('inquiryManagement.filters.all')}</option>
-          <option value="new">{t('inquiryManagement.filters.new')}</option>
-          <option value="read">{t('inquiryManagement.filters.unread')}</option>
-          <option value="responded">{t('inquiryManagement.filters.responded')}</option>
-          <option value="archived">{t('inquiryManagement.filters.archived')}</option>
-        </select>
+      <div className={styles.ordersFilters}>
+        <div className={styles.filterGroup}>
+          <select
+            value={filters.status}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            className={styles.statusFilter}
+          >
+            <option value="all">{t('inquiryManagement.filters.all')}</option>
+            <option value="new">{t('inquiryManagement.filters.new')}</option>
+            <option value="read">{t('inquiryManagement.filters.unread')}</option>
+            <option value="responded">{t('inquiryManagement.filters.responded')}</option>
+            <option value="archived">{t('inquiryManagement.filters.archived')}</option>
+          </select>
+        </div>
 
-        <select
-          value={filters.inquiryType}
-          onChange={(e) => handleFilterChange('inquiryType', e.target.value)}
-          style={{ padding: '0.5rem', borderRadius: '4px' }}
-        >
-          <option value="all">{t('inquiryManagement.filters.byType')}</option>
-          <option value="residential">{t('inquiryManagement.filters.types.residential')}</option>
-          <option value="commercial">{t('inquiryManagement.filters.types.commercial')}</option>
-          <option value="industrial">{t('inquiryManagement.filters.types.industrial')}</option>
-          <option value="service">{t('inquiryManagement.filters.types.service')}</option>
-          <option value="consultation">{t('inquiryManagement.filters.types.consultation')}</option>
-          <option value="other">{t('inquiryManagement.filters.types.other')}</option>
-        </select>
+        <div className={styles.filterGroup}>
+          <select
+            value={filters.inquiryType}
+            onChange={(e) => handleFilterChange('inquiryType', e.target.value)}
+            className={styles.statusFilter}
+          >
+            <option value="all">{t('inquiryManagement.filters.byType')}</option>
+            <option value="residential">{t('inquiryManagement.filters.types.residential')}</option>
+            <option value="commercial">{t('inquiryManagement.filters.types.commercial')}</option>
+            <option value="industrial">{t('inquiryManagement.filters.types.industrial')}</option>
+            <option value="service">{t('inquiryManagement.filters.types.service')}</option>
+            <option value="consultation">{t('inquiryManagement.filters.types.consultation')}</option>
+            <option value="other">{t('inquiryManagement.filters.types.other')}</option>
+          </select>
+        </div>
 
-        <input
-          type="text"
-          placeholder={t('inquiryManagement.search.placeholder')}
-          value={filters.search}
-          onChange={(e) => handleFilterChange('search', e.target.value)}
-          style={{ padding: '0.5rem', borderRadius: '4px', minWidth: '200px' }}
-        />
+        <div className={styles.filterGroup}>
+          <input
+            type="text"
+            placeholder={t('inquiryManagement.search.placeholder')}
+            value={filters.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
 
-        <button
-          onClick={fetchInquiries}
-          style={{ padding: '0.5rem 1rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px' }}
-        >
-          {t('admin.orders.refresh')}
-        </button>
+        <div className={styles.filterGroup}>
+          <button
+            onClick={fetchInquiries}
+            className={styles.refreshButton}
+          >
+            {t('admin.orders.refresh')}
+          </button>
+        </div>
       </div>
 
-      {/* Inquiries Table */}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f8f9fa' }}>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>
-                {t('inquiryManagement.table.columns.dateTime')}
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>
-                {t('inquiryManagement.table.columns.customerName')}
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>
-                {t('inquiryManagement.table.columns.email')}
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>
-                {t('inquiryManagement.table.columns.phone')}
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>
-                {t('inquiryManagement.table.columns.inquiryType')}
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>
-                {t('inquiryManagement.table.columns.status')}
-              </th>
-              <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '1px solid #dee2e6' }}>
-                {t('inquiryManagement.table.columns.actions')}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+      {/* Desktop Table View */}
+      <div className={styles.desktopOnly}>
+        <div className={styles.ordersTableContainer}>
+          {error && (
+            <div className={styles.errorMessage}>
+              ❌ {error}
+            </div>
+          )}
+          
+          <table className={styles.ordersTable}>
+            <thead>
+              <tr>
+                <th>{t('inquiryManagement.table.columns.dateTime')}</th>
+                <th>{t('inquiryManagement.table.columns.customerName')}</th>
+                <th>{t('inquiryManagement.table.columns.email')}</th>
+                <th>{t('inquiryManagement.table.columns.phone')}</th>
+                <th>{t('inquiryManagement.table.columns.inquiryType')}</th>
+                <th>{t('inquiryManagement.table.columns.status')}</th>
+                <th>{t('inquiryManagement.table.columns.actions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inquiries.map(inquiry => (
+                <tr key={inquiry.id} className={styles.orderRow}>
+                  <td>{formatDate(inquiry.created_at)}</td>
+                  <td>{inquiry.full_name}</td>
+                  <td>
+                    <button
+                      onClick={() => copyEmail(inquiry.email_address)}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        color: '#007bff', 
+                        cursor: 'pointer',
+                        textDecoration: 'underline'
+                      }}
+                      title={t('inquiryManagement.table.actions.copyEmail')}
+                    >
+                      {inquiry.email_address}
+                    </button>
+                  </td>
+                  <td>{inquiry.phone || '-'}</td>
+                  <td>{inquiry.inquiry_type}</td>
+                  <td>
+                    <span style={{
+                      backgroundColor: getStatusColor(inquiry.status),
+                      color: 'white',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem'
+                    }}>
+                      {t(`inquiryManagement.status.${inquiry.status}`)}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.actionButtons}>
+                      <button
+                        onClick={() => showInquiryDetails(inquiry)}
+                        className={styles.viewButton}
+                      >
+                        {t('inquiryManagement.table.actions.viewDetails')}
+                      </button>
+                      {inquiry.status === 'new' && (
+                        <button
+                          onClick={() => updateInquiryStatus(inquiry.id, 'read')}
+                          style={{ 
+                            padding: '0.25rem 0.5rem', 
+                            backgroundColor: '#ffc107', 
+                            color: '#212529', 
+                            border: 'none', 
+                            borderRadius: '4px',
+                            marginLeft: '0.5rem'
+                          }}
+                        >
+                          {t('inquiryManagement.table.actions.markAsRead')}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className={styles.mobileOnly}>
+        {error && (
+          <div className={styles.errorMessage}>
+            ❌ {error}
+          </div>
+        )}
+        
+        {loading ? (
+          <div className={styles.loadingCell}>
+            🔄 {t('inquiryManagement.loading') || 'Loading inquiries...'}
+          </div>
+        ) : inquiries.length === 0 ? (
+          <div className={styles.emptyCell}>
+            {filters.search || filters.status !== 'all' || filters.inquiryType !== 'all' 
+              ? t('inquiryManagement.noInquiriesMatchFilters') || 'No inquiries match your filters'
+              : t('inquiryManagement.noInquiries') || 'No inquiries found'
+            }
+          </div>
+        ) : (
+          <div className={styles.mobileOrdersList}>
             {inquiries.map(inquiry => (
-              <tr key={inquiry.id} style={{ borderBottom: '1px solid #dee2e6' }}>
-                <td style={{ padding: '1rem' }}>
-                  {formatDate(inquiry.created_at)}
-                </td>
-                <td style={{ padding: '1rem' }}>
-                  {inquiry.full_name}
-                </td>
-                <td style={{ padding: '1rem' }}>
-                  <button
-                    onClick={() => copyEmail(inquiry.email_address)}
-                    style={{ 
-                      background: 'none', 
-                      border: 'none', 
-                      color: '#007bff', 
-                      cursor: 'pointer',
-                      textDecoration: 'underline'
+              <div key={inquiry.id} className={styles.mobileOrderCard}>
+                <div className={styles.mobileOrderHeader}>
+                  <div className={styles.mobileOrderCustomer}>
+                    <strong>{inquiry.full_name}</strong>
+                    <span className={styles.mobileOrderPhone}>{inquiry.phone || '-'}</span>
+                  </div>
+                  <span 
+                    style={{
+                      backgroundColor: getStatusColor(inquiry.status),
+                      color: 'white',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold'
                     }}
-                    title={t('inquiryManagement.table.actions.copyEmail')}
                   >
-                    {inquiry.email_address}
-                  </button>
-                </td>
-                <td style={{ padding: '1rem' }}>
-                  {inquiry.phone || '-'}
-                </td>
-                <td style={{ padding: '1rem' }}>
-                  {inquiry.inquiry_type}
-                </td>
-                <td style={{ padding: '1rem' }}>
-                  <span style={{
-                    backgroundColor: getStatusColor(inquiry.status),
-                    color: 'white',
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '4px',
-                    fontSize: '0.875rem'
-                  }}>
                     {t(`inquiryManagement.status.${inquiry.status}`)}
                   </span>
-                </td>
-                <td style={{ padding: '1rem' }}>
+                </div>
+                
+                <div className={styles.mobileOrderDetails}>
+                  <div className={styles.mobileOrderInfo}>
+                    <span className={styles.mobileOrderLabel}>{t('inquiryManagement.table.columns.email')}:</span>
+                    <button
+                      onClick={() => copyEmail(inquiry.email_address)}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        color: '#007bff', 
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        fontSize: '0.875rem'
+                      }}
+                      title={t('inquiryManagement.table.actions.copyEmail')}
+                    >
+                      {inquiry.email_address}
+                    </button>
+                  </div>
+                  <div className={styles.mobileOrderInfo}>
+                    <span className={styles.mobileOrderLabel}>{t('inquiryManagement.table.columns.inquiryType')}:</span>
+                    <span>{inquiry.inquiry_type}</span>
+                  </div>
+                  <div className={styles.mobileOrderInfo}>
+                    <span className={styles.mobileOrderLabel}>{t('inquiryManagement.table.columns.dateTime')}:</span>
+                    <span className={styles.mobileOrderDate}>{formatDate(inquiry.created_at)}</span>
+                  </div>
+                </div>
+                
+                <div className={styles.mobileOrderActions}>
                   <button
                     onClick={() => showInquiryDetails(inquiry)}
-                    style={{ 
-                      padding: '0.25rem 0.5rem', 
-                      backgroundColor: '#007bff', 
-                      color: 'white', 
-                      border: 'none', 
-                      borderRadius: '4px',
-                      marginRight: '0.5rem'
-                    }}
+                    className={styles.viewButton}
                   >
                     {t('inquiryManagement.table.actions.viewDetails')}
                   </button>
@@ -348,44 +453,33 @@ export default function InquiryManagementTab() {
                     <button
                       onClick={() => updateInquiryStatus(inquiry.id, 'read')}
                       style={{ 
-                        padding: '0.25rem 0.5rem', 
+                        padding: '0.5rem 0.75rem',
                         backgroundColor: '#ffc107', 
                         color: '#212529', 
                         border: 'none', 
-                        borderRadius: '4px'
+                        borderRadius: '4px',
+                        fontSize: '0.875rem'
                       }}
                     >
                       {t('inquiryManagement.table.actions.markAsRead')}
                     </button>
                   )}
-                </td>
-              </tr>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        )}
       </div>
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: '0.5rem', 
-          marginTop: '2rem' 
-        }}>
+        <div className={styles.pagination}>
           <button
             onClick={() => handlePageChange(pagination.page - 1)}
             disabled={pagination.page === 1}
-            style={{ 
-              padding: '0.5rem 1rem', 
-              backgroundColor: pagination.page === 1 ? '#6c757d' : '#007bff', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '4px',
-              cursor: pagination.page === 1 ? 'not-allowed' : 'pointer'
-            }}
+            className={styles.paginationButton}
           >
-            Previous
+            {t('admin.orders.history.previousPage') || 'Previous'}
           </button>
           
           <span style={{ padding: '0.5rem 1rem' }}>
@@ -395,16 +489,9 @@ export default function InquiryManagementTab() {
           <button
             onClick={() => handlePageChange(pagination.page + 1)}
             disabled={pagination.page === pagination.totalPages}
-            style={{ 
-              padding: '0.5rem 1rem', 
-              backgroundColor: pagination.page === pagination.totalPages ? '#6c757d' : '#007bff', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '4px',
-              cursor: pagination.page === pagination.totalPages ? 'not-allowed' : 'pointer'
-            }}
+            className={styles.paginationButton}
           >
-            Next
+            {t('admin.orders.history.nextPage') || 'Next'}
           </button>
         </div>
       )}
@@ -510,8 +597,8 @@ export default function InquiryManagementTab() {
                     <strong>{t('inquiryManagement.detailView.actions.changeStatus')}:</strong>
                   </label>
                   <select
-                    value={selectedInquiry.status}
-                    onChange={(e) => updateInquiryStatus(selectedInquiry.id, e.target.value)}
+                    value={pendingChanges.status}
+                    onChange={(e) => setPendingChanges(prev => ({ ...prev, status: e.target.value }))}
                     style={{ padding: '0.5rem', borderRadius: '4px', width: '100%' }}
                   >
                     <option value="new">{t('inquiryManagement.status.new')}</option>
@@ -527,8 +614,8 @@ export default function InquiryManagementTab() {
                     <strong>{t('inquiryManagement.detailView.actions.addNotes')}:</strong>
                   </label>
                   <textarea
-                    value={selectedInquiry.admin_notes || ''}
-                    onChange={(e) => updateInquiryStatus(selectedInquiry.id, selectedInquiry.status, e.target.value)}
+                    value={pendingChanges.adminNotes}
+                    onChange={(e) => setPendingChanges(prev => ({ ...prev, adminNotes: e.target.value }))}
                     style={{ 
                       padding: '0.5rem', 
                       borderRadius: '4px', 
@@ -540,48 +627,51 @@ export default function InquiryManagementTab() {
                   />
                 </div>
 
+                {/* Post Inquiry Button */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <button
+                    onClick={postInquiryChanges}
+                    style={{ 
+                      padding: '0.5rem 1rem', 
+                      backgroundColor: '#28a745', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    {t('inquiryManagement.detailView.actions.postInquiry') || 'Post Inquiry'}
+                  </button>
+                </div>
+
                 {/* Quick Actions */}
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <button
-                    onClick={() => updateInquiryStatus(selectedInquiry.id, 'read')}
-                    disabled={selectedInquiry.status === 'read'}
+                    onClick={() => setPendingChanges(prev => ({ ...prev, status: 'read' }))}
+                    disabled={pendingChanges.status === 'read'}
                     style={{ 
                       padding: '0.5rem 1rem', 
-                      backgroundColor: selectedInquiry.status === 'read' ? '#6c757d' : '#ffc107', 
-                      color: selectedInquiry.status === 'read' ? 'white' : '#212529', 
+                      backgroundColor: pendingChanges.status === 'read' ? '#6c757d' : '#ffc107', 
+                      color: pendingChanges.status === 'read' ? 'white' : '#212529', 
                       border: 'none', 
                       borderRadius: '4px',
-                      cursor: selectedInquiry.status === 'read' ? 'not-allowed' : 'pointer'
+                      cursor: pendingChanges.status === 'read' ? 'not-allowed' : 'pointer'
                     }}
                   >
                     {t('inquiryManagement.detailView.actions.markAsRead')}
                   </button>
                   
                   <button
-                    onClick={() => updateInquiryStatus(selectedInquiry.id, 'responded')}
-                    disabled={selectedInquiry.status === 'responded'}
+                    onClick={() => setPendingChanges(prev => ({ ...prev, status: 'archived' }))}
+                    disabled={pendingChanges.status === 'archived'}
                     style={{ 
                       padding: '0.5rem 1rem', 
-                      backgroundColor: selectedInquiry.status === 'responded' ? '#6c757d' : '#28a745', 
+                      backgroundColor: pendingChanges.status === 'archived' ? '#6c757d' : '#6c757d', 
                       color: 'white', 
                       border: 'none', 
                       borderRadius: '4px',
-                      cursor: selectedInquiry.status === 'responded' ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    {t('inquiryManagement.detailView.actions.sendResponse')}
-                  </button>
-                  
-                  <button
-                    onClick={() => updateInquiryStatus(selectedInquiry.id, 'archived')}
-                    disabled={selectedInquiry.status === 'archived'}
-                    style={{ 
-                      padding: '0.5rem 1rem', 
-                      backgroundColor: selectedInquiry.status === 'archived' ? '#6c757d' : '#6c757d', 
-                      color: 'white', 
-                      border: 'none', 
-                      borderRadius: '4px',
-                      cursor: selectedInquiry.status === 'archived' ? 'not-allowed' : 'pointer'
+                      cursor: pendingChanges.status === 'archived' ? 'not-allowed' : 'pointer'
                     }}
                   >
                     {t('inquiryManagement.detailView.actions.archive')}

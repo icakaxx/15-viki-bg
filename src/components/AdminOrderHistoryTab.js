@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
+import styles from '../styles/Page Styles/Administration.module.css';
 
 const PAGE_SIZE = 20;
 
@@ -65,79 +66,187 @@ export default function AdminOrderHistoryTab() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>{t('admin.orders.history.title')}</h2>
-      <p>{t('admin.orders.history.description')}</p>
-
-      {/* Filter Bar */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', alignItems: 'center' }}>
-        <input
-          type="text"
-          placeholder={t('admin.orders.history.searchPlaceholder')}
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1); }}
-          style={{ flex: 1, padding: '0.5rem' }}
-        />
-        {/* Date range picker placeholder */}
-        <input type="text" placeholder={t('admin.orders.history.dateRangePlaceholder')} disabled style={{ width: 140 }} />
-        {/* Product type dropdown placeholder */}
-        <select value={productType} onChange={e => setProductType(e.target.value)} disabled style={{ width: 140 }}>
-          <option value="">{t('admin.orders.history.productTypePlaceholder')}</option>
-        </select>
+    <div className={styles.ordersManagementSection}>
+      <div className={styles.ordersHeader}>
+        <h2>{t('admin.orders.history.title')}</h2>
+        <p>{t('admin.orders.history.description')}</p>
       </div>
 
-      {/* Table */}
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
-          <thead>
-            <tr style={{ background: '#f5f5f5' }}>
-              <th style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{t('admin.orders.history.installationDate')}</th>
-              <th style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{t('admin.orders.history.customer')}</th>
-              <th style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{t('admin.orders.history.phone')}</th>
-              <th style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{t('admin.orders.history.products')}</th>
-              <th style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{t('admin.orders.history.total')}</th>
-              <th style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{t('admin.orders.history.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>{t('admin.orders.history.loading')}</td></tr>
-            ) : error ? (
-              <tr><td colSpan={6} style={{ color: 'red', textAlign: 'center' }}>{error}</td></tr>
-            ) : orders.length === 0 ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center' }}>{t('admin.orders.history.noOrders')}</td></tr>
-            ) : orders.map(order => (
-              <tr key={order.id}>
-                <td style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{formatDate(order.installation_date)}</td>
-                <td style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{order.customer_name}</td>
-                <td style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{order.customer_phone}</td>
-                <td style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{order.products_count}</td>
-                <td style={{ padding: '0.5rem', border: '1px solid #ddd' }}>{(order.total_price_bgn || 0).toFixed(2)} лв / {(order.total_price_eur || 0).toFixed(2)} €</td>
-                <td style={{ padding: '0.5rem', border: '1px solid #ddd' }}>
-                  {/* Actions placeholder */}
-                  <button disabled style={{ opacity: 0.5 }}>{t('admin.orders.history.detailsButton')}</button>
-                </td>
+      {/* Filter Bar */}
+      <div className={styles.ordersFilters}>
+        <div className={styles.filterGroup}>
+          <input
+            type="text"
+            placeholder={t('admin.orders.history.searchPlaceholder')}
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1); }}
+            className={styles.searchInput}
+          />
+        </div>
+        <div className={styles.filterGroup}>
+          {/* Date range picker placeholder */}
+          <input 
+            type="text" 
+            placeholder={t('admin.orders.history.dateRangePlaceholder')} 
+            disabled 
+            className={styles.searchInput}
+            style={{ width: '140px' }}
+          />
+        </div>
+        <div className={styles.filterGroup}>
+          {/* Product type dropdown placeholder */}
+          <select 
+            value={productType} 
+            onChange={e => setProductType(e.target.value)} 
+            disabled 
+            className={styles.statusFilter}
+            style={{ width: '140px' }}
+          >
+            <option value="">{t('admin.orders.history.productTypePlaceholder')}</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Desktop Table View */}
+      <div className={styles.desktopOnly}>
+        <div className={styles.ordersTableContainer}>
+          {error && (
+            <div className={styles.errorMessage}>
+              ❌ {error}
+            </div>
+          )}
+          
+          <table className={styles.ordersTable}>
+            <thead>
+              <tr>
+                <th>{t('admin.orders.history.installationDate')}</th>
+                <th>{t('admin.orders.history.customer')}</th>
+                <th>{t('admin.orders.history.phone')}</th>
+                <th>{t('admin.orders.history.products')}</th>
+                <th>{t('admin.orders.history.total')}</th>
+                <th>{t('admin.orders.history.actions')}</th>
               </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className={styles.loadingCell}>
+                    🔄 {t('admin.orders.history.loading')}
+                  </td>
+                </tr>
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className={styles.emptyCell}>
+                    {search ? t('admin.orders.history.noOrdersMatchFilters') : t('admin.orders.history.noOrders')}
+                  </td>
+                </tr>
+              ) : (
+                orders.map(order => (
+                  <tr key={order.id} className={styles.orderRow}>
+                    <td>{formatDate(order.installation_date)}</td>
+                    <td>{order.customer_name}</td>
+                    <td>{order.customer_phone}</td>
+                    <td>{order.products_count}</td>
+                    <td>{(order.total_price_bgn || 0).toFixed(2)} лв / {(order.total_price_eur || 0).toFixed(2)} €</td>
+                    <td>
+                      {/* Actions placeholder */}
+                      <button disabled style={{ opacity: 0.5 }} className={styles.viewButton}>
+                        {t('admin.orders.history.detailsButton')}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className={styles.mobileOnly}>
+        {error && (
+          <div className={styles.errorMessage}>
+            ❌ {error}
+          </div>
+        )}
+        
+        {loading ? (
+          <div className={styles.loadingCell}>
+            🔄 {t('admin.orders.history.loading')}
+          </div>
+        ) : orders.length === 0 ? (
+          <div className={styles.emptyCell}>
+            {search ? t('admin.orders.history.noOrdersMatchFilters') : t('admin.orders.history.noOrders')}
+          </div>
+        ) : (
+          <div className={styles.mobileOrdersList}>
+            {orders.map(order => (
+              <div key={order.id} className={styles.mobileOrderCard}>
+                <div className={styles.mobileOrderHeader}>
+                  <div className={styles.mobileOrderCustomer}>
+                    <strong>{order.customer_name}</strong>
+                    <span className={styles.mobileOrderPhone}>{order.customer_phone}</span>
+                  </div>
+                  <span className={styles.mobileOrderDate}>
+                    {formatDate(order.installation_date)}
+                  </span>
+                </div>
+                
+                <div className={styles.mobileOrderDetails}>
+                  <div className={styles.mobileOrderInfo}>
+                    <span className={styles.mobileOrderLabel}>{t('admin.orders.history.products')}:</span>
+                    <span>{order.products_count}</span>
+                  </div>
+                  <div className={styles.mobileOrderInfo}>
+                    <span className={styles.mobileOrderLabel}>{t('admin.orders.history.total')}:</span>
+                    <span>{(order.total_price_bgn || 0).toFixed(2)} лв / {(order.total_price_eur || 0).toFixed(2)} €</span>
+                  </div>
+                </div>
+                
+                <div className={styles.mobileOrderActions}>
+                  <button disabled style={{ opacity: 0.5 }} className={styles.viewButton}>
+                    {t('admin.orders.history.detailsButton')}
+                  </button>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        )}
       </div>
 
       {/* Pagination Footer */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
-        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>‹ {t('admin.orders.history.previousPage')}</button>
-        {Array.from({ length: totalPages }, (_, i) => i + 1).slice(Math.max(0, page - 3), page + 2).map(p => (
-          <button
-            key={p}
-            onClick={() => setPage(p)}
-            style={{ fontWeight: p === page ? 'bold' : 'normal', minWidth: 32 }}
-            disabled={p === page}
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button 
+            onClick={() => setPage(p => Math.max(1, p - 1))} 
+            disabled={page === 1}
+            className={styles.paginationButton}
           >
-            {p}
+            ‹ {t('admin.orders.history.previousPage')}
           </button>
-        ))}
-        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>{t('admin.orders.history.nextPage')} ›</button>
-      </div>
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .slice(Math.max(0, page - 3), page + 2)
+            .map(p => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={`${styles.paginationButton} ${p === page ? styles.activePage : ''}`}
+                disabled={p === page}
+              >
+                {p}
+              </button>
+            ))}
+          
+          <button 
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+            disabled={page === totalPages}
+            className={styles.paginationButton}
+          >
+            {t('admin.orders.history.nextPage')} ›
+          </button>
+        </div>
+      )}
     </div>
   );
 } 
