@@ -6,7 +6,6 @@ function formatDate(date) {
 }
 
 export default async function handler(req, res) {
-  console.log('🚀 get-weekly-installations API called');
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -27,22 +26,16 @@ export default async function handler(req, res) {
 
   try {
     // Check environment variables
-    console.log('🔍 Checking environment variables...');
-    console.log('🔍 NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET');
-    console.log('🔍 SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT SET');
     
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Missing Supabase environment variables');
       return res.status(500).json({ 
         error: 'Server configuration error - Supabase credentials not configured' 
       });
     }
 
     const { startDate, endDate } = req.query;
-    console.log('📅 Requested date range:', { startDate, endDate });
     
     if (!startDate || !endDate) {
-      console.error('❌ Missing parameters:', { startDate, endDate });
       return res.status(400).json({ 
         error: 'Missing required parameters: startDate and endDate are required' 
       });
@@ -53,8 +46,6 @@ export default async function handler(req, res) {
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
-
-    console.log('🔍 Querying installations for date range:', { startDate, endDate });
 
     // Query installation_schedule table first
     const { data: installations, error } = await supabase
@@ -76,7 +67,6 @@ export default async function handler(req, res) {
       .order('time_slot', { ascending: true });
 
     if (error) {
-      console.error('❌ Database query error:', error);
       return res.status(500).json({
         error: 'Database query failed',
         message: error.message,
@@ -84,10 +74,7 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('📊 Raw installations from database:', installations);
-
     if (!installations || installations.length === 0) {
-      console.log('📋 No installations found for the date range');
       return res.status(200).json({
         success: true,
         installations: [],
@@ -101,7 +88,6 @@ export default async function handler(req, res) {
 
     // Get unique order IDs to fetch order data
     const orderIds = [...new Set(installations.map(inst => inst.order_id))];
-    console.log('📋 Order IDs to fetch:', orderIds);
 
     // Fetch order status data from payment_and_tracking
     const { data: orderStatuses, error: orderStatusError } = await supabase
@@ -113,7 +99,6 @@ export default async function handler(req, res) {
       .in('order_id', orderIds);
 
     if (orderStatusError) {
-      console.error('❌ Error fetching order status data:', orderStatusError);
       return res.status(500).json({
         error: 'Failed to fetch order status data',
         message: orderStatusError.message,
@@ -135,16 +120,12 @@ export default async function handler(req, res) {
       .in('order_id', orderIds);
 
     if (customerError) {
-      console.error('❌ Error fetching customer data:', customerError);
       return res.status(500).json({
         error: 'Failed to fetch customer data',
         message: customerError.message,
         details: customerError
       });
     }
-
-    console.log('📊 Order status data fetched:', orderStatuses);
-    console.log('📊 Customer data fetched:', customerData);
 
     // Create maps for quick lookup
     const orderStatusMap = {};
@@ -164,11 +145,6 @@ export default async function handler(req, res) {
       let endTimeSlot = installation.end_time_slot || installation.time_slot;
       
       if (endTimeSlot <= installation.time_slot && endTimeSlot !== installation.time_slot) {
-        console.log('🔧 Fixing installation with invalid end time:', {
-          id: installation.id,
-          timeSlot: installation.time_slot,
-          endTimeSlot: endTimeSlot
-        });
         
         // Calculate correct end time (add 1 hour to start time)
         const [startHours, startMinutes] = installation.time_slot.split(':').map(Number);
@@ -178,7 +154,6 @@ export default async function handler(req, res) {
         const endMinutes = endTotalMinutes % 60;
         endTimeSlot = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
         
-        console.log('✅ Fixed end time to:', endTimeSlot);
       }
 
       // Get order status and customer data
@@ -212,13 +187,6 @@ export default async function handler(req, res) {
       };
     });
 
-    console.log('📋 Transformed installations:', transformedInstallations.map(inst => ({
-      id: inst.id,
-      scheduledDate: inst.scheduledDate,
-      timeSlot: inst.timeSlot,
-      customerName: inst.customerName
-    })));
-
     return res.status(200).json({
       success: true,
       installations: transformedInstallations,
@@ -230,8 +198,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('❌ Error in get-weekly-installations:', error);
-    console.error('❌ Error stack:', error.stack);
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message || 'Unknown error occurred',

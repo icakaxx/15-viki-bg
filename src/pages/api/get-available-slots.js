@@ -33,23 +33,10 @@ function bookInstallation(startTime, endTime, date, bookedSlotsSet) {
   const endIndex = TIME_SLOTS.indexOf(normalizedEnd);
 
   if (startIndex === -1 || endIndex === -1) {
-    console.error('Start or end time not aligned to TIME_SLOTS:', { startTime, endTime, normalizedStart, normalizedEnd });
     return [];
   }
 
   const requiredSlots = endIndex - startIndex;
-
-  console.log('🔧 New booking logic:', {
-    originalStart: startTime,
-    originalEnd: endTime,
-    normalizedStart,
-    normalizedEnd,
-    startIndex,
-    endIndex,
-    requiredSlots,
-    TIME_SLOTS_startIndex: TIME_SLOTS[startIndex],
-    TIME_SLOTS_endIndex: TIME_SLOTS[endIndex]
-  });
 
   // Mark the slots as booked
   const markedSlots = [];
@@ -57,7 +44,6 @@ function bookInstallation(startTime, endTime, date, bookedSlotsSet) {
     const slotToMark = TIME_SLOTS[startIndex + i];
     bookedSlotsSet.add(`${date}_${slotToMark}`);
     markedSlots.push(slotToMark);
-    console.log(`✅ Marked as booked: ${date}_${slotToMark} (index ${startIndex + i})`);
   }
 
   return markedSlots;
@@ -88,8 +74,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Fetching available slots from ${startDate} to ${endDate}`);
-
     // Get all booked slots in the date range
     const { data: bookedSlots, error } = await supabase
       .from('installation_schedule')
@@ -98,14 +82,11 @@ export default async function handler(req, res) {
       .lte('scheduled_date', endDate);
 
     if (error) {
-      console.error('Error fetching booked slots:', error);
       return res.status(500).json({ 
         error: 'Failed to fetch booked slots',
         details: error.message
       });
     }
-
-    console.log('📊 All booked slots found:', bookedSlots);
 
     // Create a set of booked slots for quick lookup
     const bookedSlotsSet = new Set();
@@ -114,23 +95,10 @@ export default async function handler(req, res) {
       const startTime = slot.time_slot;
       const endTime = slot.end_time_slot || slot.time_slot;
       
-      console.log('🔍 Processing booked slot:', {
-        date: slot.scheduled_date,
-        startTime,
-        endTime
-      });
-      
       // Use the new booking logic
       const markedSlots = bookInstallation(startTime, endTime, slot.scheduled_date, bookedSlotsSet);
       
-      console.log('📅 Marked slots:', {
-        startTime,
-        endTime,
-        markedSlots
-      });
     });
-
-    console.log('📊 Final booked slots set:', Array.from(bookedSlotsSet));
 
     // Generate all possible slots in the date range
     const availableSlots = {};
@@ -164,7 +132,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error in get-available-slots:', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message || 'Unknown error occurred'

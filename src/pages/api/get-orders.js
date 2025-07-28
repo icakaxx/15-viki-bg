@@ -7,7 +7,6 @@ export default async function handler(req, res) {
 
   // Check if environment variables are available
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('Missing environment variables for get-orders');
     return res.status(500).json({ 
       error: 'Server configuration error - missing environment variables'
     });
@@ -20,7 +19,6 @@ export default async function handler(req, res) {
   );
 
   try {
-    console.log('API: Loading orders...');
     
     // First try to use the order_status_view if it exists
     let { data, error } = await supabase
@@ -31,7 +29,6 @@ export default async function handler(req, res) {
 
     // If view doesn't exist, fall back to manual join
     if (error && error.code === '42P01') {
-      console.log('API: Order status view not found, using manual join...');
       
       // Get orders with payment info using manual join, excluding installed orders
       const { data: ordersData, error: ordersError } = await supabase
@@ -57,7 +54,6 @@ export default async function handler(req, res) {
         .order('created_at', { ascending: false });
 
       if (ordersError) {
-        console.error('API: Error loading orders with manual join:', ordersError);
         return res.status(500).json({ 
           error: 'Failed to load orders',
           details: ordersError.message
@@ -81,28 +77,14 @@ export default async function handler(req, res) {
         notes: order.notes
       })) || [];
 
-      console.log('API: Orders loaded via manual join:', data.map(order => ({
-        order_id: order.order_id,
-        name: `${order.first_name} ${order.last_name}`,
-        status: order.current_status,
-        total_amount: `${order.total_amount} BGN`,
-        paid_amount: `${order.paid_amount} BGN`
-      })));
     } else if (error) {
-      console.error('API: Error loading orders:', error);
       return res.status(500).json({ 
         error: 'Failed to load orders',
         details: error.message
       });
     } else {
-      console.log('API: Orders loaded via view:', data.map(order => ({
-        order_id: order.order_id,
-        name: `${order.first_name} ${order.last_name}`,
-        status: order.current_status,
-        total_amount: `${order.total_amount} BGN`,
-        paid_amount: `${order.paid_amount} BGN`,
-        notes: order.notes
-      })));
+      // The original code had a console.log here, but it's removed.
+      // The data is already transformed in the previous block.
     }
 
     return res.status(200).json({ 
@@ -112,7 +94,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('API: Error in get-orders:', error);
     return res.status(500).json({ 
       error: 'Failed to load orders',
       details: error.message

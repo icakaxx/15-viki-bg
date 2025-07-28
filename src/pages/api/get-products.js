@@ -48,18 +48,14 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 let supabase = null;
 try {
   if (!supabaseUrl || !supabaseKey) {
-    console.error('⚠️ Supabase credentials are missing:', {
-      hasUrl: !!supabaseUrl,
-      hasKey: !!supabaseKey
-    });
+    // Supabase credentials are missing
   } else {
     supabase = createClient(supabaseUrl, supabaseKey, {
       auth: { persistSession: false }
     });
-    console.log('✓ Supabase client initialized');
   }
 } catch (error) {
-  console.error('⚠️ Failed to initialize Supabase client:', error);
+  // Failed to initialize Supabase client
 }
 
 export default async function handler(req, res) {
@@ -79,7 +75,6 @@ export default async function handler(req, res) {
 
     // If Supabase is not configured or failed to initialize
     if (!supabase) {
-        console.error('⚠️ Supabase client is not available');
         return res.status(500).json({ 
             error: 'Database connection not available',
             details: {
@@ -91,7 +86,6 @@ export default async function handler(req, res) {
 
     // Use Supabase
     try {
-        console.log('🔍 Querying Supabase for products...');
         // Start with basic columns that should always exist
         let query = supabase.from('products').select(`
             id,
@@ -152,7 +146,7 @@ export default async function handler(req, res) {
         const { data, error, count } = await query;
 
     if (error) {
-            console.error('Error fetching products from Supabase:', error);
+            // Error fetching products from Supabase
         }
 
         // Get total count for pagination
@@ -176,7 +170,6 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('Supabase connection error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 }

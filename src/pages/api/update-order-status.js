@@ -26,10 +26,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log(`Updating order ${orderId} status to: ${newStatus}`);
-
+    
     // Fetch current status
-    console.log(`Fetching current status for order ${orderId}...`);
     
     let { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
@@ -41,7 +39,6 @@ export default async function handler(req, res) {
 
     if (fetchError && fetchError.code === 'PGRST116') {
       // No order record exists yet - this is a new order
-      console.log(`No order found for order ${orderId}, treating as new order`);
       
       // Verify the order exists in orders (only for real orders)
       const { data: guestOrder, error: guestError } = await supabase
@@ -51,7 +48,6 @@ export default async function handler(req, res) {
         .single();
 
       if (guestError) {
-        console.error('Error fetching guest order:', guestError);
         return res.status(404).json({ 
           error: 'Order not found, id: ' + orderId,
           details: 'Order does not exist in orders table'
@@ -70,7 +66,6 @@ export default async function handler(req, res) {
         .single();
 
       if (createError) {
-        console.error('Error creating order record:', createError);
         return res.status(500).json({ 
           error: 'Failed to create order record',
           details: createError.message
@@ -80,7 +75,6 @@ export default async function handler(req, res) {
       currentOrder = newOrder;
       oldStatus = 'new';
     } else if (fetchError) {
-      console.error('Error fetching current order status:', fetchError);
       return res.status(404).json({ 
         error: 'Order not found, id: ' + orderId,
         details: fetchError.message
@@ -96,8 +90,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Updating order ${orderId} status: ${oldStatus} → ${newStatus}`);
-
     // Update order status
     const { error: updateError } = await supabase
       .from('orders')
@@ -105,7 +97,6 @@ export default async function handler(req, res) {
       .eq('order_id', orderId);
 
     if (updateError) {
-      console.error('Error updating order status:', updateError);
       return res.status(500).json({ 
         error: 'Failed to update order status',
         details: updateError.message
@@ -113,7 +104,6 @@ export default async function handler(req, res) {
     }
 
     // Insert status change into history
-    console.log('Inserting status change into history...');
     const historyData = {
       order_id: orderId,
       status: newStatus,
@@ -127,12 +117,8 @@ export default async function handler(req, res) {
       .insert([historyData]);
 
     if (historyError) {
-      console.error('Error inserting status history:', historyError);
       // Don't fail the request if history insertion fails
-      console.warn('Status updated but history insertion failed');
     }
-
-    console.log(`✅ Order ${orderId} status updated successfully: ${oldStatus} → ${newStatus}`);
 
     return res.status(200).json({
       success: true,
@@ -143,7 +129,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Unexpected error updating order status:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       details: error.message

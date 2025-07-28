@@ -208,7 +208,6 @@ const CheckoutPage = () => {
 
   // Prepare order data for Stripe payment
   const prepareOrderData = () => {
-    console.log( "grandTotal :" + cart.totalPrice);
     return {
       personalInfo: {
         firstName: formData.firstName,
@@ -387,7 +386,6 @@ const CheckoutPage = () => {
     }
 
     setIsSubmitting(true);
-    console.log( "grandTotal :" + cart.totalPrice);
     try {
       // Format data for API
       const orderData = {

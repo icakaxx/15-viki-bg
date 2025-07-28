@@ -24,8 +24,6 @@ export default async function handler(req, res) {
     
     // Remove any duplicate slots that might have been sent
     const uniqueSlots = [...new Set(slotsToBook)];
-    console.log('Original slots:', slotsToBook);
-    console.log('Unique slots after deduplication:', uniqueSlots);
     
     const installationDuration = duration || 1; // Default 1 hour for backward compatibility
 
@@ -35,9 +33,6 @@ export default async function handler(req, res) {
         error: 'Missing required parameters: orderId, scheduledDate, and timeSlots (or timeSlot) are required' 
       });
     }
-
-    console.log(`Booking installation for order ${orderId} on ${scheduledDate} for ${installationDuration} hours`);
-    console.log('Time slots:', uniqueSlots);
 
     // Validate that we have at least one slot
     if (uniqueSlots.length === 0) {
@@ -58,8 +53,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('Availability check passed for slots:', uniqueSlots);
-
     // 2. Verify order exists and is in correct status
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
@@ -68,7 +61,6 @@ export default async function handler(req, res) {
       .single();
 
     if (orderError) {
-      console.error('Error fetching order:', orderError);
       return res.status(404).json({ 
         error: 'Order not found',
         details: orderError.message
@@ -82,8 +74,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log('Order verification passed, status:', orderData.status);
-
     // 3. Insert installation schedule records for each time slot
     const scheduleInserts = uniqueSlots.map(slot => ({
       order_id: orderId,
@@ -93,8 +83,6 @@ export default async function handler(req, res) {
       created_by: adminId || null,
       notes: notes || null
     }));
-
-    console.log('About to insert schedule records:', scheduleInserts.length, 'records');
     
     let { data: scheduleData, error: scheduleError } = await supabase
       .from('installation_schedule')
@@ -103,7 +91,6 @@ export default async function handler(req, res) {
 
     // If insertion failed due to missing duration column, try without duration
     if (scheduleError && scheduleError.message && scheduleError.message.includes("duration")) {
-      console.log('Duration column not found, retrying without duration...');
       
       const scheduleInsertsWithoutDuration = uniqueSlots.map(slot => ({
         order_id: orderId,
@@ -122,15 +109,10 @@ export default async function handler(req, res) {
       scheduleError = result.error;
       
       if (!scheduleError) {
-        console.log('Successfully inserted without duration column');
       }
     }
 
     if (scheduleError) {
-      console.error('Error creating installation schedule:', scheduleError);
-      console.error('Error details:', JSON.stringify(scheduleError, null, 2));
-      console.error('Data that failed to insert:', JSON.stringify(scheduleInserts, null, 2));
-      
       // Handle specific constraint violations
       if (scheduleError.code === '23505') { // Unique constraint violation
         return res.status(409).json({ 
@@ -172,7 +154,6 @@ export default async function handler(req, res) {
       .eq('order_id', orderId);
 
     if (statusUpdateError) {
-      console.error('Error updating order status:', statusUpdateError);
       // Try to rollback the installation schedule
       const scheduleIds = scheduleData.map(s => s.id);
       await supabase
@@ -202,11 +183,8 @@ export default async function handler(req, res) {
       }]);
 
     if (historyError) {
-      console.error('Error logging status history:', historyError);
       // Don't fail the entire request if history logging fails
     }
-
-    console.log(`Installation successfully booked for order ${orderId} - ${uniqueSlots.length} slots`);
 
     return res.status(200).json({
       success: true,
@@ -219,7 +197,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error in book-installation:', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message || 'Unknown error occurred'

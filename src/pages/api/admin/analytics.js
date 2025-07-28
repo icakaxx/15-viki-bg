@@ -18,7 +18,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('📊 Fetching analytics data from Supabase...');
     
     // Initialize results
     const analyticsData = {
@@ -32,13 +31,11 @@ export default async function handler(req, res) {
     };
 
     // 1. Accessory Usage
-    console.log('📈 Fetching accessory usage...');
     try {
       const { data: accessoryData, error: accessoryError } = await supabase
         .rpc('get_accessory_usage');
 
       if (accessoryError) {
-        console.warn('Accessory usage query failed:', accessoryError);
         // Fallback query
         const { data: fallbackAccessoryData, error: fallbackAccessoryError } = await supabase
           .from('order_accessories')
@@ -63,11 +60,10 @@ export default async function handler(req, res) {
         analyticsData.accessoryUsage = accessoryData;
       }
     } catch (error) {
-      console.error('Error fetching accessory usage:', error);
+      // console.error('Error fetching accessory usage:', error);
     }
 
     // 2. Installation Stats
-    console.log('🏠 Fetching installation statistics...');
     try {
       const { data: installationData, error: installationError } = await supabase
         .from('orders')
@@ -83,11 +79,10 @@ export default async function handler(req, res) {
         };
       }
     } catch (error) {
-      console.error('Error fetching installation stats:', error);
+      // console.error('Error fetching installation stats:', error);
     }
 
     // 3. Top Selling by BTU
-    console.log('🔥 Fetching top selling by BTU...');
     try {
       const { data: btuData, error: btuError } = await supabase
         .from('orders')
@@ -114,11 +109,10 @@ export default async function handler(req, res) {
           .sort((a, b) => b.total_sold - a.total_sold);
       }
     } catch (error) {
-      console.error('Error fetching BTU data:', error);
+      // console.error('Error fetching BTU data:', error);
     }
 
     // 4. Top Selling by Energy Rating
-    console.log('⚡ Fetching top selling by energy rating...');
     try {
       const { data: energyData, error: energyError } = await supabase
         .from('orders')
@@ -142,11 +136,10 @@ export default async function handler(req, res) {
           .sort((a, b) => b.total_sold - a.total_sold);
       }
     } catch (error) {
-      console.error('Error fetching energy rating data:', error);
+      // console.error('Error fetching energy rating data:', error);
     }
 
     // 5. Sales Over Time
-    console.log('📅 Fetching sales over time...');
     try {
       const { data: salesData, error: salesError } = await supabase
         .from('orders')
@@ -165,11 +158,10 @@ export default async function handler(req, res) {
           .sort((a, b) => new Date(a.period) - new Date(b.period));
       }
     } catch (error) {
-      console.error('Error fetching sales data:', error);
+      // console.error('Error fetching sales data:', error);
     }
 
     // 6. Total Orders and Revenue
-    console.log('💰 Fetching total orders and revenue...');
     try {
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -182,14 +174,12 @@ export default async function handler(req, res) {
         );
       }
     } catch (error) {
-      console.error('Error fetching order totals:', error);
+      // console.error('Error fetching order totals:', error);
     }
 
-    console.log('✅ Analytics data fetched successfully');
     return res.status(200).json(analyticsData);
 
   } catch (error) {
-    console.error('❌ Error fetching analytics:', error);
     return res.status(500).json({ 
       error: 'Failed to fetch analytics data',
       details: error.message

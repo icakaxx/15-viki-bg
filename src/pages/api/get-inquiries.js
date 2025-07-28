@@ -21,7 +21,6 @@ export default async function handler(req, res) {
 
   // Check environment variables
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('Missing environment variables');
     return res.status(500).json({ 
       error: 'Server configuration error - missing environment variables'
     });
@@ -43,16 +42,6 @@ export default async function handler(req, res) {
       sortBy = 'created_at',
       sortOrder = 'desc'
     } = req.query;
-
-    console.log('Fetching inquiries with filters:', {
-      status,
-      inquiryType,
-      search,
-      page,
-      limit,
-      sortBy,
-      sortOrder
-    });
 
     // Build query
     let query = supabase
@@ -83,14 +72,11 @@ export default async function handler(req, res) {
     const { data: inquiries, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching inquiries:', error);
       return res.status(500).json({ 
         error: 'Failed to fetch inquiries',
         message: error.message
       });
     }
-
-    console.log(`Fetched ${inquiries?.length || 0} inquiries`);
 
     // Return success response
     return res.status(200).json({
@@ -110,7 +96,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error in get-inquiries:', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message || 'Unknown error occurred'
