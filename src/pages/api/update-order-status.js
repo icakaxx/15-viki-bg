@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
-  console.log('=== UPDATE ORDER STATUS API CALLED ===');
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -37,7 +36,6 @@ export default async function handler(req, res) {
 
   try {
     const { orderId, newStatus, adminId, notes, startInstallationDate, startInstallationHour, startInstallationMinute, endInstallationDate, endInstallationHour, endInstallationMinute } = req.body;
-    console.log('Request data:', { orderId, newStatus, adminId, notes, startInstallationDate, startInstallationHour, startInstallationMinute, endInstallationDate, endInstallationHour, endInstallationMinute });
 
     // Validate required parameters
     if (!orderId || !newStatus) {
@@ -55,11 +53,9 @@ export default async function handler(req, res) {
     }
 
     // Fetch current status - first check if payment tracking exists
-    console.log(`Fetching current status for order ${orderId}...`);
     
     // Check if this is a mock order (orderId >= 1000)
     const isMockOrder = orderId >= 1000;
-    console.log(`Order ${orderId} is mock order: ${isMockOrder}`);
     
     let { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
@@ -71,7 +67,6 @@ export default async function handler(req, res) {
 
     if (fetchError && fetchError.code === 'PGRST116') {
       // No payment tracking record exists yet - this is a new order
-      console.log(`No payment tracking found for order ${orderId}, treating as new order`);
       
         // Verify the order exists in orders (only for real orders)
         const { data: guestOrder, error: guestError } = await supabase
@@ -130,8 +125,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Updating order ${orderId} status: ${oldStatus} → ${newStatus}`);
-
     // Update payment_and_tracking status
     const { error: updateError } = await supabase
       .from('orders')
@@ -147,7 +140,6 @@ export default async function handler(req, res) {
     }
 
     // Insert status change into history
-    console.log('Inserting status change into history...');
     const historyData = {
       order_id: orderId,
       status: newStatus,
@@ -167,7 +159,6 @@ export default async function handler(req, res) {
 
     // If status is being set to 'installation_booked', create installation schedule entries
     if (newStatus === 'installation_booked' && startInstallationDate && endInstallationDate) {
-      console.log('Creating installation schedule entries...');
       
       try {
         // Create installation schedule entry using the new time format
@@ -189,15 +180,13 @@ export default async function handler(req, res) {
           console.error('Error creating installation schedule:', installationError);
           console.warn('Installation schedule creation failed, but order status was updated successfully');
         } else {
-          console.log('Installation schedule created successfully');
+          // Installation schedule created successfully
         }
       } catch (dateError) {
         console.error('Error parsing installation dates:', dateError);
         console.warn('Installation schedule creation failed due to date parsing error');
       }
     }
-
-    console.log(`Order ${orderId} status successfully updated: ${oldStatus} → ${newStatus}`);
 
     // Return success response
     return res.status(200).json({

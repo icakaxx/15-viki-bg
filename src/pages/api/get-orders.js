@@ -20,7 +20,6 @@ export default async function handler(req, res) {
   );
 
   try {
-    console.log('API: Loading orders...');
     
     // First try to use the order_status_view if it exists
     let { data, error } = await supabase
@@ -31,7 +30,6 @@ export default async function handler(req, res) {
 
     // If view doesn't exist, fall back to manual join
     if (error && error.code === '42P01') {
-      console.log('API: Order status view not found, using manual join...');
       
       // Get orders with payment info using manual join, excluding installed orders
       const { data: ordersData, error: ordersError } = await supabase
@@ -81,13 +79,6 @@ export default async function handler(req, res) {
         notes: order.notes
       })) || [];
 
-      console.log('API: Orders loaded via manual join:', data.map(order => ({
-        order_id: order.order_id,
-        name: `${order.first_name} ${order.last_name}`,
-        status: order.current_status,
-        total_amount: `${order.total_amount} BGN`,
-        paid_amount: `${order.paid_amount} BGN`
-      })));
     } else if (error) {
       console.error('API: Error loading orders:', error);
       return res.status(500).json({ 
@@ -95,14 +86,7 @@ export default async function handler(req, res) {
         details: error.message
       });
     } else {
-      console.log('API: Orders loaded via view:', data.map(order => ({
-        order_id: order.order_id,
-        name: `${order.first_name} ${order.last_name}`,
-        status: order.current_status,
-        total_amount: `${order.total_amount} BGN`,
-        paid_amount: `${order.paid_amount} BGN`,
-        notes: order.notes
-      })));
+      // Orders loaded via view
     }
 
     return res.status(200).json({ 

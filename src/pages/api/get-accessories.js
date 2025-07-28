@@ -27,8 +27,6 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    console.log('🛠️ Get-accessories API called');
-
     // Check if Supabase is configured
     if (!supabase) {
         console.error('❌ Supabase not configured');
@@ -60,13 +58,6 @@ export default async function handler(req, res) {
 
         // Transform accessories to match frontend expectations
         const transformedAccessories = (data || []).map(transformAccessory);
-        
-        console.log('✅ Successfully fetched', transformedAccessories.length, 'accessories from database');
-        console.log('📋 Accessories:', transformedAccessories.map(acc => ({ 
-            id: acc.AccessoryID, 
-            name: acc.Name, 
-            price: acc.Price 
-        })));
         
         return res.status(200).json({ 
             accessories: transformedAccessories

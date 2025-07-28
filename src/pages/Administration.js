@@ -12,10 +12,6 @@ export default function Administration() {
     const router = useRouter();
     const locale = router.locale || 'bg';
     
-    // Debug info
-    console.log('Admin Panel - Current locale:', locale);
-    console.log('Admin Panel - Test translation:', t('admin.header.title'));
-    
     // Authentication state
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [usernameInput, setUsernameInput] = useState('');
@@ -49,7 +45,6 @@ export default function Administration() {
     const defaultValues = {
         brand: '',
         model: '',
-        type: '',
         capacity_btu: '',
         energy_rating: '',
         colour: '',
@@ -64,7 +59,6 @@ export default function Administration() {
         cop: '',
         scop: '',
         power_consumption: '',
-        refrigerant_type: '',
         operating_temp_range: '',
         dimensions: '',
         indoor_dimensions: '',
@@ -84,11 +78,11 @@ export default function Administration() {
     const getSectionProgress = (sectionName) => {
         const sectionConfig = {
             basic: {
-                required: ['brand', 'model', 'price', 'type', 'capacity_btu', 'energy_rating', 'colour', 'stock', 'discount', 'image_url'],
+                required: ['brand', 'model', 'price', 'capacity_btu', 'energy_rating', 'colour', 'stock', 'discount', 'image_url'],
                 optional: []
             },
             technical: {
-                required: ['cop', 'scop', 'power_consumption', 'refrigerant_type', 'operating_temp_range'],
+                required: ['cop', 'scop', 'power_consumption', 'operating_temp_range'],
                 optional: []
             },
             physical: {
@@ -97,8 +91,7 @@ export default function Administration() {
                     'outdoor_dimensions',
                     'indoor_weight',
                     'outdoor_weight',
-                    'colour',
-                    'refrigerant_type'
+                    'colour'
                 ],
                 optional: []
             },
@@ -123,53 +116,7 @@ export default function Administration() {
         let totalRequired = config.required.length;
         let totalOptional = config.optional.length;
 
-        // Helper function to check if a field has meaningful user input
-        const hasMeaningfulInput = (fieldName, value) => {
-            const defaultValue = defaultValues[fieldName];
 
-            // For number fields, treat any value that is not '', null, or undefined as filled
-            if ([
-                'indoor_weight',
-                'outdoor_weight'
-            ].includes(fieldName)) {
-                return value !== '' && value !== null && value !== undefined;
-            }
-
-            // If value is the same as default, it's not meaningful input
-            if (value === defaultValue) {
-                return false;
-            }
-
-            // Handle different data types
-            if (typeof value === 'string') {
-                const trimmed = value.trim();
-                // Don't count empty strings or placeholder-like text
-                if (trimmed === '' || trimmed === defaultValue || 
-                    trimmed.toLowerCase().includes('example') ||
-                    trimmed.toLowerCase().includes('placeholder') ||
-                    trimmed.toLowerCase().includes('e.g.')) {
-                    return false;
-                }
-                return trimmed.length > 0;
-            }
-
-            if (Array.isArray(value)) {
-                // For arrays, only count if user has added items
-                return value.length > 0 && JSON.stringify(value) !== JSON.stringify(defaultValue);
-            }
-
-            if (typeof value === 'boolean') {
-                // For checkboxes, only count if user has changed from default
-                return value !== defaultValue;
-            }
-
-            if (typeof value === 'number') {
-                // For numbers, don't count NaN
-                return !isNaN(value);
-            }
-
-            return value !== null && value !== undefined && value !== defaultValue;
-        };
 
         // Count completed required fields
         config.required.forEach(field => {
@@ -184,24 +131,6 @@ export default function Administration() {
                 completedOptional++;
             }
         });
-
-        // Debug log for physical section (after hasMeaningfulInput and counts)
-        if (sectionName === 'physical') {
-            const debugFields = [
-                'indoor_dimensions',
-                'outdoor_dimensions',
-                'indoor_weight',
-                'outdoor_weight',
-                'colour',
-                'refrigerant_type'
-            ];
-            const debugInfo = debugFields.map(field => ({
-                field,
-                value: formData[field],
-                filled: hasMeaningfulInput(field, formData[field])
-            }));
-            console.log('Physical section debug:', debugInfo, 'Completed:', completedRequired, 'of', config.required.length);
-        }
 
         const totalCompleted = completedRequired + completedOptional;
         const totalFields = totalRequired + totalOptional;
@@ -260,14 +189,28 @@ export default function Administration() {
         return !optionalFields.includes(fieldName);
     };
 
+    // Helper function to check if a field has meaningful user input
     const hasMeaningfulInput = (fieldName, value) => {
         const defaultValue = defaultValues[fieldName];
-        
+
+        // For number fields, treat any value that is not '', null, or undefined as filled
+        if ([
+            'indoor_weight',
+            'outdoor_weight',
+            'noise_level',
+            'air_flow',
+            'cop',
+            'scop',
+            'power_consumption'
+        ].includes(fieldName)) {
+            return value !== '' && value !== null && value !== undefined;
+        }
+
         // If value is the same as default, it's not meaningful input
         if (value === defaultValue) {
             return false;
         }
-        
+
         // Handle different data types
         if (typeof value === 'string') {
             const trimmed = value.trim();
@@ -280,22 +223,22 @@ export default function Administration() {
             }
             return trimmed.length > 0;
         }
-        
+
         if (Array.isArray(value)) {
             // For arrays, only count if user has added items
             return value.length > 0 && JSON.stringify(value) !== JSON.stringify(defaultValue);
         }
-        
+
         if (typeof value === 'boolean') {
             // For checkboxes, only count if user has changed from default
             return value !== defaultValue;
         }
-        
+
         if (typeof value === 'number') {
-            // For numbers, don't count 0 or default values
-            return value !== 0 && value !== defaultValue && !isNaN(value);
+            // For numbers, don't count NaN
+            return !isNaN(value);
         }
-        
+
         return value !== null && value !== undefined && value !== defaultValue;
     };
 
@@ -328,9 +271,9 @@ export default function Administration() {
                 // Get specific missing required fields for better error messages
                 const missingFields = [];
                 const sectionConfig = {
-                    basic: ['brand', 'model', 'price', 'type', 'capacity_btu', 'energy_rating', 'colour', 'stock', 'discount', 'image_url'],
-                    technical: ['cop', 'scop', 'power_consumption', 'refrigerant_type', 'operating_temp_range'],
-                    physical: ['indoor_dimensions', 'outdoor_dimensions', 'indoor_weight', 'outdoor_weight', 'colour', 'refrigerant_type'],
+                    basic: ['brand', 'model', 'price', 'capacity_btu', 'energy_rating', 'colour', 'stock', 'discount', 'image_url'],
+                    technical: ['cop', 'scop', 'power_consumption', 'operating_temp_range'],
+                    physical: ['indoor_dimensions', 'outdoor_dimensions', 'indoor_weight', 'outdoor_weight', 'colour'],
                     installation: ['room_size_recommendation', 'installation_type', 'warranty_period'],
                     features: [], // Features are now optional
                     description: ['description']
@@ -343,7 +286,6 @@ export default function Administration() {
                             brand: 'Brand',
                             model: 'Model',
                             price: 'Price',
-                            type: 'Type',
                             capacity_btu: 'Capacity (BTU)',
                             energy_rating: 'Energy Rating',
                             colour: 'Color',
@@ -353,7 +295,6 @@ export default function Administration() {
                             cop: 'COP',
                             scop: 'SCOP',
                             power_consumption: 'Power Consumption',
-                            refrigerant_type: 'Refrigerant Type',
                             operating_temp_range: 'Operating Temperature Range',
                             dimensions: 'Dimensions',
                             weight: 'Weight',
@@ -413,7 +354,6 @@ export default function Administration() {
     const [formData, setFormData] = useState({
         brand: '',
         model: '',
-        type: '',
         capacity_btu: '',
         energy_rating: '',
         colour: '',
@@ -428,7 +368,6 @@ export default function Administration() {
         cop: '',
         scop: '',
         power_consumption: '',
-        refrigerant_type: '',
         operating_temp_range: '',
         dimensions: '',
         indoor_dimensions: '',
@@ -483,7 +422,6 @@ export default function Administration() {
     // Load products from API
     const loadProducts = async () => {
         try {
-            console.log('Loading products...');
             const response = await fetch('/api/get-products');
             
             if (!response.ok) {
@@ -491,28 +429,18 @@ export default function Administration() {
             }
             
             const data = await response.json();
-            console.log('API Response:', data);
             
             // Extract products array from API response
             const productsArray = Array.isArray(data.products) ? data.products : [];
-            console.log('Raw products array:', productsArray);
             
             // Transform API response to match admin panel expected format
             const transformedProducts = productsArray.map(product => {
                 try {
-                    console.log('Processing product:', product);
-                    console.log('Product tech specs after DB update:', {
-                        cop: product.COP,
-                        scop: product.SCOP,
-                        power_consumption: product.PowerConsumption,
-                        refrigerant_type: product.RefrigerantType,
-                        operating_temp_range: product.OperatingTempRange
-                    });
                     return {
                         id: product.ProductID || product.id,
                         brand: product.Brand || product.brand || '',
                         model: product.Model || product.model || '',
-                        type: product.Type || product.type || '',
+
                         capacity_btu: product.CapacityBTU || product.capacity_btu || '',
                         energy_rating: product.EnergyRating || product.energy_rating || '',
                         colour: product.Colour || product.colour || '',
@@ -528,7 +456,7 @@ export default function Administration() {
                         cop: product.COP || product.cop || '',
                         scop: product.SCOP || product.scop || '',
                         power_consumption: product.PowerConsumption || product.power_consumption || '',
-                        refrigerant_type: product.RefrigerantType || product.refrigerant_type || '',
+
                         operating_temp_range: product.OperatingTempRange || product.operating_temp_range || '',
                         dimensions: product.Dimensions || product.dimensions || '',
                         indoor_dimensions: product.IndoorDimensions || product.indoor_dimensions || '',
@@ -551,8 +479,6 @@ export default function Administration() {
                 }
             }).filter(product => product !== null);
             
-            console.log('Transformed products:', transformedProducts);
-            
             setProducts(transformedProducts);
             setFilteredProducts(transformedProducts);
         } catch (error) {
@@ -573,7 +499,6 @@ export default function Administration() {
         setFormData({
             brand: '',
             model: '',
-            type: '',
             capacity_btu: '',
             energy_rating: '',
             colour: '',
@@ -588,7 +513,6 @@ export default function Administration() {
             cop: '',
             scop: '',
             power_consumption: '',
-            refrigerant_type: '',
             operating_temp_range: '',
             dimensions: '',
             indoor_dimensions: '',
@@ -696,7 +620,7 @@ export default function Administration() {
                     image_url: mockSupabaseUrl
                 }));
                 
-                console.log('⚠️ Using mock upload (Supabase not configured):', mockSupabaseUrl);
+                // Using mock upload (Supabase not configured)
             }
 
             alert('Image uploaded successfully!');
@@ -748,7 +672,6 @@ export default function Administration() {
                 air_flow: formData.air_flow ? parseInt(formData.air_flow) : null,
                 // Convert empty strings to null for text fields
                 colour: formData.colour || null,
-                type: formData.type || null,
                 energy_rating: formData.energy_rating || null,
                 image_url: formData.image_url || null,
                 dimensions: formData.dimensions || null,
@@ -760,8 +683,6 @@ export default function Administration() {
                 warranty_period: formData.warranty_period || null,
                 description: formData.description || null
             };
-
-            console.log('Sending product data:', cleanedData);
 
             const response = await fetch('/api/add-product', {
                 method: 'POST',
@@ -787,18 +708,9 @@ export default function Administration() {
     };
 
     const handleEdit = (product) => {
-        console.log('handleEdit called with product:', product);
-        console.log('Product tech specs in handleEdit after DB update:', {
-            cop: product.cop,
-            scop: product.scop,
-            power_consumption: product.power_consumption,
-            refrigerant_type: product.refrigerant_type,
-            operating_temp_range: product.operating_temp_range
-        });
         setFormData({
             brand: product.brand || '',
             model: product.model || '',
-            type: product.type || '',
             capacity_btu: product.capacity_btu ? product.capacity_btu.toString() : '',
             energy_rating: product.energy_rating || '',
             colour: product.colour || '',
@@ -810,24 +722,24 @@ export default function Administration() {
             is_featured: product.is_featured || false,
             is_bestseller: product.is_bestseller || false,
             is_new: product.is_new || false,
-            cop: product.cop ? product.cop.toString() : '',
-            scop: product.scop ? product.scop.toString() : '',
-            power_consumption: product.power_consumption ? product.power_consumption.toString() : '',
-            refrigerant_type: product.refrigerant_type || 'R32',
-            operating_temp_range: product.operating_temp_range || '',
+            cop: (product.COP || product.cop) ? (product.COP || product.cop).toString() : '',
+            scop: (product.SCOP || product.scop) ? (product.SCOP || product.scop).toString() : '',
+            power_consumption: (product.PowerConsumption || product.power_consumption) ? (product.PowerConsumption || product.power_consumption).toString() : '',
+            operating_temp_range: product.OperatingTempRange || product.operating_temp_range || '',
             dimensions: product.dimensions || '',
-            indoor_dimensions: product.indoor_dimensions || '',
-            outdoor_dimensions: product.outdoor_dimensions || '',
-            indoor_weight: product.indoor_weight ? product.indoor_weight.toString() : '',
-            outdoor_weight: product.outdoor_weight ? product.outdoor_weight.toString() : '',
-            noise_level: product.noise_level ? product.noise_level.toString() : '',
-            air_flow: product.air_flow ? product.air_flow.toString() : '',
-            room_size_recommendation: product.room_size_recommendation || '',
-            installation_type: product.installation_type || '',
-            warranty_period: product.warranty_period || '',
+            indoor_dimensions: product.IndoorDimensions || product.indoor_dimensions || '',
+            outdoor_dimensions: product.OutdoorDimensions || product.outdoor_dimensions || '',
+            indoor_weight: (product.IndoorWeight || product.indoor_weight) ? (product.IndoorWeight || product.indoor_weight).toString() : '',
+            outdoor_weight: (product.OutdoorWeight || product.outdoor_weight) ? (product.OutdoorWeight || product.outdoor_weight).toString() : '',
+            noise_level: (product.NoiseLevel || product.noise_level) ? (product.NoiseLevel || product.noise_level).toString() : '',
+            air_flow: (product.AirFlow || product.air_flow) ? (product.AirFlow || product.air_flow).toString() : '',
+            room_size_recommendation: product.RoomSizeRecommendation || product.room_size_recommendation || '',
+            installation_type: product.InstallationType || product.installation_type || '',
+            warranty_period: product.WarrantyPeriod || product.warranty_period || '',
             features: product.features || [],
             description: product.description || ''
         });
+        
         setIsEditing(true);
         setEditingId(product.id);
         setShowForm(true);
@@ -868,7 +780,6 @@ export default function Administration() {
                 is_new: Boolean(formData.is_new),
                 // Convert empty strings to null for text fields
                 colour: formData.colour || null,
-                type: formData.type || null,
                 energy_rating: formData.energy_rating || null,
                 image_url: formData.image_url || null,
                 dimensions: formData.dimensions || null,
@@ -880,8 +791,6 @@ export default function Administration() {
                 warranty_period: formData.warranty_period || null,
                 description: formData.description || null
             };
-
-            console.log('Updating product data:', cleanedData);
 
             const response = await fetch('/api/edit-product', {
                 method: 'POST',
@@ -1159,23 +1068,7 @@ export default function Administration() {
                                             <div className={styles.formCard}>
                                                 <h3 className={styles.cardTitle}>🏷️ {t('admin.products.formCards.productDetails')}</h3>
                                                 <div className={styles.formGrid}>
-                                                    <div className={styles.formGroup}>
-                                                        <label>
-                                                            {t('admin.products.type')}:
-                                                            <select
-                                                                name="type"
-                                                                value={formData.type}
-                                                                onChange={handleChange}
-                                                            >
-                                                                <option value="">{t('admin.products.dropdowns.selectType')}</option>
-                                                                <option value="Split">{t('admin.products.dropdowns.types.split')}</option>
-                                                                <option value="Multi-Split">{t('admin.products.dropdowns.types.multiSplit')}</option>
-                                                                <option value="Cassette">{t('admin.products.dropdowns.types.cassette')}</option>
-                                                                <option value="Ducted">{t('admin.products.dropdowns.types.ducted')}</option>
-                                                                <option value="Portable">{t('admin.products.dropdowns.types.portable')}</option>
-                                                            </select>
-                                                        </label>
-                                                    </div>
+
                                                     <div className={styles.formGroup}>
                                                         <label>
                                                             {t('admin.products.capacity')} (BTU):
@@ -1396,22 +1289,7 @@ export default function Administration() {
                                                             />
                                                         </label>
                                                     </div>
-                                                    <div className={styles.formGroup}>
-                                                        <label>
-                                                            {t('admin.products.fields.refrigerantType')}:
-                                                            <select
-                                                                name="refrigerant_type"
-                                                                value={formData.refrigerant_type}
-                                                                onChange={handleChange}
-                                                            >
-                                                                <option value="" disabled>{t('admin.products.dropdowns.selectRefrigerant') || 'Select refrigerant type...'}</option>
-                                                                <option value="R32">{t('admin.products.dropdowns.refrigerantTypes.r32')}</option>
-                                                                <option value="R410A">{t('admin.products.dropdowns.refrigerantTypes.r410a')}</option>
-                                                                <option value="R134a">{t('admin.products.dropdowns.refrigerantTypes.r134a')}</option>
-                                                                <option value="R290">{t('admin.products.dropdowns.refrigerantTypes.r290')}</option>
-                                                            </select>
-                                                        </label>
-                                                    </div>
+
                                                     <div className={styles.formGroup}>
                                                         <label>
                                                             {t('admin.products.fields.operatingTempRange')}:
@@ -1860,7 +1738,7 @@ export default function Administration() {
                                         <div className={styles.productInfo}>
                                             <h4>{product.brand} {product.model}</h4>
                                             <p>Price: €{product.price}</p>
-                                            <p>Type: {product.type || 'Not specified'}</p>
+                    
                                         </div>
                                         <div className={styles.productActions}>
                                             <button 

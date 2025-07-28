@@ -13,12 +13,7 @@ const ProductDetailPage = () => {
   const { t } = useTranslation('common');
   const { addToCartEnhanced } = useCart();
 
-  // Helper function to translate AC types
-  const translateType = (type) => {
-    if (!type) return '';
-    const typeKey = type.toLowerCase();
-    return t(`buyPage.types.${typeKey}`) || type;
-  };
+
 
   // Helper function to translate features
   const translateFeature = (feature) => {
@@ -62,7 +57,6 @@ const ProductDetailPage = () => {
     if (product.IndoorWeight) count++;
     if (product.OutdoorWeight) count++;
     if (product.Colour) count++;
-    if (product.RefrigerantType) count++;
     if (product.OperatingTempRange) count++;
     if (product.InstallationType) count++;
     if (product.Stock !== undefined && product.Stock !== null) count++;
@@ -142,7 +136,6 @@ const ProductDetailPage = () => {
           const accessoriesData = await accessoriesResponse.json();
 
           if (accessoriesResponse.ok) {
-            console.log('✅ Loaded accessories:', accessoriesData.accessories?.length || 0, 'items');
             setAccessories(accessoriesData.accessories || []);
           } else {
             console.warn('⚠️ Failed to load accessories:', accessoriesData.error);
@@ -185,6 +178,33 @@ const ProductDetailPage = () => {
     return Math.round(((previousPrice - price) / previousPrice) * 100);
   };
 
+  // Dynamic discount calculation system
+  const getDynamicPricing = () => {
+    if (!product) return { discount: 0, previousPrice: null, currentPrice: 0 };
+    
+    let discount, previousPrice, currentPrice, calculatedPrice;
+    
+    if (product.Discount > 0) {
+      // If discount percentage is provided, calculate the discounted price dynamically
+      discount = product.Discount;
+      previousPrice = product.PreviousPrice || product.Price; // Original price (before discount)
+      calculatedPrice = previousPrice * (1 - discount / 100); // Calculate discounted price
+      currentPrice = calculatedPrice; // Use calculated price for display
+    } else if (product.PreviousPrice && product.PreviousPrice > product.Price) {
+      // If previous price is provided and higher than current price, calculate discount
+      discount = calculateDiscount(product.Price, product.PreviousPrice);
+      previousPrice = product.PreviousPrice;
+      currentPrice = product.Price;
+    } else {
+      // No discount
+      discount = 0;
+      previousPrice = null;
+      currentPrice = product.Price;
+    }
+    
+    return { discount, previousPrice, currentPrice };
+  };
+
   const getAccessoryTotal = () => {
     return selectedAccessories.reduce((total, accId) => {
       const accessory = accessories.find(acc => acc.AccessoryID === accId);
@@ -193,7 +213,8 @@ const ProductDetailPage = () => {
   };
 
   const getTotalPrice = () => {
-    const basePrice = product?.Price || 0;
+    const { currentPrice } = getDynamicPricing();
+    const basePrice = currentPrice || 0;
     const accessoryTotal = getAccessoryTotal();
     const installationCost = installationSelected ? INSTALLATION_PRICE_PER_UNIT * quantity : 0;
     return (basePrice + accessoryTotal) * quantity + installationCost;
@@ -420,26 +441,31 @@ const ProductDetailPage = () => {
 
               {/* Pricing */}
               <div className={styles.pricing}>
-                <div className={styles.currentPrice}>
-                  {formatPrice(product.Price)}
-                </div>
-                <div className={styles.priceDetails}>
-                  {product.PreviousPrice && product.PreviousPrice > product.Price && (
+                {(() => {
+                  const { discount, previousPrice, currentPrice } = getDynamicPricing();
+                  return (
                     <>
-                      <span className={styles.originalPrice}>
-                        {formatPrice(product.PreviousPrice)}
-                      </span>
-                      {discount && (
-                        <span className={styles.discount}>
-                          -{discount}%
-                        </span>
-                      )}
+                      <div className={styles.currentPrice}>
+                        {formatPrice(currentPrice)}
+                      </div>
+                      <div className={styles.priceDetails}>
+                        {discount > 0 && (
+                          <>
+                            <span className={styles.originalPrice}>
+                              {formatPrice(previousPrice)}
+                            </span>
+                            <span className={styles.discount}>
+                              -{discount}%
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <div className={styles.eurPrice}>
+                        {formatPriceEUR(currentPrice)}
+                      </div>
                     </>
-                  )}
-                </div>
-                <div className={styles.eurPrice}>
-                  {formatPriceEUR(product.Price)}
-                </div>
+                  );
+                })()}
               </div>
 
               {/* Quick Specs */}
@@ -460,14 +486,7 @@ const ProductDetailPage = () => {
                     {product.EnergyRating}
                   </div>
                 </div>
-                <div className={styles.quickSpec}>
-                  <div className={styles.quickSpecLabel}>
-                    {t('productDetail.specs.type')}
-                  </div>
-                  <div className={styles.quickSpecValue}>
-                    {translateType(product.Type)}
-                  </div>
-                </div>
+
                 {product.RoomSizeRecommendation && (
                   <div className={styles.quickSpec}>
                     <div className={styles.quickSpecLabel}>
@@ -539,7 +558,6 @@ const ProductDetailPage = () => {
             {/* Technical Details Tab */}
             <div className={`${styles.specsTabContent} ${activeTab === 'technical' ? styles.active : ''}`}>
               <div className={styles.specsGrid}>
-                {product.RefrigerantType && renderSpecCard('❄️', t('productDetail.specs.refrigerant'), product.RefrigerantType, t('productDetail.tooltips.refrigerantType'))}
                 {product.InstallationType && renderSpecCard('🔧', t('productDetail.specs.installation'), product.InstallationType, t('productDetail.tooltips.installationType'))}
                 {product.Stock !== undefined && product.Stock !== null && renderSpecCard('📦', t('productDetail.specs.stock'), product.Stock > 0 ? `${product.Stock} ${t('productDetail.stock.available')}` : t('productDetail.stock.outOfStockShort'), t('productDetail.tooltips.stock'))}
               </div>

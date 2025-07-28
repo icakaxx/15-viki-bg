@@ -29,8 +29,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Loading products for order ${orderId}...`);
-
     // Get order items
     const { data: orderItems, error: itemsError } = await supabase
       .from('order_items')
@@ -115,8 +113,6 @@ export default async function handler(req, res) {
     });
 
     const products = await Promise.all(productsPromises);
-
-    console.log(`Successfully loaded ${products.length} products for order ${orderId}`);
 
     return res.status(200).json({ 
       success: true,

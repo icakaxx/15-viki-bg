@@ -208,7 +208,6 @@ const CheckoutPage = () => {
 
   // Prepare order data for Stripe payment
   const prepareOrderData = () => {
-    console.log( "grandTotal :" + cart.totalPrice);
     return {
       personalInfo: {
         firstName: formData.firstName,
@@ -387,7 +386,6 @@ const CheckoutPage = () => {
     }
 
     setIsSubmitting(true);
-    console.log( "grandTotal :" + cart.totalPrice);
     try {
       // Format data for API
       const orderData = {
@@ -638,8 +636,8 @@ const CheckoutPage = () => {
                         </button>
                       </div>
                       <div className={styles.installationPrice}>
-                        <div>{formatPrice(item.installationPrice || 0)}</div>
-                        <div className={styles.itemPriceEur}>{formatPriceEUR(item.installationPrice || 0)}</div>
+                        <div>{formatPrice((item.installationPrice || 0) * item.quantity)}</div>
+                        <div className={styles.itemPriceEur}>{formatPriceEUR((item.installationPrice || 0) * item.quantity)}</div>
                       </div>
                     </div>
                   </div>

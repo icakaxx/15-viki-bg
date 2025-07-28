@@ -42,13 +42,10 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Rescheduling installation ${searchId} to ${new_date} at ${new_time}`);
-
     // Check if this is a mock order (order_id >= 1000)
     const isMockOrder = searchId >= 1000;
     
     if (isMockOrder) {
-      console.log(`Mock order ${searchId} detected - returning success for testing`);
       return res.status(200).json({
         success: true,
         order_id: searchId,
@@ -95,12 +92,6 @@ export default async function handler(req, res) {
 
     // Fix existing installations with incorrect end times (where end time is before start time)
     if (oldEndTime <= oldTime && oldEndTime !== oldTime) {
-      console.log('🔧 Fixing installation with incorrect end time:', {
-        id: installationId,
-        oldTime,
-        oldEndTime
-      });
-      
       // Calculate correct end time based on duration (default 1 hour)
       const [startHours, startMinutes] = oldTime.split(':').map(Number);
       const startTotalMinutes = startHours * 60 + startMinutes;
@@ -118,8 +109,7 @@ export default async function handler(req, res) {
       if (fixError) {
         console.error('Error fixing installation end time:', fixError);
       } else {
-        console.log('✅ Fixed installation end time:', correctedEndTime);
-        // Update the local variable
+        // Fixed installation end time
         existingInstallation.end_time_slot = correctedEndTime;
       }
     }
@@ -128,13 +118,6 @@ export default async function handler(req, res) {
     const { generateConsecutiveSlots, getDurationFromTimeRange } = await import('../../lib/slotUtils');
     const oldTimeSlots = generateConsecutiveSlots(oldTime, getDurationFromTimeRange(oldTime, oldEndTime));
     const installationDuration = getDurationFromTimeRange(oldTime, oldEndTime);
-
-    console.log('🔧 Duration calculation debug:', {
-      oldTime,
-      oldEndTime,
-      installationDuration,
-      oldTimeSlots
-    });
 
     // Generate new time slots based on the new start time and duration
     const newTimeSlots = generateConsecutiveSlots(new_time, installationDuration);
@@ -168,12 +151,6 @@ export default async function handler(req, res) {
     // 3. Calculate new end time - ensure it's after the start time
     let newEndTime = newTimeSlots[newTimeSlots.length - 1] || new_time;
     
-    console.log('🔧 Initial newEndTime calculation:', {
-      newTimeSlots,
-      lastSlot: newTimeSlots[newTimeSlots.length - 1],
-      newEndTime
-    });
-    
     // FIXED: The end time should be the actual end of the installation, not the last slot start time
     if (newTimeSlots.length > 0) {
       // Calculate the actual end time by adding 30 minutes to the last slot
@@ -196,15 +173,8 @@ export default async function handler(req, res) {
       newEndTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
     }
     
-    console.log('🔧 Final newEndTime before validation:', {
-      newEndTime,
-      new_time,
-      isEndTimeBeforeStart: newEndTime <= new_time
-    });
-    
     // Only apply fallback if there's a real problem (this should rarely happen now)
     if (newEndTime <= new_time) {
-      console.log('⚠️ End time is before start time, applying fallback with original duration');
       // Use the original duration, not hardcoded 1 hour
       const [startHours, startMinutes] = new_time.split(':').map(Number);
       const endTotalMinutes = (startHours * 60 + startMinutes) + (installationDuration * 60);
@@ -212,16 +182,6 @@ export default async function handler(req, res) {
       const endMinutes = endTotalMinutes % 60;
       newEndTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
     }
-
-    console.log('🔧 Reschedule calculation FINAL:', {
-      oldTime,
-      oldEndTime,
-      originalDuration: installationDuration,
-      newTime: new_time,
-      newEndTime,
-      newTimeSlots,
-      calculatedDuration: getDurationFromTimeRange(new_time, newEndTime)
-    });
 
     // 4. Update installation schedule
     const { error: updateError } = await supabase
@@ -259,8 +219,6 @@ export default async function handler(req, res) {
       console.error('Error logging reschedule history:', historyError);
       // Don't fail the entire request if history logging fails, but warn
     }
-
-    console.log(`Installation successfully rescheduled for order ${existingInstallation.order_id}: ${oldDate} ${oldTime}-${oldEndTime} → ${new_date} ${new_time}-${newEndTime}`);
 
     return res.status(200).json({
       success: true,

@@ -44,16 +44,6 @@ export default async function handler(req, res) {
       sortOrder = 'desc'
     } = req.query;
 
-    console.log('Fetching inquiries with filters:', {
-      status,
-      inquiryType,
-      search,
-      page,
-      limit,
-      sortBy,
-      sortOrder
-    });
-
     // Build query
     let query = supabase
       .from('inquiries')
@@ -89,8 +79,6 @@ export default async function handler(req, res) {
         message: error.message
       });
     }
-
-    console.log(`Fetched ${inquiries?.length || 0} inquiries`);
 
     // Return success response
     return res.status(200).json({

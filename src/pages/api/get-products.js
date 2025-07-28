@@ -7,7 +7,6 @@ const transformProduct = (product) => {
         Brand: product.brand,
         Model: product.model,
         Colour: product.colour,
-        Type: product.type,
         CapacityBTU: product.capacity_btu,
         EnergyRating: product.energy_rating,
         Price: product.price,
@@ -22,7 +21,6 @@ const transformProduct = (product) => {
         COP: product.cop || null,
         SCOP: product.scop || null,
         PowerConsumption: product.power_consumption || null,
-        RefrigerantType: product.refrigerant_type || 'R32',
         OperatingTempRange: product.operating_temp_range || null,
         // Physical Characteristics (with defaults for missing columns)
         IndoorDimensions: product.indoor_dimensions || null,
@@ -58,7 +56,7 @@ try {
     supabase = createClient(supabaseUrl, supabaseKey, {
       auth: { persistSession: false }
     });
-    console.log('✓ Supabase client initialized');
+    // Supabase client initialized
   }
 } catch (error) {
   console.error('⚠️ Failed to initialize Supabase client:', error);
@@ -93,14 +91,12 @@ export default async function handler(req, res) {
 
     // Use Supabase
     try {
-        console.log('🔍 Querying Supabase for products...');
         // Start with basic columns that should always exist
         let query = supabase.from('products').select(`
             id,
             brand,
             model,
             colour,
-            type,
             capacity_btu,
             energy_rating,
             price,
@@ -111,6 +107,10 @@ export default async function handler(req, res) {
             is_archived,
             created_at,
             updated_at,
+            cop,
+            scop,
+            power_consumption,
+            operating_temp_range,
             indoor_dimensions,
             outdoor_dimensions,
             indoor_weight,

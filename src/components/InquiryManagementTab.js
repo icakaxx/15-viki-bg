@@ -6,13 +6,7 @@ const ADMIN_ID = 1; // Default admin ID
 export default function InquiryManagementTab() {
   const { t } = useTranslation('common');
   
-  // Debug translations
-  console.log('🔍 Translation debug:', {
-    title: t('inquiryManagement.title'),
-    tabTitle: t('inquiryManagement.tabTitle'),
-    totalInquiries: t('inquiryManagement.overview.totalInquiries'),
-    testKey: t('admin.header.title') // Test if other translations work
-  });
+
   
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -29,8 +29,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Loading order history for order ${orderId}...`);
-
     // Get order status history
     const { data, error } = await supabase
       .from('order_status_view')
@@ -40,7 +38,6 @@ export default async function handler(req, res) {
 
     if (error) {
       if (error.code === '42P01') {
-        console.log('Order status history table not found');
         return res.status(200).json({ 
           success: true,
           history: [],
@@ -54,8 +51,6 @@ export default async function handler(req, res) {
         });
       }
     }
-
-    console.log(`Successfully loaded ${data?.length || 0} history entries for order ${orderId}`);
 
     return res.status(200).json({ 
       success: true,

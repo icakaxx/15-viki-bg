@@ -14,15 +14,12 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    console.log('Edit product API received data:', req.body);
-
     // Validate required fields
     const { 
         id,
         brand, 
         model, 
         colour, 
-        type, 
         capacity_btu, 
         energy_rating, 
         price,
@@ -39,7 +36,6 @@ export default async function handler(req, res) {
         cop,
         scop,
         power_consumption,
-        refrigerant_type,
         operating_temp_range,
         // Physical Characteristics
         indoor_dimensions,
@@ -57,10 +53,8 @@ export default async function handler(req, res) {
     } = req.body;
 
     // Server-side validation
-    console.log('Validation check - id:', id, 'brand:', brand, 'model:', model, 'price:', price);
     
     if (!id) {
-        console.log('Validation failed: Missing id');
         return res.status(400).json({ 
             error: 'Missing required field: id' 
         });
@@ -130,7 +124,6 @@ export default async function handler(req, res) {
             brand,
             model,
             colour,
-            type,
             capacity_btu,
             energy_rating,
             price: parseFloat(price),
@@ -147,7 +140,6 @@ export default async function handler(req, res) {
             cop: cop !== undefined ? (cop ? parseFloat(cop) : null) : null,
             scop: scop !== undefined ? (scop ? parseFloat(scop) : null) : null,
             power_consumption,
-            refrigerant_type,
             operating_temp_range,
             // Physical Characteristics
             indoor_dimensions,
@@ -197,7 +189,6 @@ export default async function handler(req, res) {
         if (brand !== undefined) updateData.brand = brand;
         if (model !== undefined) updateData.model = model;
         if (colour !== undefined) updateData.colour = colour;
-        if (type !== undefined) updateData.type = type;
         if (capacity_btu !== undefined) updateData.capacity_btu = capacity_btu ? parseInt(capacity_btu) : null;
         if (energy_rating !== undefined) updateData.energy_rating = energy_rating;
         if (price !== undefined) updateData.price = parseFloat(price);
@@ -216,7 +207,6 @@ export default async function handler(req, res) {
         if (cop !== undefined) updateData.cop = cop ? parseFloat(cop) : null;
         if (scop !== undefined) updateData.scop = scop ? parseFloat(scop) : null;
         if (power_consumption !== undefined) updateData.power_consumption = power_consumption;
-        if (refrigerant_type !== undefined) updateData.refrigerant_type = refrigerant_type;
         if (operating_temp_range !== undefined) updateData.operating_temp_range = operating_temp_range;
 
         // Physical Characteristics

@@ -398,11 +398,14 @@
 .image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   transition: transform 0.3s ease;
-  /* Ensure image stays within bounds */
+  /* Ensure image stays within bounds and maintains aspect ratio */
   max-width: 100%;
   max-height: 100%;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 }
 
 .card:hover .image {
@@ -452,6 +455,11 @@
 
 .badge.featured {
   background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  color: white;
+}
+
+.badge.discount {
+  background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
   color: white;
 }
 
@@ -812,6 +820,45 @@
 }
 
 .discount {
+  display: inline-block;
+  background-color: #dc3545;
+  color: white;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  font-weight: bold;
+}
+
+/* New Discounted Price Layout */
+.originalPriceContainer {
+  margin-bottom: 1.25rem;
+}
+
+.originalPrice {
+  color: #d91a1a;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  text-decoration: line-through;
+  margin-bottom: 1rem;
+}
+
+.currentPriceContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.currentPrice {
+  color: #2c5530;
+  font-size: 1.7rem;
+  font-weight: bold;
+  line-height: 1.2;
+  margin-top: -1rem;
+}
+
+.discountBadge {
   display: inline-block;
   background-color: #dc3545;
   color: white;
@@ -1454,6 +1501,19 @@
 
   .previousPrice {
     font-size: 0.95rem;
+  }
+
+  .originalPrice {
+    font-size: 0.9rem;
+  }
+
+  .currentPrice {
+    font-size: 1.25rem;
+  }
+
+  .discountBadge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
   }
 
   /* Legacy EUR mobile styles - keeping for compatibility */
