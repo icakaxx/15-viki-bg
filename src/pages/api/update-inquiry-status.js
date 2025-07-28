@@ -21,7 +21,6 @@ export default async function handler(req, res) {
 
   // Check environment variables
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('Missing environment variables');
     return res.status(500).json({ 
       error: 'Server configuration error - missing environment variables'
     });
@@ -40,13 +39,6 @@ export default async function handler(req, res) {
       adminNotes, 
       adminId 
     } = req.body;
-
-    console.log('Updating inquiry status:', {
-      inquiryId,
-      status,
-      hasAdminNotes: !!adminNotes,
-      adminId
-    });
 
     // Validate required parameters
     if (!inquiryId) {
@@ -71,7 +63,6 @@ export default async function handler(req, res) {
       .single();
 
     if (fetchError || !currentInquiry) {
-      console.error('Error fetching inquiry:', fetchError);
       return res.status(404).json({ 
         error: 'Inquiry not found',
         message: `No inquiry found with ID ${inquiryId}`
@@ -97,8 +88,6 @@ export default async function handler(req, res) {
       updateData.responded_by = adminId || null;
     }
 
-    console.log('Updating inquiry with data:', updateData);
-
     // Update inquiry
     const { data: updatedInquiry, error: updateError } = await supabase
       .from('inquiries')
@@ -108,14 +97,11 @@ export default async function handler(req, res) {
       .single();
 
     if (updateError) {
-      console.error('Error updating inquiry:', updateError);
       return res.status(500).json({ 
         error: 'Failed to update inquiry',
         message: updateError.message
       });
     }
-
-    console.log('Inquiry updated successfully:', updatedInquiry.id);
 
     // Return success response
     return res.status(200).json({
@@ -127,7 +113,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error in update-inquiry-status:', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message || 'Unknown error occurred'

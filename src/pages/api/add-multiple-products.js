@@ -26,7 +26,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log(`Adding ${products.length} products`);
 
     // Validate all products before insertion
     const validatedProducts = products.map((product, index) => {
@@ -77,14 +76,11 @@ export default async function handler(req, res) {
       .select();
 
     if (error) {
-      console.error('Error adding products:', error);
       return res.status(500).json({ 
         error: 'Failed to add products',
         details: error.message
       });
     }
-
-    console.log('✅ Products added successfully:', newProducts.length);
 
     return res.status(201).json({
       success: true,
@@ -94,7 +90,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Unexpected error adding products:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       details: error.message

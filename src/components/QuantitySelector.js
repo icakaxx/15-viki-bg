@@ -10,11 +10,6 @@ const QuantitySelector = ({ product }) => {
   const { t } = useTranslation('common');
   const router = useRouter();
   
-  // Debug logging
-  console.log('QuantitySelector rendered for product:', product?.ProductID);
-  console.log('Cart context available:', !!addToCart);
-  console.log('Language context available:', !!t);
-  
   const currentCartQuantity = getCartItemQuantity(product.ProductID);
   const minQuantity = 1;
   const maxQuantity = 10; // Maximum 10 ACs per product
@@ -23,14 +18,12 @@ const QuantitySelector = ({ product }) => {
   const isOutOfStock = product.IsArchived;
 
   const handleDecrease = () => {
-    console.log('Decrease button clicked');
     if (quantity > minQuantity && !isOutOfStock) {
       setQuantity(quantity - 1);
     }
   };
 
   const handleIncrease = () => {
-    console.log('Increase button clicked');
     if (quantity < maxQuantity && !isOutOfStock) {
       setQuantity(quantity + 1);
     }
@@ -39,7 +32,6 @@ const QuantitySelector = ({ product }) => {
   const handleBuyNow = () => {
     if (isOutOfStock) return; // Prevent navigation for archived products
     
-    console.log('Buy now clicked for product:', product?.ProductID);
     // Navigate to product detail page with quantity parameter
     router.push(`/buy/${product.ProductID}?qty=${quantity}`);
   };

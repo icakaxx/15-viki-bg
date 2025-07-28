@@ -98,7 +98,6 @@ const BuyPage = () => {
         }
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching products:', err);
       } finally {
         setLoading(false);
       }
@@ -937,7 +936,6 @@ const BuyPage = () => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 // TODO: Add red button functionality
-                                console.log('Red button clicked for product:', product.ProductID);
                               }}
                             >
                               <img 
@@ -952,7 +950,6 @@ const BuyPage = () => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 // TODO: Add green button functionality
-                                console.log('Green button clicked for product:', product.ProductID);
                               }}
                             >
                               <img 

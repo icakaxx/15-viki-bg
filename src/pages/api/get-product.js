@@ -61,7 +61,6 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log(`Fetching product with ID: ${id}`);
         
         const { data: product, error } = await supabase
             .from('products')
@@ -70,7 +69,6 @@ export default async function handler(req, res) {
             .single();
 
         if (error) {
-            console.error('Error fetching product:', error);
             return res.status(404).json({ error: 'Product not found' });
         }
 
@@ -82,7 +80,6 @@ export default async function handler(req, res) {
         return res.status(200).json(transformedProduct);
 
     } catch (error) {
-        console.error('Unexpected error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 } 

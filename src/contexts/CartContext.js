@@ -257,15 +257,11 @@ export const CartProvider = ({ children }) => {
       const savedCart = localStorage.getItem('viki15-cart');
       if (savedCart) {
         const parsedCart = JSON.parse(savedCart);
-        // Only log when actually loading from localStorage
-        console.log('Loading cart from localStorage:', parsedCart);
         dispatch({ type: CART_ACTIONS.LOAD_CART, payload: parsedCart });
       } else {
         // Only log once when cart is first initialized
-        console.log('CartProvider initialized with empty cart');
       }
     } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
     }
   }, []);
 
@@ -274,16 +270,11 @@ export const CartProvider = ({ children }) => {
     try {
       localStorage.setItem('viki15-cart', JSON.stringify(cart));
     } catch (error) {
-      console.error('Error saving cart to localStorage:', error);
     }
   }, [cart]);
 
   // Cart Actions
   const addToCart = (product, quantity = 1) => {
-    // Only log in development mode
-    if (process.env.NODE_ENV === 'development') {
-      console.log('addToCart called with:', { product: product?.ProductID, quantity });
-    }
     dispatch({
       type: CART_ACTIONS.ADD_TO_CART,
       payload: { product, quantity }
@@ -291,16 +282,6 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCartEnhanced = (product, quantity = 1, accessories = [], installation = false, installationPrice = 0) => {
-    // Only log in development mode and only essential info
-    if (process.env.NODE_ENV === 'development') {
-      console.log('addToCartEnhanced called with:', { 
-        productId: product?.ProductID, 
-        quantity, 
-        accessoriesCount: accessories.length,
-        installation 
-      });
-    }
-    
     dispatch({
       type: CART_ACTIONS.ADD_TO_CART_ENHANCED,
       payload: { 

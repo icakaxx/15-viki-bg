@@ -7,7 +7,6 @@ export default async function handler(req, res) {
 
   // Check if environment variables are available
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('Missing environment variables for get-order-history');
     return res.status(500).json({ 
       error: 'Server configuration error - missing environment variables'
     });
@@ -29,8 +28,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Loading order history for order ${orderId}...`);
-
     // Get order status history
     const { data, error } = await supabase
       .from('order_status_view')
@@ -40,22 +37,18 @@ export default async function handler(req, res) {
 
     if (error) {
       if (error.code === '42P01') {
-        console.log('Order status history table not found');
         return res.status(200).json({ 
           success: true,
           history: [],
           message: 'Order status history table not found - history feature not set up yet'
         });
       } else {
-        console.error('Error loading order history:', error);
         return res.status(500).json({ 
           error: 'Failed to load order history',
           details: error.message
         });
       }
     }
-
-    console.log(`Successfully loaded ${data?.length || 0} history entries for order ${orderId}`);
 
     return res.status(200).json({ 
       success: true,
@@ -64,7 +57,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error in get-order-history:', error);
     return res.status(500).json({ 
       error: 'Failed to load order history',
       details: error.message

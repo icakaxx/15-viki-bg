@@ -56,7 +56,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('Adding new product:', { brand, model, capacity_btu, energy_rating, price });
 
     const productData = {
       brand,
@@ -99,14 +98,11 @@ export default async function handler(req, res) {
       .single();
 
     if (error) {
-      console.error('Error adding product:', error);
       return res.status(500).json({ 
         error: 'Failed to add product',
         details: error.message
       });
     }
-
-    console.log('✅ Product added successfully:', newProduct.id);
 
     return res.status(201).json({
       success: true,
@@ -115,7 +111,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Unexpected error adding product:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       details: error.message

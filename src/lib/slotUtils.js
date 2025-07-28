@@ -119,12 +119,6 @@ export function generateConsecutiveSlots(startTime, duration) {
   let currentTime = startHours * 60 + startMinutes; // Convert to minutes
   const endTime = currentTime + (duration * 60); // Duration in minutes
   
-  console.log('🔧 generateConsecutiveSlots:', {
-    startTime,
-    duration,
-    startTotalMinutes: currentTime,
-    endTotalMinutes: endTime
-  });
   
   while (currentTime < endTime) {
     const hours = Math.floor(currentTime / 60);
@@ -154,7 +148,6 @@ export function generateConsecutiveSlots(startTime, duration) {
     }
   }
   
-  console.log('🔧 Generated slots:', slots);
   return slots;
 }
 

@@ -75,9 +75,6 @@ class Analytics {
   // Send event to analytics endpoint
   async sendEvent(event) {
     try {
-      // In production, send to your analytics service
-      // For now, just log to console
-      console.log('Analytics Event:', event);
       
       // Example: Send to your API endpoint
       // await fetch('/api/analytics', {

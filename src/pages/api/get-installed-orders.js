@@ -38,7 +38,6 @@ export default async function handler(req, res) {
   );
 
   try {
-    console.log('📊 Fetching installed orders...');
     
     // First, get orders with 'installed' status
     let query = supabase
@@ -58,14 +57,12 @@ export default async function handler(req, res) {
     const { data: installedOrders, error: ordersError } = await query;
 
     if (ordersError) {
-      console.error('Error fetching installed orders:', ordersError);
       return res.status(500).json({ 
         error: 'Failed to fetch installed orders',
         details: ordersError.message 
       });
     }
 
-    console.log(`Found ${installedOrders?.length || 0} installed orders`);
     if (!installedOrders || installedOrders.length === 0) {
       return res.status(200).json({
         data: [],
@@ -101,11 +98,9 @@ export default async function handler(req, res) {
             `)
             .eq('order_id', orderId);
 
-          if (itemsError) {
-            console.warn(`Error fetching order items for order ${orderId}:`, itemsError);
-          }
-          
-          console.log(`Order ${orderId} has ${orderItems?.length || 0} items`);
+                      if (itemsError) {
+              // Error fetching order items
+            }
 
           // Get product details for each item
           const products = [];
@@ -113,7 +108,6 @@ export default async function handler(req, res) {
 
           if (orderItems) {
             for (const item of orderItems) {
-              console.log(`Looking for product with ID: ${item.product_id}`);
               
               // Try both possible column names for product ID
               let { data: product, error: productError } = await supabase
@@ -122,9 +116,8 @@ export default async function handler(req, res) {
                 .eq('ProductID', item.product_id)
                 .single();
 
-              // If ProductID doesn't work, try 'id'
-              if (productError || !product) {
-                console.log(`ProductID lookup failed, trying 'id' column...`);
+                              // If ProductID doesn't work, try 'id'
+                if (productError || !product) {
                 const result = await supabase
                   .from('products')
                   .select('brand, model, price')
@@ -135,8 +128,7 @@ export default async function handler(req, res) {
                 productError = result.error;
               }
 
-              if (product && !productError) {
-                console.log(`Found product: ${product.brand} ${product.model} - €${product.price}`);
+                              if (product && !productError) {
                 const itemPrice = parseFloat(product.price) * item.quantity;
                 totalPrice += itemPrice;
 
@@ -147,9 +139,8 @@ export default async function handler(req, res) {
                   quantity: item.quantity,
                   service: item.service_option
                 });
-              } else {
-                console.warn(`Product not found for ID ${item.product_id}:`, productError);
-                // Add a placeholder for missing products
+                              } else {
+                  // Add a placeholder for missing products
                 products.push({
                   brand: 'Unknown',
                   model: 'Product Not Found',
@@ -191,13 +182,11 @@ export default async function handler(req, res) {
             total_price_eur: Math.round((totalPrice / EUR_RATE) * 100) / 100
           };
 
-          console.log(`Order ${orderId} summary: ${products.length} products, total: ${totalPrice} BGN`);
-          return orderResult;
+                      return orderResult;
 
-        } catch (detailError) {
-          console.warn(`Error fetching details for order ${orderId}:`, detailError);
-          return null;
-        }
+                  } catch (detailError) {
+            return null;
+          }
       })
     );
 
@@ -233,15 +222,12 @@ export default async function handler(req, res) {
     const totalCount = validOrders.length;
     const paginatedOrders = validOrders.slice(offset, offset + limit);
 
-    console.log(`Returning ${paginatedOrders.length} orders (${totalCount} total)`);
-
     return res.status(200).json({
       data: paginatedOrders,
       totalCount: totalCount
     });
 
   } catch (err) {
-    console.error('Error in get-installed-orders:', err);
     return res.status(500).json({ 
       error: 'Internal server error',
       message: err.message 

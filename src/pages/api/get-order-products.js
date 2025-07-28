@@ -7,7 +7,6 @@ export default async function handler(req, res) {
 
   // Check if environment variables are available
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('Missing environment variables for get-order-products');
     return res.status(500).json({ 
       error: 'Server configuration error - missing environment variables'
     });
@@ -29,8 +28,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Loading products for order ${orderId}...`);
-
     // Get order items
     const { data: orderItems, error: itemsError } = await supabase
       .from('order_items')
@@ -44,7 +41,6 @@ export default async function handler(req, res) {
       .eq('order_id', orderId);
 
     if (itemsError) {
-      console.error('Error fetching order items:', itemsError);
       return res.status(500).json({ 
         error: 'Failed to fetch order items',
         details: itemsError.message
@@ -98,7 +94,6 @@ export default async function handler(req, res) {
           total_price: parseFloat(product.price) * item.quantity
         };
       } else {
-        console.warn(`Product not found for ID ${item.product_id}:`, productError);
         return {
           product_id: item.product_id,
           brand: 'Unknown',
@@ -116,8 +111,6 @@ export default async function handler(req, res) {
 
     const products = await Promise.all(productsPromises);
 
-    console.log(`Successfully loaded ${products.length} products for order ${orderId}`);
-
     return res.status(200).json({ 
       success: true,
       products: products,
@@ -126,7 +119,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error in get-order-products:', error);
     return res.status(500).json({ 
       error: 'Failed to load order products',
       details: error.message

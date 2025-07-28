@@ -26,7 +26,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log(`Rescheduling installation for order: ${searchId} to ${newDate} ${newTime}`);
 
     // Check if order exists
     const { data: order, error: orderError } = await supabase
@@ -36,7 +35,6 @@ export default async function handler(req, res) {
       .single();
 
     if (orderError) {
-      console.error('Error fetching order:', orderError);
       return res.status(404).json({ error: 'Order not found' });
     }
 
@@ -52,7 +50,6 @@ export default async function handler(req, res) {
       .single();
 
     if (scheduleError && scheduleError.code !== 'PGRST116') {
-      console.error('Error fetching installation schedule:', scheduleError);
       return res.status(500).json({ 
         error: 'Failed to fetch installation schedule',
         details: scheduleError.message
@@ -77,7 +74,6 @@ export default async function handler(req, res) {
         .eq('order_id', searchId);
 
       if (updateError) {
-        console.error('Error updating installation schedule:', updateError);
         return res.status(500).json({ 
           error: 'Failed to update installation schedule',
           details: updateError.message
@@ -95,15 +91,12 @@ export default async function handler(req, res) {
         }]);
 
       if (createError) {
-        console.error('Error creating installation schedule:', createError);
         return res.status(500).json({ 
           error: 'Failed to create installation schedule',
           details: createError.message
         });
       }
     }
-
-    console.log(`✅ Installation rescheduled successfully for order ${searchId}`);
 
     return res.status(200).json({
       success: true,
@@ -114,7 +107,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Unexpected error rescheduling installation:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       details: error.message

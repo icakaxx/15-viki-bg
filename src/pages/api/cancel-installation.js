@@ -24,7 +24,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log(`Cancelling installation for order: ${searchId}`);
 
     // Check if order exists
     const { data: order, error: orderError } = await supabase
@@ -34,7 +33,6 @@ export default async function handler(req, res) {
       .single();
 
     if (orderError) {
-      console.error('Error fetching order:', orderError);
       return res.status(404).json({ error: 'Order not found' });
     }
 
@@ -52,7 +50,6 @@ export default async function handler(req, res) {
       .eq('order_id', searchId);
 
     if (updateError) {
-      console.error('Error cancelling installation:', updateError);
       return res.status(500).json({ 
         error: 'Failed to cancel installation',
         details: updateError.message
@@ -66,11 +63,8 @@ export default async function handler(req, res) {
       .eq('order_id', searchId);
 
     if (scheduleError) {
-      console.warn('Error removing from installation schedule:', scheduleError);
       // Don't fail the request if schedule deletion fails
     }
-
-    console.log(`✅ Installation cancelled successfully for order ${searchId}`);
 
     return res.status(200).json({
       success: true,
@@ -79,7 +73,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Unexpected error cancelling installation:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       details: error.message

@@ -24,7 +24,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log(`Updating product with ID: ${id}`);
 
     // Check if product exists
     const { data: existingProduct, error: fetchError } = await supabase
@@ -34,7 +33,6 @@ export default async function handler(req, res) {
       .single();
 
     if (fetchError) {
-      console.error('Error fetching product:', fetchError);
       return res.status(404).json({ error: 'Product not found' });
     }
 
@@ -63,14 +61,11 @@ export default async function handler(req, res) {
       .single();
 
     if (updateError) {
-      console.error('Error updating product:', updateError);
       return res.status(500).json({ 
         error: 'Failed to update product',
         details: updateError.message
       });
     }
-
-    console.log('✅ Product updated successfully:', id);
 
     return res.status(200).json({
       success: true,
@@ -79,7 +74,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Unexpected error updating product:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       details: error.message
