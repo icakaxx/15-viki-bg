@@ -116,51 +116,11 @@ export default async function handler(req, res) {
         });
     }
 
-    // Mock mode - if Supabase is not configured
+    // If Supabase is not configured, return error
     if (!supabase) {
-        console.log('⚠️  Supabase not configured, simulating product update');
-        const mockProduct = {
-            id,
-            brand,
-            model,
-            colour,
-            capacity_btu,
-            energy_rating,
-            price: parseFloat(price),
-            previous_price: previous_price ? parseFloat(previous_price) : null,
-            image_url,
-            stock: stock !== undefined ? parseInt(stock) : 0,
-            discount: discount !== undefined ? parseFloat(discount) : 0,
-            is_archived: is_archived !== undefined ? is_archived : false,
-            // Promotional flags
-            is_featured: is_featured !== undefined ? is_featured : false,
-            is_bestseller: is_bestseller !== undefined ? is_bestseller : false,
-            is_new: is_new !== undefined ? is_new : false,
-            // Technical Performance
-            cop: cop !== undefined ? (cop ? parseFloat(cop) : null) : null,
-            scop: scop !== undefined ? (scop ? parseFloat(scop) : null) : null,
-            power_consumption,
-            operating_temp_range,
-            // Physical Characteristics
-            indoor_dimensions,
-            outdoor_dimensions,
-            indoor_weight,
-            outdoor_weight,
-            noise_level,
-            air_flow,
-            // Features & Usability
-            warranty_period,
-            room_size_recommendation,
-            installation_type,
-            description,
-            features,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        };
-        
-        return res.status(200).json({ 
-            message: 'Product updated successfully (mock mode)',
-            product: mockProduct 
+        return res.status(500).json({ 
+            error: 'Database not configured',
+            message: 'Product update requires database connection'
         });
     }
 

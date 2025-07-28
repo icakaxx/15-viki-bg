@@ -1,42 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Mock analytics data for when Supabase is not configured
-const mockAnalytics = {
-  accessoryUsage: [
-    { name: 'Wi-Fi Control Module', times_used: 45 },
-    { name: 'Advanced Filter Set', times_used: 32 },
-    { name: 'Extended Warranty (3 years)', times_used: 28 },
-    { name: 'Remote Control Premium', times_used: 18 }
-  ],
-  installationStats: {
-    withInstallation: 78,
-    withoutInstallation: 45
-  },
-  topSellingByBTU: [
-    { capacity_btu: 12000, total_sold: 65 },
-    { capacity_btu: 9000, total_sold: 48 },
-    { capacity_btu: 18000, total_sold: 35 },
-    { capacity_btu: 24000, total_sold: 22 }
-  ],
-  topSellingByEnergyRating: [
-    { energy_rating: 'A+++', total_sold: 89 },
-    { energy_rating: 'A++', total_sold: 67 },
-    { energy_rating: 'A+', total_sold: 34 },
-    { energy_rating: 'A', total_sold: 23 }
-  ],
-  salesOverTime: [
-    { period: '2024-01-01', order_count: 12 },
-    { period: '2024-01-08', order_count: 18 },
-    { period: '2024-01-15', order_count: 25 },
-    { period: '2024-01-22', order_count: 31 },
-    { period: '2024-01-29', order_count: 28 },
-    { period: '2024-02-05', order_count: 35 },
-    { period: '2024-02-12', order_count: 42 }
-  ],
-  totalOrders: 123,
-  totalRevenue: 185750.50
-};
-
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -50,10 +13,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // If Supabase is not configured, return mock data
+  // If Supabase is not configured, return error
   if (!supabase) {
-    console.log('⚠️  Supabase not configured, using mock analytics data');
-    return res.status(200).json(mockAnalytics);
+    return res.status(500).json({ 
+      error: 'Database not configured',
+      message: 'Analytics require database connection'
+    });
   }
 
   try {
@@ -270,12 +235,9 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Analytics API error:', error);
     
-    // Return mock data as fallback
-    console.log('📊 Returning mock analytics data due to error');
-    return res.status(200).json({
-      ...mockAnalytics,
-      error: 'Using mock data due to database error',
-      details: error.message
+    return res.status(500).json({
+      error: 'Failed to fetch analytics data',
+      message: error.message
     });
   }
 } 

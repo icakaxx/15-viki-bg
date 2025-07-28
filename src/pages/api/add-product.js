@@ -97,47 +97,11 @@ export default async function handler(req, res) {
         });
     }
 
-    // Mock mode - if Supabase is not configured
+    // If Supabase is not configured, return error
     if (!supabase) {
-        console.log('⚠️  Supabase not configured, simulating product creation');
-        const mockProduct = {
-            id: Math.floor(Math.random() * 1000) + 100,
-            brand,
-            model,
-            colour,
-            capacity_btu,
-            energy_rating,
-            price: parseFloat(price),
-            previous_price: previous_price ? parseFloat(previous_price) : null,
-            image_url,
-            stock: parseInt(stock),
-            discount: parseFloat(discount),
-            is_archived: false,
-            // Technical Performance
-            cop: cop ? parseFloat(cop) : null,
-            scop: scop ? parseFloat(scop) : null,
-            power_consumption,
-            operating_temp_range,
-            // Physical Characteristics
-            indoor_dimensions,
-            outdoor_dimensions,
-            indoor_weight,
-            outdoor_weight,
-            noise_level,
-            air_flow,
-            // Features & Usability
-            warranty_period,
-            room_size_recommendation,
-            installation_type,
-            description,
-            features,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        };
-        
-        return res.status(201).json({ 
-            message: 'Product added successfully (mock mode)',
-            product: mockProduct 
+        return res.status(500).json({ 
+            error: 'Database not configured',
+            message: 'Product creation requires database connection'
         });
     }
 

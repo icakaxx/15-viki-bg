@@ -42,26 +42,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check if this is a mock order (order_id >= 1000)
-    const isMockOrder = searchId >= 1000;
-    
-    if (isMockOrder) {
-      return res.status(200).json({
-        success: true,
-        order_id: searchId,
-        installation_id: searchId,
-        old_schedule: {
-          date: '2025-07-26', // Mock old date
-          time: '08:00'       // Mock old time
-        },
-        new_schedule: {
-          date: new_date,
-          time: new_time
-        },
-        message: 'Mock installation rescheduled successfully'
-      });
-    }
-
     // 1. Fetch existing installation schedule
     let query = supabase
       .from('installation_schedule')

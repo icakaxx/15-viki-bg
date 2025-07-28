@@ -154,9 +154,11 @@
 }
 
 .originalPrice {
-  font-size: 1.25rem;
-  color: #999;
+  color: #d91a1a;
+  font-size: 1.4rem;
+  line-height: 1.2;
   text-decoration: line-through;
+  margin-bottom: 1rem;
 }
 
 .discount {

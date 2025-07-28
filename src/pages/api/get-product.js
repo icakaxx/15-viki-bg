@@ -43,71 +43,7 @@ const transformProduct = (product) => {
     };
 };
 
-// Mock single product for testing when Supabase is not configured
-const mockProducts = [
-    {
-        id: 1,
-        brand: "Daikin",
-        model: "FTXS35K",
-        colour: "White",
-        capacity_btu: 12000,
-        energy_rating: "A++",
-        price: 899.00,
-        previous_price: 999.00,
-        image_url: "https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/daikin-ftxs35k.jpg",
-        stock: 15,
-        discount: 10.00,
-        is_archived: false,
-        created_at: "2024-01-01T00:00:00Z",
-        updated_at: "2024-01-01T00:00:00Z",
-        cop: 4.2,
-        scop: 4.0,
-        power_consumption: "2.1 kW",
-        operating_temp_range: "-15°C to 46°C",
-        indoor_dimensions: "795 x 295 x 203 mm",
-        outdoor_dimensions: "795 x 295 x 203 mm",
-        indoor_weight: "9.5 kg",
-        outdoor_weight: "9.5 kg",
-        noise_level: "19-22 dB",
-        air_flow: "540 m³/h",
-        warranty_period: "5 years",
-        room_size_recommendation: "35-50 m²",
-        installation_type: "Wall-mounted",
-        description: "Premium inverter air conditioner with advanced filtration system and Wi-Fi connectivity.",
-        features: ["Wi-Fi Control", "Advanced Filtration", "Quiet Operation", "Energy Efficient"]
-    },
-    {
-        id: 2,
-        brand: "Mitsubishi",
-        model: "MSZ-LN35VG",
-        colour: "White",
-        capacity_btu: 12000,
-        energy_rating: "A+++",
-        price: 1099.00,
-        previous_price: 1199.00,
-        image_url: "https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/mitsubishi-msz-ln35vg.jpg",
-        stock: 8,
-        discount: 8.33,
-        is_archived: false,
-        created_at: "2024-01-01T00:00:00Z",
-        updated_at: "2024-01-01T00:00:00Z",
-        cop: 4.5,
-        scop: 4.3,
-        power_consumption: "1.9 kW",
-        operating_temp_range: "-20°C to 50°C",
-        indoor_dimensions: "799 x 295 x 225 mm",
-        outdoor_dimensions: "799 x 295 x 225 mm",
-        indoor_weight: "10.0 kg",
-        outdoor_weight: "10.0 kg",
-        noise_level: "17-20 dB",
-        air_flow: "600 m³/h",
-        warranty_period: "5 years",
-        room_size_recommendation: "30-45 m²",
-        installation_type: "Wall-mounted",
-        description: "Ultra-quiet premium air conditioner with intelligent eye sensor and plasma quad filtration.",
-        features: ["Plasma Quad Filter", "Intelligent Eye", "Ultra Quiet", "Smart Defrost"]
-    }
-];
+
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -128,19 +64,11 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Product ID is required' });
     }
 
-    // If Supabase is not configured, return mock data
+    // If Supabase is not configured, return error
     if (!supabase) {
-        
-        const mockProduct = mockProducts.find(p => p.id === parseInt(id));
-        
-        if (!mockProduct) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        const transformedProduct = transformProduct(mockProduct);
-        
-        return res.status(200).json({ 
-            product: transformedProduct
+        return res.status(500).json({ 
+            error: 'Database not configured',
+            message: 'Product data requires database connection'
         });
     }
 
@@ -190,17 +118,9 @@ export default async function handler(req, res) {
                 return res.status(404).json({ error: 'Product not found' });
             }
             console.error('Error fetching product from Supabase:', error);
-            
-            // Fallback to mock data
-            const mockProduct = mockProducts.find(p => p.id === parseInt(id));
-            if (!mockProduct) {
-                return res.status(404).json({ error: 'Product not found' });
-            }
-            
-            const transformedProduct = transformProduct(mockProduct);
-            return res.status(200).json({ 
-                product: transformedProduct,
-                fallback: true
+            return res.status(500).json({ 
+                error: 'Failed to fetch product',
+                message: error.message
             });
         }
 
@@ -213,17 +133,9 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('Supabase connection error:', error);
-        
-        // Fallback to mock data on connection error
-        const mockProduct = mockProducts.find(p => p.id === parseInt(id));
-        if (!mockProduct) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-        
-        const transformedProduct = transformProduct(mockProduct);
-        return res.status(200).json({ 
-            product: transformedProduct,
-            fallback: true
+        return res.status(500).json({ 
+            error: 'Database connection failed',
+            message: error.message
         });
     }
 } 

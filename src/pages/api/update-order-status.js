@@ -54,9 +54,6 @@ export default async function handler(req, res) {
 
     // Fetch current status - first check if payment tracking exists
     
-    // Check if this is a mock order (orderId >= 1000)
-    const isMockOrder = orderId >= 1000;
-    
     let { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
       .select('status, order_id')
@@ -89,8 +86,8 @@ export default async function handler(req, res) {
         .from('orders')
         .insert([{ 
           id: orderId, 
-          status: isMockOrder ? 'installation_booked' : 'new', // Mock orders are already booked
-          payment_method: isMockOrder ? 'mock' : null,
+          status: 'new',
+          payment_method: null,
           modifiedDT: new Date().toISOString()
         }])
         .select()
@@ -105,7 +102,7 @@ export default async function handler(req, res) {
       }
 
       currentOrder = newTracking;
-      oldStatus = isMockOrder ? 'installation_booked' : 'new';
+      oldStatus = 'new';
     } else if (fetchError) {
       console.error('Error fetching current order status:', fetchError);
       

@@ -3,13 +3,13 @@
 
 export const promotionalFlags = {
   // Product IDs that should show "NEW" badge
-  newProducts: [108, 107, 106],
+  newProducts: [],
   
   // Product IDs that should show "BESTSELLER" badge  
-  bestsellerProducts: [108, 105, 104],
+  bestsellerProducts: [],
   
   // Product IDs that should show "FEATURED" badge
-  featuredProducts: [106, 105, 103]
+  featuredProducts: []
 };
 
 // Helper function to check if a product has promotional flags

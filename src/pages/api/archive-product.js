@@ -24,18 +24,11 @@ export default async function handler(req, res) {
         });
     }
 
-    // Mock mode - if Supabase is not configured
+    // If Supabase is not configured, return error
     if (!supabase) {
-        console.log('⚠️  Supabase not configured, simulating product archiving');
-        const mockProduct = {
-            id,
-            is_archived: true,
-            updated_at: new Date().toISOString()
-        };
-        
-        return res.status(200).json({ 
-            message: 'Product archived successfully (mock mode)',
-            product: mockProduct 
+        return res.status(500).json({ 
+            error: 'Database not configured',
+            message: 'Product archiving requires database connection'
         });
     }
 

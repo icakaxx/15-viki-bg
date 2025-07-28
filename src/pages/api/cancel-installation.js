@@ -42,25 +42,6 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`Cancelling installation ${searchId}`);
-
-    // Check if this is a mock order (order_id >= 1000)
-    const isMockOrder = searchId >= 1000;
-    
-    if (isMockOrder) {
-      console.log(`Mock order ${searchId} detected - returning success for testing`);
-      return res.status(200).json({
-        success: true,
-        order_id: searchId,
-        installation_id: searchId,
-        cancelled_schedule: {
-          date: '2025-07-26', // Mock cancelled date
-          time: '08:00'       // Mock cancelled time
-        },
-        message: 'Mock installation cancelled successfully'
-      });
-    }
-
     // 1. Fetch existing installation schedule
     let query = supabase
       .from('installation_schedule')

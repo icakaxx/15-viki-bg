@@ -234,20 +234,11 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Mock mode - if Supabase is not configured
+    // If Supabase is not configured, return error
     if (!supabase) {
-        console.log('⚠️  Supabase not configured, simulating multiple product creation');
-        const mockProducts = newProducts.map((product, index) => ({
-            ...product,
-            id: Math.floor(Math.random() * 1000) + 200 + index,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-        }));
-        
-        return res.status(201).json({ 
-            message: 'Products added successfully (mock mode)',
-            products: mockProducts,
-            count: mockProducts.length
+        return res.status(500).json({ 
+            error: 'Database not configured',
+            message: 'Bulk product creation requires database connection'
         });
     }
 

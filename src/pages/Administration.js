@@ -611,16 +611,13 @@ export default function Administration() {
                 const previewUrl = URL.createObjectURL(file);
                 setImagePreview(previewUrl);
                 
-                // Mock Supabase URL structure for consistency
-                const mockSupabaseUrl = `https://mock.supabase.co/storage/v1/object/public/images-viki15bg/products/${fileName}`;
-                
-                // Update form data with the mock URL
+                // Update form data with the file name for later upload
                 setFormData(prev => ({
                     ...prev,
-                    image_url: mockSupabaseUrl
+                    image_url: fileName
                 }));
                 
-                // Using mock upload (Supabase not configured)
+                // Note: Actual upload requires Supabase configuration
             }
 
             alert('Image uploaded successfully!');
