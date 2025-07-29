@@ -1,0 +1,111 @@
+.loadingWrapper {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.loadingWrapper::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007BFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.disabledWrapper {
+  position: relative;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.disabledWrapper > * {
+  pointer-events: none;
+}
+
+.consentWarning {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 8px;
+  border: 2px solid #ffc107;
+  z-index: 10;
+}
+
+.warningIcon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.warningText {
+  text-align: center;
+  color: #856404;
+  font-size: 0.9rem;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+  max-width: 300px;
+}
+
+.acceptTermsButton {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+}
+
+.acceptTermsButton:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.acceptTermsButton:active {
+  background-color: #004085;
+  transform: translateY(0);
+}
+
+.acceptTermsButton:focus {
+  outline: 2px solid #007BFF;
+  outline-offset: 2px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .consentWarning {
+    padding: 16px;
+  }
+  
+  .warningText {
+    font-size: 0.85rem;
+    max-width: 250px;
+  }
+  
+  .acceptTermsButton {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+} 
