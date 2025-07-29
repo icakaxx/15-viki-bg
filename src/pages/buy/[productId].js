@@ -6,12 +6,14 @@ import { useTranslation } from 'next-i18next';
 import Image from 'next/image';
 import { useCart } from '../../contexts/CartContext';
 import styles from '../../styles/Page Styles/ProductDetail.module.css';
+import { useConsent } from '../../components/ConsentProvider';
 
 const ProductDetailPage = () => {
   const router = useRouter();
   const { productId, qty } = router.query;
   const { t } = useTranslation('common');
   const { addToCartEnhanced } = useCart();
+  const { hasConsent } = useConsent();
 
 
 
@@ -247,6 +249,12 @@ const ProductDetailPage = () => {
   // Add to cart handler
   const handleAddToCart = () => {
     if (!product || product.IsArchived) return;
+
+    if (!hasConsent) {
+      // Show terms modal instead of adding to cart
+      window.dispatchEvent(new CustomEvent('showTermsModal'));
+      return;
+    }
 
     const selectedAccessoryObjects = selectedAccessories.map(accId => 
       accessories.find(acc => acc.AccessoryID === accId)
@@ -755,13 +763,15 @@ const ProductDetailPage = () => {
               </button>
             </div>
             <button
-              className={styles.addToCartButton}
+              className={`${styles.addToCartButton} ${!hasConsent ? styles.consentRequired : ''}`}
               onClick={handleAddToCart}
               disabled={product.IsArchived || product.Stock === 0}
             >
               {product.IsArchived || product.Stock === 0
                 ? t('productDetail.outOfStock')
-                : t('productDetail.addToCart')
+                : !hasConsent 
+                  ? t('consent.warning')
+                  : t('productDetail.addToCart')
               }
             </button>
           </div>

@@ -103,7 +103,7 @@ const QuantitySelector = ({ product }) => {
         aria-label={`${t ? t('buyPage.buyButton') : 'Buy'} ${product?.Brand} ${product?.Model}`}
       >
         {isOutOfStock ? 'Out of Stock' : 
-         !hasConsent ? 'За да закупите климатик, моля приемете условията' : 
+         !hasConsent ? (t ? t('consent.warning') : 'За да закупите климатик, моля приемете условията') : 
          (t ? t('buyPage.buyButton') : 'Buy')}
       </button>
 
