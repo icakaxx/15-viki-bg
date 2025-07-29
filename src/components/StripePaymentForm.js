@@ -137,7 +137,6 @@ const CheckoutForm = ({ amount, onPaymentSuccess, onPaymentError, isProcessing, 
             // Call the success callback
             onPaymentSuccess(paymentIntent);
           } catch (orderError) {
-            console.error('Order submission error after payment:', orderError);
             // Even if order submission fails, payment was successful
             onPaymentSuccess(paymentIntent);
           }
@@ -149,7 +148,6 @@ const CheckoutForm = ({ amount, onPaymentSuccess, onPaymentError, isProcessing, 
         return { success: true, paymentIntent };
       }
     } catch (err) {
-      console.error('Payment error:', err);
       const errorMessage = err.message || 'Payment failed';
       const translatedError = translateStripeError(errorMessage);
       setError(translatedError);

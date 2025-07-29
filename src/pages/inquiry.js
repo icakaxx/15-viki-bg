@@ -74,11 +74,9 @@ const InquiryPage = () => {
         });
       } else {
         setSubmitStatus('error');
-        console.error('Inquiry submission failed:', data);
       }
     } catch (err) {
       setSubmitStatus('error');
-      console.error('Error submitting inquiry:', err);
     } finally {
       setIsSubmitting(false);
     }
