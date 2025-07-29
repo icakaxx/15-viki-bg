@@ -7,26 +7,52 @@ import { CartProvider } from '../contexts/CartContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { appWithTranslation } from 'next-i18next';
 import '../lib/i18n';
+import { ConsentProvider } from '../components/ConsentProvider';
+import { useState, useEffect } from 'react';
 
 //Changing subset of 'Nunito' font to latin and setting it to its own variable
 const nunito = Nunito({
   subsets: ['latin'],
 })
 
-const MyApp = ({ Component, pageProps }) => (
-//   <ChakraProvider>
+const MyApp = ({ Component, pageProps }) => {
+  const [termsText, setTermsText] = useState('');
+
+  useEffect(() => {
+    // Fetch terms text from API
+    const fetchTerms = async () => {
+      try {
+        const response = await fetch('/api/obshti-uslovia');
+        const data = await response.json();
+        setTermsText(data.terms);
+      } catch (error) {
+        console.error('Error fetching terms:', error);
+        // Fallback terms text
+        setTermsText(`
+          <h1>ОБЩИ УСЛОВИЯ ЗА ПОЛЗВАНЕ И ПОКУПКА ПРЕЗ САЙТА BG-VIKI15.BG</h1>
+          <p>За да използвате сайта, трябва да приемете общите условия.</p>
+        `);
+      }
+    };
+
+    fetchTerms();
+  }, []);
+
+  return (
     <ErrorBoundary>
-      <main >
+      <main>
         <CartProvider>
-          <Layout>
-            <Component {...pageProps} />
-            {/* <BackToTop /> */}
-          </Layout>
+          <ConsentProvider termsText={termsText}>
+            <Layout>
+              <Component {...pageProps} />
+              {/* <BackToTop /> */}
+            </Layout>
+          </ConsentProvider>
         </CartProvider>
       </main>
     </ErrorBoundary>
-//   </ChakraProvider>
-)
+  );
+};
 
 /**
  * 

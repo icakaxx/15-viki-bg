@@ -3,10 +3,13 @@ import Head from 'next/head';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Page Styles/Products.module.css';
 import inquiryStyles from '../styles/Page Styles/InquiryPage.module.css';
+import ConsentFormWrapper from '../components/ConsentFormWrapper';
+import { useConsent } from '../components/ConsentProvider';
 
 // Fixed Link import issue
 const InquiryPage = () => {
   const { t } = useTranslation('common');
+  const { hasConsent } = useConsent();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -29,6 +32,13 @@ const InquiryPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check consent before allowing form submission
+    if (!hasConsent) {
+      setSubmitStatus('consent_required');
+      return;
+    }
+    
     setIsSubmitting(true);
     setSubmitStatus(null);
     
@@ -114,149 +124,177 @@ const InquiryPage = () => {
 
         <div className={inquiryStyles.inquiryMainGrid}>
           {/* Contact Form */}
-          <section style={{
-            background: 'white',
-            padding: '2rem',
-            borderRadius: '12px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            border: '1px solid #e0e0e0'
-          }}>
-            <h2 style={{ fontSize: '1.8rem', marginBottom: '2rem', color: '#333' }}>{t('inquiryPage.form.title')}</h2>
-            
-            {submitStatus === 'success' && (
-              <div style={{
-                background: '#d4edda',
-                border: '1px solid #c3e6cb',
-                color: '#155724',
-                padding: '1rem',
-                borderRadius: '8px',
-                marginBottom: '2rem'
-              }}>
-                ✅ {t('inquiryPage.form.success')}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              {/* Grid for first 6 fields */}
-              <div className={inquiryStyles.inquiryFormGrid}>
-                {/* Row 1: Full Name + Email */}
-                <div>
-                  <label className={inquiryStyles.inquiryLabel}>
-                    {t('inquiryPage.form.name')} {t('inquiryPage.form.required')}
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className={inquiryStyles.inquiryInput}
-                  />
-                </div>
-                <div>
-                  <label className={inquiryStyles.inquiryLabel}>
-                    {t('inquiryPage.form.email')} {t('inquiryPage.form.required')}
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className={inquiryStyles.inquiryInput}
-                  />
-                </div>
-                {/* Row 2: Phone + Company */}
-                <div>
-                  <label className={inquiryStyles.inquiryLabel}>
-                    {t('inquiryPage.form.phone')}
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className={inquiryStyles.inquiryInput}
-                  />
-                </div>
-                <div>
-                  <label className={inquiryStyles.inquiryLabel}>
-                    {t('inquiryPage.form.company')}
-                  </label>
-                  <input
-                    type="text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleInputChange}
-                    className={inquiryStyles.inquiryInput}
-                  />
-                </div>
-                {/* Row 3: Inquiry Type + Budget */}
-                <div>
-                  <label className={inquiryStyles.inquiryLabel}>
-                    {t('inquiryPage.form.inquiryType')} {t('inquiryPage.form.required')}
-                  </label>
-                  <select
-                    name="inquiryType"
-                    value={formData.inquiryType}
-                    onChange={handleInputChange}
-                    required
-                    className={inquiryStyles.inquirySelect}
-                  >
-                    <option value="">{t('inquiryPage.form.selectType')}</option>
-                    {inquiryTypes.map((type, index) => (
-                      <option key={index} value={type}>{type}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className={inquiryStyles.inquiryLabel}>
-                    {t('inquiryPage.form.budget')}
-                  </label>
-                  <select
-                    name="budget"
-                    value={formData.budget}
-                    onChange={handleInputChange}
-                    className={inquiryStyles.inquirySelect}
-                  >
-                    <option value="">{t('inquiryPage.form.selectBudget')}</option>
-                    {budgetRanges.map((range, index) => (
-                      <option key={index} value={range}>{range}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              {/* Message field and submit button remain as before */}
-
-              <div style={{ marginBottom: '2rem' }}>
-                <label className={inquiryStyles.inquiryLabel}>
-                  {t('inquiryPage.form.message')} {t('inquiryPage.form.required')}
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  required
-                  rows="5"
-                  placeholder={t('inquiryPage.form.messagePlaceholder')}
-                  className={inquiryStyles.inquiryTextarea}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={inquiryStyles.inquiryButton}
-              >
-                {isSubmitting ? t('inquiryPage.form.submitting') : t('inquiryPage.form.submit')}
-              </button>
+          <ConsentFormWrapper>
+            <section style={{
+              background: 'white',
+              padding: '2rem',
+              borderRadius: '12px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              border: '1px solid #e0e0e0'
+            }}>
+              <h2 style={{ fontSize: '1.8rem', marginBottom: '2rem', color: '#333' }}>{t('inquiryPage.form.title')}</h2>
+              
               {submitStatus === 'success' && (
-                <div className={inquiryStyles.inquirySuccess}>
+                <div style={{
+                  background: '#d4edda',
+                  border: '1px solid #c3e6cb',
+                  color: '#155724',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '2rem'
+                }}>
                   ✅ {t('inquiryPage.form.success')}
                 </div>
               )}
-            </form>
-          </section>
+
+              {submitStatus === 'consent_required' && (
+                <div style={{
+                  background: '#fff3cd',
+                  border: '1px solid #ffeaa7',
+                  color: '#856404',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '2rem'
+                }}>
+                  ⚠️ За да изпратите запитването, трябва първо да приемете общите условия.
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                {/* Grid for first 6 fields */}
+                <div className={inquiryStyles.inquiryFormGrid}>
+                  {/* Row 1: Full Name + Email */}
+                  <div>
+                    <label className={inquiryStyles.inquiryLabel}>
+                      {t('inquiryPage.form.name')} {t('inquiryPage.form.required')}
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      className={inquiryStyles.inquiryInput}
+                    />
+                  </div>
+                  <div>
+                    <label className={inquiryStyles.inquiryLabel}>
+                      {t('inquiryPage.form.email')} {t('inquiryPage.form.required')}
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className={inquiryStyles.inquiryInput}
+                    />
+                  </div>
+                  {/* Row 2: Phone + Company */}
+                  <div>
+                    <label className={inquiryStyles.inquiryLabel}>
+                      {t('inquiryPage.form.phone')}
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className={inquiryStyles.inquiryInput}
+                    />
+                  </div>
+                  <div>
+                    <label className={inquiryStyles.inquiryLabel}>
+                      {t('inquiryPage.form.company')}
+                    </label>
+                    <input
+                      type="text"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleInputChange}
+                      className={inquiryStyles.inquiryInput}
+                    />
+                  </div>
+                  {/* Row 3: Inquiry Type + Budget */}
+                  <div>
+                    <label className={inquiryStyles.inquiryLabel}>
+                      {t('inquiryPage.form.inquiryType')} {t('inquiryPage.form.required')}
+                    </label>
+                    <select
+                      name="inquiryType"
+                      value={formData.inquiryType}
+                      onChange={handleInputChange}
+                      required
+                      className={inquiryStyles.inquiryInput}
+                    >
+                      <option value="">{t('inquiryPage.form.selectInquiryType')}</option>
+                      {inquiryTypes.map((type, index) => (
+                        <option key={index} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={inquiryStyles.inquiryLabel}>
+                      {t('inquiryPage.form.budget')}
+                    </label>
+                    <select
+                      name="budget"
+                      value={formData.budget}
+                      onChange={handleInputChange}
+                      className={inquiryStyles.inquiryInput}
+                    >
+                      <option value="">{t('inquiryPage.form.selectBudget')}</option>
+                      {budgetRanges.map((range, index) => (
+                        <option key={index} value={range}>{range}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Message field - full width */}
+                <div style={{ marginTop: '1.5rem' }}>
+                  <label className={inquiryStyles.inquiryLabel}>
+                    {t('inquiryPage.form.message')} {t('inquiryPage.form.required')}
+                  </label>
+                  <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    required
+                    rows="5"
+                    className={inquiryStyles.inquiryInput}
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !hasConsent}
+                  style={{
+                    background: hasConsent ? 'linear-gradient(135deg, #2c5530 0%, #4a7c59 100%)' : '#ccc',
+                    color: 'white',
+                    padding: '1rem 2rem',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    cursor: hasConsent ? 'pointer' : 'not-allowed',
+                    marginTop: '2rem',
+                    width: '100%',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {isSubmitting ? t('inquiryPage.form.submitting') : t('inquiryPage.form.submit')}
+                </button>
+                {submitStatus === 'success' && (
+                  <div className={inquiryStyles.inquirySuccess}>
+                    ✅ {t('inquiryPage.form.success')}
+                  </div>
+                )}
+              </form>
+            </section>
+          </ConsentFormWrapper>
 
           {/* Sidebar Info: wrap contact and why choose us */}
           <div className={inquiryStyles.inquirySidebarCol}>

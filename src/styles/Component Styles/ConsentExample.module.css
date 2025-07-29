@@ -1,0 +1,218 @@
+.exampleContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.exampleContainer h2 {
+  color: #333;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.exampleContainer h3 {
+  color: #555;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #007BFF;
+  padding-bottom: 0.5rem;
+}
+
+/* Status Section */
+.statusSection {
+  margin-bottom: 3rem;
+}
+
+.statusCard {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.statusItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.statusLabel {
+  font-weight: 600;
+  color: #555;
+}
+
+.statusValue {
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+}
+
+.statusValue.positive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.statusValue.negative {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.clearButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.clearButton:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.clearButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Form Section */
+.formSection {
+  margin-bottom: 3rem;
+}
+
+.exampleForm {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.formInput,
+.formTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.formInput:focus,
+.formTextarea:focus {
+  outline: none;
+  border-color: #007BFF;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.formTextarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.successMessage {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Manual Section */
+.manualSection {
+  margin-bottom: 3rem;
+}
+
+.manualExample {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.manualExample p {
+  margin-bottom: 1rem;
+  color: #666;
+}
+
+.codeExample {
+  background: #2d3748;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+/* Practices Section */
+.practicesSection {
+  margin-bottom: 2rem;
+}
+
+.practicesList {
+  list-style: none;
+  padding: 0;
+}
+
+.practicesList li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.practicesList li:last-child {
+  border-bottom: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .exampleContainer {
+    padding: 1rem;
+  }
+  
+  .exampleForm {
+    padding: 1.5rem;
+  }
+  
+  .statusItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .codeExample {
+    font-size: 0.8rem;
+    padding: 0.75rem;
+  }
+} 

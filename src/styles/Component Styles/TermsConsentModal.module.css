@@ -1,0 +1,277 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(3px);
+  /* Prevent clicking outside to dismiss */
+  pointer-events: auto;
+}
+
+.modalContent {
+  background: #f6fff6;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  width: 800px;
+  max-width: 90%;
+  max-height: 459px;
+  display: flex;
+  flex-direction: column;
+  animation: modalSlideIn 0.3s ease-out;
+  /* Ensure modal content is clearly interactive */
+  position: relative;
+  z-index: 1001;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalHeader {
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+}
+
+.modalBody {
+  flex: 1;
+  padding: 16px 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.termsContent {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 8px;
+  padding-bottom: 16px;
+  line-height: 1.6;
+  color: #374151;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.termsContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.termsContent::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.termsContent::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.termsContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.termsContent h1,
+.termsContent h2,
+.termsContent h3 {
+  color: #1f2937;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.termsContent h1 {
+  font-size: 1.25rem;
+}
+
+.termsContent h2 {
+  font-size: 1.1rem;
+}
+
+.termsContent h3 {
+  font-size: 1rem;
+}
+
+.termsContent p {
+  margin-bottom: 0.75rem;
+}
+
+.termsContent p:last-child {
+  margin-bottom: 0;
+}
+
+.termsContent ul,
+.termsContent ol {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.termsContent ul:last-child,
+.termsContent ol:last-child {
+  margin-bottom: 0;
+}
+
+.termsContent li {
+  margin-bottom: 0.25rem;
+}
+
+.termsContent li:last-child {
+  margin-bottom: 0;
+}
+
+.modalFooter {
+  padding: 16px 24px 24px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.acceptButton {
+  width: 120px;
+  height: 36px;
+  background-color: #17860b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acceptButton:hover {
+  background-color: #0f6b05;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(23, 134, 11, 0.3);
+}
+
+.acceptButton:active {
+  background-color: #0d5a04;
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(23, 134, 11, 0.3);
+}
+
+.acceptButton:focus {
+  outline: 2px solid #17860b;
+  outline-offset: 2px;
+}
+
+.declineButton {
+  width: 120px;
+  height: 36px;
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.declineButton:hover {
+  background-color: #e9ecef;
+  color: #495057;
+  border-color: #adb5bd;
+}
+
+.declineButton:active {
+  background-color: #dee2e6;
+  color: #343a40;
+}
+
+.declineButton:focus {
+  outline: 2px solid #6c757d;
+  outline-offset: 2px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .modalContent {
+    width: 90%;
+    max-height: 80vh;
+  }
+  
+  .modalHeader {
+    padding: 20px 20px 12px 20px;
+  }
+  
+  .modalTitle {
+    font-size: 1.25rem;
+  }
+  
+  .modalBody {
+    padding: 12px 20px;
+  }
+  
+  .modalFooter {
+    padding: 12px 20px 20px 20px;
+    flex-direction: column;
+  }
+  
+  .acceptButton,
+  .declineButton {
+    width: 100%;
+    height: 44px;
+    font-size: 1rem;
+  }
+  
+  .termsContent {
+    font-size: 0.9rem;
+    padding-bottom: 12px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .modalContent {
+    border: 2px solid #000;
+  }
+  
+  .acceptButton {
+    border: 2px solid #000;
+  }
+  
+  .declineButton {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .modalContent {
+    animation: none;
+  }
+  
+  .acceptButton,
+  .declineButton {
+    transition: none;
+  }
+} 
