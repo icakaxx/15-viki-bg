@@ -42,16 +42,22 @@ export const ConsentProvider = ({ children, termsText }) => {
       setShowModal(true);
     };
 
+    const handleShowTermsModal = () => {
+      setShowModal(true);
+    };
+
     // Check initial consent
     checkConsent();
 
     // Add event listeners
     window.addEventListener('termsAccepted', handleTermsAccepted);
     window.addEventListener('termsWithdrawn', handleTermsWithdrawn);
+    window.addEventListener('showTermsModal', handleShowTermsModal);
 
     return () => {
       window.removeEventListener('termsAccepted', handleTermsAccepted);
       window.removeEventListener('termsWithdrawn', handleTermsWithdrawn);
+      window.removeEventListener('showTermsModal', handleShowTermsModal);
     };
   }, []);
 

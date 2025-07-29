@@ -3,12 +3,14 @@ import { useCart } from '../contexts/CartContext';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import styles from '../styles/Component Styles/QuantitySelector.module.css';
+import { useConsent } from './ConsentProvider';
 
 const QuantitySelector = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const { addToCart, getCartItemQuantity } = useCart();
   const { t } = useTranslation('common');
   const router = useRouter();
+  const { hasConsent } = useConsent();
   
   const currentCartQuantity = getCartItemQuantity(product.ProductID);
   const minQuantity = 1;
@@ -31,6 +33,12 @@ const QuantitySelector = ({ product }) => {
 
   const handleBuyNow = () => {
     if (isOutOfStock) return; // Prevent navigation for archived products
+    
+    if (!hasConsent) {
+      // Show terms modal instead of navigating
+      window.dispatchEvent(new CustomEvent('showTermsModal'));
+      return;
+    }
     
     // Navigate to product detail page with quantity parameter
     router.push(`/buy/${product.ProductID}?qty=${quantity}`);
@@ -89,12 +97,14 @@ const QuantitySelector = ({ product }) => {
       {/* Buy Now Button - Navigates to product detail page */}
       <button
         type="button"
-        className={`${styles.addToCartButton} ${isOutOfStock ? styles.disabled : ''}`}
+        className={`${styles.addToCartButton} ${isOutOfStock ? styles.disabled : ''} ${!hasConsent ? styles.consentRequired : ''}`}
         onClick={handleBuyNow}
         disabled={isOutOfStock}
         aria-label={`${t ? t('buyPage.buyButton') : 'Buy'} ${product?.Brand} ${product?.Model}`}
       >
-        {isOutOfStock ? 'Out of Stock' : (t ? t('buyPage.buyButton') : 'Buy')}
+        {isOutOfStock ? 'Out of Stock' : 
+         !hasConsent ? 'За да закупите климатик, моля приемете условията' : 
+         (t ? t('buyPage.buyButton') : 'Buy')}
       </button>
 
       {/* Already in Cart Indicator - Hide for archived products */}
