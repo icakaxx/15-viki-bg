@@ -551,6 +551,9 @@
       "subtitle": "We're here to answer all your questions and help you choose the most suitable climate solution."
     },
     "info": {
+      "contacts": {
+        "title": "Contacts"
+      },
       "phone": {
         "title": "Phone",
         "description": "Call for quick consultation",
