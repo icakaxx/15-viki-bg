@@ -136,21 +136,17 @@ const ProductDetailPage = () => {
           const accessoriesData = await accessoriesResponse.json();
 
           if (accessoriesResponse.ok) {
-            console.log('✅ Loaded accessories:', accessoriesData.accessories?.length || 0, 'items');
             setAccessories(accessoriesData.accessories || []);
           } else {
-            console.warn('⚠️ Failed to load accessories:', accessoriesData.error);
             setAccessories([]); // Fallback to empty array
           }
         } catch (accessoryErr) {
-          console.error('❌ Error fetching accessories:', accessoryErr);
           setAccessories([]); // Fallback to empty array
         } finally {
           setAccessoriesLoading(false);
         }
 
       } catch (err) {
-        console.error('Error fetching product data:', err);
         setError(err.message);
         setLoading(false);
       }

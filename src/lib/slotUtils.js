@@ -71,7 +71,6 @@ export async function areSlotsAvailable(date, timeSlots, excludeInstallationId =
     const { data: existingBookings, error } = await query;
 
     if (error) {
-      console.error('Error checking slot availability:', error);
       return { available: false, reason: 'Failed to check slot availability' };
     }
 
@@ -87,7 +86,6 @@ export async function areSlotsAvailable(date, timeSlots, excludeInstallationId =
     return { available: true };
 
   } catch (error) {
-    console.error('Error in areSlotsAvailable:', error);
     return { available: false, reason: 'Internal error checking availability' };
   }
 }

@@ -121,11 +121,9 @@ export default async function handler(req, res) {
           .insert([invoiceData]);
         
         if (invoiceError) {
-          console.warn('Invoice table insert failed - continuing without invoice tracking for now');
         } else {
         }
       } catch (insertError) {
-        console.warn('Invoice table insert failed - continuing without invoice tracking for now');
       }
     }
 
@@ -146,11 +144,9 @@ export default async function handler(req, res) {
         .single();
       
       if (paymentError) {
-        console.warn('Payment table insert failed - continuing without payment tracking for now');
       } else {
       }
     } catch (insertError) {
-      console.warn('Payment table insert failed - continuing without payment tracking for now');
     }
 
     // Insert order items (optional - skip if table doesn't exist)
@@ -174,11 +170,9 @@ export default async function handler(req, res) {
         .insert(orderItems);
       
       if (itemsError) {
-        console.warn('Order items table insert failed - continuing without item tracking for now');
       } else {
       }
     } catch (insertError) {
-      console.warn('Order items table insert failed - continuing without item tracking for now');
     }
 
     return res.status(200).json({ success: true, orderId });

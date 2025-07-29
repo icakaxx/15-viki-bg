@@ -223,12 +223,10 @@ export default function OrdersManagementTab() {
         setOrderProducts(data.products || []);
         setIncludesInstallation(data.includesInstallation || false);
       } else {
-        console.error('Failed to load products:', data.error);
         setOrderProducts([]);
         setIncludesInstallation(false);
       }
     } catch (err) {
-      console.error('Error loading products:', err);
       setOrderProducts([]);
       setIncludesInstallation(false);
     } finally {
@@ -268,12 +266,10 @@ export default function OrdersManagementTab() {
         setOrderProducts(data.products || []);
         setIncludesInstallation(data.includesInstallation || false);
       } else {
-        console.error('Failed to load products:', data.error);
         setOrderProducts([]);
         setIncludesInstallation(false);
       }
     } catch (err) {
-      console.error('Error loading products:', err);
       setOrderProducts([]);
       setIncludesInstallation(false);
     } finally {

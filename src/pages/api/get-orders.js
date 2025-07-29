@@ -82,10 +82,7 @@ export default async function handler(req, res) {
         error: 'Failed to load orders',
         details: error.message
       });
-    } else {
-      // The original code had a console.log here, but it's removed.
-      // The data is already transformed in the previous block.
-    }
+    } 
 
     return res.status(200).json({ 
       success: true,
