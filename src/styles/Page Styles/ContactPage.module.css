@@ -303,6 +303,55 @@
   border-color: #4a7c59;
 }
 
+/* Contact Info Grid Layout */
+.contactInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.contactInfoCard {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.contactInfoSection {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.contactInfoSection:last-child {
+  margin-bottom: 0;
+}
+
+.contactInfoIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.contactInfoTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+  text-align: center;
+}
+
+.contactInfoDetails {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.contactInfoDescription {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 @media (max-width: 900px) {
   .companyAndQuickWrapper {
     flex-direction: column;
@@ -342,13 +391,15 @@
   .pageTitle {
     font-size: 2rem;
   }
-    .companyCol {
+  
+  .companyCol {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     padding-left: 1rem;
     padding-right: 1rem;
   }
+  
   .contactGrid {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -357,6 +408,31 @@
   .contactItem {
     flex-direction: column;
     text-align: center;
+  }
+  
+  .contactInfoGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .contactInfoCard:first-child {
+    grid-column: 1 / -1;
+  }
+  
+  .contactInfoCard {
+    padding: 0.5rem;
+  }
+  
+  .contactInfoSection {
+    margin-bottom: 1.5rem;
+  }
+  
+  .contactInfoIcon {
+    font-size: 2.5rem;
+  }
+  
+  .contactInfoTitle {
+    font-size: 1.3rem;
   }
 } 
 

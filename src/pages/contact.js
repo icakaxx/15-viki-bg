@@ -90,40 +90,75 @@ const ContactPage = () => {
 
         {/* Contact Info Grid */}
         <section style={{ marginBottom: '4rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-            {contactInfo.map((info, index) => (
-              <div key={index} style={{
-                background: 'white',
-                padding: '2rem',
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #e0e0e0',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{info.icon}</div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#333' }}>{info.title}</h3>
-                <div style={{ marginBottom: '1rem' }}>
-                  {info.details.map((detail, idx) => (
-                    info.title === t('contactPage.info.phone.title') ? (
-                      <p key={idx} style={{ margin: '0.5rem 0', color: '#2c5530', fontWeight: '600', fontSize: '1.1rem' }}>
-                        <a href={`tel:${detail.replace(/\s+/g, '')}`} className={styles.contactLink}>{detail}</a>
-                      </p>
-                    ) : info.title === t('contactPage.info.email.title') ? (
-                      <p key={idx} style={{ margin: '0.5rem 0', color: '#2c5530', fontWeight: '600', fontSize: '1.1rem' }}>
-                        <a href={`mailto:${detail}`} className={styles.contactLink}>{detail}</a>
-                      </p>
-                    ) : info.title === t('contactPage.info.address.title') && detail ? (
-                      <p key={idx} style={{ margin: '0.5rem 0', color: '#2c5530', fontWeight: '600', fontSize: '1.1rem' }}>
-                        <a href="https://maps.app.goo.gl/B74QyWSEYh1oV5Pk9" target="_blank" rel="noopener noreferrer" className={styles.contactLink}>{detail}</a>
-                      </p>
-                    ) : (
-                      <p key={idx} style={{ margin: '0.5rem 0', color: '#2c5530', fontWeight: '600', fontSize: '1.1rem' }}>{detail}</p>
-                    )
+          <div className={styles.contactInfoGrid}>
+            {/* Card 1: Phone & Email Combined */}
+            <div className={styles.contactInfoCard}>
+              {/* Contacts Header */}
+              <div className={styles.contactInfoSection}>
+                <div className={styles.contactInfoIcon}>📞</div>
+                <h3 className={styles.contactInfoTitle}>
+                  {t('contactPage.info.contacts.title')}
+                </h3>
+                
+                {/* Phone Details */}
+                <div className={styles.contactInfoDetails}>
+                  <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: '#2c5530', fontWeight: '600' }}>
+                    {t('contactPage.info.phone.title')}
+                  </h4>
+                  {contactInfo[0].details.map((detail, idx) => (
+                    <p key={idx} style={{ margin: '0.5rem 0', color: '#2c5530', fontWeight: '600', fontSize: '1.1rem' }}>
+                      <a href={`tel:${detail.replace(/\s+/g, '')}`} className={styles.contactLink}>{detail}</a>
+                    </p>
                   ))}
                 </div>
-                <p style={{ color: '#666', fontSize: '0.9rem' }}>{info.description}</p>
+
+                {/* Email Details */}
+                <div className={styles.contactInfoDetails}>
+                  <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: '#2c5530', fontWeight: '600' }}>
+                    {t('contactPage.info.email.title')}
+                  </h4>
+                  {contactInfo[1].details.map((detail, idx) => (
+                    <p key={idx} style={{ margin: '0.5rem 0', color: '#2c5530', fontWeight: '600', fontSize: '1.1rem' }}>
+                      <a href={`mailto:${detail}`} className={styles.contactLink}>{detail}</a>
+                    </p>
+                  ))}
+                </div>
+                
+                <p className={styles.contactInfoDescription}>{contactInfo[0].description}</p>
               </div>
-            ))}
+            </div>
+
+            {/* Card 2: Address */}
+            <div className={styles.contactInfoCard}>
+              <div className={styles.contactInfoIcon}>📍</div>
+              <h3 className={styles.contactInfoTitle}>
+                {t('contactPage.info.address.title')}
+              </h3>
+              <div className={styles.contactInfoDetails}>
+                {contactInfo[2].details.map((detail, idx) => (
+                  detail ? (
+                    <p key={idx} style={{ margin: '0.5rem 0', color: '#2c5530', fontWeight: '600', fontSize: '1.1rem' }}>
+                      <a href="https://maps.app.goo.gl/B74QyWSEYh1oV5Pk9" target="_blank" rel="noopener noreferrer" className={styles.contactLink}>{detail}</a>
+                    </p>
+                  ) : null
+                ))}
+              </div>
+              <p className={styles.contactInfoDescription}>{contactInfo[2].description}</p>
+            </div>
+
+            {/* Card 3: Working Hours */}
+            <div className={styles.contactInfoCard}>
+              <div className={styles.contactInfoIcon}>🕐</div>
+              <h3 className={styles.contactInfoTitle}>
+                {t('contactPage.info.hours.title')}
+              </h3>
+              <div className={styles.contactInfoDetails}>
+                {contactInfo[3].details.map((detail, idx) => (
+                  <p key={idx} style={{ margin: '0.5rem 0', color: '#2c5530', fontWeight: '600', fontSize: '1.1rem' }}>{detail}</p>
+                ))}
+              </div>
+              <p className={styles.contactInfoDescription}>{contactInfo[3].description}</p>
+            </div>
           </div>
         </section>
 

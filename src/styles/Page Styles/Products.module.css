@@ -1699,14 +1699,14 @@
   
   .grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
   
   .card {
     padding: 1rem;
     max-width: 100%;
-    width: 94%;
-    margin-left: 3%;
-    margin-right: 3%;
+    width: 100%;
+    margin: 0;
     box-sizing: border-box;
   }
   
