@@ -1,36 +1,42 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Function to transform database properties to frontend expected format
 const transformProduct = (product) => {
     return {
-        id: product.id,
-        brand: product.brand,
-        model: product.model,
-        colour: product.colour,
-        capacity_btu: product.capacity_btu,
-        energy_rating: product.energy_rating,
-        price: product.price,
-        previous_price: product.previous_price,
-        image_url: product.image_url,
-        stock: product.stock,
-        discount: product.discount,
-        is_archived: product.is_archived,
-        created_at: product.created_at,
-        updated_at: product.updated_at,
-        cop: product.cop,
-        scop: product.scop,
-        power_consumption: product.power_consumption,
-        operating_temp_range: product.operating_temp_range,
-        indoor_dimensions: product.indoor_dimensions,
-        outdoor_dimensions: product.outdoor_dimensions,
-        indoor_weight: product.indoor_weight,
-        outdoor_weight: product.outdoor_weight,
-        noise_level: product.noise_level,
-        air_flow: product.air_flow,
-        warranty_period: product.warranty_period,
-        room_size_recommendation: product.room_size_recommendation,
-        installation_type: product.installation_type,
-        description: product.description,
-        features: product.features,
+        ProductID: product.id,
+        Brand: product.brand,
+        Model: product.model,
+        Colour: product.colour,
+        CapacityBTU: product.capacity_btu,
+        EnergyRating: product.energy_rating,
+        Price: product.price,
+        PreviousPrice: product.previous_price,
+        ImageURL: product.image_url,
+        Stock: product.stock,
+        Discount: product.discount,
+        IsArchived: product.is_archived,
+        CreatedAt: product.created_at,
+        UpdatedAt: product.updated_at,
+        // Technical Performance
+        COP: product.cop,
+        SCOP: product.scop,
+        PowerConsumption: product.power_consumption,
+        OperatingTempRange: product.operating_temp_range,
+        // Physical Characteristics
+        IndoorDimensions: product.indoor_dimensions,
+        OutdoorDimensions: product.outdoor_dimensions,
+        IndoorWeight: product.indoor_weight,
+        OutdoorWeight: product.outdoor_weight,
+        NoiseLevel: product.noise_level,
+        AirFlow: product.air_flow,
+        // Features & Usability
+        Warranty: product.warranty_period,
+        WarrantyPeriod: product.warranty_period,
+        RoomSizeRecommendation: product.room_size_recommendation,
+        InstallationType: product.installation_type,
+        Description: product.description || `Premium ${product.brand} ${product.model} air conditioner with ${product.energy_rating} energy efficiency rating.`,
+        Features: product.features ? (typeof product.features === 'string' ? JSON.parse(product.features) : product.features) : [],
+        // Promotional flags
         IsFeatured: product.is_featured || false,
         IsBestseller: product.is_bestseller || false,
         IsNew: product.is_new || false
@@ -56,30 +62,62 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Product ID is required' });
     }
 
-    if (!supabase) {
-        return res.status(500).json({ error: 'Database not configured' });
-    }
 
+    // Use Supabase if configured
     try {
-        
-        const { data: product, error } = await supabase
+        const { data, error } = await supabase
             .from('products')
-            .select('*')
+            .select(`
+                id,
+                brand,
+                model,
+                colour,
+                capacity_btu,
+                energy_rating,
+                price,
+                previous_price,
+                image_url,
+                stock,
+                discount,
+                is_archived,
+                created_at,
+                updated_at,
+                cop,
+                scop,
+                power_consumption,
+                operating_temp_range,
+                indoor_dimensions,
+                outdoor_dimensions,
+                indoor_weight,
+                outdoor_weight,
+                noise_level,
+                air_flow,
+                warranty_period,
+                room_size_recommendation,
+                installation_type,
+                description,
+                features,
+                is_featured,
+                is_bestseller,
+                is_new
+            `)
             .eq('id', id)
             .single();
 
         if (error) {
-            return res.status(404).json({ error: 'Product not found' });
+            if (error.code === 'PGRST116') {
+                return res.status(404).json({ error: 'Product not found' });
+            }  
         }
 
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-        const transformedProduct = transformProduct(product);
-        return res.status(200).json(transformedProduct);
+        // Transform product to match frontend expectations
+        const transformedProduct = transformProduct(data);
+        
+        return res.status(200).json({ 
+            product: transformedProduct
+        });
 
     } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(404).json({ error: 'Product not found' });
     }
 } 

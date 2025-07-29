@@ -27,6 +27,7 @@
   filter: blur(5px);
   opacity: 0.15;
   z-index: -1;
+  pointer-events: none;
 }
 
 .pageLayout {
@@ -1069,11 +1070,13 @@
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
   backdrop-filter: blur(2px);
+  pointer-events: none;
 }
 
 .mobileFilterOverlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .mobileFilterPanel {
