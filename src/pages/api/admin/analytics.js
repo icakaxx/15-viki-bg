@@ -60,7 +60,6 @@ export default async function handler(req, res) {
         analyticsData.accessoryUsage = accessoryData;
       }
     } catch (error) {
-      // console.error('Error fetching accessory usage:', error);
     }
 
     // 2. Installation Stats
@@ -79,7 +78,6 @@ export default async function handler(req, res) {
         };
       }
     } catch (error) {
-      // console.error('Error fetching installation stats:', error);
     }
 
     // 3. Top Selling by BTU
@@ -109,7 +107,6 @@ export default async function handler(req, res) {
           .sort((a, b) => b.total_sold - a.total_sold);
       }
     } catch (error) {
-      // console.error('Error fetching BTU data:', error);
     }
 
     // 4. Top Selling by Energy Rating
@@ -136,7 +133,6 @@ export default async function handler(req, res) {
           .sort((a, b) => b.total_sold - a.total_sold);
       }
     } catch (error) {
-      // console.error('Error fetching energy rating data:', error);
     }
 
     // 5. Sales Over Time
@@ -158,7 +154,6 @@ export default async function handler(req, res) {
           .sort((a, b) => new Date(a.period) - new Date(b.period));
       }
     } catch (error) {
-      // console.error('Error fetching sales data:', error);
     }
 
     // 6. Total Orders and Revenue
@@ -174,7 +169,6 @@ export default async function handler(req, res) {
         );
       }
     } catch (error) {
-      // console.error('Error fetching order totals:', error);
     }
 
     return res.status(200).json(analyticsData);

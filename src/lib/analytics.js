@@ -83,7 +83,6 @@ class Analytics {
       //   body: JSON.stringify(event)
       // });
     } catch (error) {
-      console.error('Analytics error:', error);
     }
   }
 

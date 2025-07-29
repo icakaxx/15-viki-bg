@@ -98,6 +98,7 @@ const BuyPage = () => {
         }
       } catch (err) {
         setError(err.message);
+        console.error('Error fetching products:', err);
       } finally {
         setLoading(false);
       }
@@ -935,7 +936,6 @@ const BuyPage = () => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                // TODO: Add red button functionality
                               }}
                             >
                               <img 
@@ -949,8 +949,7 @@ const BuyPage = () => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                // TODO: Add green button functionality
-                              }}
+                                }}
                             >
                               <img 
                                 src="https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg//dsk.png"
