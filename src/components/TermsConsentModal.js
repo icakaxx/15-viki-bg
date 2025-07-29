@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import styles from '../styles/Component Styles/TermsConsentModal.module.css';
 
 const TermsConsentModal = ({ isOpen, onAccept, onDecline, termsText }) => {
+  const { t } = useTranslation('common');
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -33,7 +35,7 @@ const TermsConsentModal = ({ isOpen, onAccept, onDecline, termsText }) => {
       >
         <div className={styles.modalHeader}>
           <h2 id="terms-title" className={styles.modalTitle}>
-            Общи условия за ползване
+            {t('consent.modalTitle')}
           </h2>
         </div>
         
@@ -51,7 +53,7 @@ const TermsConsentModal = ({ isOpen, onAccept, onDecline, termsText }) => {
             className={styles.declineButton}
             onClick={onDecline}
           >
-            Отказ
+            {t('consent.decline')}
           </button>
           <button
             type="button"
@@ -59,7 +61,7 @@ const TermsConsentModal = ({ isOpen, onAccept, onDecline, termsText }) => {
             onClick={onAccept}
             autoFocus
           >
-            Приемам
+            {t('consent.accept')}
           </button>
         </div>
       </div>

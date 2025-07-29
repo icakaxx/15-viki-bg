@@ -1218,6 +1218,17 @@
       "Anti-vibration Mount Kit": "Anti-vibration Mount Kit"
     }
   },
+  "consent": {
+    "title": "Terms & Conditions",
+    "accept": "I Accept",
+    "decline": "Decline",
+    "warning": "To purchase an air conditioner, please accept the terms and conditions",
+    "modalTitle": "Terms and Conditions for Use and Purchase",
+    "modalDescription": "Please read the terms and conditions carefully before proceeding",
+    "required": "Terms acceptance required",
+    "alreadyAccepted": "Terms have been accepted",
+    "notAccepted": "Terms have not been accepted"
+  },
   "inquiryManagement": {
     "title": "Inquiry Management",
     "tabTitle": "Inquiries",

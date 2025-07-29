@@ -9,6 +9,7 @@ import { appWithTranslation } from 'next-i18next';
 import '../lib/i18n';
 import { ConsentProvider } from '../components/ConsentProvider';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 //Changing subset of 'Nunito' font to latin and setting it to its own variable
 const nunito = Nunito({
@@ -16,13 +17,20 @@ const nunito = Nunito({
 })
 
 const MyApp = ({ Component, pageProps }) => {
+  const router = useRouter();
   const [termsText, setTermsText] = useState('');
 
   useEffect(() => {
-    // Fetch terms text from API
+    // Get current locale from Next.js router
+    const getCurrentLocale = () => {
+      return router.locale || 'bg'; // Default to Bulgarian
+    };
+
+    // Fetch terms text from API with current language
     const fetchTerms = async () => {
       try {
-        const response = await fetch('/api/obshti-uslovia');
+        const locale = getCurrentLocale();
+        const response = await fetch(`/api/obshti-uslovia?lang=${locale}`);
         const data = await response.json();
         setTermsText(data.terms);
       } catch (error) {
@@ -36,7 +44,7 @@ const MyApp = ({ Component, pageProps }) => {
     };
 
     fetchTerms();
-  }, []);
+  }, [router.locale]);
 
   return (
     <ErrorBoundary>

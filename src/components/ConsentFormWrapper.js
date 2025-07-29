@@ -1,7 +1,9 @@
 import { useConsent } from './ConsentProvider';
+import { useTranslation } from 'next-i18next';
 import styles from '../styles/Component Styles/ConsentFormWrapper.module.css';
 
 const ConsentFormWrapper = ({ children, formId, showWarning = true }) => {
+  const { t } = useTranslation('common');
   const { hasConsent, isLoading } = useConsent();
 
   if (isLoading) {
@@ -16,14 +18,14 @@ const ConsentFormWrapper = ({ children, formId, showWarning = true }) => {
           <div className={styles.consentWarning}>
             <div className={styles.warningIcon}>⚠️</div>
             <p className={styles.warningText}>
-              За да изпратите тази форма, трябва първо да приемете общите условия.
+              {t('consent.required')}
             </p>
             <button
               type="button"
               className={styles.acceptTermsButton}
               onClick={() => window.dispatchEvent(new CustomEvent('showTermsModal'))}
             >
-              Приемам условията
+              {t('consent.accept')}
             </button>
           </div>
         )}
