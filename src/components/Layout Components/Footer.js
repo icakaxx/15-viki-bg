@@ -73,6 +73,11 @@ const Footer = () => {
     { href: "/contact", translationKey: "footer.navigation.contact", title: t('footer.navigation.contact') }
   ];
 
+  const policyItems = [
+    { href: "/privacy-policy", translationKey: "privacyPolicy.title", title: t('privacyPolicy.title') },
+    { href: "/cookie-policy", translationKey: "cookiePolicy.title", title: t('cookiePolicy.title') }
+  ];
+
 
 
   const companyName = "БГВИКИ15 ЕООД";
@@ -125,6 +130,31 @@ const Footer = () => {
             <nav aria-label="Footer navigation" role="navigation">
               <ul className={styles.navList}>
                 {navigationItems.map((item, index) => (
+                  <li key={index}>
+                    <Link 
+                      href={item.href} 
+                      className={styles.navLink}
+                      title={item.title}
+                      aria-label={item.title}
+                      onFocus={(e) => e.target.setAttribute('data-focused', 'true')}
+                      onBlur={(e) => e.target.removeAttribute('data-focused')}
+                    >
+                      {t(item.translationKey)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </section>
+
+          {/* Policy Links Section */}
+          <section className={styles.policySection} aria-labelledby="policy-heading">
+            <h3 id="policy-heading" className={styles.sectionTitle}>
+              {t('footer.policies.title')}
+            </h3>
+            <nav aria-label="Policy navigation" role="navigation">
+              <ul className={styles.navList}>
+                {policyItems.map((item, index) => (
                   <li key={index}>
                     <Link 
                       href={item.href} 

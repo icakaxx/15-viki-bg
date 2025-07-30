@@ -3,6 +3,7 @@ import Footer from './Layout Components/Footer'
 //import Transition from './Layout Components/Transition'
 import styles from '../styles/Component Styles/Layout.module.css'
 import { Analytics } from "@vercel/analytics/react"
+import CookieBanner from './CookieBanner'
 
 /**
  * A layout component that defines the overall structure of the web page
@@ -22,6 +23,7 @@ const Layout = ({ children }) => {
         </main>
         {/* </Transition> */}
         <Footer />
+        <CookieBanner />
       </div>
     </>
   )
