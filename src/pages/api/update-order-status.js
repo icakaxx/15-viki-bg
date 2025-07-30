@@ -9,7 +9,7 @@ if (supabaseUrl && supabaseKey) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== 'PUT') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -26,9 +26,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    
+
     // Fetch current status
-    
+
     let { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
       .select('status, order_id')
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
     if (fetchError && fetchError.code === 'PGRST116') {
       // No order record exists yet - this is a new order
-      
+
       // Verify the order exists in orders (only for real orders)
       const { data: guestOrder, error: guestError } = await supabase
         .from('orders')
@@ -90,6 +90,7 @@ export default async function handler(req, res) {
       });
     }
 
+
     // Update order status
     const { error: updateError } = await supabase
       .from('orders')
@@ -120,6 +121,7 @@ export default async function handler(req, res) {
       // Don't fail the request if history insertion fails
     }
 
+
     return res.status(200).json({
       success: true,
       orderId: orderId,
@@ -134,4 +136,4 @@ export default async function handler(req, res) {
       details: error.message
     });
   }
-} 
+}

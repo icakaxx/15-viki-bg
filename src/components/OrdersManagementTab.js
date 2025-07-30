@@ -1087,6 +1087,208 @@ export default function OrdersManagementTab() {
                       </select>
                     </div>
                     
+                    {statusUpdateData.newStatus === 'installation_booked' && (
+                      <>
+                        <div className={styles.formGroup}>
+                          <label>{t('admin.orders.startInstallationDate')}:</label>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <input
+                              type="date"
+                              value={statusUpdateData.startInstallationDate}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, startInstallationDate: e.target.value }))}
+                              className={styles.dateInput}
+                              required
+                              style={{ flex: '1', minWidth: '150px' }}
+                            />
+                            <select
+                              value={statusUpdateData.startInstallationHour}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, startInstallationHour: e.target.value }))}
+                              className={styles.timeSelect}
+                              style={{ width: '80px' }}
+                            >
+                              {hourOptions.map(hour => (
+                                <option key={hour} value={hour}>{hour}</option>
+                              ))}
+                            </select>
+                            <span>:</span>
+                            <select
+                              value={statusUpdateData.startInstallationMinute}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, startInstallationMinute: e.target.value }))}
+                              className={styles.timeSelect}
+                              style={{ width: '80px' }}
+                            >
+                              {minuteOptions.map(minute => (
+                                <option key={minute} value={minute}>{minute}</option>
+                              ))}
+                            </select>
+                          </div>
+                          
+                          {/* Quick time buttons for start */}
+                          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('start', '08', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.startInstallationHour === '08' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.startInstallationHour === '08' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              08:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('start', '09', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.startInstallationHour === '09' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.startInstallationHour === '09' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              09:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('start', '14', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.startInstallationHour === '14' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.startInstallationHour === '14' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              14:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('start', '15', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.startInstallationHour === '15' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.startInstallationHour === '15' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              15:00
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className={styles.formGroup}>
+                          <label>{t('admin.orders.endInstallationDate')}:</label>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <input
+                              type="date"
+                              value={statusUpdateData.endInstallationDate}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, endInstallationDate: e.target.value }))}
+                              className={styles.dateInput}
+                              required
+                              style={{ flex: '1', minWidth: '150px' }}
+                            />
+                            <select
+                              value={statusUpdateData.endInstallationHour}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, endInstallationHour: e.target.value }))}
+                              className={styles.timeSelect}
+                              style={{ width: '80px' }}
+                            >
+                              {hourOptions.map(hour => (
+                                <option key={hour} value={hour}>{hour}</option>
+                              ))}
+                            </select>
+                            <span>:</span>
+                            <select
+                              value={statusUpdateData.endInstallationMinute}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, endInstallationMinute: e.target.value }))}
+                              className={styles.timeSelect}
+                              style={{ width: '80px' }}
+                            >
+                              {minuteOptions.map(minute => (
+                                <option key={minute} value={minute}>{minute}</option>
+                              ))}
+                            </select>
+                          </div>
+                          
+                          {/* Quick time buttons for end */}
+                          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('end', '17', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.endInstallationHour === '17' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.endInstallationHour === '17' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              17:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('end', '18', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.endInstallationHour === '18' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.endInstallationHour === '18' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              18:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('end', '19', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.endInstallationHour === '19' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.endInstallationHour === '19' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              19:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('end', '20', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.endInstallationHour === '20' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.endInstallationHour === '20' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              20:00
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    
                     <div className={styles.formGroup}>
                       <label>{t('admin.orders.notes')}:</label>
                       <textarea

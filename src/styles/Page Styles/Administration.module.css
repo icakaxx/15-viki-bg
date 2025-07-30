@@ -2369,6 +2369,7 @@
   .cancelButton,
   .saveButton {
     width: 100%;
+    margin: 0;
   }
 }
 
