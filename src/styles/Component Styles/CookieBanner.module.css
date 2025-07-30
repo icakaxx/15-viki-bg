@@ -1,0 +1,283 @@
+.banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.bannerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bannerText {
+  flex: 1;
+}
+
+.bannerTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.bannerDescription {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1rem;
+}
+
+.policyLink {
+  color: #ffffff;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.policyLink:hover {
+  color: #f0f0f0;
+}
+
+.bannerActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.bannerButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.acceptAll {
+  background: #4a7c59;
+  color: white;
+}
+
+.acceptAll:hover {
+  background: #5a8c69;
+  transform: translateY(-1px);
+}
+
+.acceptEssential {
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.acceptEssential:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+.preferences {
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.preferences:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+.preferencesPanel {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  backdrop-filter: blur(10px);
+}
+
+.preferencesTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.preferenceItem {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid #ffffff;
+}
+
+.preferenceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.preferenceLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  color: white;
+  font-weight: 500;
+}
+
+.preferenceCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #4a7c59;
+}
+
+.preferenceName {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.preferenceRequired {
+  background: #e74c3c;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.preferenceDescription {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.preferencesActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.savePreferences {
+  background: #ffffff;
+  color: #2c5530;
+  border: 2px solid #ffffff;
+}
+
+.savePreferences:hover {
+  background: #f8f9fa;
+  color: #2c5530;
+  transform: translateY(-1px);
+}
+
+.back {
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.back:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+@media (max-width: 768px) {
+  .bannerContent {
+    padding: 1rem;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .bannerTitle {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .bannerDescription {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+  
+  .bannerActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .bannerButton {
+    width: 100%;
+    text-align: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .preferencesPanel {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+  
+  .preferencesTitle {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .preferenceItem {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .preferenceHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .preferenceRequired {
+    align-self: flex-start;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .preferenceName {
+    font-size: 0.9rem;
+  }
+  
+  .preferenceDescription {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  
+  .preferencesActions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .preferencesActions .bannerButton {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+} 

@@ -15,6 +15,206 @@
   "error": "Error:",
   "retry": "Retry",
   "others": "others",
+  "privacyPolicy": {
+    "title": "Privacy Policy",
+    "description": "Privacy Policy of BGVIKI15 Ltd - how we collect, use and protect your personal data",
+    "lastUpdated": "Last Updated",
+    "intro": "This Privacy Policy describes how \"BGVIKI15\" Ltd collects, uses, stores and protects the personal data of its customers when using the website www.bgviki15.bg, in accordance with Regulation (EU) 2016/679 (GDPR).",
+    "dataController": {
+      "title": "Data Controller",
+      "company": "Company: \"BGVIKI15\" Ltd",
+      "eik": "EIK",
+      "address": "Address",
+      "addressValue": "Bulgaria, Pleven, bl. 319, ent. V, fl. 5",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "dataCollected": {
+      "title": "What Personal Data We Collect",
+      "intro": "When ordering, inquiring or contacting through the website, we may collect the following data:",
+      "name": "First and last name",
+      "phone": "Phone number",
+      "email": "Email address",
+      "address": "Delivery/installation address",
+      "orderData": "Order data (product, payment method, etc.)",
+      "technicalData": "IP address and technical information (via cookies - see Cookie Policy)"
+    },
+    "purposes": {
+      "title": "Processing Purposes",
+      "intro": "Your personal data is processed for the following purposes:",
+      "orderFulfillment": "Order fulfillment (delivery, installation, warranty)",
+      "customerContact": "Contact with the customer regarding inquiries or orders",
+      "billing": "Issuing invoices and accounting documents",
+      "legalRights": "Establishing, exercising or defending legal rights"
+    },
+    "legalBasis": {
+      "title": "Legal Basis for Processing",
+      "contract": "Contract performance (Art. 6(1)(b) GDPR)",
+      "legalObligation": "Legal obligation (Art. 6(1)(c))",
+      "consent": "Data subject consent (Art. 6(1)(a)) - e.g., when using contact forms"
+    },
+    "dataSharing": {
+      "title": "Who We Share Personal Data With",
+      "intro": "Your data may be provided to:",
+      "couriers": "Courier companies (for delivery)",
+      "installers": "Installation teams (for installation)",
+      "accounting": "Accounting office (for invoicing)",
+      "hosting": "Hosting provider (for website operation)",
+      "protection": "All third parties have signed data protection agreements."
+    },
+    "retention": {
+      "title": "Retention Period",
+      "orders": "Order data: up to 5 years (per accounting requirements)",
+      "inquiries": "Inquiry data: up to 6 months",
+      "consent": "Data with legal basis \"consent\": until consent withdrawal"
+    },
+    "rights": {
+      "title": "Your GDPR Rights",
+      "intro": "You have the right to:",
+      "access": "Access your personal data",
+      "correction": "Correct inaccurate or incomplete data",
+      "deletion": "Request deletion (\"right to be forgotten\")",
+      "restriction": "Restrict processing",
+      "objection": "Object to processing",
+      "portability": "Data portability",
+      "complaint": "File a complaint with the Commission for Personal Data Protection (CPDP)"
+    },
+    "dataProtection": {
+      "title": "Data Protection",
+      "description": "We use technical and organizational measures to protect your personal data from unauthorized access, loss or misuse."
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "description": "The website uses cookies. More information can be found in our Cookie Policy."
+    },
+    "contact": {
+      "title": "Contact",
+      "intro": "For any questions regarding your personal data, you can contact us at:",
+      "email": "Email",
+      "phone": "Phone"
+    }
+  },
+  "cookiePolicy": {
+    "title": "Cookie Policy",
+    "description": "Cookie Policy of BGVIKI15 Ltd - how we use cookies on our website",
+    "lastUpdated": "Last Updated",
+    "intro": "This Cookie Policy explains how we use cookies and similar technologies on our website www.bgviki15.bg. By using our website, you agree to the use of cookies in accordance with this policy.",
+    "whatAreCookies": {
+      "title": "What Are Cookies",
+      "description": "Cookies are small text files that are stored on your device when you visit a website. They help the website remember information about your visit, such as your preferences and other settings."
+    },
+    "howWeUseCookies": {
+      "title": "How We Use Cookies",
+      "intro": "We use cookies for the following purposes:",
+      "essential": "Consent management and core website functions",
+      "analytics": "Website usage analysis and service improvement",
+      "preferences": "Remembering your preferences and settings",
+      "marketing": "Content and advertising personalization"
+    },
+    "cookieTypes": {
+      "title": "Types of Cookies",
+      "essential": {
+        "title": "Essential Cookies",
+        "description": "These cookies are necessary for the basic functioning of the website and cannot be disabled.",
+        "consent": "Cookie Consent",
+        "consentDesc": "Remembering your consent for cookie usage",
+        "cart": "Shopping Cart",
+        "cartDesc": "Remembering products in your cart",
+        "session": "Session Data",
+        "sessionDesc": "Remembering your session and login"
+      },
+      "analytics": {
+        "title": "Analytics Cookies",
+        "description": "These cookies help us understand how you use our website and improve it.",
+        "vercel": "Website visit and performance analysis",
+        "custom": "Custom Analytics",
+        "customDesc": "Internal analytics for service improvement"
+      },
+      "functional": {
+        "title": "Functional Cookies",
+        "description": "These cookies allow the website to remember your preferences and provide enhanced features.",
+        "language": "Language Settings",
+        "languageDesc": "Remembering your preferred language",
+        "preferences": "User Preferences",
+        "preferencesDesc": "Remembering your settings and preferences"
+      },
+      "thirdParty": {
+        "title": "Third-Party Cookies",
+        "description": "These cookies are set by external services that we integrate into our website.",
+        "stripe": "Payment processing and security",
+        "supabase": "Database and authentication"
+      }
+    },
+    "cookieTable": {
+      "title": "Cookie Table",
+      "name": "Cookie Name",
+      "purpose": "Purpose",
+      "duration": "Duration",
+      "type": "Type",
+      "essential": "Essential",
+      "analytics": "Analytics",
+      "consentPurpose": "Remembering cookie consent",
+      "consentDuration": "1 year",
+      "timestampPurpose": "Remembering consent timestamp",
+      "versionPurpose": "Remembering consent version",
+      "cartPurpose": "Remembering cart products",
+      "cartDuration": "Until browser close",
+      "analyticsPurpose": "Website usage analysis",
+      "analyticsDuration": "2 years"
+    },
+    "managingCookies": {
+      "title": "Managing Cookies",
+      "intro": "You have several options for managing cookies:",
+      "browser": {
+        "title": "Through Browser Settings",
+        "description": "You can disable cookies through your browser settings. Note that this may affect website functionality."
+      },
+      "consent": {
+        "title": "Through Our Consent Tool",
+        "description": "Use our consent management tool to choose which cookies to allow."
+      },
+      "withdrawal": {
+        "title": "Withdrawing Consent",
+        "description": "You can withdraw your consent at any time through our consent management tool."
+      }
+    },
+    "contact": {
+      "title": "Contact",
+      "intro": "For questions regarding cookies, you can contact us at:",
+      "email": "Email",
+      "phone": "Phone"
+    }
+  },
+  "cookieBanner": {
+    "title": "We Use Cookies",
+    "description": "We use cookies to improve your experience on our website. Some cookies are necessary for basic functionality, while others help us improve our services.",
+    "learnMore": "Learn More",
+    "acceptAll": "Accept All",
+    "essentialOnly": "Essential Only",
+    "managePreferences": "Manage Preferences",
+    "preferencesTitle": "Cookie Management",
+    "savePreferences": "Save Preferences",
+    "back": "Back",
+    "preferences": {
+      "essential": {
+        "title": "Essential Cookies",
+        "description": "Necessary for basic website functionality. Cannot be disabled."
+      },
+      "analytics": {
+        "title": "Analytics Cookies",
+        "description": "Help us understand how you use the website and improve it."
+      },
+      "functional": {
+        "title": "Functional Cookies",
+        "description": "Remember your preferences and improve functionality."
+      },
+      "marketing": {
+        "title": "Marketing Cookies",
+        "description": "Used for content and advertising personalization."
+      },
+      "required": "Required"
+    }
+  },
   "productsPage": {
     "title": "Products & Solutions",
     "metaDescription": "Complete range of air conditioners and climate solutions for home, office and industry. Professional services and maintenance.",
@@ -448,6 +648,9 @@
       "buy": "Buy ACs",
       "inquiry": "Make an inquiry",
       "contact": "Contact"
+    },
+    "policies": {
+      "title": "Policies"
     },
     "contact": {
       "title": "Contact",
