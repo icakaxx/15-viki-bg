@@ -1118,7 +1118,7 @@ export default function Administration() {
                                                                     style={{ maxWidth: 120 }}
                                                                 />
                                                                 <span style={{ color: '#888', fontSize: '0.95em' }}>
-                                                                    €{formData.price && !isNaN(formData.price) ? (parseFloat(formData.price) / 1.96).toFixed(2) : '0.00'}
+                                                                    €{formData.price && !isNaN(formData.price) ? (parseFloat(formData.price) / 1.95583).toFixed(2) : '0.00'}
                                                                 </span>
                                                             </div>
                                                             {getFieldStatus('price') === 'invalid' && (

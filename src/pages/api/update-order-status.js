@@ -23,7 +23,8 @@ export default async function handler(req, res) {
     startInstallationMinute,
     endInstallationDate,
     endInstallationHour,
-    endInstallationMinute
+    endInstallationMinute,
+    paidAmount
   } = req.body;
 
   if (!orderId || !newStatus) {
@@ -49,6 +50,7 @@ export default async function handler(req, res) {
       endInstallationHour,
       endInstallationMinute
     });
+    console.log('Paid amount:', paidAmount);
 
     // Fetch current status
     console.log('Fetching current order status...');
@@ -112,14 +114,6 @@ export default async function handler(req, res) {
       oldStatus = currentOrder.status;
       console.log('Current order status:', oldStatus);
     }
-
-    // Check if status is actually changing
-    if (oldStatus === newStatus) {
-      return res.status(400).json({ 
-        error: `Order is already in status: ${newStatus}` 
-      });
-    }
-
 
     // Prepare update data
     const updateData = { 
@@ -240,6 +234,54 @@ export default async function handler(req, res) {
       // Don't fail the request if history insertion fails
     }
 
+    // Update paid amount if provided
+    if (paidAmount !== undefined && paidAmount !== null && paidAmount !== '') {
+      console.log('Updating paid amount to:', paidAmount);
+      
+      // Check if payment record exists
+      const { data: existingPayment, error: paymentCheckError } = await supabase
+        .from('payment_and_tracking')
+        .select('id')
+        .eq('order_id', orderId)
+        .single();
+      
+      console.log('Payment record check:', { existingPayment, paymentCheckError });
+      
+      const paymentData = {
+        order_id: orderId,
+        paid_amount: parseFloat(paidAmount),
+      };
+      
+      let paymentResult;
+      if (existingPayment) {
+        // Update existing payment record
+        console.log('Updating existing payment record...');
+        paymentResult = await supabase
+          .from('payment_and_tracking')
+          .update(paymentData)
+          .eq('order_id', orderId)
+          .select();
+      } else {
+        // Create new payment record
+        console.log('Creating new payment record...');
+        paymentResult = await supabase
+          .from('payment_and_tracking')
+          .insert([paymentData])
+          .select();
+      }
+      
+      console.log('Payment operation result:', paymentResult);
+      
+      if (paymentResult.error) {
+        console.error('Payment update error:', paymentResult.error);
+        return res.status(500).json({ 
+          error: 'Failed to update payment amount',
+          details: paymentResult.error.message
+        });
+      }
+      
+      console.log('✅ Payment amount updated successfully');
+    }
 
     console.log('✅ Order status update completed successfully');
     return res.status(200).json({

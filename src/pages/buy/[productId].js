@@ -277,9 +277,16 @@ const ProductDetailPage = () => {
       accessories.find(acc => acc.AccessoryID === accId)
     ).filter(Boolean);
 
+    // Create a product object with the discounted price for the cart
+    const { currentPrice } = getDynamicPricing();
+    const productWithDiscountedPrice = {
+      ...product,
+      Price: currentPrice // Use the discounted price
+    };
+
     // Use enhanced cart functionality
     addToCartEnhanced(
-      product, 
+      productWithDiscountedPrice, 
       quantity, 
       selectedAccessoryObjects, 
       installationSelected, 
@@ -704,8 +711,8 @@ const ProductDetailPage = () => {
                 {product.Brand} {product.Model} × {quantity}
               </span>
               <span className={styles.priceValue}>
-                <div className={styles.priceMain}>{formatPrice(product.Price * quantity)}</div>
-                <div className={styles.priceSecondary}>{formatPriceEUR(product.Price * quantity)}</div>
+                <div className={styles.priceMain}>{formatPrice(getDynamicPricing().currentPrice * quantity)}</div>
+                <div className={styles.priceSecondary}>{formatPriceEUR(getDynamicPricing().currentPrice * quantity)}</div>
               </span>
             </div>
             {selectedAccessories.map(accessoryId => {
