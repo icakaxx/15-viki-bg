@@ -2369,6 +2369,7 @@
   .cancelButton,
   .saveButton {
     width: 100%;
+    margin: 0;
   }
 }
 
@@ -2890,6 +2891,60 @@
   color: #333;
 }
 
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #e9ecef;
+  color: #333;
+}
+
+.closeModalButton {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.closeModalButton:hover {
+  background-color: #5a6268;
+}
+
+.orderDetailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.orderDetailRow:last-child {
+  border-bottom: none;
+}
+
+.orderDetailRow strong {
+  color: #333;
+  font-weight: 600;
+}
+
 .modalBody {
   padding: 1.5rem;
   max-height: 60vh;
@@ -3022,6 +3077,50 @@
 .filterGroup {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+}
+
+.filterLabel {
+  font-weight: 500;
+  color: #555;
+  white-space: nowrap;
+}
+
+.dateInput {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 140px;
+  transition: border-color 0.2s ease;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+}
+
+.dateSeparator {
+  color: #666;
+  font-weight: 500;
+}
+
+.clearFilterButton {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  color: #666;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.clearFilterButton:hover {
+  background: #e9ecef;
+  color: #333;
+  border-color: #adb5bd;
 }
 
 .searchInput {
@@ -3319,8 +3418,49 @@
     gap: 0.75rem;
   }
   
+  .filterGroup {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .dateInput {
+    width: auto;
+    min-width: 0;
+    flex: 1;
+  }
+  
+  /* Mobile date filter layout */
+  .filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .dateFilterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .dateFilterGroup .dateInput {
+    width: auto;
+    min-width: 0;
+  }
+  
+  .dateFilterGroup .dateSeparator {
+    text-align: center;
+    padding: 0.5rem 0;
+  }
+  
+  .dateFilterGroup .clearFilterButton {
+    align-self: center;
+    margin-top: 0.5rem;
+  }
+  
   .searchInput {
     min-width: auto;
+    width: auto;
   }
   
   .ordersTable {
@@ -3644,16 +3784,173 @@
   border-radius: 8px;
 }
 
-.productsPanel {
-  flex: 1;
-  min-width: 0;
+  .productsPanel {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    border-left: 1px solid #eee;
+    padding: 1rem 0 1rem 1.5rem;
+    background-color: #fafafa;
+    border-radius: 8px;
+  }
+
+/* Products section in modal */
+.productsSection {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.productsSection h4 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.loadingProducts {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 1rem;
+}
+
+.noProducts {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+}
+
+.productsList {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  border-left: 1px solid #eee;
-  padding: 1rem 0 1rem 1.5rem;
-  background-color: #fafafa;
+  gap: 1rem;
+}
+
+.productItem {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
   border-radius: 8px;
+  padding: 1rem;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.productBrandModel {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.productDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.productDetails span {
+  background-color: #e9ecef;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.installationIncluded {
+  background-color: #d4edda !important;
+  color: #155724 !important;
+  font-weight: 500;
+}
+
+.accessoriesList {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.accessoriesList strong {
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.accessoriesList ul {
+  margin: 0.25rem 0 0 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.accessoriesList li {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.1rem;
+}
+
+.accessoryItem {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+}
+
+.accessoryName {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.25rem;
+}
+
+.accessoryDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.accessoryDetails span {
+  background-color: #e9ecef;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.installationSection {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background-color: #d4edda;
+  border-radius: 6px;
+  border-left: 3px solid #28a745;
+}
+
+.installationInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.installationInfo strong {
+  color: #155724;
+  font-size: 0.9rem;
+}
+
+.installationInfo span {
+  background-color: #c3e6cb;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #155724;
+  white-space: nowrap;
 }
 
 .productsPanel h4 {
@@ -3713,5 +4010,242 @@
     flex: 1;
     border-top: 1px solid #eee;
     padding-top: 1rem;
+  }
+  
+  .accessoryDetails {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .installationInfo {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .installationInfo span {
+    align-self: flex-start;
+  }
+}
+
+/* Total breakdown styles */
+.totalBreakdown {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.totalBreakdown h4 {
+  margin: 0 0 1rem 0;
+  color: #495057;
+  font-size: 1rem;
+}
+
+.breakdownRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.breakdownRow:last-child {
+  border-bottom: none;
+}
+
+.breakdownRow.totalRow {
+  border-top: 2px solid #007bff;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.breakdownRow span:first-child {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.breakdownRow span:last-child {
+  font-weight: 600;
+  color: #495057;
+}
+
+.breakdownRow.totalRow span:last-child {
+  color: #007bff;
+  font-size: 1.2rem;
+}
+
+/* Status Update Section in Modal */
+.statusUpdateSection {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.statusUpdateSection h4 {
+  margin: 0 0 1rem 0;
+  color: #495057;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.statusUpdateForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.statusUpdateForm .formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.statusUpdateForm label {
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.statusSelect {
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: white;
+  color: #495057;
+  transition: border-color 0.2s ease;
+}
+
+.statusSelect:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.notesTextarea {
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  background-color: white;
+  color: #495057;
+  transition: border-color 0.2s ease;
+}
+
+.notesTextarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.updateStatusButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+}
+
+.updateStatusButton:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.updateStatusButton:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Mobile responsive styles for status update section */
+@media (max-width: 768px) {
+  .statusUpdateSection {
+    margin-top: 1.5rem;
+    padding: 1rem;
+  }
+  
+  .statusUpdateForm {
+    gap: 0.75rem;
+  }
+  
+  .updateStatusButton {
+    align-self: stretch;
+    width: 100%;
+  }
+}
+
+/* Price Update Field Styles */
+.priceInput {
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: white;
+  color: #495057;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+
+.priceInput:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.updatePriceButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+}
+
+.updatePriceButton:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.updatePriceButton:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Mobile responsive styles for price update */
+@media (max-width: 768px) {
+  .updatePriceButton {
+    align-self: stretch;
+    width: 100%;
   }
 }

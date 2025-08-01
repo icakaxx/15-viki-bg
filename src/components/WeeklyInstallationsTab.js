@@ -246,6 +246,11 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
     setCurrentWeek(newWeek);
   }
 
+  function jumpToToday() {
+    const today = new Date();
+    setCurrentWeek(today);
+  }
+
   function showInstallationDetails(installation) {
     setSelectedInstallation(installation);
     setShowDetailsModal(true);
@@ -836,6 +841,33 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
               }}
             >
               {t('admin.installations.nextWeek')}
+            </button>
+          </div>
+          
+          {/* Jump to Today Button */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: '1rem',
+            width: '100%',
+          }}>
+            <button
+              onClick={jumpToToday}
+              style={{
+                padding: '0.5rem 1.5rem',
+                border: '1px solid #007bff',
+                borderRadius: '4px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#0056b3'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#007bff'}
+            >
+              {t('admin.installations.jumpToToday')}
             </button>
           </div>
         </div>

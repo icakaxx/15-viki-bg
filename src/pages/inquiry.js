@@ -225,7 +225,7 @@ const InquiryPage = () => {
                       required
                       className={inquiryStyles.inquiryInput}
                     >
-                      <option value="">{t('inquiryPage.form.selectInquiryType')}</option>
+                      <option value="">{t('inquiryPage.form.inquiryType')}</option>
                       {inquiryTypes.map((type, index) => (
                         <option key={index} value={type}>{type}</option>
                       ))}

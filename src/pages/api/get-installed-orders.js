@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const EUR_RATE = 1.96; // BGN to EUR
+const EUR_RATE = 1.95583; // BGN to EUR
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
@@ -26,6 +26,12 @@ export default async function handler(req, res) {
   const search = (req.query.search || '').trim();
   const sortBy = req.query.sortBy || 'installation_date';
   const sortOrder = req.query.sortOrder === 'asc' ? 'asc' : 'desc';
+  
+  // Date filtering parameters
+  const startDate = req.query.startDate || null;
+  const endDate = req.query.endDate || null;
+  
+
 
   // Only allow certain sort fields
   const validSortFields = ['installation_date', 'total_price', 'customer_name'];
@@ -88,13 +94,22 @@ export default async function handler(req, res) {
             .order('changed_at', { ascending: false })
             .limit(1);
 
+          // Get payment information
+          const { data: paymentInfo, error: paymentError } = await supabase
+            .from('payment_and_tracking')
+            .select('total_amount, paid_amount')
+            .eq('order_id', orderId)
+            .single();
+
           // Get order items and products
           const { data: orderItems, error: itemsError } = await supabase
             .from('order_items')
             .select(`
               quantity,
               service_option,
-              product_id
+              product_id,
+              accessories,
+              includes_installation
             `)
             .eq('order_id', orderId);
 
@@ -104,7 +119,7 @@ export default async function handler(req, res) {
 
           // Get product details for each item
           const products = [];
-          let totalPrice = 300; // Base installation fee
+          let calculatedTotal = 0;
 
           if (orderItems) {
             for (const item of orderItems) {
@@ -116,8 +131,8 @@ export default async function handler(req, res) {
                 .eq('ProductID', item.product_id)
                 .single();
 
-                              // If ProductID doesn't work, try 'id'
-                if (productError || !product) {
+              // If ProductID doesn't work, try 'id'
+              if (productError || !product) {
                 const result = await supabase
                   .from('products')
                   .select('brand, model, price')
@@ -128,9 +143,22 @@ export default async function handler(req, res) {
                 productError = result.error;
               }
 
-                              if (product && !productError) {
+              if (product && !productError) {
                 const itemPrice = parseFloat(product.price) * item.quantity;
-                totalPrice += itemPrice;
+                calculatedTotal += itemPrice;
+
+                // Add accessories cost
+                if (item.accessories && Array.isArray(item.accessories)) {
+                  item.accessories.forEach(accessory => {
+                    const accessoryPrice = (accessory.price || 0) * (accessory.quantity || 1);
+                    calculatedTotal += accessoryPrice * item.quantity;
+                  });
+                }
+
+                // Add installation cost
+                if (item.includes_installation) {
+                  calculatedTotal += 300 * item.quantity; // 300 BGN per item
+                }
 
                 products.push({
                   brand: product.brand,
@@ -139,8 +167,8 @@ export default async function handler(req, res) {
                   quantity: item.quantity,
                   service: item.service_option
                 });
-                              } else {
-                  // Add a placeholder for missing products
+              } else {
+                // Add a placeholder for missing products
                 products.push({
                   brand: 'Unknown',
                   model: 'Product Not Found',
@@ -154,6 +182,27 @@ export default async function handler(req, res) {
 
           // Format customer name
           const customerName = guest;
+
+          // Apply date filtering
+          if (startDate || endDate) {
+            const installationDate = new Date(installation_date);
+            
+            if (startDate) {
+              const startDateObj = new Date(startDate);
+              if (installationDate < startDateObj) {
+                return null; // Filter out this order
+              }
+            }
+            
+            if (endDate) {
+              const endDateObj = new Date(endDate);
+              // Set end date to end of day for inclusive filtering
+              endDateObj.setHours(23, 59, 59, 999);
+              if (installationDate > endDateObj) {
+                return null; // Filter out this order
+              }
+            }
+          }
 
           // Apply search filter
           if (search) {
@@ -171,15 +220,21 @@ export default async function handler(req, res) {
             }
           }
 
+          // Use stored total from payment_and_tracking if available, otherwise use calculated total
+          const finalTotal = paymentInfo && paymentInfo.total_amount ? 
+            paymentInfo.total_amount : 
+            calculatedTotal;
+
           const orderResult = {
             order_id: orderId,
             installation_date: installation_date,
             customer_name: customerName,
-            customer_phone:phone,
+            customer_phone: phone,
             products: products,
             products_count: products.length,
-            total_price_bgn: Math.round(totalPrice * 100) / 100,
-            total_price_eur: Math.round((totalPrice / EUR_RATE) * 100) / 100
+            total_price_bgn: Math.round(finalTotal * 100) / 100,
+            total_price_eur: Math.round((finalTotal / EUR_RATE) * 100) / 100,
+            paid_amount: paymentInfo && paymentInfo.paid_amount ? Math.round(paymentInfo.paid_amount * 100) / 100 : null
           };
 
                       return orderResult;

@@ -74,7 +74,8 @@ export default function OrdersManagementTab() {
     startInstallationMinute: '00',
     endInstallationDate: '',
     endInstallationHour: '17',
-    endInstallationMinute: '00'
+    endInstallationMinute: '00',
+    paidAmount: '' // Added paid amount field
   });
 
   useEffect(() => {
@@ -165,7 +166,8 @@ export default function OrdersManagementTab() {
           startInstallationMinute: '00',
           endInstallationDate: '', 
           endInstallationHour: '17',
-          endInstallationMinute: '00'
+          endInstallationMinute: '00',
+          paidAmount: '' // Reset paid amount
         });
         fetchOrders(); // Refresh the orders list
         setShowOrderDetails(false);
@@ -175,6 +177,47 @@ export default function OrdersManagementTab() {
       }
     } catch (err) {
       alert(t('admin.orders.errors.updateFailed') + ': ' + err.message);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handlePaidAmountUpdate = async (orderId) => {
+    if (!statusUpdateData.paidAmount || isNaN(parseFloat(statusUpdateData.paidAmount))) {
+      alert('Моля, въведете валидна сума за плащане');
+      return;
+    }
+
+    setUpdatingStatus(true);
+    try {
+      const response = await fetch('/api/update-order-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: orderId,
+          newStatus: selectedOrder.current_status, // Keep current status
+          notes: statusUpdateData.notes || 'Обновена платена сума',
+          paidAmount: parseFloat(statusUpdateData.paidAmount),
+          adminId: 'admin'
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert(`Платената сума е обновена успешно на ${parseFloat(statusUpdateData.paidAmount).toFixed(2)} лв.`);
+        setStatusUpdateData(prev => ({ 
+          ...prev,
+          paidAmount: '' // Reset paid amount field
+        }));
+        fetchOrders(); // Refresh the orders list
+      } else {
+        alert(`Грешка при обновяване на платената сума: ${data.error}`);
+      }
+    } catch (err) {
+      alert(`Грешка при обновяване на платената сума: ${err.message}`);
     } finally {
       setUpdatingStatus(false);
     }
@@ -191,7 +234,8 @@ export default function OrdersManagementTab() {
       startInstallationMinute: '00',
       endInstallationDate: '',
       endInstallationHour: '17',
-      endInstallationMinute: '00'
+      endInstallationMinute: '00',
+      paidAmount: order.paid_amount ? order.paid_amount.toString() : '' // Initialize with current paid amount
     });
   };
 
@@ -206,7 +250,8 @@ export default function OrdersManagementTab() {
       startInstallationMinute: '00',
       endInstallationDate: '', 
       endInstallationHour: '17',
-      endInstallationMinute: '00'
+      endInstallationMinute: '00',
+      paidAmount: '' // Reset paid amount
     });
   };
 
@@ -253,7 +298,8 @@ export default function OrdersManagementTab() {
       startInstallationMinute: '00',
       endInstallationDate: '',
       endInstallationHour: '17',
-      endInstallationMinute: '00'
+      endInstallationMinute: '00',
+      paidAmount: order.paid_amount ? order.paid_amount.toString() : '' // Initialize with current paid amount
     });
     
     // Load products for the combined view
@@ -290,7 +336,8 @@ export default function OrdersManagementTab() {
       startInstallationMinute: '00',
       endInstallationDate: '', 
       endInstallationHour: '17',
-      endInstallationMinute: '00'
+      endInstallationMinute: '00',
+      paidAmount: '' // Reset paid amount
     });
   };
 
@@ -812,6 +859,19 @@ export default function OrdersManagementTab() {
                       rows="3"
                     />
                   </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Платена сума (лв.):</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={statusUpdateData.paidAmount}
+                      onChange={(e) => setStatusUpdateData(prev => ({ ...prev, paidAmount: e.target.value }))}
+                      placeholder="Въведете платена сума"
+                      className={styles.priceInput}
+                    />
+                  </div>
                   
                   <div className={styles.statusUpdateActions}>
                     <button
@@ -820,6 +880,13 @@ export default function OrdersManagementTab() {
                       className={styles.updateStatusButton}
                     >
                       {updatingStatus ? `🔄 ${t('admin.orders.updatingStatus')}` : `✅ ${t('admin.orders.updateStatus')}`}
+                    </button>
+                    <button
+                      onClick={() => handlePaidAmountUpdate(selectedOrder.order_id)}
+                      disabled={updatingStatus || !statusUpdateData.paidAmount}
+                      className={styles.updatePriceButton}
+                    >
+                      {updatingStatus ? '🔄 Обновяване...' : '💰 Обнови платена сума'}
                     </button>
                     <button
                       onClick={closeOrderDetails}
@@ -897,13 +964,13 @@ export default function OrdersManagementTab() {
                             <div className={styles.productPrice}>
                               <div>{product.price ? `${parseFloat(product.price).toFixed(2)} лв.` : '-'}</div>
                               <div style={{ fontSize: '0.85em', color: '#666' }}>
-                                {product.price ? `${(parseFloat(product.price) / 1.96).toFixed(2)} €` : '-'}
+                                {product.price ? `${(parseFloat(product.price) / 1.95583).toFixed(2)} €` : '-'}
                               </div>
                             </div>
                             <div className={styles.productTotal}>
                               <div>{product.total_price ? `${product.total_price.toFixed(2)} лв.` : '-'}</div>
                               <div style={{ fontSize: '0.85em', color: '#666' }}>
-                                {product.total_price ? `${(product.total_price / 1.96).toFixed(2)} €` : '-'}
+                                {product.total_price ? `${(product.total_price / 1.95583).toFixed(2)} €` : '-'}
                               </div>
                             </div>
                           </div>
@@ -928,13 +995,13 @@ export default function OrdersManagementTab() {
                                   <div className={styles.productPrice}>
                                     <div>{accessory.price ? `${parseFloat(accessory.price).toFixed(2)} лв.` : '-'}</div>
                                     <div style={{ fontSize: '0.85em', color: '#666' }}>
-                                      {accessory.price ? `${(parseFloat(accessory.price) / 1.96).toFixed(2)} €` : '-'}
+                                      {accessory.price ? `${(parseFloat(accessory.price) / 1.95583).toFixed(2)} €` : '-'}
                                     </div>
                                   </div>
                                   <div className={styles.productTotal}>
                                     <div>{accessoryTotal ? `${accessoryTotal.toFixed(2)} лв.` : '-'}</div>
                                     <div style={{ fontSize: '0.85em', color: '#666' }}>
-                                      {accessoryTotal ? `${(accessoryTotal / 1.96).toFixed(2)} €` : '-'}
+                                      {accessoryTotal ? `${(accessoryTotal / 1.95583).toFixed(2)} €` : '-'}
                                     </div>
                                   </div>
                                 </div>
@@ -959,13 +1026,13 @@ export default function OrdersManagementTab() {
                               <div className={styles.productPrice}>
                                 <div>300.00 лв.</div>
                                 <div style={{ fontSize: '0.85em', color: '#666' }}>
-                                  153.06 €
+                                  {(300 / 1.95583).toFixed(2)} €
                                 </div>
                               </div>
                               <div className={styles.productTotal}>
                                 <div>{(300 * product.quantity).toFixed(2)} лв.</div>
                                 <div style={{ fontSize: '0.85em', color: '#666' }}>
-                                  {(153.06 * product.quantity).toFixed(2)} €
+                                  {((300 / 1.95583) * product.quantity).toFixed(2)} €
                                 </div>
                               </div>
                             </div>
@@ -1007,11 +1074,11 @@ export default function OrdersManagementTab() {
                             }, 0);
                             const installationTotal = orderProducts.reduce((sum, product) => {
                               if (product.includes_installation) {
-                                return sum + (153.06 * product.quantity);
+                                return sum + ((300 / 1.95583) * product.quantity);
                               }
                               return sum;
                             }, 0);
-                            return ((productTotal + accessoryTotal + installationTotal) / 1.96).toFixed(2);
+                            return ((productTotal + accessoryTotal + installationTotal) / 1.95583).toFixed(2);
                           })()} €</strong>
                         </div>
                       </div>
@@ -1087,6 +1154,208 @@ export default function OrdersManagementTab() {
                       </select>
                     </div>
                     
+                    {statusUpdateData.newStatus === 'installation_booked' && (
+                      <>
+                        <div className={styles.formGroup}>
+                          <label>{t('admin.orders.startInstallationDate')}:</label>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <input
+                              type="date"
+                              value={statusUpdateData.startInstallationDate}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, startInstallationDate: e.target.value }))}
+                              className={styles.dateInput}
+                              required
+                              style={{ flex: '1', minWidth: '150px' }}
+                            />
+                            <select
+                              value={statusUpdateData.startInstallationHour}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, startInstallationHour: e.target.value }))}
+                              className={styles.timeSelect}
+                              style={{ width: '80px' }}
+                            >
+                              {hourOptions.map(hour => (
+                                <option key={hour} value={hour}>{hour}</option>
+                              ))}
+                            </select>
+                            <span>:</span>
+                            <select
+                              value={statusUpdateData.startInstallationMinute}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, startInstallationMinute: e.target.value }))}
+                              className={styles.timeSelect}
+                              style={{ width: '80px' }}
+                            >
+                              {minuteOptions.map(minute => (
+                                <option key={minute} value={minute}>{minute}</option>
+                              ))}
+                            </select>
+                          </div>
+                          
+                          {/* Quick time buttons for start */}
+                          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('start', '08', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.startInstallationHour === '08' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.startInstallationHour === '08' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              08:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('start', '09', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.startInstallationHour === '09' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.startInstallationHour === '09' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              09:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('start', '14', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.startInstallationHour === '14' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.startInstallationHour === '14' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              14:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('start', '15', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.startInstallationHour === '15' && statusUpdateData.startInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.startInstallationHour === '15' && statusUpdateData.startInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              15:00
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className={styles.formGroup}>
+                          <label>{t('admin.orders.endInstallationDate')}:</label>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <input
+                              type="date"
+                              value={statusUpdateData.endInstallationDate}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, endInstallationDate: e.target.value }))}
+                              className={styles.dateInput}
+                              required
+                              style={{ flex: '1', minWidth: '150px' }}
+                            />
+                            <select
+                              value={statusUpdateData.endInstallationHour}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, endInstallationHour: e.target.value }))}
+                              className={styles.timeSelect}
+                              style={{ width: '80px' }}
+                            >
+                              {hourOptions.map(hour => (
+                                <option key={hour} value={hour}>{hour}</option>
+                              ))}
+                            </select>
+                            <span>:</span>
+                            <select
+                              value={statusUpdateData.endInstallationMinute}
+                              onChange={(e) => setStatusUpdateData(prev => ({ ...prev, endInstallationMinute: e.target.value }))}
+                              className={styles.timeSelect}
+                              style={{ width: '80px' }}
+                            >
+                              {minuteOptions.map(minute => (
+                                <option key={minute} value={minute}>{minute}</option>
+                              ))}
+                            </select>
+                          </div>
+                          
+                          {/* Quick time buttons for end */}
+                          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('end', '17', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.endInstallationHour === '17' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.endInstallationHour === '17' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              17:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('end', '18', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.endInstallationHour === '18' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.endInstallationHour === '18' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              18:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('end', '19', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.endInstallationHour === '19' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.endInstallationHour === '19' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              19:00
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickTime('end', '20', '00')}
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                backgroundColor: statusUpdateData.endInstallationHour === '20' && statusUpdateData.endInstallationMinute === '00' ? '#007bff' : '#fff',
+                                color: statusUpdateData.endInstallationHour === '20' && statusUpdateData.endInstallationMinute === '00' ? '#fff' : '#333',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              20:00
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    
                     <div className={styles.formGroup}>
                       <label>{t('admin.orders.notes')}:</label>
                       <textarea
@@ -1097,6 +1366,19 @@ export default function OrdersManagementTab() {
                         rows="3"
                       />
                     </div>
+
+                    <div className={styles.formGroup}>
+                      <label>Платена сума (лв.):</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={statusUpdateData.paidAmount}
+                        onChange={(e) => setStatusUpdateData(prev => ({ ...prev, paidAmount: e.target.value }))}
+                        placeholder="Въведете платена сума"
+                        className={styles.priceInput}
+                      />
+                    </div>
                     
                     <div className={styles.statusUpdateActions}>
                       <button
@@ -1105,6 +1387,13 @@ export default function OrdersManagementTab() {
                         className={styles.updateStatusButton}
                       >
                         {updatingStatus ? `🔄 ${t('admin.orders.updatingStatus')}` : `✅ ${t('admin.orders.updateStatus')}`}
+                      </button>
+                      <button
+                        onClick={() => handlePaidAmountUpdate(selectedOrder.order_id)}
+                        disabled={updatingStatus || !statusUpdateData.paidAmount}
+                        className={styles.updatePriceButton}
+                      >
+                        {updatingStatus ? '🔄 Обновяване...' : '💰 Обнови платена сума'}
                       </button>
                     </div>
                   </div>

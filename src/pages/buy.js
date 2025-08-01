@@ -360,8 +360,8 @@ const BuyPage = () => {
 
   const formatPriceEUR = (price) => {
     if (price == null || isNaN(price)) return '€0.00';
-    // BGN to EUR conversion rate (approximate - 1 EUR = 1.96 BGN)
-    const eurPrice = price / 1.96;
+    // BGN to EUR conversion rate (1 EUR = 1.95583 BGN - official rate)
+    const eurPrice = price / 1.95583;
     return new Intl.NumberFormat('en-EU', {
       style: 'currency',
       currency: 'EUR'

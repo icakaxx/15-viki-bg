@@ -274,6 +274,8 @@ const CheckoutPage = () => {
     setStripePaymentSuccess(true);
     setStripePaymentError(null);
     setOrderCompleted(true);
+    // Scroll to top of page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     // Clear cart and redirect to success page
     clearCart();
     setTimeout(() => {
@@ -445,6 +447,8 @@ const CheckoutPage = () => {
         showToast('success', t('checkout.form.stripe.orderSuccess'), 
           `${t('checkout.form.stripe.orderId')}: ${result.orderId}\n${t('checkout.form.stripe.emailSent')}`);
         setOrderCompleted(true);
+        // Scroll to top of page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         clearCart();
         
         // Redirect to success page

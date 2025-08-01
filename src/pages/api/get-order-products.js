@@ -40,6 +40,8 @@ export default async function handler(req, res) {
       `)
       .eq('order_id', orderId);
 
+
+
     if (itemsError) {
       return res.status(500).json({ 
         error: 'Failed to fetch order items',
@@ -60,7 +62,7 @@ export default async function handler(req, res) {
     const includesInstallation = orderItems.some(item => item.includes_installation);
 
     // Get product details for each item
-    const productsPromises = orderItems.map(async (item) => {
+    const productsPromises = orderItems.map(async (item, index) => {
       // Try both possible column names for product ID
       let { data: product, error: productError } = await supabase
         .from('products')
@@ -81,6 +83,26 @@ export default async function handler(req, res) {
       }
 
       if (product && !productError) {
+        // Handle accessories - might be stored as JSON string or null
+        let accessories = item.accessories;
+        if (accessories === null || accessories === undefined) {
+          accessories = [];
+        } else if (typeof accessories === 'string') {
+          try {
+            accessories = JSON.parse(accessories);
+          } catch (e) {
+            accessories = [];
+          }
+        }
+        
+        // Handle includes_installation - might be stored as string or boolean
+        let includesInstallation = item.includes_installation;
+        if (includesInstallation === null || includesInstallation === undefined) {
+          includesInstallation = false;
+        } else if (typeof includesInstallation === 'string') {
+          includesInstallation = includesInstallation.toLowerCase() === 'true' || includesInstallation === '1';
+        }
+        
         return {
           product_id: item.product_id,
           brand: product.brand,
@@ -89,11 +111,31 @@ export default async function handler(req, res) {
           image_url: product.image_url,
           quantity: item.quantity,
           service_option: item.service_option,
-          accessories: item.accessories || [],
-          includes_installation: item.includes_installation || false,
+          accessories: accessories,
+          includes_installation: includesInstallation,
           total_price: parseFloat(product.price) * item.quantity
         };
       } else {
+        // Handle accessories - might be stored as JSON string or null
+        let accessories = item.accessories;
+        if (accessories === null || accessories === undefined) {
+          accessories = [];
+        } else if (typeof accessories === 'string') {
+          try {
+            accessories = JSON.parse(accessories);
+          } catch (e) {
+            accessories = [];
+          }
+        }
+        
+        // Handle includes_installation - might be stored as string or boolean
+        let includesInstallation = item.includes_installation;
+        if (includesInstallation === null || includesInstallation === undefined) {
+          includesInstallation = false;
+        } else if (typeof includesInstallation === 'string') {
+          includesInstallation = includesInstallation.toLowerCase() === 'true' || includesInstallation === '1';
+        }
+        
         return {
           product_id: item.product_id,
           brand: 'Unknown',
@@ -102,8 +144,8 @@ export default async function handler(req, res) {
           image_url: null,
           quantity: item.quantity,
           service_option: item.service_option,
-          accessories: item.accessories || [],
-          includes_installation: item.includes_installation || false,
+          accessories: accessories,
+          includes_installation: includesInstallation,
           total_price: 0
         };
       }

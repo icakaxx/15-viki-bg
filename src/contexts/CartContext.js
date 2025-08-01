@@ -362,7 +362,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const formatPriceEUR = (price) => {
-    const eurPrice = price / 1.96;
+    const eurPrice = price / 1.95583;
     return new Intl.NumberFormat('en-EU', {
       style: 'currency',
       currency: 'EUR'

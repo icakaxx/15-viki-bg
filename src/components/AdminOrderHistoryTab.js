@@ -21,14 +21,29 @@ export default function AdminOrderHistoryTab() {
   const [sortBy, setSortBy] = useState('installation_date');
   const [sortOrder, setSortOrder] = useState('desc');
 
-  // Placeholder states for future filters
-  const [dateRange, setDateRange] = useState([null, null]);
-  const [productType, setProductType] = useState('');
+  // Date filtering states
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  
+  // Modal state for order details
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [orderProducts, setOrderProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  
+  // Status update state
+  const [statusUpdateData, setStatusUpdateData] = useState({
+    newStatus: '',
+    notes: ''
+  });
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   useEffect(() => {
     fetchOrders();
     // eslint-disable-next-line
-  }, [page, search, sortBy, sortOrder]);
+  }, [page, search, sortBy, sortOrder, startDate, endDate]);
+
+
 
   async function fetchOrders() {
     setLoading(true);
@@ -41,6 +56,17 @@ export default function AdminOrderHistoryTab() {
         sortBy,
         sortOrder
       });
+      
+      // Add date filters if they exist
+      if (startDate) {
+        params.append('startDate', startDate);
+      }
+      if (endDate) {
+        params.append('endDate', endDate);
+      }
+      
+
+      
       // Force the correct port based on current server
       const baseUrl = window.location.origin;
       const apiUrl = `${baseUrl}/api/get-installed-orders?${params}`;
@@ -63,6 +89,88 @@ export default function AdminOrderHistoryTab() {
     }
   }
 
+  const handleViewDetails = (order) => {
+    setSelectedOrder(order);
+    setShowDetailsModal(true);
+    fetchOrderProducts(order.order_id);
+  };
+
+  const closeDetailsModal = () => {
+    setShowDetailsModal(false);
+    setSelectedOrder(null);
+    setOrderProducts([]);
+    setStatusUpdateData({ newStatus: '', notes: '' });
+  };
+
+  const updateOrderStatus = async () => {
+    if (!statusUpdateData.newStatus) {
+      alert('Моля, изберете нов статус');
+      return;
+    }
+
+    setUpdatingStatus(true);
+    try {
+      const baseUrl = window.location.origin;
+      const response = await fetch(`${baseUrl}/api/update-order-status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: selectedOrder.order_id,
+          newStatus: statusUpdateData.newStatus,
+          notes: statusUpdateData.notes,
+          adminId: 'admin'
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        alert(`Статусът е обновен успешно от ${result.oldStatus} на ${result.newStatus}`);
+        // Refresh the orders list
+        fetchOrders();
+        // Close modal
+        closeDetailsModal();
+      } else {
+        alert(`Грешка при обновяване на статуса: ${result.error}`);
+      }
+    } catch (error) {
+      alert(`Грешка при обновяване на статуса: ${error.message}`);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  async function fetchOrderProducts(orderId) {
+    setProductsLoading(true);
+    try {
+      const baseUrl = window.location.origin;
+      const apiUrl = `${baseUrl}/api/get-order-products?orderId=${orderId}`;
+      
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        setOrderProducts(data.products || []);
+      } else {
+        console.error('Failed to fetch order products:', data.error);
+        setOrderProducts([]);
+      }
+    } catch (err) {
+      console.error('Error fetching order products:', err);
+      setOrderProducts([]);
+    } finally {
+      setProductsLoading(false);
+    }
+  }
+
+  const clearDateFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setPage(1);
+  };
+
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
@@ -83,27 +191,32 @@ export default function AdminOrderHistoryTab() {
             className={styles.searchInput}
           />
         </div>
-        <div className={styles.filterGroup}>
-          {/* Date range picker placeholder */}
+        <div className={`${styles.filterGroup} ${styles.dateFilterGroup}`}>
+          <label className={styles.filterLabel}>Период:</label>
           <input 
-            type="text" 
-            placeholder={t('admin.orders.history.dateRangePlaceholder')} 
-            disabled 
-            className={styles.searchInput}
-            style={{ width: '140px' }}
+            type="date" 
+            value={startDate}
+            onChange={e => { setStartDate(e.target.value); setPage(1); }}
+            className={styles.dateInput}
+            placeholder="От дата"
           />
-        </div>
-        <div className={styles.filterGroup}>
-          {/* Product type dropdown placeholder */}
-          <select 
-            value={productType} 
-            onChange={e => setProductType(e.target.value)} 
-            disabled 
-            className={styles.statusFilter}
-            style={{ width: '140px' }}
-          >
-            <option value="">{t('admin.orders.history.productTypePlaceholder')}</option>
-          </select>
+          <span className={styles.dateSeparator}>-</span>
+          <input 
+            type="date" 
+            value={endDate}
+            onChange={e => { setEndDate(e.target.value); setPage(1); }}
+            className={styles.dateInput}
+            placeholder="До дата"
+          />
+          {(startDate || endDate) && (
+            <button 
+              onClick={clearDateFilters}
+              className={styles.clearFilterButton}
+              title="Изчисти филтри"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
@@ -142,15 +255,17 @@ export default function AdminOrderHistoryTab() {
                 </tr>
               ) : (
                 orders.map(order => (
-                  <tr key={order.id} className={styles.orderRow}>
+                  <tr key={order.order_id} className={styles.orderRow}>
                     <td>{formatDate(order.installation_date)}</td>
                     <td>{order.customer_name}</td>
                     <td>{order.customer_phone}</td>
                     <td>{order.products_count}</td>
                     <td>{(order.total_price_bgn || 0).toFixed(2)} лв / {(order.total_price_eur || 0).toFixed(2)} €</td>
                     <td>
-                      {/* Actions placeholder */}
-                      <button disabled style={{ opacity: 0.5 }} className={styles.viewButton}>
+                      <button 
+                        onClick={() => handleViewDetails(order)}
+                        className={styles.viewButton}
+                      >
                         {t('admin.orders.history.detailsButton')}
                       </button>
                     </td>
@@ -181,7 +296,7 @@ export default function AdminOrderHistoryTab() {
         ) : (
           <div className={styles.mobileOrdersList}>
             {orders.map(order => (
-              <div key={order.id} className={styles.mobileOrderCard}>
+              <div key={order.order_id} className={styles.mobileOrderCard}>
                 <div className={styles.mobileOrderHeader}>
                   <div className={styles.mobileOrderCustomer}>
                     <strong>{order.customer_name}</strong>
@@ -204,7 +319,10 @@ export default function AdminOrderHistoryTab() {
                 </div>
                 
                 <div className={styles.mobileOrderActions}>
-                  <button disabled style={{ opacity: 0.5 }} className={styles.viewButton}>
+                  <button 
+                    onClick={() => handleViewDetails(order)}
+                    className={styles.viewButton}
+                  >
                     {t('admin.orders.history.detailsButton')}
                   </button>
                 </div>
@@ -245,6 +363,177 @@ export default function AdminOrderHistoryTab() {
           >
             {t('admin.orders.history.nextPage')} ›
           </button>
+        </div>
+      )}
+
+      {/* Order Details Modal */}
+      {showDetailsModal && selectedOrder && (
+        <div className={styles.modalOverlay} onClick={closeDetailsModal}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>Детайли за поръчка #{selectedOrder.order_id}</h3>
+              <button onClick={closeDetailsModal} className={styles.closeButton}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.orderDetailRow}>
+                <strong>Клиент:</strong> {selectedOrder.customer_name}
+              </div>
+              <div className={styles.orderDetailRow}>
+                <strong>Телефон:</strong> {selectedOrder.customer_phone}
+              </div>
+              <div className={styles.orderDetailRow}>
+                <strong>Дата на инсталация:</strong> {formatDate(selectedOrder.installation_date)}
+              </div>
+              <div className={styles.orderDetailRow}>
+                <strong>Брой продукти:</strong> {selectedOrder.products_count}
+              </div>
+              <div className={styles.orderDetailRow}>
+                <strong>Обща сума:</strong> {(selectedOrder.total_price_bgn || 0).toFixed(2)} лв / {(selectedOrder.total_price_eur || 0).toFixed(2)} €
+              </div>
+              <div className={styles.orderDetailRow}>
+                <strong>Платена сума:</strong> {selectedOrder.paid_amount ? `${selectedOrder.paid_amount.toFixed(2)} лв` : 'Не е платена'}
+              </div>
+              <div className={styles.orderDetailRow}>
+                <strong>Изчислена сума:</strong> {(() => {
+                  const productTotal = orderProducts.reduce((sum, product) => sum + (parseFloat(product.price) * product.quantity), 0);
+                  const accessoryTotal = orderProducts.reduce((sum, product) => {
+                    if (product.accessories && Array.isArray(product.accessories)) {
+                      return sum + product.accessories.reduce((accSum, acc) => accSum + ((acc.price || 0) * (acc.quantity || 1)), 0);
+                    }
+                    return sum;
+                  }, 0);
+                  const installationTotal = orderProducts.reduce((sum, product) => {
+                    if (product.includes_installation) {
+                      return sum + (300 * product.quantity);
+                    }
+                    return sum;
+                  }, 0);
+                  const calculatedTotal = productTotal + accessoryTotal + installationTotal;
+                  return `${calculatedTotal.toFixed(2)} лв / ${(calculatedTotal / 1.95583).toFixed(2)} €`;
+                })()}
+              </div>
+              
+              <div className={styles.productsSection}>
+                <h4>Продукти в поръчката:</h4>
+                {productsLoading ? (
+                  <div className={styles.loadingProducts}>Зареждане на продукти...</div>
+                ) : orderProducts.length > 0 ? (
+                  <div className={styles.productsList}>
+                    {orderProducts.map((product, index) => (
+                      <div key={index} className={styles.productItem}>
+                        <div className={styles.productInfo}>
+                          <div className={styles.productBrandModel}>
+                            <strong>{product.brand} {product.model}</strong>
+                          </div>
+                          <div className={styles.productDetails}>
+                            <span>Количество: {product.quantity}</span>
+                            <span>Цена: {product.price} лв</span>
+                            <span>Общо: {(parseFloat(product.price) * product.quantity).toFixed(2)} лв</span>
+                          </div>
+                          {product.includes_installation && (
+                            <div className={styles.installationSection}>
+                              <div className={styles.installationInfo}>
+                                <strong>Включена инсталация</strong>
+                                <span>Цена: 300.00 лв</span>
+                                <span>Общо: {(300 * product.quantity).toFixed(2)} лв</span>
+                              </div>
+                            </div>
+                          )}
+                          {product.accessories && Array.isArray(product.accessories) && product.accessories.length > 0 && (
+                            <div className={styles.accessoriesList}>
+                              <strong>Аксесоари:</strong>
+                              <ul>
+                                {product.accessories.map((accessory, accIndex) => {
+                                  const accessoryTotal = (accessory.price || 0) * (accessory.quantity || 1);
+                                  return (
+                                    <li key={accIndex} className={styles.accessoryItem}>
+                                      <div className={styles.accessoryName}>
+                                        • {accessory.name || accessory.Name || 'Unknown Accessory'}
+                                      </div>
+                                      <div className={styles.accessoryDetails}>
+                                        <span>Количество: {accessory.quantity || 1}</span>
+                                        <span>Цена: {(accessory.price || 0).toFixed(2)} лв</span>
+                                        <span>Общо: {accessoryTotal.toFixed(2)} лв</span>
+                                      </div>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                                     </div>
+                 ) : (
+                   <div className={styles.noProducts}>Няма намерени продукти за тази поръчка.</div>
+                 )}
+                 
+                 {/* Total breakdown */}
+                 {orderProducts.length > 0 && (
+                   <div className={styles.totalBreakdown}>
+                     <h4>Разбивка на сумата:</h4>
+                     <div className={styles.breakdownRow}>
+                       <span>Продукти:</span>
+                       <span>{(() => {
+                         const productTotal = orderProducts.reduce((sum, product) => sum + (parseFloat(product.price) * product.quantity), 0);
+                         return `${productTotal.toFixed(2)} лв`;
+                       })()}</span>
+                     </div>
+                     <div className={styles.breakdownRow}>
+                       <span>Аксесоари:</span>
+                       <span>{(() => {
+                         const accessoryTotal = orderProducts.reduce((sum, product) => {
+                           if (product.accessories && Array.isArray(product.accessories)) {
+                             return sum + product.accessories.reduce((accSum, acc) => accSum + ((acc.price || 0) * (acc.quantity || 1)), 0);
+                           }
+                           return sum;
+                         }, 0);
+                         return `${accessoryTotal.toFixed(2)} лв`;
+                       })()}</span>
+                     </div>
+                     <div className={styles.breakdownRow}>
+                       <span>Инсталация:</span>
+                       <span>{(() => {
+                         const installationTotal = orderProducts.reduce((sum, product) => {
+                           if (product.includes_installation) {
+                             return sum + (300 * product.quantity);
+                           }
+                           return sum;
+                         }, 0);
+                         return `${installationTotal.toFixed(2)} лв`;
+                       })()}</span>
+                     </div>
+                     <div className={`${styles.breakdownRow} ${styles.totalRow}`}>
+                       <strong>Общо:</strong>
+                       <strong>{(() => {
+                         const productTotal = orderProducts.reduce((sum, product) => sum + (parseFloat(product.price) * product.quantity), 0);
+                         const accessoryTotal = orderProducts.reduce((sum, product) => {
+                           if (product.accessories && Array.isArray(product.accessories)) {
+                             return sum + product.accessories.reduce((accSum, acc) => accSum + ((acc.price || 0) * (acc.quantity || 1)), 0);
+                           }
+                           return sum;
+                         }, 0);
+                         const installationTotal = orderProducts.reduce((sum, product) => {
+                           if (product.includes_installation) {
+                             return sum + (300 * product.quantity);
+                           }
+                           return sum;
+                         }, 0);
+                         const calculatedTotal = productTotal + accessoryTotal + installationTotal;
+                         return `${calculatedTotal.toFixed(2)} лв`;
+                       })()}</strong>
+                     </div>
+                   </div>
+                 )}
+               </div>
+            </div>
+            <div className={styles.modalFooter}>
+              <button onClick={closeDetailsModal} className={styles.closeModalButton}>
+                Затвори
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

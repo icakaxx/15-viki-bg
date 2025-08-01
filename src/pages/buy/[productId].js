@@ -46,6 +46,23 @@ const ProductDetailPage = () => {
     return translationKey ? t(translationKey) || feature : feature;
   };
 
+  // Helper function to translate installation types
+  const translateInstallationType = (installationType) => {
+    if (!installationType) return '';
+    
+    // Map installation type values to translation keys
+    const installationTypeMap = {
+      'Wall-mounted': 'admin.products.dropdowns.installationTypes.wallMounted',
+      'Ceiling-mounted': 'admin.products.dropdowns.installationTypes.ceilingMounted',
+      'Floor-standing': 'admin.products.dropdowns.installationTypes.floorStanding',
+      'Ducted': 'admin.products.dropdowns.installationTypes.ducted',
+      'Cassette': 'admin.products.dropdowns.installationTypes.cassette'
+    };
+    
+    const translationKey = installationTypeMap[installationType];
+    return translationKey ? t(translationKey) || installationType : installationType;
+  };
+
   // Helper function to count all technical specifications
   const getTechnicalSpecsCount = () => {
     let count = 0;
@@ -260,9 +277,16 @@ const ProductDetailPage = () => {
       accessories.find(acc => acc.AccessoryID === accId)
     ).filter(Boolean);
 
+    // Create a product object with the discounted price for the cart
+    const { currentPrice } = getDynamicPricing();
+    const productWithDiscountedPrice = {
+      ...product,
+      Price: currentPrice // Use the discounted price
+    };
+
     // Use enhanced cart functionality
     addToCartEnhanced(
-      product, 
+      productWithDiscountedPrice, 
       quantity, 
       selectedAccessoryObjects, 
       installationSelected, 
@@ -563,7 +587,7 @@ const ProductDetailPage = () => {
             {/* Technical Details Tab */}
             <div className={`${styles.specsTabContent} ${activeTab === 'technical' ? styles.active : ''}`}>
               <div className={styles.specsGrid}>
-                {product.InstallationType && renderSpecCard('🔧', t('productDetail.specs.installation'), product.InstallationType, t('productDetail.tooltips.installationType'))}
+                {product.InstallationType && renderSpecCard('🔧', t('productDetail.specs.installation'), translateInstallationType(product.InstallationType), t('productDetail.tooltips.installationType'))}
                 {product.Stock !== undefined && product.Stock !== null && renderSpecCard('📦', t('productDetail.specs.stock'), product.Stock > 0 ? `${product.Stock} ${t('productDetail.stock.available')}` : t('productDetail.stock.outOfStockShort'), t('productDetail.tooltips.stock'))}
               </div>
             </div>
@@ -687,8 +711,8 @@ const ProductDetailPage = () => {
                 {product.Brand} {product.Model} × {quantity}
               </span>
               <span className={styles.priceValue}>
-                <div className={styles.priceMain}>{formatPrice(product.Price * quantity)}</div>
-                <div className={styles.priceSecondary}>{formatPriceEUR(product.Price * quantity)}</div>
+                <div className={styles.priceMain}>{formatPrice(getDynamicPricing().currentPrice * quantity)}</div>
+                <div className={styles.priceSecondary}>{formatPriceEUR(getDynamicPricing().currentPrice * quantity)}</div>
               </span>
             </div>
             {selectedAccessories.map(accessoryId => {
