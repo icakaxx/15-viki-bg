@@ -11,17 +11,17 @@ export default function Administration() {
     const { t } = useTranslation('common');
     const router = useRouter();
     const locale = router.locale || 'bg';
-    
+
     // Debug info
-    
+
     // Authentication state
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [usernameInput, setUsernameInput] = useState('');
     const [passwordInput, setPasswordInput] = useState('');
-    
+
     // Main tabs state
     const [activeTab, setActiveTab] = useState('products');
-    
+
     // Products state
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
@@ -31,7 +31,7 @@ export default function Administration() {
     const [sortOrder, setSortOrder] = useState('desc');
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    
+
     // Form state
     const [showForm, setShowForm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -39,7 +39,7 @@ export default function Administration() {
     const [duplicateWarning, setDuplicateWarning] = useState(null);
     const [showValidationModal, setShowValidationModal] = useState(false);
     const [validationErrors, setValidationErrors] = useState([]);
-    
+
     // Form section state - accordion style
     const [expandedSections, setExpandedSections] = useState(['basic']);
     const [featureInput, setFeatureInput] = useState('');
@@ -112,7 +112,7 @@ export default function Administration() {
         };
 
         const config = sectionConfig[sectionName] || { required: [], optional: [] };
-        
+
         let completedRequired = 0;
         let completedOptional = 0;
         let totalRequired = config.required.length;
@@ -148,7 +148,7 @@ export default function Administration() {
                 value: formData[field],
                 filled: hasMeaningfulInput(field, formData[field])
             }));
-            
+
         }
 
         // Debug log for technical section
@@ -164,7 +164,7 @@ export default function Administration() {
                 value: formData[field],
                 filled: hasMeaningfulInput(field, formData[field])
             }));
-            
+
         }
 
         const totalCompleted = completedRequired + completedOptional;
@@ -185,7 +185,7 @@ export default function Administration() {
 
     const getSectionStatus = (sectionName) => {
         const progress = getSectionProgress(sectionName);
-        
+
         if (progress.isComplete) return 'completed';
         if (progress.hasContent) return 'in_progress';
         return 'pending';
@@ -193,12 +193,12 @@ export default function Administration() {
 
     const getSectionStatusLabel = (sectionName) => {
         const progress = getSectionProgress(sectionName);
-        
+
         if (sectionName === 'features') {
             if (progress.hasContent) return 'Optional features added';
             return 'Optional features';
         }
-        
+
         if (progress.isComplete) return 'Completed';
         if (progress.hasContent) return 'In progress';
         return 'Not filled';
@@ -206,12 +206,12 @@ export default function Administration() {
 
     const getSectionStatusColor = (sectionName) => {
         const progress = getSectionProgress(sectionName);
-        
+
         if (sectionName === 'features') {
             if (progress.hasContent) return '🟢';
             return '⚪'; // Gray for optional
         }
-        
+
         if (progress.isComplete) return '🟢';
         if (progress.hasContent) return '🟠';
         return '🔴';
@@ -250,7 +250,7 @@ export default function Administration() {
         if (typeof value === 'string') {
             const trimmed = value.trim();
             // Don't count empty strings or placeholder-like text
-            if (trimmed === '' || trimmed === defaultValue || 
+            if (trimmed === '' || trimmed === defaultValue ||
                 trimmed.toLowerCase().includes('example') ||
                 trimmed.toLowerCase().includes('placeholder') ||
                 trimmed.toLowerCase().includes('e.g.')) {
@@ -290,7 +290,7 @@ export default function Administration() {
     const validateFormForSubmission = () => {
         const errors = [];
         const sections = ['basic', 'technical', 'physical', 'installation', 'features', 'description'];
-        
+
         sections.forEach(section => {
             const progress = getSectionProgress(section);
             if (progress.totalRequired > 0 && progress.completedRequired < progress.totalRequired) {
@@ -302,7 +302,7 @@ export default function Administration() {
                     features: 'Features & Promotional',
                     description: 'Description'
                 };
-                
+
                 // Get specific missing required fields for better error messages
                 const missingFields = [];
                 const sectionConfig = {
@@ -313,7 +313,7 @@ export default function Administration() {
                     features: [], // Features are now optional
                     description: ['description']
                 };
-                
+
                 const requiredFields = sectionConfig[section] || [];
                 requiredFields.forEach(field => {
                     if (!hasMeaningfulInput(field, formData[field])) {
@@ -347,7 +347,7 @@ export default function Administration() {
                         missingFields.push(fieldNames[field] || field);
                     }
                 });
-                
+
                 if (missingFields.length > 0) {
                     errors.push(`${sectionNames[section]} - Missing: ${missingFields.join(', ')}`);
                 } else {
@@ -355,19 +355,19 @@ export default function Administration() {
                 }
             }
         });
-        
+
         return errors;
     };
 
     const handleFormSubmission = () => {
         const errors = validateFormForSubmission();
-        
+
         if (errors.length > 0) {
             setValidationErrors(errors);
             setShowValidationModal(true);
             return false;
         }
-        
+
         return true;
     };
 
@@ -384,7 +384,7 @@ export default function Administration() {
     const isSectionExpanded = (sectionName) => {
         return expandedSections.includes(sectionName);
     };
-    
+
     // Form data state
     const [formData, setFormData] = useState({
         brand: '',
@@ -431,24 +431,24 @@ export default function Administration() {
     // Helper function to get proper image URL
     const getImageUrl = (imageUrl) => {
         if (!imageUrl) return '/images/placeholder-ac.svg';
-        
+
         // If it's already a Supabase URL, use it as is
         if (imageUrl.includes('supabase.co') || imageUrl.includes('supabase.')) {
             return imageUrl;
         }
-        
+
         // If it's a local path that doesn't exist, use placeholder
         if (imageUrl.startsWith('/images/products/')) {
             return '/images/placeholder-ac.svg';
         }
-        
+
         // Default fallback
         return imageUrl || '/images/placeholder-ac.svg';
     };
-    
+
     const fileInputRef = useRef(null);
     const formRef = useRef(null);
-    
+
     // Image upload state
     const [uploading, setUploading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
@@ -456,22 +456,22 @@ export default function Administration() {
     // Load products from API
     const loadProducts = async () => {
         try {
-            
+
             const response = await fetch('/api/get-products');
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             const data = await response.json();
-            
+
             // Extract products array from API response
             const productsArray = Array.isArray(data.products) ? data.products : [];
-            
+
             // Transform API response to match admin panel expected format
             const transformedProducts = productsArray.map(product => {
                 try {
-                    
+
                     return {
                         id: product.ProductID || product.id,
                         brand: product.Brand || product.brand || '',
@@ -510,16 +510,16 @@ export default function Administration() {
                         updated_at: product.UpdatedAt || product.updated_at || ''
                     };
                 } catch (error) {
-                    
+
                     return null;
                 }
             }).filter(product => product !== null);
-            
-            
+
+
             setProducts(transformedProducts);
             setFilteredProducts(transformedProducts);
         } catch (error) {
-            
+
             // Set empty arrays on error
             setProducts([]);
             setFilteredProducts([]);
@@ -531,7 +531,7 @@ export default function Administration() {
             loadProducts();
         }
     }, [isLoggedIn]);
-    
+
     const clearForm = () => {
         setFormData({
             brand: '',
@@ -587,68 +587,68 @@ export default function Administration() {
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            alert('Please select an image file');
+            alert('Моля, изберете файл с изображение');
             return;
         }
 
         // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
-            alert('Image size should be less than 5MB');
+            alert('Размерът на изображението трябва да е по-малък от 5MB');
             return;
         }
 
         setUploading(true);
-        
+
         try {
             // Create a unique filename
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-            
+
             // REAL SUPABASE IMPLEMENTATION:
             // Check if we have Supabase configured
             const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
             const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-            
+
             if (supabaseUrl && supabaseAnonKey) {
                 // Use real Supabase Storage
                 const { createClient } = await import('@supabase/supabase-js');
                 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-                
+
                 const { data, error } = await supabase.storage
                     .from('images-viki15bg')
                     .upload(`products/${fileName}`, file, {
                         cacheControl: '3600',
                         upsert: false
                     });
-                
+
                 if (error) {
                     throw new Error('Failed to upload to Supabase: ' + error.message);
                 }
-                
+
                 const { data: { publicUrl } } = supabase.storage
                     .from('images-viki15bg')
                     .getPublicUrl(`products/${fileName}`);
-                
+
                 // Set image preview
                 setImagePreview(publicUrl);
-                
+
                 // Update form data with the Supabase public URL
                 setFormData(prev => ({
                     ...prev,
                     image_url: publicUrl
                 }));
-                
-                
+
+
             } else {
-                
-                alert('Image upload not available. Please configure Supabase storage.');
+
+                alert('Изтегляне на изображение не е налично. Моля, конфигурирайте Supabase storage.');
                 return;
             }
 
-            alert('Image uploaded successfully!');
+            alert('Изтеглянето на изображението е успешно!');
         } catch (error) {
-            
-            alert('Error uploading image. Please try again.');
+
+            alert('Грешка при изтегляне на изображение. Моля, опитайте отново.');
         } finally {
             setUploading(false);
         }
@@ -706,7 +706,7 @@ export default function Administration() {
                 description: formData.description || null
             };
 
-            
+
 
             const response = await fetch('/api/add-product', {
                 method: 'POST',
@@ -719,20 +719,20 @@ export default function Administration() {
             if (response.ok) {
                 loadProducts();
                 hideForm();
-                alert('Product added successfully!');
+                alert('Продуктът е добавен успешно!');
             } else {
                 const error = await response.json();
-                
-                alert('Error: ' + error.message);
+
+                alert('Грешка: ' + error.message);
             }
         } catch (error) {
-            
-            alert('Error adding product: ' + error.message);
+
+            alert('Грешка при добавяне на продукт: ' + error.message);
         }
     };
 
     const handleEdit = (product) => {
-        
+
         setFormData({
             brand: product.brand || '',
             model: product.model || '',
@@ -764,19 +764,19 @@ export default function Administration() {
             features: product.features || [],
             description: product.description || ''
         });
-        
-        
-        
+
+
+
         // Test: Check if formData is actually being set
         setTimeout(() => {
-            
+
         }, 100);
-        
+
         setIsEditing(true);
         setEditingId(product.id);
         setShowForm(true);
         setExpandedSections(['basic']);
-        
+
         // Set image preview if product has an image
         if (product.image_url) {
             setImagePreview(product.image_url);
@@ -824,7 +824,7 @@ export default function Administration() {
                 description: formData.description || null
             };
 
-            
+
 
             const response = await fetch('/api/edit-product', {
                 method: 'POST',
@@ -837,15 +837,15 @@ export default function Administration() {
             if (response.ok) {
                 loadProducts();
                 hideForm();
-                alert('Product updated successfully!');
+                alert('Продуктът е обновен успешно!');
             } else {
                 const error = await response.json();
-                
-                alert('Error: ' + error.message);
+
+                alert('Грешка: ' + error.message);
             }
         } catch (error) {
-            
-            alert('Error updating product: ' + error.message);
+
+            alert('Грешка при обновяване на продукт: ' + error.message);
         }
     };
 
@@ -854,7 +854,7 @@ export default function Administration() {
             return;
         }
 
-        
+
 
         try {
             const response = await fetch('/api/delete-product', {
@@ -870,11 +870,11 @@ export default function Administration() {
                 alert(t('admin.products.deleteSuccess'));
             } else {
                 const error = await response.json();
-                
+
                 alert(t('admin.products.deleteError') + ' ' + error.message);
             }
         } catch (error) {
-            
+
             alert(t('admin.products.deleteError') + ' ' + error.message);
         }
     };
@@ -885,7 +885,7 @@ export default function Administration() {
             if (usernameInput === '1' && passwordInput === '1') {
                 setIsLoggedIn(true);
             } else {
-                alert('Incorrect username or password');
+                alert('Грешен потребител или парола');
             }
         };
 
@@ -897,7 +897,7 @@ export default function Administration() {
                         <div className={styles.modalContent}>
                             <div className={styles.modalHeader}>
                                 <h3>⚠️ Form Validation Required</h3>
-                                <button 
+                                <button
                                     className={styles.modalCloseButton}
                                     onClick={() => setShowValidationModal(false)}
                                 >
@@ -915,7 +915,7 @@ export default function Administration() {
                                 </ul>
                             </div>
                             <div className={styles.modalFooter}>
-                                <button 
+                                <button
                                     className={styles.modalButton}
                                     onClick={() => setShowValidationModal(false)}
                                 >
@@ -925,37 +925,37 @@ export default function Administration() {
                         </div>
                     </div>
                 )}
-                
+
                 <div className={styles.loginContainer}>
-                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🕵️</div>
-                <h1>Admin Login</h1>
-                <input
-                    type="text"
-                    placeholder={t('admin.login.username')}
-                    value={usernameInput}
-                    onChange={(e) => setUsernameInput(e.target.value)}
-                    onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                            handleLogin();
-                        }
-                    }}
-                />
-                <input
-                    type="password"
-                    placeholder={t('admin.login.password')}
-                    value={passwordInput}
-                    onChange={(e) => setPasswordInput(e.target.value)}
-                    onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                            handleLogin();
-                        }
-                    }}
-                />
-                <button onClick={handleLogin}>
-                    {t('admin.login.loginButton')}
-                </button>
-            </div>
-        </>
+                    <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🕵️</div>
+                    <h1>Admin Login</h1>
+                    <input
+                        type="text"
+                        placeholder={t('admin.login.username')}
+                        value={usernameInput}
+                        onChange={(e) => setUsernameInput(e.target.value)}
+                        onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                                handleLogin();
+                            }
+                        }}
+                    />
+                    <input
+                        type="password"
+                        placeholder={t('admin.login.password')}
+                        value={passwordInput}
+                        onChange={(e) => setPasswordInput(e.target.value)}
+                        onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                                handleLogin();
+                            }
+                        }}
+                    />
+                    <button onClick={handleLogin}>
+                        {t('admin.login.loginButton')}
+                    </button>
+                </div>
+            </>
         );
     }
 
@@ -969,16 +969,16 @@ export default function Administration() {
                     </button>
                 </div>
             </div>
-            
+
             {/* Tab Navigation */}
             <div className={styles.tabNavigation}>
-                <button 
+                <button
                     className={`${styles.tab} ${activeTab === 'products' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('products')}
                 >
                     {t('admin.tabs.products')}
                 </button>
-                <button 
+                <button
                     className={`${styles.tab} ${activeTab === 'orders' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('orders')}
                 >
@@ -1012,7 +1012,7 @@ export default function Administration() {
                         <div className={styles.formSection} ref={formRef}>
                             <div className={styles.formHeader}>
                                 <h2>{isEditing ? t('admin.products.edit') : t('admin.products.addNew')}</h2>
-                                <button 
+                                <button
                                     onClick={hideForm}
                                     className={styles.closeFormButton}
                                     aria-label="Close form"
@@ -1020,7 +1020,7 @@ export default function Administration() {
                                     ✕
                                 </button>
                             </div>
-                            
+
                             {duplicateWarning && (
                                 <div className={styles.warningMessage}>
                                     ⚠️ {duplicateWarning}
@@ -1029,17 +1029,17 @@ export default function Administration() {
 
                             {/* Accordion Form Sections */}
                             <div className={styles.accordionContainer}>
-                                
+
                                 {/* Basic Information Section */}
                                 <div className={styles.accordionSection}>
-                                    <div 
+                                    <div
                                         className={`${styles.accordionHeader} ${styles[getSectionStatus('basic')]}`}
                                         onClick={() => toggleSection('basic')}
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>📋</span>
                                             <span className={styles.sectionTitle}>
-                                                {t('admin.products.sections.basic')} 
+                                                {t('admin.products.sections.basic')}
                                                 <span className={styles.sectionProgress}>
                                                     ({getSectionProgress('basic').totalCompleted}/{getSectionProgress('basic').totalFields})
                                                 </span>
@@ -1048,11 +1048,10 @@ export default function Administration() {
                                                 {getSectionStatusColor('basic')} {getSectionStatusLabel('basic')}
                                             </span>
                                             <div className={styles.sectionProgressBar}>
-                                                <div 
-                                                    className={`${styles.sectionProgressFill} ${
-                                                        getSectionProgress('basic').progress === 100 ? '' : 
-                                                        getSectionProgress('basic').progress > 0 ? 'incomplete' : 'empty'
-                                                    }`}
+                                                <div
+                                                    className={`${styles.sectionProgressFill} ${getSectionProgress('basic').progress === 100 ? '' :
+                                                            getSectionProgress('basic').progress > 0 ? 'incomplete' : 'empty'
+                                                        }`}
                                                     style={{ width: `${getSectionProgress('basic').progress}%` }}
                                                 ></div>
                                             </div>
@@ -1061,7 +1060,7 @@ export default function Administration() {
                                             {isSectionExpanded('basic') ? '▼' : '▶'}
                                         </span>
                                     </div>
-                                    
+
                                     {isSectionExpanded('basic') && (
                                         <div className={styles.sectionContent}>
                                             <div className={styles.formCard}>
@@ -1101,7 +1100,7 @@ export default function Administration() {
                                                             )}
                                                         </label>
                                                     </div>
-                                                    <div className={`${styles.formGroup} ${styles[getFieldStatus('price')]}`}> 
+                                                    <div className={`${styles.formGroup} ${styles[getFieldStatus('price')]}`}>
                                                         <label>
                                                             {t('admin.products.price')} (лв. / BGN):
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -1128,7 +1127,7 @@ export default function Administration() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className={styles.formCard}>
                                                 <h3 className={styles.cardTitle}>🏷️ {t('admin.products.formCards.productDetails')}</h3>
                                                 <div className={styles.formGrid}>
@@ -1203,9 +1202,9 @@ export default function Administration() {
                                                                 placeholder={t('admin.products.placeholders.discountExample')}
                                                             />
                                                             {formData.price && formData.discount > 0 && (
-                                                                <div style={{ 
-                                                                    marginTop: '8px', 
-                                                                    padding: '8px 12px', 
+                                                                <div style={{
+                                                                    marginTop: '8px',
+                                                                    padding: '8px 12px',
                                                                     backgroundColor: '#e8f5e8',
                                                                     border: '1px solid #4caf50',
                                                                     borderRadius: '4px',
@@ -1272,14 +1271,14 @@ export default function Administration() {
 
                                 {/* Technical Specifications Section */}
                                 <div className={styles.accordionSection}>
-                                    <div 
+                                    <div
                                         className={`${styles.accordionHeader} ${styles[getSectionStatus('technical')]}`}
                                         onClick={() => toggleSection('technical')}
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>⚡</span>
                                             <span className={styles.sectionTitle}>
-                                                {t('admin.products.sections.technical')} 
+                                                {t('admin.products.sections.technical')}
                                                 <span className={styles.sectionProgress}>
                                                     ({getSectionProgress('technical').totalCompleted}/{getSectionProgress('technical').totalFields})
                                                 </span>
@@ -1288,11 +1287,10 @@ export default function Administration() {
                                                 {getSectionStatusColor('technical')} {getSectionStatusLabel('technical')}
                                             </span>
                                             <div className={styles.sectionProgressBar}>
-                                                <div 
-                                                    className={`${styles.sectionProgressFill} ${
-                                                        getSectionProgress('technical').progress === 100 ? '' : 
-                                                        getSectionProgress('technical').progress > 0 ? 'incomplete' : 'empty'
-                                                    }`}
+                                                <div
+                                                    className={`${styles.sectionProgressFill} ${getSectionProgress('technical').progress === 100 ? '' :
+                                                            getSectionProgress('technical').progress > 0 ? 'incomplete' : 'empty'
+                                                        }`}
                                                     style={{ width: `${getSectionProgress('technical').progress}%` }}
                                                 ></div>
                                             </div>
@@ -1301,7 +1299,7 @@ export default function Administration() {
                                             {isSectionExpanded('technical') ? '▼' : '▶'}
                                         </span>
                                     </div>
-                                    
+
                                     {isSectionExpanded('technical') && (
                                         <div className={styles.sectionContent}>
                                             <div className={styles.formCard}>
@@ -1374,14 +1372,14 @@ export default function Administration() {
 
                                 {/* Physical Characteristics Section */}
                                 <div className={styles.accordionSection}>
-                                    <div 
+                                    <div
                                         className={`${styles.accordionHeader} ${styles[getSectionStatus('physical')]}`}
                                         onClick={() => toggleSection('physical')}
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>📏</span>
                                             <span className={styles.sectionTitle}>
-                                                {t('admin.products.sections.physical')} 
+                                                {t('admin.products.sections.physical')}
                                                 <span className={styles.sectionProgress}>
                                                     ({getSectionProgress('physical').totalCompleted}/{getSectionProgress('physical').totalFields})
                                                 </span>
@@ -1390,11 +1388,10 @@ export default function Administration() {
                                                 {getSectionStatusColor('physical')} {getSectionStatusLabel('physical')}
                                             </span>
                                             <div className={styles.sectionProgressBar}>
-                                                <div 
-                                                    className={`${styles.sectionProgressFill} ${
-                                                        getSectionProgress('physical').progress === 100 ? '' : 
-                                                        getSectionProgress('physical').progress > 0 ? 'incomplete' : 'empty'
-                                                    }`}
+                                                <div
+                                                    className={`${styles.sectionProgressFill} ${getSectionProgress('physical').progress === 100 ? '' :
+                                                            getSectionProgress('physical').progress > 0 ? 'incomplete' : 'empty'
+                                                        }`}
                                                     style={{ width: `${getSectionProgress('physical').progress}%` }}
                                                 ></div>
                                             </div>
@@ -1403,7 +1400,7 @@ export default function Administration() {
                                             {isSectionExpanded('physical') ? '▼' : '▶'}
                                         </span>
                                     </div>
-                                    
+
                                     {isSectionExpanded('physical') && (
                                         <div className={styles.sectionContent}>
                                             <div className={styles.formCard}>
@@ -1496,14 +1493,14 @@ export default function Administration() {
 
                                 {/* Installation & Warranty Section */}
                                 <div className={styles.accordionSection}>
-                                    <div 
+                                    <div
                                         className={`${styles.accordionHeader} ${styles[getSectionStatus('installation')]}`}
                                         onClick={() => toggleSection('installation')}
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>🔧</span>
                                             <span className={styles.sectionTitle}>
-                                                {t('admin.products.sections.installation')} 
+                                                {t('admin.products.sections.installation')}
                                                 <span className={styles.sectionProgress}>
                                                     ({getSectionProgress('installation').totalCompleted}/{getSectionProgress('installation').totalFields})
                                                 </span>
@@ -1512,11 +1509,10 @@ export default function Administration() {
                                                 {getSectionStatusColor('installation')} {getSectionStatusLabel('installation')}
                                             </span>
                                             <div className={styles.sectionProgressBar}>
-                                                <div 
-                                                    className={`${styles.sectionProgressFill} ${
-                                                        getSectionProgress('installation').progress === 100 ? '' : 
-                                                        getSectionProgress('installation').progress > 0 ? 'incomplete' : 'empty'
-                                                    }`}
+                                                <div
+                                                    className={`${styles.sectionProgressFill} ${getSectionProgress('installation').progress === 100 ? '' :
+                                                            getSectionProgress('installation').progress > 0 ? 'incomplete' : 'empty'
+                                                        }`}
                                                     style={{ width: `${getSectionProgress('installation').progress}%` }}
                                                 ></div>
                                             </div>
@@ -1525,7 +1521,7 @@ export default function Administration() {
                                             {isSectionExpanded('installation') ? '▼' : '▶'}
                                         </span>
                                     </div>
-                                    
+
                                     {isSectionExpanded('installation') && (
                                         <div className={styles.sectionContent}>
                                             <div className={styles.formCard}>
@@ -1586,14 +1582,14 @@ export default function Administration() {
 
                                 {/* Features & Promotions Section */}
                                 <div className={styles.accordionSection}>
-                                    <div 
+                                    <div
                                         className={`${styles.accordionHeader} ${styles[getSectionStatus('features')]}`}
                                         onClick={() => toggleSection('features')}
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>⭐</span>
                                             <span className={styles.sectionTitle}>
-                                                {t('admin.products.sections.features')} 
+                                                {t('admin.products.sections.features')}
                                                 <span className={styles.sectionProgress}>
                                                     ({getSectionProgress('features').totalCompleted}/{getSectionProgress('features').totalFields})
                                                 </span>
@@ -1602,11 +1598,10 @@ export default function Administration() {
                                                 {getSectionStatusColor('features')} {getSectionStatusLabel('features')}
                                             </span>
                                             <div className={styles.sectionProgressBar}>
-                                                <div 
-                                                    className={`${styles.sectionProgressFill} ${
-                                                        getSectionProgress('features').progress === 100 ? '' : 
-                                                        getSectionProgress('features').progress > 0 ? 'incomplete' : 'empty'
-                                                    }`}
+                                                <div
+                                                    className={`${styles.sectionProgressFill} ${getSectionProgress('features').progress === 100 ? '' :
+                                                            getSectionProgress('features').progress > 0 ? 'incomplete' : 'empty'
+                                                        }`}
                                                     style={{ width: `${getSectionProgress('features').progress}%` }}
                                                 ></div>
                                             </div>
@@ -1615,7 +1610,7 @@ export default function Administration() {
                                             {isSectionExpanded('features') ? '▼' : '▶'}
                                         </span>
                                     </div>
-                                    
+
                                     {isSectionExpanded('features') && (
                                         <div className={styles.sectionContent}>
                                             <div className={styles.formCard}>
@@ -1706,14 +1701,14 @@ export default function Administration() {
 
                                 {/* Description Section */}
                                 <div className={styles.accordionSection}>
-                                    <div 
+                                    <div
                                         className={`${styles.accordionHeader} ${styles[getSectionStatus('description')]}`}
                                         onClick={() => toggleSection('description')}
                                     >
                                         <div className={styles.sectionInfo}>
                                             <span className={styles.sectionIcon}>📝</span>
                                             <span className={styles.sectionTitle}>
-                                                {t('admin.products.sections.description')} 
+                                                {t('admin.products.sections.description')}
                                                 <span className={styles.sectionProgress}>
                                                     ({getSectionProgress('description').totalCompleted}/{getSectionProgress('description').totalFields})
                                                 </span>
@@ -1722,11 +1717,10 @@ export default function Administration() {
                                                 {getSectionStatusColor('description')} {getSectionStatusLabel('description')}
                                             </span>
                                             <div className={styles.sectionProgressBar}>
-                                                <div 
-                                                    className={`${styles.sectionProgressFill} ${
-                                                        getSectionProgress('description').progress === 100 ? '' : 
-                                                        getSectionProgress('description').progress > 0 ? 'incomplete' : 'empty'
-                                                    }`}
+                                                <div
+                                                    className={`${styles.sectionProgressFill} ${getSectionProgress('description').progress === 100 ? '' :
+                                                            getSectionProgress('description').progress > 0 ? 'incomplete' : 'empty'
+                                                        }`}
                                                     style={{ width: `${getSectionProgress('description').progress}%` }}
                                                 ></div>
                                             </div>
@@ -1735,7 +1729,7 @@ export default function Administration() {
                                             {isSectionExpanded('description') ? '▼' : '▶'}
                                         </span>
                                     </div>
-                                    
+
                                     {isSectionExpanded('description') && (
                                         <div className={styles.sectionContent}>
                                             <div className={styles.formCard}>
@@ -1761,15 +1755,15 @@ export default function Administration() {
 
                             {/* Form Actions */}
                             <div className={styles.formActions}>
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={hideForm}
                                     className={styles.cancelButton}
                                 >
                                     {t('admin.products.actions.cancel')}
                                 </button>
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={isEditing ? handleSaveEdit : handleAdd}
                                     className={styles.saveButton}
                                 >
@@ -1782,7 +1776,7 @@ export default function Administration() {
                     {/* Add Product Button */}
                     {!showForm && (
                         <div className={styles.addProductSection}>
-                            <button 
+                            <button
                                 onClick={showAddForm}
                                 className={styles.addButton}
                             >
@@ -1798,22 +1792,31 @@ export default function Administration() {
                             <p>{t('admin.products.section.description')}</p>
                             <div className={styles.productsList}>
                                 {products.map(product => (
-                                    <div key={product.id} className={styles.productCard}>
-                                        <div className={styles.productInfo}>
-                                            <h4>{product.brand} {product.model}</h4>
-                                            <p>Price: €{product.price}</p>
-                    
+                                    <div key={product.id} className={`${styles.productCard} ${styles.productCardRow}`}>
+                                        <div className={styles.productThumb}>
+                                            <img
+                                                src={getImageUrl(product.image_url)}
+                                                alt={`${product.brand} ${product.model}`}
+                                            />
                                         </div>
-                                        <div className={styles.productActions}>
-                                            <button 
+                                        <div className={styles.productMain}>
+                                            <h4>{product.brand} {product.model}</h4>
+                                            <p>Цена: €{product.price}</p>
+                                        </div>
+                                        <div className={styles.productActionsRow}>
+                                            <button
                                                 onClick={() => handleEdit(product)}
                                                 className={styles.editButton}
+                                                aria-label={t('admin.products.actions.edit')}
+                                                title={t('admin.products.actions.edit')}
                                             >
                                                 {t('admin.products.actions.edit')}
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => handleDelete(product.id)}
                                                 className={styles.deleteButton}
+                                                aria-label={t('admin.products.actions.delete')}
+                                                title={t('admin.products.actions.delete')}
                                             >
                                                 {t('admin.products.actions.delete')}
                                             </button>
@@ -1850,13 +1853,12 @@ export default function Administration() {
 }
 
 export async function getStaticProps({ locale }) {
-  const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
-  
-  return {
-    props: {
-      ...(await serverSideTranslations(locale || 'bg', ['common'])),
-    },
-  };
+    const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+
+    return {
+        props: {
+            ...(await serverSideTranslations(locale || 'bg', ['common'])),
+        },
+    };
 }
 
- 

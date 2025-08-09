@@ -530,7 +530,7 @@ const CheckoutPage = () => {
                   <div className={styles.itemDetails}>
                     <h4>{item.product.Brand} {item.product.Model}</h4>
                     <div className={styles.itemSpecs}>
-                      {item.product.CapacityBTU} {t('buyPage.btu')} • {item.product.EnergyRating}
+              {item.product.CapacityBTU} {t('buyPage.btu')} {item.product.EnergyRating ? `| ${item.product.EnergyRating}` : ''}
                     </div>
                     <div className={styles.quantityControls}>
                       <div className={styles.quantityControlsGroup}>
@@ -581,7 +581,7 @@ const CheckoutPage = () => {
                         <div key={index} className={styles.accessoryItem}>
                           <div className={styles.accessoryDetails}>
                             <span className={styles.accessoryName}>
-                              • {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
+            {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
                             </span>
                             <div className={styles.accessoryQuantityControls}>
                               <div className={styles.quantitySelector}>
@@ -628,7 +628,7 @@ const CheckoutPage = () => {
                     <div className={styles.installationItem}>
                       <div className={styles.installationDetails}>
                         <span className={styles.installationName}>
-                          • {t('productDetail.installation.title')}
+            {t('productDetail.installation.title')}
                         </span>
                         <button
                           className={styles.removeInstallationButton}
