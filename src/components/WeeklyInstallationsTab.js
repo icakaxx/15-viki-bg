@@ -24,6 +24,21 @@ function formatDate(date) {
   return date.toISOString().split('T')[0];
 }
 
+// Helper to get Monday of the week for any date
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 (Sun) - 6 (Sat)
+  const diff = d.getDate() - day + 1; // shift to Monday
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// Helper to map JS weekday to Monday-first index (Mon=0..Sun=6)
+function getDayIndex(date) {
+  return (date.getDay() + 6) % 7;
+}
+
 function getWeekdayName(index, t) {
   const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   return t(`weekdays.${weekdays[index]}`);
@@ -162,7 +177,14 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
 
   // Reset mobile day when week changes
   useEffect(() => {
-    setCurrentMobileDay(0);
+    const today = new Date();
+    const currentWeekMonday = getMonday(currentWeek);
+    const todayWeekMonday = getMonday(today);
+    if (currentWeekMonday.getTime() === todayWeekMonday.getTime()) {
+      setCurrentMobileDay(getDayIndex(today));
+    } else {
+      setCurrentMobileDay(0);
+    }
   }, [currentWeek]);
 
   // Touch handlers for swipe gestures
@@ -249,6 +271,8 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
   function jumpToToday() {
     const today = new Date();
     setCurrentWeek(today);
+    // Ensure mobile view selects today's day in the current week
+    setCurrentMobileDay(getDayIndex(today));
   }
 
   function showInstallationDetails(installation) {
@@ -710,10 +734,11 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
                   padding: '1rem',
                   borderBottom: '1px solid #f0f0f0',
                   backgroundColor: mergedGroup 
-                    ? (mergedGroup.installation.isCompleted ? '#e3f2fd' : '#fff3e0') 
+                    ? (mergedGroup.installation.isCompleted ? '#eeeeee' : '#fff3e0') 
                     : (isSlotPast ? '#f5f5f5' : 'white'),
                   cursor: mergedGroup ? 'pointer' : 'default',
-                  minHeight: mergedGroup && mergedGroup.rowSpan > 1 ? `${70 * mergedGroup.rowSpan}px` : '70px'
+                  // In mobile view, always render merged installation as a single compact row
+                  minHeight: '70px'
                 }}
                 onClick={() => mergedGroup && showInstallationDetails(mergedGroup.installation)}
               >
@@ -735,12 +760,12 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
                       <div style={{ 
                         fontWeight: 'bold', 
                         fontSize: '1rem',
-                        color: mergedGroup.installation.isCompleted ? '#1565c0' : '#f57c00',
+                        color: mergedGroup.installation.isCompleted ? '#555' : '#f57c00',
                         marginBottom: '0.25rem'
                       }}>
                         {mergedGroup.installation.customerName}
                         {mergedGroup.installation.isCompleted && (
-                          <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem' }}>
+                          <span style={{ fontSize: '0.8rem', marginLeft: '0.5rem', color: '#555' }}>
                             ✅ {t('admin.installations.completedLabel')}
                           </span>
                         )}
@@ -930,27 +955,25 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
                           const isToday = formatDate(date) === formatDate(new Date());
                           const isPast = date < new Date() && !isToday;
                           
-                          // Skip rendering if this slot is part of a merged installation that starts later
-                          if (mergedGroup && mergedGroup.startIndex > timeIndex) {
+                          // Render only at the starting slot for a merged installation
+                          if (mergedGroup && mergedGroup.startIndex !== timeIndex) {
                             return null;
                           }
 
                           return (
                             <td
                               key={dayIndex}
+                              rowSpan={mergedGroup && mergedGroup.rowSpan > 1 ? mergedGroup.rowSpan : undefined}
                               style={{
                                 padding: '0.5rem',
                                 border: '1px solid #ddd',
-                                backgroundColor: mergedGroup 
-                                  ? (mergedGroup.installation.isCompleted ? '#e3f2fd' : '#e8f5e8') 
+                              backgroundColor: mergedGroup 
+                                  ? (mergedGroup.installation.isCompleted ? '#eeeeee' : '#e8f5e8') 
                                   : (isPast ? '#f5f5f5' : 'white'),
                                 cursor: mergedGroup ? 'pointer' : 'default',
                                 verticalAlign: 'top',
                                 minHeight: '60px',
                                 position: 'relative',
-                                ...(mergedGroup && mergedGroup.rowSpan > 1 && {
-                                  rowSpan: mergedGroup.rowSpan
-                                })
                               }}
                               onClick={() => mergedGroup && showInstallationDetails(mergedGroup.installation)}
                             >
@@ -977,11 +1000,11 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
                                   )}
                                   <div style={{ 
                                     fontWeight: 'bold', 
-                                    color: mergedGroup.installation.isCompleted ? '#1565c0' : '#2d5a27' 
+                                  color: mergedGroup.installation.isCompleted ? '#555' : '#2d5a27' 
                                   }}>
                                     {mergedGroup.installation.customerName}
                                     {mergedGroup.installation.isCompleted && (
-                                      <span style={{ fontSize: '0.75em', marginLeft: '4px', color: '#17a2b8' }}>
+                                      <span style={{ fontSize: '0.75em', marginLeft: '4px', color: '#555' }}>
                                         {t('admin.installations.completedLabel')}
                                       </span>
                                     )}
@@ -1124,8 +1147,54 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
               
               <div>
                 <strong>{t('admin.installations.details.products')}:</strong>
-                <div style={{ marginTop: '0.5rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-                  {selectedInstallation.productsSummary}
+                <div style={{ marginTop: '0.5rem' }}>
+                  {Array.isArray(selectedInstallation.products) && selectedInstallation.products.length > 0 ? (
+                    <div style={{ display: 'grid', gap: '0.5rem' }}>
+                      {selectedInstallation.products.map((product, idx) => (
+                        <div key={idx} style={{
+                          display: 'grid',
+                          gridTemplateColumns: '48px 1fr auto auto',
+                          gap: '0.75rem',
+                          alignItems: 'center',
+                          padding: '0.5rem',
+                          backgroundColor: '#f8f9fa',
+                          borderRadius: '6px'
+                        }}>
+                          <div>
+                            {product.image_url ? (
+                              <img src={product.image_url} alt={`${product.brand} ${product.model}`} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} />
+                            ) : (
+                              <div style={{ width: 48, height: 48, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}>📦</div>
+                            )}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600 }}>{product.brand} {product.model}</div>
+                            {/* Accessories */}
+                            {Array.isArray(product.accessories) && product.accessories.length > 0 && (
+                              <div style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#555' }}>
+                                {product.accessories.map((a, aIdx) => (
+                                  <div key={aIdx}>{(a.name)} × {a.quantity || 1} {a.price ? `— ${(parseFloat(a.price)).toFixed(2)} лв.` : ''}</div>
+                                ))}
+                              </div>
+                            )}
+                            {product.includes_installation && (
+                              <div style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#2d5a27' }}>Услуга монтаж</div>
+                            )}
+                          </div>
+                          <div style={{ textAlign: 'right', fontSize: '0.9rem' }}>
+                            {product.price != null ? `${parseFloat(product.price).toFixed(2)} лв.` : '-'}
+                          </div>
+                          <div style={{ textAlign: 'right', fontWeight: 600 }}>
+                            {product.total_price != null ? `${product.total_price.toFixed(2)} лв.` : '-'}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ marginTop: '0.5rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
+                      {selectedInstallation.productsSummary}
+                    </div>
+                  )}
                 </div>
               </div>
               

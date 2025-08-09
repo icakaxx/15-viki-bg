@@ -448,8 +448,7 @@ export default function AdminOrderHistoryTab() {
                                   return (
                                     <li key={accIndex} className={styles.accessoryItem}>
                                       <div className={styles.accessoryName}>
-                                        • {accessory.name || accessory.Name || 'Unknown Accessory'}
-                                      </div>
+              {accessory.name || accessory.Name || 'Unknown Accessory'}                                      </div>
                                       <div className={styles.accessoryDetails}>
                                         <span>Количество: {accessory.quantity || 1}</span>
                                         <span>Цена: {(accessory.price || 0).toFixed(2)} лв</span>

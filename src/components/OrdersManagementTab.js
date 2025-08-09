@@ -980,14 +980,9 @@ export default function OrdersManagementTab() {
                             product.accessories.map((accessory, accIndex) => {
                               const accessoryTotal = (accessory.price || 0) * (accessory.quantity || 1);
                               return (
-                                <div key={`${index}-acc-${accIndex}`} className={styles.productRow} style={{
-                                  backgroundColor: '#f9f9f9',
-                                  paddingLeft: '2rem',
-                                  borderLeft: '3px solid #e0e0e0',
-                                  fontSize: '0.9rem'
-                                }}>
-                                  <div className={styles.productInfo} style={{ gridColumn: '1 / 3' }}>
-                                    <span>• {t(`productDetail.accessoryNames.${accessory.name}`) || accessory.name}</span>
+                                <div key={`${index}-acc-${accIndex}`} className={`${styles.productRow} ${styles.accessoryRow}`}>
+                                  <div className={`${styles.productInfo} ${styles.accessoryInfo}`}>
+                                    <span>{t(`productDetail.accessoryNames.${accessory.name}`) || accessory.name}</span>
                                   </div>
                                   <div className={styles.productQuantity}>
                                     {t('admin.orders.products.quantity')}: {accessory.quantity || 1}
@@ -1017,8 +1012,8 @@ export default function OrdersManagementTab() {
                               borderLeft: '3px solid #4caf50',
                               fontSize: '0.9rem'
                             }}>
-                              <div className={styles.productInfo} style={{ gridColumn: '1 / 3' }}>
-                                <span>• {t('admin.orders.products.installation')}</span>
+                              <div className={styles.productInfo} style={{ gridColumn: '2 / 3' }}>
+                                <span>{t('admin.orders.products.installation')}</span>
                               </div>
                               <div className={styles.productQuantity}>
                                 {t('admin.orders.products.quantity')}: {product.quantity}
@@ -1460,14 +1455,9 @@ export default function OrdersManagementTab() {
                               product.accessories.map((accessory, accIndex) => {
                                 const accessoryTotal = (accessory.price || 0) * (accessory.quantity || 1);
                                 return (
-                                  <div key={`${index}-acc-${accIndex}`} className={styles.productRow} style={{
-                                    backgroundColor: '#f9f9f9',
-                                    paddingLeft: '1rem',
-                                    borderLeft: '2px solid #e0e0e0',
-                                    fontSize: '0.8rem'
-                                  }}>
-                                    <div className={styles.productInfo} style={{ gridColumn: '1 / 3' }}>
-                                      <span>• {t(`productDetail.accessoryNames.${accessory.name}`) || accessory.name}</span>
+                                  <div key={`${index}-acc-${accIndex}`} className={`${styles.productRow} ${styles.accessoryRow}`}>
+                                    <div className={`${styles.productInfo} ${styles.accessoryInfo}`}>
+                                      <span>{t(`productDetail.accessoryNames.${accessory.name}`) || accessory.name}</span>
                                     </div>
                                     <div className={styles.productQuantity}>
                                       <small>{t('admin.orders.products.quantity')}: {accessory.quantity || 1}</small>
@@ -1492,7 +1482,7 @@ export default function OrdersManagementTab() {
                                 fontSize: '0.8rem'
                               }}>
                                 <div className={styles.productInfo} style={{ gridColumn: '1 / 3' }}>
-                                  <span>• {t('admin.orders.products.installation')}</span>
+                                  <span>{t('admin.orders.products.installation')}</span>
                                 </div>
                                 <div className={styles.productQuantity}>
                                   <small>{t('admin.orders.products.quantity')}: {product.quantity}</small>
