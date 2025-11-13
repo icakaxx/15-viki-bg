@@ -343,7 +343,7 @@
   },
   "buyPage": {
     "title": "Buy Air Conditioners",
-    "loading": "Loading products...",
+    "loading": "Loading...",
     "error": "Error loading products",
     "noProducts": "No products found",
     "buyButton": "Buy",

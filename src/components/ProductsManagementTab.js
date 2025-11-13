@@ -1,0 +1,1653 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'next-i18next';
+import styles from '../styles/Page Styles/Administration.module.css';
+
+export default function ProductsManagementTab() {
+    const { t } = useTranslation('common');
+
+    // Products state
+    const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showArchived, setShowArchived] = useState(false);
+    const [sortBy, setSortBy] = useState('updated_at');
+    const [sortOrder, setSortOrder] = useState('desc');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
+    // Form state
+    const [showForm, setShowForm] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [duplicateWarning, setDuplicateWarning] = useState(null);
+    const [showValidationModal, setShowValidationModal] = useState(false);
+    const [validationErrors, setValidationErrors] = useState([]);
+
+    // Form section state - accordion style
+    const [expandedSections, setExpandedSections] = useState(['basic']);
+    const [featureInput, setFeatureInput] = useState('');
+    
+    // Default values map for all form fields
+    const defaultValues = {
+        brand: '',
+        model: '',
+        capacity_btu: '',
+        energy_rating: '',
+        colour: '',
+        price: '',
+        previous_price: '',
+        stock: '',
+        discount: '',
+        image_url: '',
+        is_featured: false,
+        is_bestseller: false,
+        is_new: false,
+        cop: '',
+        scop: '',
+        power_consumption: '',
+        operating_temp_range: '',
+        dimensions: '',
+        indoor_dimensions: '',
+        outdoor_dimensions: '',
+        indoor_weight: '',
+        outdoor_weight: '',
+        noise_level: '',
+        air_flow: '',
+        room_size_recommendation: '',
+        installation_type: '',
+        warranty_period: '',
+        features: [],
+        description: ''
+    };
+
+    // Form data state
+    const [formData, setFormData] = useState({
+        brand: '',
+        model: '',
+        capacity_btu: '',
+        energy_rating: '',
+        colour: '',
+        price: '',
+        previous_price: '',
+        stock: '',
+        discount: '',
+        image_url: '',
+        is_featured: false,
+        is_bestseller: false,
+        is_new: false,
+        cop: '',
+        scop: '',
+        power_consumption: '',
+        operating_temp_range: '',
+        dimensions: '',
+        indoor_dimensions: '',
+        outdoor_dimensions: '',
+        indoor_weight: '',
+        outdoor_weight: '',
+        noise_level: '',
+        air_flow: '',
+        room_size_recommendation: '',
+        installation_type: '',
+        warranty_period: '',
+        features: [],
+        description: ''
+    });
+
+    const fileInputRef = useRef(null);
+    const formRef = useRef(null);
+
+    // Image upload state
+    const [uploading, setUploading] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+
+    // Enhanced form validation helpers with smart default detection
+    const getSectionProgress = (sectionName) => {
+        const sectionConfig = {
+            basic: {
+                required: ['brand', 'model', 'price', 'capacity_btu', 'energy_rating', 'colour', 'stock', 'discount', 'image_url'],
+                optional: []
+            },
+            technical: {
+                required: ['cop', 'scop', 'power_consumption', 'operating_temp_range'],
+                optional: []
+            },
+            physical: {
+                required: [
+                    'indoor_dimensions',
+                    'outdoor_dimensions',
+                    'indoor_weight',
+                    'outdoor_weight',
+                    'colour'
+                ],
+                optional: []
+            },
+            installation: {
+                required: ['room_size_recommendation', 'installation_type', 'warranty_period'],
+                optional: []
+            },
+            features: {
+                required: [],
+                optional: ['features', 'is_featured', 'is_bestseller', 'is_new']
+            },
+            description: {
+                required: ['description'],
+                optional: []
+            }
+        };
+
+        const config = sectionConfig[sectionName] || { required: [], optional: [] };
+
+        let completedRequired = 0;
+        let completedOptional = 0;
+        let totalRequired = config.required.length;
+        let totalOptional = config.optional.length;
+
+        // Count completed required fields
+        config.required.forEach(field => {
+            if (hasMeaningfulInput(field, formData[field])) {
+                completedRequired++;
+            }
+        });
+
+        // Count completed optional fields
+        config.optional.forEach(field => {
+            if (hasMeaningfulInput(field, formData[field])) {
+                completedOptional++;
+            }
+        });
+
+        const totalCompleted = completedRequired + completedOptional;
+        const totalFields = totalRequired + totalOptional;
+
+        return {
+            completedRequired,
+            completedOptional,
+            totalRequired,
+            totalOptional,
+            totalCompleted,
+            totalFields,
+            progress: totalFields > 0 ? Math.round((totalCompleted / totalFields) * 100) : 0,
+            isComplete: totalRequired === 0 ? true : completedRequired === totalRequired,
+            hasContent: totalCompleted > 0
+        };
+    };
+
+    const getSectionStatus = (sectionName) => {
+        const progress = getSectionProgress(sectionName);
+
+        if (progress.isComplete) return 'completed';
+        if (progress.hasContent) return 'in_progress';
+        return 'pending';
+    };
+
+    const getSectionStatusLabel = (sectionName) => {
+        const progress = getSectionProgress(sectionName);
+
+        if (sectionName === 'features') {
+            if (progress.hasContent) return 'Optional features added';
+            return 'Optional features';
+        }
+
+        if (progress.isComplete) return 'Completed';
+        if (progress.hasContent) return 'In progress';
+        return 'Not filled';
+    };
+
+    const getSectionStatusColor = (sectionName) => {
+        const progress = getSectionProgress(sectionName);
+
+        if (sectionName === 'features') {
+            if (progress.hasContent) return '🟢';
+            return '⚪';
+        }
+
+        if (progress.isComplete) return '🟢';
+        if (progress.hasContent) return '🟠';
+        return '🔴';
+    };
+
+    // Helper function to check if a field has meaningful user input
+    const hasMeaningfulInput = (fieldName, value) => {
+        const defaultValue = defaultValues[fieldName];
+
+        // For number fields, treat any value that is not '', null, or undefined as filled
+        if ([
+            'indoor_weight',
+            'outdoor_weight',
+            'noise_level',
+            'air_flow',
+            'cop',
+            'scop',
+            'power_consumption'
+        ].includes(fieldName)) {
+            return value !== '' && value !== null && value !== undefined;
+        }
+
+        // If value is the same as default, it's not meaningful input
+        if (value === defaultValue) {
+            return false;
+        }
+
+        // Handle different data types
+        if (typeof value === 'string') {
+            const trimmed = value.trim();
+            // Don't count empty strings or placeholder-like text
+            if (trimmed === '' || trimmed === defaultValue ||
+                trimmed.toLowerCase().includes('example') ||
+                trimmed.toLowerCase().includes('placeholder') ||
+                trimmed.toLowerCase().includes('e.g.')) {
+                return false;
+            }
+            return trimmed.length > 0;
+        }
+
+        if (Array.isArray(value)) {
+            // For arrays, only count if user has added items
+            return value.length > 0 && JSON.stringify(value) !== JSON.stringify(defaultValue);
+        }
+
+        if (typeof value === 'boolean') {
+            // For checkboxes, only count if user has changed from default
+            return value !== defaultValue;
+        }
+
+        if (typeof value === 'number') {
+            // For numbers, don't count NaN
+            return !isNaN(value);
+        }
+
+        return value !== null && value !== undefined && value !== defaultValue;
+    };
+
+    const isFieldValid = (fieldName) => {
+        const value = formData[fieldName];
+        return hasMeaningfulInput(fieldName, value);
+    };
+
+    const getFieldStatus = (fieldName) => {
+        return isFieldValid(fieldName) ? 'valid' : 'invalid';
+    };
+
+    // Form validation for submission with smart default detection
+    const validateFormForSubmission = () => {
+        const errors = [];
+        const sections = ['basic', 'technical', 'physical', 'installation', 'features', 'description'];
+
+        sections.forEach(section => {
+            const progress = getSectionProgress(section);
+            if (progress.totalRequired > 0 && progress.completedRequired < progress.totalRequired) {
+                const sectionNames = {
+                    basic: 'Basic Information',
+                    technical: 'Technical Performance',
+                    physical: 'Physical Characteristics',
+                    installation: 'Installation & Warranty',
+                    features: 'Features & Promotional',
+                    description: 'Description'
+                };
+
+                // Get specific missing required fields for better error messages
+                const missingFields = [];
+                const sectionConfig = {
+                    basic: ['brand', 'model', 'price', 'capacity_btu', 'energy_rating', 'colour', 'stock', 'discount', 'image_url'],
+                    technical: ['cop', 'scop', 'power_consumption', 'operating_temp_range'],
+                    physical: ['indoor_dimensions', 'outdoor_dimensions', 'indoor_weight', 'outdoor_weight', 'colour'],
+                    installation: ['room_size_recommendation', 'installation_type', 'warranty_period'],
+                    features: [],
+                    description: ['description']
+                };
+
+                const requiredFields = sectionConfig[section] || [];
+                requiredFields.forEach(field => {
+                    if (!hasMeaningfulInput(field, formData[field])) {
+                        const fieldNames = {
+                            brand: 'Brand',
+                            model: 'Model',
+                            price: 'Price',
+                            capacity_btu: 'Capacity (BTU)',
+                            energy_rating: 'Energy Rating',
+                            colour: 'Color',
+                            stock: 'Stock Quantity',
+                            discount: 'Discount',
+                            image_url: 'Image URL',
+                            cop: 'COP',
+                            scop: 'SCOP',
+                            power_consumption: 'Power Consumption',
+                            operating_temp_range: 'Operating Temperature Range',
+                            dimensions: 'Dimensions',
+                            weight: 'Weight',
+                            noise_level: 'Noise Level',
+                            air_flow: 'Air Flow',
+                            room_size_recommendation: 'Room Size Recommendation',
+                            installation_type: 'Installation Type',
+                            warranty_period: 'Warranty Period',
+                            features: 'Features',
+                            is_featured: 'Featured',
+                            is_bestseller: 'Bestseller',
+                            is_new: 'New Product',
+                            description: 'Description'
+                        };
+                        missingFields.push(fieldNames[field] || field);
+                    }
+                });
+
+                if (missingFields.length > 0) {
+                    errors.push(`${sectionNames[section]} - Missing: ${missingFields.join(', ')}`);
+                } else {
+                    errors.push(`${sectionNames[section]} - ${progress.totalRequired - progress.completedRequired} required fields missing`);
+                }
+            }
+        });
+
+        return errors;
+    };
+
+    const handleFormSubmission = () => {
+        const errors = validateFormForSubmission();
+
+        if (errors.length > 0) {
+            setValidationErrors(errors);
+            setShowValidationModal(true);
+            return false;
+        }
+
+        return true;
+    };
+
+    const toggleSection = (sectionName) => {
+        setExpandedSections(prev => {
+            if (prev.includes(sectionName)) {
+                return prev.filter(s => s !== sectionName);
+            } else {
+                return [...prev, sectionName];
+            }
+        });
+    };
+
+    const isSectionExpanded = (sectionName) => {
+        return expandedSections.includes(sectionName);
+    };
+
+    // Calculate final price for preview
+    const calculateFinalPrice = () => {
+        const price = parseFloat(formData.price) || 0;
+        const discount = parseFloat(formData.discount) || 0;
+        if (price > 0 && discount > 0) {
+            return price - (price * discount / 100);
+        }
+        return price;
+    };
+
+    // Helper function to get proper image URL
+    const getImageUrl = (imageUrl) => {
+        if (!imageUrl) return '/images/placeholder-ac.svg';
+
+        // If it's already a Supabase URL, use it as is
+        if (imageUrl.includes('supabase.co') || imageUrl.includes('supabase.')) {
+            return imageUrl;
+        }
+
+        // If it's a local path that doesn't exist, use placeholder
+        if (imageUrl.startsWith('/images/products/')) {
+            return '/images/placeholder-ac.svg';
+        }
+
+        // Default fallback
+        return imageUrl || '/images/placeholder-ac.svg';
+    };
+
+    // Load products from API
+    const loadProducts = async () => {
+        try {
+            const response = await fetch('/api/get-products');
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Extract products array from API response
+            const productsArray = Array.isArray(data.products) ? data.products : [];
+
+            // Transform API response to match admin panel expected format
+            const transformedProducts = productsArray.map(product => {
+                try {
+                    return {
+                        id: product.ProductID || product.id,
+                        brand: product.Brand || product.brand || '',
+                        model: product.Model || product.model || '',
+                        capacity_btu: product.CapacityBTU || product.capacity_btu || '',
+                        energy_rating: product.EnergyRating || product.energy_rating || '',
+                        colour: product.Colour || product.colour || '',
+                        price: product.Price || product.price || '',
+                        previous_price: product.PreviousPrice || product.previous_price || '',
+                        stock: product.Stock || product.stock || '',
+                        discount: product.Discount || product.discount || '',
+                        image_url: product.ImageURL || product.image_url || '',
+                        is_featured: product.IsFeatured || product.is_featured || false,
+                        is_bestseller: product.IsBestseller || product.is_bestseller || false,
+                        is_new: product.IsNew || product.is_new || false,
+                        is_archived: product.IsArchived || product.is_archived || false,
+                        cop: product.COP || product.cop || '',
+                        scop: product.SCOP || product.scop || '',
+                        power_consumption: product.PowerConsumption || product.power_consumption || '',
+                        operating_temp_range: product.OperatingTempRange || product.operating_temp_range || '',
+                        dimensions: product.Dimensions || product.dimensions || '',
+                        indoor_dimensions: product.IndoorDimensions || product.indoor_dimensions || '',
+                        outdoor_dimensions: product.OutdoorDimensions || product.outdoor_dimensions || '',
+                        indoor_weight: product.IndoorWeight || product.indoor_weight || '',
+                        outdoor_weight: product.OutdoorWeight || product.outdoor_weight || '',
+                        noise_level: product.NoiseLevel || product.noise_level || '',
+                        air_flow: product.AirFlow || product.air_flow || '',
+                        room_size_recommendation: product.RoomSizeRecommendation || product.room_size_recommendation || '',
+                        installation_type: product.InstallationType || product.installation_type || '',
+                        warranty_period: product.WarrantyPeriod || product.warranty_period || '',
+                        features: product.Features || product.features || [],
+                        description: product.Description || product.description || '',
+                        created_at: product.CreatedAt || product.created_at || '',
+                        updated_at: product.UpdatedAt || product.updated_at || ''
+                    };
+                } catch (error) {
+                    return null;
+                }
+            }).filter(product => product !== null);
+
+            setProducts(transformedProducts);
+            setFilteredProducts(transformedProducts);
+        } catch (error) {
+            // Set empty arrays on error
+            setProducts([]);
+            setFilteredProducts([]);
+        }
+    };
+
+    useEffect(() => {
+        loadProducts();
+    }, []);
+
+    const clearForm = () => {
+        setFormData({
+            brand: '',
+            model: '',
+            capacity_btu: '',
+            energy_rating: '',
+            colour: '',
+            price: '',
+            previous_price: '',
+            stock: '',
+            discount: '',
+            image_url: '',
+            is_featured: false,
+            is_bestseller: false,
+            is_new: false,
+            cop: '',
+            scop: '',
+            power_consumption: '',
+            operating_temp_range: '',
+            dimensions: '',
+            indoor_dimensions: '',
+            outdoor_dimensions: '',
+            indoor_weight: '',
+            outdoor_weight: '',
+            noise_level: '',
+            air_flow: '',
+            room_size_recommendation: '',
+            installation_type: '',
+            warranty_period: '',
+            features: [],
+            description: ''
+        });
+        setDuplicateWarning(null);
+        setExpandedSections(['basic']);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
+
+    // Handle image upload to Supabase storage
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Моля, изберете файл с изображение');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Размерът на изображението трябва да е по-малък от 5MB');
+            return;
+        }
+
+        setUploading(true);
+
+        try {
+            // Create a unique filename
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+            // REAL SUPABASE IMPLEMENTATION:
+            // Check if we have Supabase configured
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+            if (supabaseUrl && supabaseAnonKey) {
+                // Use real Supabase Storage
+                const { createClient } = await import('@supabase/supabase-js');
+                const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+                const { data, error } = await supabase.storage
+                    .from('images-viki15bg')
+                    .upload(`products/${fileName}`, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) {
+                    throw new Error('Failed to upload to Supabase: ' + error.message);
+                }
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('images-viki15bg')
+                    .getPublicUrl(`products/${fileName}`);
+
+                // Set image preview
+                setImagePreview(publicUrl);
+
+                // Update form data with the Supabase public URL
+                setFormData(prev => ({
+                    ...prev,
+                    image_url: publicUrl
+                }));
+
+            } else {
+                alert('Изтегляне на изображение не е налично. Моля, конфигурирайте Supabase storage.');
+                return;
+            }
+
+            alert('Изтеглянето на изображението е успешно!');
+        } catch (error) {
+            alert('Грешка при изтегляне на изображение. Моля, опитайте отново.');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const showAddForm = () => {
+        clearForm();
+        setIsEditing(false);
+        setEditingId(null);
+        setShowForm(true);
+        setExpandedSections(['basic']);
+    };
+
+    const hideForm = () => {
+        setShowForm(false);
+        clearForm();
+        setIsEditing(false);
+        setEditingId(null);
+    };
+
+    const handleAdd = async () => {
+        try {
+            // Enhanced validation with modal
+            if (!handleFormSubmission()) {
+                return;
+            }
+
+            // Clean and validate data before sending
+            const cleanedData = {
+                ...formData,
+                // Convert empty strings to null for numeric fields
+                price: formData.price ? parseFloat(formData.price) : null,
+                previous_price: formData.discount > 0 ? parseFloat(formData.price) : (formData.previous_price ? parseFloat(formData.previous_price) : null),
+                stock: formData.stock ? parseInt(formData.stock) : 0,
+                discount: formData.discount ? parseFloat(formData.discount) : 0,
+                capacity_btu: formData.capacity_btu ? parseInt(formData.capacity_btu) : null,
+                cop: formData.cop ? parseFloat(formData.cop) : null,
+                scop: formData.scop ? parseFloat(formData.scop) : null,
+                power_consumption: formData.power_consumption ? parseFloat(formData.power_consumption) : null,
+                indoor_weight: formData.indoor_weight ? parseFloat(formData.indoor_weight) : null,
+                outdoor_weight: formData.outdoor_weight ? parseFloat(formData.outdoor_weight) : null,
+                noise_level: formData.noise_level ? parseInt(formData.noise_level) : null,
+                air_flow: formData.air_flow ? parseInt(formData.air_flow) : null,
+                // Convert empty strings to null for text fields
+                colour: formData.colour || null,
+                energy_rating: formData.energy_rating || null,
+                image_url: formData.image_url || null,
+                dimensions: formData.dimensions || null,
+                indoor_dimensions: formData.indoor_dimensions || null,
+                outdoor_dimensions: formData.outdoor_dimensions || null,
+                operating_temp_range: formData.operating_temp_range || null,
+                room_size_recommendation: formData.room_size_recommendation || null,
+                installation_type: formData.installation_type || null,
+                warranty_period: formData.warranty_period || null,
+                description: formData.description || null
+            };
+
+            const response = await fetch('/api/add-product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cleanedData),
+            });
+
+            if (response.ok) {
+                loadProducts();
+                hideForm();
+                alert('Продуктът е добавен успешно!');
+            } else {
+                const error = await response.json();
+                alert('Грешка: ' + error.message);
+            }
+        } catch (error) {
+            alert('Грешка при добавяне на продукт: ' + error.message);
+        }
+    };
+
+    const handleEdit = (product) => {
+        setFormData({
+            brand: product.brand || '',
+            model: product.model || '',
+            capacity_btu: product.capacity_btu ? product.capacity_btu.toString() : '',
+            energy_rating: product.energy_rating || '',
+            colour: product.colour || '',
+            price: product.price ? product.price.toString() : '',
+            previous_price: product.previous_price ? product.previous_price.toString() : '',
+            stock: product.stock ? product.stock.toString() : '',
+            discount: product.discount ? product.discount.toString() : '',
+            image_url: product.image_url || '',
+            is_featured: product.is_featured || false,
+            is_bestseller: product.is_bestseller || false,
+            is_new: product.is_new || false,
+            cop: (product.COP || product.cop) ? (product.COP || product.cop).toString() : '',
+            scop: (product.SCOP || product.scop) ? (product.SCOP || product.scop).toString() : '',
+            power_consumption: (product.PowerConsumption || product.power_consumption) ? (product.PowerConsumption || product.power_consumption).toString() : '',
+            operating_temp_range: product.OperatingTempRange || product.operating_temp_range || '',
+            dimensions: product.dimensions || '',
+            indoor_dimensions: product.IndoorDimensions || product.indoor_dimensions || '',
+            outdoor_dimensions: product.OutdoorDimensions || product.outdoor_dimensions || '',
+            indoor_weight: (product.IndoorWeight || product.indoor_weight) ? (product.IndoorWeight || product.indoor_weight).toString() : '',
+            outdoor_weight: (product.OutdoorWeight || product.outdoor_weight) ? (product.OutdoorWeight || product.outdoor_weight).toString() : '',
+            noise_level: (product.NoiseLevel || product.noise_level) ? (product.NoiseLevel || product.noise_level).toString() : '',
+            air_flow: (product.AirFlow || product.air_flow) ? (product.AirFlow || product.air_flow).toString() : '',
+            room_size_recommendation: product.RoomSizeRecommendation || product.room_size_recommendation || '',
+            installation_type: product.InstallationType || product.installation_type || '',
+            warranty_period: product.WarrantyPeriod || product.warranty_period || '',
+            features: product.features || [],
+            description: product.description || ''
+        });
+
+        setIsEditing(true);
+        setEditingId(product.id);
+        setShowForm(true);
+        setExpandedSections(['basic']);
+
+        // Set image preview if product has an image
+        if (product.image_url) {
+            setImagePreview(product.image_url);
+        }
+    };
+
+    const handleSaveEdit = async () => {
+        try {
+            // Enhanced validation with modal
+            if (!handleFormSubmission()) {
+                return;
+            }
+
+            // Clean and validate data before sending
+            const cleanedData = {
+                ...formData,
+                // Convert empty strings to null for numeric fields
+                price: formData.price ? parseFloat(formData.price) : null,
+                previous_price: formData.discount > 0 ? parseFloat(formData.price) : (formData.previous_price ? parseFloat(formData.previous_price) : null),
+                stock: formData.stock ? parseInt(formData.stock) : 0,
+                discount: formData.discount ? parseFloat(formData.discount) : 0,
+                capacity_btu: formData.capacity_btu ? parseInt(formData.capacity_btu) : null,
+                cop: formData.cop ? parseFloat(formData.cop) : null,
+                scop: formData.scop ? parseFloat(formData.scop) : null,
+                power_consumption: formData.power_consumption ? parseFloat(formData.power_consumption) : null,
+                indoor_weight: formData.indoor_weight ? parseFloat(formData.indoor_weight) : null,
+                outdoor_weight: formData.outdoor_weight ? parseFloat(formData.outdoor_weight) : null,
+                noise_level: formData.noise_level ? parseInt(formData.noise_level) : null,
+                air_flow: formData.air_flow ? parseInt(formData.air_flow) : null,
+                // Promotional flags - ensure they are boolean values
+                is_featured: Boolean(formData.is_featured),
+                is_bestseller: Boolean(formData.is_bestseller),
+                is_new: Boolean(formData.is_new),
+                // Convert empty strings to null for text fields
+                colour: formData.colour || null,
+                energy_rating: formData.energy_rating || null,
+                image_url: formData.image_url || null,
+                dimensions: formData.dimensions || null,
+                indoor_dimensions: formData.indoor_dimensions || null,
+                outdoor_dimensions: formData.outdoor_dimensions || null,
+                operating_temp_range: formData.operating_temp_range || null,
+                room_size_recommendation: formData.room_size_recommendation || null,
+                installation_type: formData.installation_type || null,
+                warranty_period: formData.warranty_period || null,
+                description: formData.description || null
+            };
+
+            const response = await fetch('/api/edit-product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: editingId, ...cleanedData }),
+            });
+
+            if (response.ok) {
+                loadProducts();
+                hideForm();
+                alert('Продуктът е обновен успешно!');
+            } else {
+                const error = await response.json();
+                alert('Грешка: ' + error.message);
+            }
+        } catch (error) {
+            alert('Грешка при обновяване на продукт: ' + error.message);
+        }
+    };
+
+    const handleDelete = async (productId) => {
+        if (!confirm(t('admin.products.deleteConfirm'))) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/delete-product', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: productId }),
+            });
+
+            if (response.ok) {
+                loadProducts();
+                alert(t('admin.products.deleteSuccess'));
+            } else {
+                const error = await response.json();
+                alert(t('admin.products.deleteError') + ' ' + error.message);
+            }
+        } catch (error) {
+            alert(t('admin.products.deleteError') + ' ' + error.message);
+        }
+    };
+
+    return (
+        <>
+            {/* Validation Modal */}
+            {showValidationModal && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <div className={styles.modalHeader}>
+                            <h3>⚠️ Form Validation Required</h3>
+                            <button
+                                className={styles.modalCloseButton}
+                                onClick={() => setShowValidationModal(false)}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className={styles.modalBody}>
+                            <p>You must complete all required fields before submitting:</p>
+                            <ul className={styles.validationErrors}>
+                                {validationErrors.map((error, index) => (
+                                    <li key={index} className={styles.validationError}>
+                                        {error}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className={styles.modalFooter}>
+                            <button
+                                className={styles.modalButton}
+                                onClick={() => setShowValidationModal(false)}
+                            >
+                                OK, I'll fix it
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Accordion Form */}
+            {showForm && (
+                <div className={styles.formSection} ref={formRef}>
+                    <div className={styles.formHeader}>
+                        <h2>{isEditing ? t('admin.products.edit') : t('admin.products.addNew')}</h2>
+                        <button
+                            onClick={hideForm}
+                            className={styles.closeFormButton}
+                            aria-label="Close form"
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    {duplicateWarning && (
+                        <div className={styles.warningMessage}>
+                            ⚠️ {duplicateWarning}
+                        </div>
+                    )}
+
+                    {/* Accordion Form Sections */}
+                    <div className={styles.accordionContainer}>
+
+                        {/* Basic Information Section */}
+                        <div className={styles.accordionSection}>
+                            <div
+                                className={`${styles.accordionHeader} ${styles[getSectionStatus('basic')]}`}
+                                onClick={() => toggleSection('basic')}
+                            >
+                                <div className={styles.sectionInfo}>
+                                    <span className={styles.sectionIcon}>📋</span>
+                                    <span className={styles.sectionTitle}>
+                                        {t('admin.products.sections.basic')}
+                                        <span className={styles.sectionProgress}>
+                                            ({getSectionProgress('basic').totalCompleted}/{getSectionProgress('basic').totalFields})
+                                        </span>
+                                    </span>
+                                    <span className={styles.sectionStatus}>
+                                        {getSectionStatusColor('basic')} {getSectionStatusLabel('basic')}
+                                    </span>
+                                    <div className={styles.sectionProgressBar}>
+                                        <div
+                                            className={`${styles.sectionProgressFill} ${getSectionProgress('basic').progress === 100 ? '' :
+                                                    getSectionProgress('basic').progress > 0 ? 'incomplete' : 'empty'
+                                                }`}
+                                            style={{ width: `${getSectionProgress('basic').progress}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                                <span className={styles.expandIcon}>
+                                    {isSectionExpanded('basic') ? '▼' : '▶'}
+                                </span>
+                            </div>
+
+                            {isSectionExpanded('basic') && (
+                                <div className={styles.sectionContent}>
+                                    <div className={styles.formCard}>
+                                        <h3 className={styles.cardTitle}>📦 {t('admin.products.formCards.productIdentity')}</h3>
+                                        <div className={styles.formGrid}>
+                                            <div className={`${styles.formGroup} ${styles[getFieldStatus('brand')]}`}>
+                                                <label>
+                                                    {t('admin.products.brand')} *:
+                                                    <input
+                                                        type="text"
+                                                        name="brand"
+                                                        value={formData.brand}
+                                                        onChange={handleChange}
+                                                        required
+                                                        placeholder={t('admin.products.placeholders.brandExample')}
+                                                        className={getFieldStatus('brand') === 'invalid' ? styles.invalidField : ''}
+                                                    />
+                                                    {getFieldStatus('brand') === 'invalid' && (
+                                                        <span className={styles.fieldError}>Required</span>
+                                                    )}
+                                                </label>
+                                            </div>
+                                            <div className={`${styles.formGroup} ${styles[getFieldStatus('model')]}`}>
+                                                <label>
+                                                    {t('admin.products.model')} *:
+                                                    <input
+                                                        type="text"
+                                                        name="model"
+                                                        value={formData.model}
+                                                        onChange={handleChange}
+                                                        required
+                                                        placeholder={t('admin.products.placeholders.modelExample')}
+                                                        className={getFieldStatus('model') === 'invalid' ? styles.invalidField : ''}
+                                                    />
+                                                    {getFieldStatus('model') === 'invalid' && (
+                                                        <span className={styles.fieldError}>Required</span>
+                                                    )}
+                                                </label>
+                                            </div>
+                                            <div className={`${styles.formGroup} ${styles[getFieldStatus('price')]}`}>
+                                                <label>
+                                                    {t('admin.products.price')} (лв. / BGN):
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                        <input
+                                                            type="number"
+                                                            name="price"
+                                                            value={formData.price}
+                                                            onChange={handleChange}
+                                                            step="0.01"
+                                                            min="0"
+                                                            required
+                                                            placeholder={t('admin.products.placeholders.priceExample')}
+                                                            className={getFieldStatus('price') === 'invalid' ? styles.invalidField : ''}
+                                                            style={{ maxWidth: 120 }}
+                                                        />
+                                                        <span style={{ color: '#888', fontSize: '0.95em' }}>
+                                                            €{formData.price && !isNaN(formData.price) ? (parseFloat(formData.price) / 1.95583).toFixed(2) : '0.00'}
+                                                        </span>
+                                                    </div>
+                                                    {getFieldStatus('price') === 'invalid' && (
+                                                        <span className={styles.fieldError}>Required</span>
+                                                    )}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.formCard}>
+                                        <h3 className={styles.cardTitle}>🏷️ {t('admin.products.formCards.productDetails')}</h3>
+                                        <div className={styles.formGrid}>
+
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.capacity')} (BTU):
+                                                    <input
+                                                        type="number"
+                                                        name="capacity_btu"
+                                                        value={formData.capacity_btu}
+                                                        onChange={handleChange}
+                                                        placeholder="e.g. 12000"
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.energyRating')}:
+                                                    <select
+                                                        name="energy_rating"
+                                                        value={formData.energy_rating}
+                                                        onChange={handleChange}
+                                                    >
+                                                        <option value="">{t('admin.products.dropdowns.selectRating')}</option>
+                                                        <option value="A+++">{t('admin.products.dropdowns.energyRatings.aPlusPlus')}</option>
+                                                        <option value="A++">{t('admin.products.dropdowns.energyRatings.aPlus')}</option>
+                                                        <option value="A+">{t('admin.products.dropdowns.energyRatings.a')}</option>
+                                                        <option value="A">{t('admin.products.dropdowns.energyRatings.b')}</option>
+                                                        <option value="B">{t('admin.products.dropdowns.energyRatings.c')}</option>
+                                                        <option value="C">{t('admin.products.dropdowns.energyRatings.d')}</option>
+                                                    </select>
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.color')}:
+                                                    <input
+                                                        type="text"
+                                                        name="colour"
+                                                        value={formData.colour}
+                                                        onChange={handleChange}
+                                                        placeholder="e.g. White, Black"
+                                                    />
+                                                </label>
+                                            </div>
+
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.stockQuantity')}:
+                                                    <input
+                                                        type="number"
+                                                        name="stock"
+                                                        value={formData.stock}
+                                                        onChange={handleChange}
+                                                        min="0"
+                                                        placeholder={t('admin.products.placeholders.stockExample')}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.discount')} (%):
+                                                    <input
+                                                        type="number"
+                                                        name="discount"
+                                                        value={formData.discount}
+                                                        onChange={handleChange}
+                                                        min="0"
+                                                        max="100"
+                                                        step="0.1"
+                                                        placeholder={t('admin.products.placeholders.discountExample')}
+                                                    />
+                                                    {formData.price && formData.discount > 0 && (
+                                                        <div style={{
+                                                            marginTop: '8px',
+                                                            padding: '8px 12px',
+                                                            backgroundColor: '#e8f5e8',
+                                                            border: '1px solid #4caf50',
+                                                            borderRadius: '4px',
+                                                            fontSize: '14px',
+                                                            color: '#2e7d32'
+                                                        }}>
+                                                            💰 Final Price: €{calculateFinalPrice().toFixed(2)}
+                                                            <small style={{ display: 'block', marginTop: '4px', opacity: 0.8 }}>
+                                                                Original: €{formData.price} - {formData.discount}% discount
+                                                            </small>
+                                                        </div>
+                                                    )}
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.imageUpload')}:
+                                                    <div className={styles.imageUploadContainer}>
+                                                        <input
+                                                            type="file"
+                                                            ref={fileInputRef}
+                                                            accept="image/*"
+                                                            onChange={handleImageUpload}
+                                                            disabled={uploading}
+                                                            className={styles.fileInput}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => fileInputRef.current?.click()}
+                                                            disabled={uploading}
+                                                            className={styles.uploadButton}
+                                                        >
+                                                            {uploading ? t('admin.products.uploading') : t('admin.products.selectImage')}
+                                                        </button>
+                                                    </div>
+                                                    {imagePreview && (
+                                                        <div className={styles.imagePreview}>
+                                                            <img src={imagePreview} alt="Preview" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setImagePreview(null);
+                                                                    setFormData(prev => ({ ...prev, image_url: '' }));
+                                                                    if (fileInputRef.current) fileInputRef.current.value = '';
+                                                                }}
+                                                                className={styles.removeImageButton}
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                    {formData.image_url && !imagePreview && (
+                                                        <div className={styles.currentImage}>
+                                                            <p>{t('admin.products.currentImage')}: {formData.image_url}</p>
+                                                        </div>
+                                                    )}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Technical Specifications Section */}
+                        <div className={styles.accordionSection}>
+                            <div
+                                className={`${styles.accordionHeader} ${styles[getSectionStatus('technical')]}`}
+                                onClick={() => toggleSection('technical')}
+                            >
+                                <div className={styles.sectionInfo}>
+                                    <span className={styles.sectionIcon}>⚡</span>
+                                    <span className={styles.sectionTitle}>
+                                        {t('admin.products.sections.technical')}
+                                        <span className={styles.sectionProgress}>
+                                            ({getSectionProgress('technical').totalCompleted}/{getSectionProgress('technical').totalFields})
+                                        </span>
+                                    </span>
+                                    <span className={styles.sectionStatus}>
+                                        {getSectionStatusColor('technical')} {getSectionStatusLabel('technical')}
+                                    </span>
+                                    <div className={styles.sectionProgressBar}>
+                                        <div
+                                            className={`${styles.sectionProgressFill} ${getSectionProgress('technical').progress === 100 ? '' :
+                                                    getSectionProgress('technical').progress > 0 ? 'incomplete' : 'empty'
+                                                }`}
+                                            style={{ width: `${getSectionProgress('technical').progress}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                                <span className={styles.expandIcon}>
+                                    {isSectionExpanded('technical') ? '▼' : '▶'}
+                                </span>
+                            </div>
+
+                            {isSectionExpanded('technical') && (
+                                <div className={styles.sectionContent}>
+                                    <div className={styles.formCard}>
+                                        <h3 className={styles.cardTitle}>📊 {t('admin.products.formCards.performanceMetrics')}</h3>
+                                        <div className={styles.formGrid}>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    COP (Coefficient of Performance):
+                                                    <input
+                                                        type="number"
+                                                        name="cop"
+                                                        value={formData.cop}
+                                                        onChange={handleChange}
+                                                        step="0.1"
+                                                        min="0"
+                                                        max="10"
+                                                        placeholder="e.g. 4.2"
+                                                    />
+                                                    <small>{t('admin.products.hints.copHint')}</small>
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.scop')}:
+                                                    <input
+                                                        type="number"
+                                                        name="scop"
+                                                        value={formData.scop}
+                                                        onChange={handleChange}
+                                                        step="0.1"
+                                                        min="0"
+                                                        max="10"
+                                                        placeholder={t('admin.products.hints.scopHint')}
+                                                    />
+                                                    <small>{t('admin.products.hints.scopHint')}</small>
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.powerConsumption')} (kW):
+                                                    <input
+                                                        type="number"
+                                                        name="power_consumption"
+                                                        value={formData.power_consumption}
+                                                        onChange={handleChange}
+                                                        step="0.1"
+                                                        min="0"
+                                                        placeholder={t('admin.products.hints.powerHint')}
+                                                    />
+                                                </label>
+                                            </div>
+
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.operatingTempRange')}:
+                                                    <input
+                                                        type="text"
+                                                        name="operating_temp_range"
+                                                        value={formData.operating_temp_range}
+                                                        onChange={handleChange}
+                                                        placeholder={t('admin.products.hints.tempRangeHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Physical Characteristics Section */}
+                        <div className={styles.accordionSection}>
+                            <div
+                                className={`${styles.accordionHeader} ${styles[getSectionStatus('physical')]}`}
+                                onClick={() => toggleSection('physical')}
+                            >
+                                <div className={styles.sectionInfo}>
+                                    <span className={styles.sectionIcon}>📏</span>
+                                    <span className={styles.sectionTitle}>
+                                        {t('admin.products.sections.physical')}
+                                        <span className={styles.sectionProgress}>
+                                            ({getSectionProgress('physical').totalCompleted}/{getSectionProgress('physical').totalFields})
+                                        </span>
+                                    </span>
+                                    <span className={styles.sectionStatus}>
+                                        {getSectionStatusColor('physical')} {getSectionStatusLabel('physical')}
+                                    </span>
+                                    <div className={styles.sectionProgressBar}>
+                                        <div
+                                            className={`${styles.sectionProgressFill} ${getSectionProgress('physical').progress === 100 ? '' :
+                                                    getSectionProgress('physical').progress > 0 ? 'incomplete' : 'empty'
+                                                }`}
+                                            style={{ width: `${getSectionProgress('physical').progress}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                                <span className={styles.expandIcon}>
+                                    {isSectionExpanded('physical') ? '▼' : '▶'}
+                                </span>
+                            </div>
+
+                            {isSectionExpanded('physical') && (
+                                <div className={styles.sectionContent}>
+                                    <div className={styles.formCard}>
+                                        <h3 className={styles.cardTitle}>📐 {t('admin.products.formCards.physicalSpecs')}</h3>
+                                        <div className={styles.formGrid}>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.indoorDimensions')} (W×H×D):
+                                                    <input
+                                                        type="text"
+                                                        name="indoor_dimensions"
+                                                        value={formData.indoor_dimensions}
+                                                        onChange={handleChange}
+                                                        placeholder={t('admin.products.hints.indoorDimensionsHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.outdoorDimensions')} (W×H×D):
+                                                    <input
+                                                        type="text"
+                                                        name="outdoor_dimensions"
+                                                        value={formData.outdoor_dimensions}
+                                                        onChange={handleChange}
+                                                        placeholder={t('admin.products.hints.outdoorDimensionsHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.indoorWeight')} (kg):
+                                                    <input
+                                                        type="number"
+                                                        name="indoor_weight"
+                                                        value={formData.indoor_weight}
+                                                        onChange={handleChange}
+                                                        step="0.1"
+                                                        min="0"
+                                                        placeholder={t('admin.products.hints.indoorWeightHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.outdoorWeight')} (kg):
+                                                    <input
+                                                        type="number"
+                                                        name="outdoor_weight"
+                                                        value={formData.outdoor_weight}
+                                                        onChange={handleChange}
+                                                        step="0.1"
+                                                        min="0"
+                                                        placeholder={t('admin.products.hints.outdoorWeightHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.noiseLevel')} (dB):
+                                                    <input
+                                                        type="number"
+                                                        name="noise_level"
+                                                        value={formData.noise_level}
+                                                        onChange={handleChange}
+                                                        min="0"
+                                                        max="100"
+                                                        placeholder={t('admin.products.hints.noiseHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.airFlow')} (m³/h):
+                                                    <input
+                                                        type="number"
+                                                        name="air_flow"
+                                                        value={formData.air_flow}
+                                                        onChange={handleChange}
+                                                        min="0"
+                                                        placeholder={t('admin.products.hints.airFlowHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Installation & Warranty Section */}
+                        <div className={styles.accordionSection}>
+                            <div
+                                className={`${styles.accordionHeader} ${styles[getSectionStatus('installation')]}`}
+                                onClick={() => toggleSection('installation')}
+                            >
+                                <div className={styles.sectionInfo}>
+                                    <span className={styles.sectionIcon}>🔧</span>
+                                    <span className={styles.sectionTitle}>
+                                        {t('admin.products.sections.installation')}
+                                        <span className={styles.sectionProgress}>
+                                            ({getSectionProgress('installation').totalCompleted}/{getSectionProgress('installation').totalFields})
+                                        </span>
+                                    </span>
+                                    <span className={styles.sectionStatus}>
+                                        {getSectionStatusColor('installation')} {getSectionStatusLabel('installation')}
+                                    </span>
+                                    <div className={styles.sectionProgressBar}>
+                                        <div
+                                            className={`${styles.sectionProgressFill} ${getSectionProgress('installation').progress === 100 ? '' :
+                                                    getSectionProgress('installation').progress > 0 ? 'incomplete' : 'empty'
+                                                }`}
+                                            style={{ width: `${getSectionProgress('installation').progress}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                                <span className={styles.expandIcon}>
+                                    {isSectionExpanded('installation') ? '▼' : '▶'}
+                                </span>
+                            </div>
+
+                            {isSectionExpanded('installation') && (
+                                <div className={styles.sectionContent}>
+                                    <div className={styles.formCard}>
+                                        <h3 className={styles.cardTitle}>🏠 {t('admin.products.formCards.installationDetails')}</h3>
+                                        <div className={styles.formGrid}>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.installationType')}:
+                                                    <select
+                                                        name="installation_type"
+                                                        value={formData.installation_type}
+                                                        onChange={handleChange}
+                                                    >
+                                                        <option value="">{t('admin.products.dropdowns.selectType')}</option>
+                                                        <option value="Wall-mounted">{t('admin.products.dropdowns.installationTypes.wallMounted')}</option>
+                                                        <option value="Ceiling-mounted">{t('admin.products.dropdowns.installationTypes.ceilingMounted')}</option>
+                                                        <option value="Floor-standing">{t('admin.products.dropdowns.installationTypes.floorStanding')}</option>
+                                                        <option value="Ducted">{t('admin.products.dropdowns.installationTypes.ducted')}</option>
+                                                        <option value="Cassette">{t('admin.products.dropdowns.installationTypes.cassette')}</option>
+                                                    </select>
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.roomSizeRecommendation')} (m²):
+                                                    <input
+                                                        type="text"
+                                                        name="room_size_recommendation"
+                                                        value={formData.room_size_recommendation}
+                                                        onChange={handleChange}
+                                                        placeholder={t('admin.products.hints.roomSizeHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.warrantyPeriod')}:
+                                                    <select
+                                                        name="warranty_period"
+                                                        value={formData.warranty_period}
+                                                        onChange={handleChange}
+                                                    >
+                                                        <option value="">{t('admin.products.dropdowns.selectPeriod')}</option>
+                                                        <option value="1 year">{t('admin.products.dropdowns.warrantyPeriods.1year')}</option>
+                                                        <option value="2 years">{t('admin.products.dropdowns.warrantyPeriods.2years')}</option>
+                                                        <option value="3 years">{t('admin.products.dropdowns.warrantyPeriods.3years')}</option>
+                                                        <option value="5 years">{t('admin.products.dropdowns.warrantyPeriods.5years')}</option>
+                                                        <option value="7 years">{t('admin.products.dropdowns.warrantyPeriods.7years')}</option>
+                                                        <option value="10 years">{t('admin.products.dropdowns.warrantyPeriods.10years')}</option>
+                                                    </select>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Features & Promotions Section */}
+                        <div className={styles.accordionSection}>
+                            <div
+                                className={`${styles.accordionHeader} ${styles[getSectionStatus('features')]}`}
+                                onClick={() => toggleSection('features')}
+                            >
+                                <div className={styles.sectionInfo}>
+                                    <span className={styles.sectionIcon}>⭐</span>
+                                    <span className={styles.sectionTitle}>
+                                        {t('admin.products.sections.features')}
+                                        <span className={styles.sectionProgress}>
+                                            ({getSectionProgress('features').totalCompleted}/{getSectionProgress('features').totalFields})
+                                        </span>
+                                    </span>
+                                    <span className={styles.sectionStatus}>
+                                        {getSectionStatusColor('features')} {getSectionStatusLabel('features')}
+                                    </span>
+                                    <div className={styles.sectionProgressBar}>
+                                        <div
+                                            className={`${styles.sectionProgressFill} ${getSectionProgress('features').progress === 100 ? '' :
+                                                    getSectionProgress('features').progress > 0 ? 'incomplete' : 'empty'
+                                                }`}
+                                            style={{ width: `${getSectionProgress('features').progress}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                                <span className={styles.expandIcon}>
+                                    {isSectionExpanded('features') ? '▼' : '▶'}
+                                </span>
+                            </div>
+
+                            {isSectionExpanded('features') && (
+                                <div className={styles.sectionContent}>
+                                    <div className={styles.formCard}>
+                                        <h3 className={styles.cardTitle}>🛠️ {t('admin.products.formCards.productFeatures')}</h3>
+                                        <div className={styles.featuresManager}>
+                                            <div className={styles.inputRow}>
+                                                <input
+                                                    type="text"
+                                                    value={featureInput || ''}
+                                                    onChange={e => setFeatureInput(e.target.value)}
+                                                    placeholder={t('admin.products.placeholders.featureExample')}
+                                                    className={styles.featureInput}
+                                                    onKeyDown={e => {
+                                                        if (e.key === 'Enter' && featureInput?.trim()) {
+                                                            e.preventDefault();
+                                                            if (!formData.features.includes(featureInput.trim())) {
+                                                                setFormData(prev => ({ ...prev, features: [...prev.features, featureInput.trim()] }));
+                                                            }
+                                                            setFeatureInput('');
+                                                        }
+                                                    }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className={styles.addFeatureButton}
+                                                    onClick={() => {
+                                                        if (featureInput?.trim() && !formData.features.includes(featureInput.trim())) {
+                                                            setFormData(prev => ({ ...prev, features: [...prev.features, featureInput.trim()] }));
+                                                            setFeatureInput('');
+                                                        }
+                                                    }}
+                                                >
+                                                    {t('admin.products.features.addFeature')}
+                                                </button>
+                                            </div>
+                                            <div className={styles.featuresList}>
+                                                {formData.features.map((feature, idx) => (
+                                                    <span key={feature} className={styles.featureTag}>
+                                                        {feature}
+                                                        <button
+                                                            type="button"
+                                                            className={styles.removeFeatureButton}
+                                                            onClick={() => setFormData(prev => ({ ...prev, features: prev.features.filter((_, i) => i !== idx) }))}
+                                                            aria-label={t('admin.products.features.removeFeature') || 'Remove feature'}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className={styles.formCard}>
+                                        <h3 className={styles.cardTitle}>🎯 {t('admin.products.formCards.promotionalTags')}</h3>
+                                        <div className={styles.promoTagsGroup}>
+                                            <div className={styles.formGroup}>
+                                                <span>{t('admin.products.fields.isFeatured')}</span>
+                                                <input
+                                                    type="checkbox"
+                                                    name="is_featured"
+                                                    checked={formData.is_featured}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <span>{t('admin.products.fields.isBestseller')}</span>
+                                                <input
+                                                    type="checkbox"
+                                                    name="is_bestseller"
+                                                    checked={formData.is_bestseller}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <span>{t('admin.products.fields.isNew')}</span>
+                                                <input
+                                                    type="checkbox"
+                                                    name="is_new"
+                                                    checked={formData.is_new}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Description Section */}
+                        <div className={styles.accordionSection}>
+                            <div
+                                className={`${styles.accordionHeader} ${styles[getSectionStatus('description')]}`}
+                                onClick={() => toggleSection('description')}
+                            >
+                                <div className={styles.sectionInfo}>
+                                    <span className={styles.sectionIcon}>📝</span>
+                                    <span className={styles.sectionTitle}>
+                                        {t('admin.products.sections.description')}
+                                        <span className={styles.sectionProgress}>
+                                            ({getSectionProgress('description').totalCompleted}/{getSectionProgress('description').totalFields})
+                                        </span>
+                                    </span>
+                                    <span className={styles.sectionStatus}>
+                                        {getSectionStatusColor('description')} {getSectionStatusLabel('description')}
+                                    </span>
+                                    <div className={styles.sectionProgressBar}>
+                                        <div
+                                            className={`${styles.sectionProgressFill} ${getSectionProgress('description').progress === 100 ? '' :
+                                                    getSectionProgress('description').progress > 0 ? 'incomplete' : 'empty'
+                                                }`}
+                                            style={{ width: `${getSectionProgress('description').progress}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                                <span className={styles.expandIcon}>
+                                    {isSectionExpanded('description') ? '▼' : '▶'}
+                                </span>
+                            </div>
+
+                            {isSectionExpanded('description') && (
+                                <div className={styles.sectionContent}>
+                                    <div className={styles.formCard}>
+                                        <h3 className={styles.cardTitle}>📝 {t('admin.products.formCards.productDescription')}</h3>
+                                        <div className={styles.formGroup + ' ' + styles.descriptionGroup}>
+                                            <label>
+                                                {t('admin.products.fields.description')}:
+                                                <textarea
+                                                    name="description"
+                                                    value={formData.description}
+                                                    onChange={handleChange}
+                                                    rows="5"
+                                                    placeholder={t('admin.products.placeholders.descriptionExample')}
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                    </div>
+
+                    {/* Form Actions */}
+                    <div className={styles.formActions}>
+                        <button
+                            type="button"
+                            onClick={hideForm}
+                            className={styles.cancelButton}
+                        >
+                            {t('admin.products.actions.cancel')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={isEditing ? handleSaveEdit : handleAdd}
+                            className={styles.saveButton}
+                        >
+                            {isEditing ? t('admin.products.actions.updateProduct') : t('admin.products.actions.addProduct')}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Add Product Button */}
+            {!showForm && (
+                <div className={styles.addProductSection}>
+                    <button
+                        onClick={showAddForm}
+                        className={styles.addButton}
+                    >
+                        + {t('admin.products.addNew')}
+                    </button>
+                </div>
+            )}
+
+            {/* Products List */}
+            {!showForm && (
+                <div className={styles.productsSection}>
+                    <h3>{t('admin.products.section.title')} ({products.length})</h3>
+                    <p>{t('admin.products.section.description')}</p>
+                    <div className={styles.productsList}>
+                        {products.map(product => (
+                            <div key={product.id} className={`${styles.productCard} ${styles.productCardRow}`}>
+                                <div className={styles.productThumb}>
+                                    <img
+                                        src={getImageUrl(product.image_url)}
+                                        alt={`${product.brand} ${product.model}`}
+                                    />
+                                </div>
+                                <div className={styles.productMain}>
+                                    <h4>{product.brand} {product.model}</h4>
+                                    <p>Цена: €{product.price}</p>
+                                </div>
+                                <div className={styles.productActionsRow}>
+                                    <button
+                                        onClick={() => handleEdit(product)}
+                                        className={styles.editButton}
+                                        aria-label={t('admin.products.actions.edit')}
+                                        title={t('admin.products.actions.edit')}
+                                    >
+                                        {t('admin.products.actions.edit')}
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(product.id)}
+                                        className={styles.deleteButton}
+                                        aria-label={t('admin.products.actions.delete')}
+                                        title={t('admin.products.actions.delete')}
+                                    >
+                                        {t('admin.products.actions.delete')}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}
+
+
+

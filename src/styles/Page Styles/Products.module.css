@@ -321,9 +321,7 @@
   border: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
-  height: 100%;
   position: relative;
-  width: 100%;
 }
 
 /* Product Link Wrapper */
@@ -1955,7 +1953,7 @@
   
   .grid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 4rem;
+    gap: 1rem;
   }
   
   .container {

@@ -1,0 +1,194 @@
+.container {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+}
+
+.content {
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.errorCode {
+  font-size: 8rem;
+  font-weight: 700;
+  color: #2c5530;
+  line-height: 1;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 20px rgba(44, 85, 48, 0.1);
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c5530;
+  margin: 1rem 0 1.5rem;
+  line-height: 1.2;
+}
+
+.description {
+  font-size: 1.125rem;
+  color: #6c757d;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.homeButton,
+.secondaryButton {
+  display: inline-block;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  min-width: 250px;
+  text-align: center;
+}
+
+.homeButton {
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(44, 85, 48, 0.3);
+}
+
+.homeButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(44, 85, 48, 0.4);
+  background: linear-gradient(135deg, #234428 0%, #3d6a4a 100%);
+}
+
+.homeButton:active {
+  transform: translateY(0);
+}
+
+.secondaryButton {
+  background: white;
+  color: #2c5530;
+  border: 2px solid #2c5530;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.secondaryButton:hover {
+  background: #2c5530;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(44, 85, 48, 0.3);
+}
+
+.secondaryButton:active {
+  transform: translateY(0);
+}
+
+.helpSection {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.helpText {
+  font-size: 0.95rem;
+  color: #6c757d;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+    min-height: calc(100vh - 150px);
+  }
+
+  .errorCode {
+    font-size: 6rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .description {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .homeButton,
+  .secondaryButton {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .actions {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .errorCode {
+    font-size: 5rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .description {
+    font-size: 0.95rem;
+  }
+
+  .homeButton,
+  .secondaryButton {
+    font-size: 0.95rem;
+    padding: 0.7rem 1.25rem;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .content {
+    animation: none;
+  }
+
+  .homeButton,
+  .secondaryButton {
+    transition: none;
+  }
+
+  .homeButton:hover,
+  .secondaryButton:hover {
+    transform: none;
+  }
+}
+
+
+

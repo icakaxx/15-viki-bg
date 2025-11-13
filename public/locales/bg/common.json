@@ -402,7 +402,7 @@
   },
   "buyPage": {
     "title": "Купи климатици",
-    "loading": "Зареждане на продукти...",
+    "loading": "Зареждане...",
     "error": "Грешка при зареждане на продуктите",
     "noProducts": "Няма намерени продукти",
     "buyButton": "Купи",
@@ -1170,8 +1170,8 @@
       "customerInformation": "Информация за клиента",
       "paymentInformation": "Информация за плащането",
       "updateOrderStatus": "Обнови статус на поръчката",
-      "newStatus": "Нов статус",
-      "selectNewStatus": "Избери нов статус...",
+      "newStatus": "Статус",
+      "selectNewStatus": "Избери статус...",
       "startInstallationDate": "Дата на начало на монтажа",
       "endInstallationDate": "Дата на край на монтажа",
       "notes": "Бележки",
@@ -1195,7 +1195,7 @@
       "errors": {
         "updateFailed": "Грешка при обновяване на статуса",
         "loadFailed": "Възникна грешка при зареждане",
-        "selectStatus": "Моля, изберете нов статус"
+        "selectStatus": "Моля, изберете статус"
       },
       "history": {
         "title": "История на поръчки",

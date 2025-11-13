@@ -4,6 +4,7 @@ import Footer from './Layout Components/Footer'
 import styles from '../styles/Component Styles/Layout.module.css'
 import { Analytics } from "@vercel/analytics/react"
 import CookieBanner from './CookieBanner'
+import { useRouter } from 'next/router'
 
 /**
  * A layout component that defines the overall structure of the web page
@@ -12,18 +13,21 @@ import CookieBanner from './CookieBanner'
  * @returns {JSX.Element} - The layout component
 */
 const Layout = ({ children }) => {
+  const router = useRouter();
+  const isAdminPage = router.pathname === '/administraciq';
+
   return (
     <>
       <div className={styles.layout}>
       <Analytics/>
-        <Header />
+        {!isAdminPage && <Header />}
         {/* <Transition> */}
         <main className={styles.main}>
           {children}
         </main>
         {/* </Transition> */}
-        <Footer />
-        <CookieBanner />
+        {!isAdminPage && <Footer />}
+        {!isAdminPage && <CookieBanner />}
       </div>
     </>
   )

@@ -48,9 +48,9 @@ const CheckoutPage = () => {
 
   // Accordion state - which sections are expanded
   const [expandedSections, setExpandedSections] = useState({
-    personal: true,    // Start with first section expanded
-    invoice: false,
-    payment: false
+    personal: true,    // All sections expanded by default
+    invoice: true,
+    payment: true
   });
 
   // Toggle accordion section

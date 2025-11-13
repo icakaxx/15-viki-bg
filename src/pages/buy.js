@@ -669,7 +669,10 @@ const BuyPage = () => {
           <meta name="description" content="Air conditioners and climate solutions" />
         </Head>
         <div className={styles.container}>
-          <h1 className={styles.title}>Buy ACs</h1>
+          <h1 className={styles.title}>{t('buyPage.title')}</h1>
+          <p style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.1rem', color: '#666' }}>
+            {t('buyPage.loading')}
+          </p>
           <SkeletonLoader />
         </div>
       </>

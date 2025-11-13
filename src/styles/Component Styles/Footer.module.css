@@ -344,6 +344,40 @@
   border-radius: 4px;
 }
 
+/* Creator Section */
+.creatorSection {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.creatorText {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.creatorLink {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all var(--transition-smooth);
+  border-bottom: 1px solid transparent;
+  margin-left: 0.25rem;
+}
+
+.creatorLink:hover {
+  color: var(--background-white);
+  border-bottom-color: rgba(255, 255, 255, 0.5);
+}
+
+.creatorLink:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* Admin Link */
 .adminLink {
   text-decoration: none;
@@ -596,6 +630,15 @@
     line-height: 1.7;
   }
 
+  .creatorSection {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .creatorText {
+    font-size: 0.85rem;
+  }
+
   .backToTop {
     bottom: 1.25rem;
     right: 1.25rem;
@@ -636,10 +679,19 @@
     min-height: 2rem;
     padding: 0.3rem;
   }
-  
+
   .copyright {
     font-size: 0.8rem;
     line-height: 1.8;
+  }
+
+  .creatorSection {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .creatorText {
+    font-size: 0.8rem;
   }
   
 
@@ -699,6 +751,7 @@
   .contactItem,
   .footerLogo,
   .emailLink,
+  .creatorLink,
   .navLink::before {
     transition: none;
   }

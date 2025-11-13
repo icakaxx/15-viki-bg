@@ -5,6 +5,50 @@ import { useRouter } from 'next/router';
 import { TIME_SLOTS } from '../lib/slotUtils';
 // Weekdays will be handled by translation system instead of this constant
 const ADMIN_ID = 1; // Using dev admin ID - you can make this configurable later
+const INSTALLATION_SERVICE_PRICE = 300;
+
+const parseAmount = (value) => {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : 0;
+  }
+  const num = parseFloat(value);
+  return Number.isFinite(num) ? num : 0;
+};
+
+const formatCurrency = (value) => `${parseAmount(value).toFixed(2)} лв.`;
+
+const getAccessoriesTotal = (accessories) => {
+  if (!Array.isArray(accessories) || accessories.length === 0) return 0;
+  return accessories.reduce((sum, accessory) => {
+    const price = parseAmount(accessory?.price);
+    const quantity = accessory?.quantity || 1;
+    return sum + price * quantity;
+  }, 0);
+};
+
+const calculateProductTotals = (products = []) => {
+  const totals = {
+    productTotal: 0,
+    accessoryTotal: 0,
+    installationTotal: 0,
+  };
+
+  products.forEach(product => {
+    const quantity = product?.quantity || 1;
+    const basePrice = parseAmount(product?.price);
+    totals.productTotal += basePrice * quantity;
+    totals.accessoryTotal += getAccessoriesTotal(product?.accessories);
+    if (product?.includes_installation) {
+      totals.installationTotal += INSTALLATION_SERVICE_PRICE * quantity;
+    }
+  });
+
+  return {
+    ...totals,
+    grandTotal: totals.productTotal + totals.accessoryTotal + totals.installationTotal,
+  };
+};
 
 function getWeekDates(date) {
   const monday = new Date(date);
@@ -153,6 +197,9 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
   const [rescheduleLoading, setRescheduleLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  const installationProducts = Array.isArray(selectedInstallation?.products) ? selectedInstallation.products : [];
+  const installationTotals = calculateProductTotals(installationProducts);
 
   // Mobile responsiveness state
   const [isMobile, setIsMobile] = useState(false);
@@ -1148,47 +1195,162 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
               <div>
                 <strong>{t('admin.installations.details.products')}:</strong>
                 <div style={{ marginTop: '0.5rem' }}>
-                  {Array.isArray(selectedInstallation.products) && selectedInstallation.products.length > 0 ? (
+                  {installationProducts.length > 0 ? (
                     <div style={{ display: 'grid', gap: '0.5rem' }}>
-                      {selectedInstallation.products.map((product, idx) => (
-                        <div key={idx} style={{
-                          display: 'grid',
-                          gridTemplateColumns: '48px 1fr auto auto',
-                          gap: '0.75rem',
-                          alignItems: 'center',
-                          padding: '0.5rem',
-                          backgroundColor: '#f8f9fa',
-                          borderRadius: '6px'
-                        }}>
-                          <div>
-                            {product.image_url ? (
-                              <img src={product.image_url} alt={`${product.brand} ${product.model}`} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} />
-                            ) : (
-                              <div style={{ width: 48, height: 48, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}>📦</div>
-                            )}
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 600 }}>{product.brand} {product.model}</div>
-                            {/* Accessories */}
-                            {Array.isArray(product.accessories) && product.accessories.length > 0 && (
-                              <div style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#555' }}>
-                                {product.accessories.map((a, aIdx) => (
-                                  <div key={aIdx}>{(a.name)} × {a.quantity || 1} {a.price ? `— ${(parseFloat(a.price)).toFixed(2)} лв.` : ''}</div>
-                                ))}
+                      {installationProducts.map((product, idx) => {
+                        const quantity = product?.quantity || 1;
+                        const basePrice = parseAmount(product?.price);
+                        const baseTotal = product?.total_price != null
+                          ? parseAmount(product.total_price)
+                          : basePrice * quantity;
+                        const accessories = Array.isArray(product?.accessories) ? product.accessories : [];
+
+                        return (
+                          <React.Fragment key={idx}>
+                            <div style={{
+                              display: 'grid',
+                              gridTemplateColumns: '48px 1fr auto auto',
+                              gap: '0.75rem',
+                              alignItems: 'center',
+                              padding: '0.5rem',
+                              backgroundColor: '#f8f9fa',
+                              borderRadius: '6px'
+                            }}>
+                              <div>
+                                {product?.image_url ? (
+                                  <img src={product.image_url} alt={`${product.brand} ${product.model}`} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }} />
+                                ) : (
+                                  <div style={{ width: 48, height: 48, background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}>📦</div>
+                                )}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: 600 }}>{product.brand} {product.model}</div>
+                                {accessories.length > 0 && (
+                                  <div style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#555' }}>
+                                    {accessories.map((a, aIdx) => (
+                                      <div key={aIdx}>
+                                        {(t(`productDetail.accessoryNames.${a.name}`) || a.name)} × {a.quantity || 1}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                {product.includes_installation && (
+                                  <div style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#2d5a27' }}>
+                                    {t('admin.orders.products.installation')}
+                                  </div>
+                                )}
+                              </div>
+                              <div style={{ textAlign: 'right', fontSize: '0.9rem' }}>
+                                {product?.price != null ? formatCurrency(basePrice) : '-'}
+                              </div>
+                              <div style={{ textAlign: 'right', fontWeight: 600 }}>
+                                {product?.total_price != null ? formatCurrency(baseTotal) : '-'}
+                              </div>
+                            </div>
+
+                            {accessories.length > 0 && accessories.map((accessory, aIdx) => {
+                              const accessoryPrice = parseAmount(accessory?.price);
+                              const accessoryQuantity = accessory?.quantity || 1;
+                              const accessoryTotal = accessoryPrice * accessoryQuantity;
+                              return (
+                                <div
+                                  key={`${idx}-acc-${aIdx}`}
+                                  style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '48px 1fr auto auto',
+                                    gap: '0.75rem',
+                                    alignItems: 'center',
+                                    padding: '0.5rem',
+                                    backgroundColor: '#fffbe6',
+                                    borderRadius: '6px',
+                                    borderLeft: '2px solid #ff9800'
+                                  }}
+                                >
+                                  <div style={{ textAlign: 'center', fontSize: '1.1rem', color: '#ff9800' }}>➕</div>
+                                  <div>
+                                    <div style={{ fontSize: '0.85rem', color: '#555' }}>
+                                      {t(`productDetail.accessoryNames.${accessory.name}`) || accessory.name}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: '#777' }}>
+                                      {t('admin.orders.products.quantity')}: {accessoryQuantity}
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'right', fontSize: '0.8rem' }}>
+                                    {formatCurrency(accessoryPrice)}
+                                  </div>
+                                  <div style={{ textAlign: 'right', fontSize: '0.8rem', fontWeight: 600 }}>
+                                    {formatCurrency(accessoryTotal)}
+                                  </div>
+                                </div>
+                              );
+                            })}
+
+                            {product.includes_installation && (
+                              <div
+                                style={{
+                                  display: 'grid',
+                                  gridTemplateColumns: '48px 1fr auto auto',
+                                  gap: '0.75rem',
+                                  alignItems: 'center',
+                                  padding: '0.5rem',
+                                  backgroundColor: '#e8f5e8',
+                                  borderRadius: '6px',
+                                  borderLeft: '2px solid #4caf50'
+                                }}
+                              >
+                                <div style={{ textAlign: 'center', fontSize: '1.1rem', color: '#2d5a27' }}>🛠️</div>
+                                <div>
+                                  <div style={{ fontSize: '0.85rem', color: '#2d5a27', fontWeight: 600 }}>
+                                    {t('admin.orders.products.installation')}
+                                  </div>
+                                  <div style={{ fontSize: '0.75rem', color: '#2d5a27' }}>
+                                    {t('admin.orders.products.quantity')}: {quantity}
+                                  </div>
+                                </div>
+                                <div style={{ textAlign: 'right', fontSize: '0.8rem' }}>
+                                  {formatCurrency(INSTALLATION_SERVICE_PRICE)}
+                                </div>
+                                <div style={{ textAlign: 'right', fontSize: '0.8rem', fontWeight: 600 }}>
+                                  {formatCurrency(INSTALLATION_SERVICE_PRICE * quantity)}
+                                </div>
                               </div>
                             )}
-                            {product.includes_installation && (
-                              <div style={{ marginTop: '0.25rem', fontSize: '0.9rem', color: '#2d5a27' }}>Услуга монтаж</div>
-                            )}
-                          </div>
-                          <div style={{ textAlign: 'right', fontSize: '0.9rem' }}>
-                            {product.price != null ? `${parseFloat(product.price).toFixed(2)} лв.` : '-'}
-                          </div>
-                          <div style={{ textAlign: 'right', fontWeight: 600 }}>
-                            {product.total_price != null ? `${product.total_price.toFixed(2)} лв.` : '-'}
-                          </div>
+                          </React.Fragment>
+                        );
+                      })}
+
+                      <div
+                        style={{
+                          marginTop: '0.5rem',
+                          padding: '0.75rem',
+                          backgroundColor: '#fff8e1',
+                          border: '1px solid #ffe0b2',
+                          borderRadius: '6px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
+                          <span>{t('admin.orders.products.total')}:</span>
+                          <span>{formatCurrency(installationTotals.grandTotal)}</span>
                         </div>
-                      ))}
+                        <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#555', display: 'grid', gap: '0.25rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>{t('productDetail.priceBreakdown.product')}:</span>
+                            <span>{formatCurrency(installationTotals.productTotal)}</span>
+                          </div>
+                          {installationTotals.accessoryTotal > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span>{t('productDetail.priceBreakdown.accessories')}:</span>
+                              <span>{formatCurrency(installationTotals.accessoryTotal)}</span>
+                            </div>
+                          )}
+                          {installationTotals.installationTotal > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span>{t('productDetail.priceBreakdown.installation')}:</span>
+                              <span>{formatCurrency(installationTotals.installationTotal)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <div style={{ marginTop: '0.5rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>

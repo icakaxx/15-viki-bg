@@ -38,8 +38,14 @@ export default async function handler(req, res) {
   }
 
   try {
-
     let oldStatus = 'new'; // Default status for new orders
+    let currentOrder = null;
+
+    const { data: currentOrderData, error: fetchError } = await supabase
+      .from('orders')
+      .select('order_id, status')
+      .eq('order_id', orderId)
+      .single();
 
     if (fetchError && fetchError.code === 'PGRST116') {
 
@@ -88,6 +94,7 @@ export default async function handler(req, res) {
         details: fetchError.message
       });
     } else {
+      currentOrder = currentOrderData;
       oldStatus = currentOrder.status;
 
     }

@@ -276,25 +276,23 @@ const Footer = () => {
         <div className={styles.bottomBar}>
           <div className={styles.bottomContainer}>
             <p className={styles.copyright}>
-              {t('footer.copyright')} | {t('footer.attribution')} (
-              <a 
-                href="mailto:hm.websiteprovisioning@gmail.com" 
-                className={styles.emailLink}
-                title="Contact H&M WSPro"
-                aria-label="Contact H&M WSPro by email"
-              >
-                hm.websiteprovisioning@gmail.com
-              </a>
-              )
+              {t('footer.copyright')} 
             </p>
-            <Link 
-              href="/Administration" 
-              className={styles.adminLink} 
-              title={t('footer.admin')}
-              aria-label={t('footer.admin')}
-            >
-              ⚙️
-            </Link>
+            
+            <div className={styles.creatorSection}>
+              <span className={styles.creatorText}>
+                Изработка от <a 
+                  href="https://www.hmwspro.com/bg" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className={styles.creatorLink}
+                  title="Visit H&M WS Pro website"
+                  aria-label="Visit H&M WS Pro website"
+                >
+                  H&M WS Pro
+                </a>
+              </span>
+            </div>
           </div>
         </div>
       </footer>
