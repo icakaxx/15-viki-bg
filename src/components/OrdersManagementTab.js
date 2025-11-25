@@ -761,8 +761,8 @@ export default function OrdersManagementTab() {
                       disabled={updatingStatus || !canSubmitOrderUpdate}
                       className={styles.updateStatusButton}
                     >
-                      {updatingStatus ? '🔄 Updating...' : '✅ Update'}
-                    </button>
+                        {updatingStatus ? '🔄 Обновяване...' : '✅ Обновяване'}
+                        </button>
                     <button
                       onClick={closeOrderDetails}
                       className={styles.cancelButton}
@@ -1123,7 +1123,7 @@ export default function OrdersManagementTab() {
                         disabled={updatingStatus || !canSubmitOrderUpdate}
                         className={styles.updateStatusButton}
                       >
-                        {updatingStatus ? '🔄 Updating...' : '✅ Update'}
+                        {updatingStatus ? '🔄 Обновяване...' : '✅ Обновяване'}
                       </button>
                     </div>
               </div>

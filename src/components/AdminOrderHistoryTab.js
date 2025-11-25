@@ -448,7 +448,19 @@ export default function AdminOrderHistoryTab() {
                                   return (
                                     <li key={accIndex} className={styles.accessoryItem}>
                                       <div className={styles.accessoryName}>
-              {accessory.name || accessory.Name || 'Unknown Accessory'}                                      </div>
+                                        {(() => {
+                                          const name = accessory.name || accessory.Name || 'Unknown Accessory';
+                                          switch (name) {
+                                            case 'Anti-vibration Mount Kit':
+                                              return 'Комплект антивибрационни тампони';
+                                            case 'Condensate Tray':
+                                              return 'Кондензна вана';
+                                            case 'Condensate Tray with Heater and Thermostat':
+                                              return 'Кондензна вана с нагревател и термостат';
+                                            default:
+                                              return name;
+                                          }
+                                        })()}                                      </div>
                                       <div className={styles.accessoryDetails}>
                                         <span>Количество: {accessory.quantity || 1}</span>
                                         <span>Цена: {(accessory.price || 0).toFixed(2)} лв</span>

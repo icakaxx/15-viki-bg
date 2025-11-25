@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       last_name,
       phone,
       created_at,
-      installation_schedule!inner(scheduled_date)
+      installation_schedule!left(scheduled_date)
     `)
     .eq('status', 'installed');
   

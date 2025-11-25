@@ -111,14 +111,20 @@ const CheckoutPage = () => {
 
   // Handle accessory quantity changes
   const handleAccessoryQuantityChange = (cartItemId, accessoryIndex, newQuantity) => {
-    if (newQuantity < 0) {
+    const item = cart.items.find(item => item.cartItemId === cartItemId);
+    if (!item) return;
+
+    // Don't allow accessory quantity to exceed product quantity
+    if (newQuantity > item.quantity) {
+      alert(t('checkout.accessoryLimitExceeded'));
+      return;
+    }
+
+    if (newQuantity <= 0) {
       // Remove accessory if quantity is 0 or less
-      if (confirm('Are you sure you want to remove this accessory?')) {
-        const item = cart.items.find(item => item.cartItemId === cartItemId);
-        if (item) {
-          const updatedAccessories = item.accessories.filter((_, index) => index !== accessoryIndex);
-          updateCartItemAccessories(cartItemId, updatedAccessories);
-        }
+      if (confirm(t('checkout.confirmRemoveAccessory'))) {
+        const updatedAccessories = item.accessories.filter((_, index) => index !== accessoryIndex);
+        updateCartItemAccessories(cartItemId, updatedAccessories);
       }
     } else {
       updateAccessoryQuantity(cartItemId, accessoryIndex, newQuantity);
@@ -127,7 +133,7 @@ const CheckoutPage = () => {
 
   // Handle removing accessories
   const handleRemoveAccessory = (cartItemId, accessoryIndex) => {
-    if (confirm('Are you sure you want to remove this accessory?')) {
+    if (confirm(t('checkout.confirmRemoveAccessory'))) {
       const item = cart.items.find(item => item.cartItemId === cartItemId);
       if (item) {
         const updatedAccessories = item.accessories.filter((_, index) => index !== accessoryIndex);
@@ -588,7 +594,7 @@ const CheckoutPage = () => {
                                 <button
                                   className={styles.quantityButton}
                                   onClick={() => handleAccessoryQuantityChange(item.cartItemId, index, accessoryQuantity - 1)}
-                                  disabled={accessoryQuantity <= 0}
+                                  disabled={accessoryQuantity === 0}
                                   aria-label="Decrease accessory quantity"
                                 >
                                   −
@@ -597,6 +603,7 @@ const CheckoutPage = () => {
                                 <button
                                   className={styles.quantityButton}
                                   onClick={() => handleAccessoryQuantityChange(item.cartItemId, index, accessoryQuantity + 1)}
+                                  disabled={accessoryQuantity >= item.quantity}
                                   aria-label="Increase accessory quantity"
                                 >
                                   +

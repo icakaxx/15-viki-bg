@@ -147,6 +147,15 @@ const cartReducer = (state, action) => {
         if (isMatch) {
           // Recalculate item total price for enhanced items
           const updatedItem = { ...item, quantity };
+          
+          // Adjust accessory quantities if they exceed the new product quantity
+          if (updatedItem.accessories && updatedItem.accessories.length > 0) {
+            updatedItem.accessories = updatedItem.accessories.map(accessory => ({
+              ...accessory,
+              quantity: Math.min(accessory.quantity || quantity, quantity)
+            }));
+          }
+          
           // Always recalculate since accessories now scale with quantity
           updatedItem.itemTotalPrice = calculateItemTotal(updatedItem);
           return updatedItem;
