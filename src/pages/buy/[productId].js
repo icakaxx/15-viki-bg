@@ -293,8 +293,8 @@ const ProductDetailPage = () => {
       INSTALLATION_PRICE_PER_UNIT
     );
 
-    // Navigate to checkout
-    router.push('/checkout');
+    // Navigate back to buy page
+    router.push('/buy');
   };
 
   // Loading state

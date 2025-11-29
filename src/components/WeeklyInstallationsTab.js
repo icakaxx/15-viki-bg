@@ -558,16 +558,12 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
       const baseUrl = window.location.origin || `http://localhost:${window.location.port || '3008'}`;
       const apiUrl = `${baseUrl}/api/cancel-installation`;
       const response = await fetch(apiUrl, {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          installation_id: selectedInstallation.id,
-          order_id: selectedInstallation.orderId,
-          admin_id: ADMIN_ID,
-          reason: t('admin.installations.messages.cancelReason'),
-          delete_from_db: true
+          searchId: selectedInstallation.orderId
         })
       });
 
@@ -605,15 +601,12 @@ export default function WeeklyInstallationsTab({ onInstallationCancelled, onInst
       const cancelApiUrl = `${baseUrl}/api/cancel-installation`;
       
       const cancelResponse = await fetch(cancelApiUrl, {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          installation_id: selectedInstallation.id,
-          order_id: selectedInstallation.orderId,
-          admin_id: ADMIN_ID,
-          reason: t('admin.installations.messages.cancelReason')
+          searchId: selectedInstallation.orderId
         })
       });
 

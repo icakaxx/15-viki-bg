@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Page Styles/ContactPage.module.css';
 
 const ContactPage = () => {
   const { t } = useTranslation('common');
-  const [mapUrl, setMapUrl] = useState('');
+  // Google Maps embed URL without API key - using coordinates
+  const mapUrl = 'https://maps.google.com/maps?q=43.142072,24.718314&t=&z=15&ie=UTF8&iwloc=&output=embed';
+  
   const contactInfo = [
     {
       icon: '📞',
@@ -62,11 +64,6 @@ const ContactPage = () => {
     }
   ];
 
-  useEffect(() => {
-    fetch('/api/maps-embed-url')
-      .then(res => res.json())
-      .then(data => setMapUrl(data.url));
-  }, []);
 
   return (
     <>
@@ -293,7 +290,7 @@ const ContactPage = () => {
                     loading="lazy"
                     allowFullScreen
                     referrerPolicy="no-referrer-when-downgrade"
-                    src={mapUrl || ''}
+                    src={mapUrl}
                   ></iframe>
                 </div>
                 <div className={styles.buttonsCol}>

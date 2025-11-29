@@ -10,6 +10,13 @@ const CheckoutPage = () => {
   const { cart, updateQuantity, removeFromCart, updateItemAccessories, updateAccessoryQuantity, updateItemInstallation, clearCart, formatPrice, formatPriceEUR } = useCart();
   const { t } = useTranslation('common');
 
+  // State for all available accessories
+  const [allAccessories, setAllAccessories] = useState([]);
+  const [accessoriesLoading, setAccessoriesLoading] = useState(true);
+
+  // Fixed installation price per AC unit
+  const INSTALLATION_PRICE_PER_UNIT = 300.00;
+
   // Form state
   const [formData, setFormData] = useState({
     // Personal Information
@@ -41,6 +48,27 @@ const CheckoutPage = () => {
   const [cardFormValid, setCardFormValid] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
 
+  // Fetch all available accessories
+  useEffect(() => {
+    const fetchAccessories = async () => {
+      try {
+        setAccessoriesLoading(true);
+        const response = await fetch('/api/get-accessories');
+        const data = await response.json();
+        if (response.ok) {
+          setAllAccessories(data.accessories || []);
+        }
+      } catch (error) {
+        console.error('Error fetching accessories:', error);
+        setAllAccessories([]);
+      } finally {
+        setAccessoriesLoading(false);
+      }
+    };
+
+    fetchAccessories();
+  }, []);
+
   // Handle card form validation
   const handleCardValidationChange = (isValid) => {
     setCardFormValid(isValid);
@@ -59,6 +87,11 @@ const CheckoutPage = () => {
       ...prev,
       [sectionKey]: !prev[sectionKey]
     }));
+  };
+
+  // Make sure installation uses the correct price from cart item or fallback to constant
+  const getInstallationPrice = (item) => {
+    return item.installationPrice || INSTALLATION_PRICE_PER_UNIT;
   };
 
   // Handle quantity changes for main product
@@ -147,6 +180,47 @@ const CheckoutPage = () => {
     updateItemAccessories(cartItemId, updatedAccessories);
   };
 
+  // Check if accessory is already selected for this cart item
+  const isAccessorySelected = (cartItemId, accessoryId) => {
+    const item = cart.items.find(item => item.cartItemId === cartItemId);
+    if (!item || !item.accessories) return false;
+    return item.accessories.some(acc => acc.AccessoryID === accessoryId);
+  };
+
+  // Get accessory quantity for a cart item
+  const getAccessoryQuantity = (cartItemId, accessoryId) => {
+    const item = cart.items.find(item => item.cartItemId === cartItemId);
+    if (!item || !item.accessories) return 0;
+    const accessory = item.accessories.find(acc => acc.AccessoryID === accessoryId);
+    return accessory ? (accessory.quantity || item.quantity) : 0;
+  };
+
+  // Toggle accessory for a cart item
+  const handleToggleAccessory = (cartItemId, accessory) => {
+    const item = cart.items.find(item => item.cartItemId === cartItemId);
+    if (!item) return;
+
+    const isSelected = isAccessorySelected(cartItemId, accessory.AccessoryID);
+    
+    if (isSelected) {
+      // Remove accessory
+      const updatedAccessories = item.accessories.filter(acc => acc.AccessoryID !== accessory.AccessoryID);
+      updateCartItemAccessories(cartItemId, updatedAccessories);
+    } else {
+      // Add accessory with quantity = 1
+      const newAccessory = { ...accessory, quantity: 1 };
+      const updatedAccessories = [...(item.accessories || []), newAccessory];
+      updateCartItemAccessories(cartItemId, updatedAccessories);
+    }
+  };
+
+  // Get accessory index in cart item
+  const getAccessoryIndex = (cartItemId, accessoryId) => {
+    const item = cart.items.find(item => item.cartItemId === cartItemId);
+    if (!item || !item.accessories) return -1;
+    return item.accessories.findIndex(acc => acc.AccessoryID === accessoryId);
+  };
+
   // Calculate totals from cart (installation costs are now handled per unit in cart)
   const grandTotal = cart.totalPrice;
 
@@ -198,6 +272,18 @@ const CheckoutPage = () => {
   const isPaymentSectionEnabled = () => {
     return isPersonalInfoComplete() && isInvoiceInfoComplete();
   };
+
+  // Check if any cart items have installation
+  const hasInstallation = () => {
+    return cart.items.some(item => item.installation === true);
+  };
+
+  // Reset payment method if office is selected but installation is added
+  useEffect(() => {
+    if (formData.paymentMethod === 'office' && hasInstallation()) {
+      setFormData(prev => ({ ...prev, paymentMethod: '' }));
+    }
+  }, [cart.items, formData.paymentMethod]);
 
   // Check if submit button should be disabled
   const isSubmitButtonDisabled = () => {
@@ -577,82 +663,116 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
-                {/* Accessories */}
-                {item.accessories && item.accessories.length > 0 && (
-                  <div className={styles.accessoriesSection}>
-                    <div className={styles.accessoriesTitle}>{t('productDetail.accessories')}:</div>
-                    {item.accessories.map((accessory, index) => {
-                      const accessoryQuantity = accessory.quantity || item.quantity;
+                {/* Accessories - Always show all available accessories */}
+                <div className={styles.accessoriesSection}>
+                  <div className={styles.accessoriesTitle}>{t('productDetail.accessories')}:</div>
+                  {accessoriesLoading ? (
+                    <div style={{ padding: '1rem', color: '#666' }}>
+                      {t('productDetail.loadingAccessories')}...
+                    </div>
+                  ) : allAccessories.length > 0 ? (
+                    allAccessories.map((accessory) => {
+                      const isSelected = isAccessorySelected(item.cartItemId, accessory.AccessoryID);
+                      const accessoryQuantity = getAccessoryQuantity(item.cartItemId, accessory.AccessoryID);
+                      const accessoryIndex = getAccessoryIndex(item.cartItemId, accessory.AccessoryID);
+                      
                       return (
-                        <div key={index} className={styles.accessoryItem}>
+                        <div key={accessory.AccessoryID} className={styles.accessoryItem}>
                           <div className={styles.accessoryDetails}>
-                            <span className={styles.accessoryName}>
-            {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
-                            </span>
-                            <div className={styles.accessoryQuantityControls}>
-                              <div className={styles.quantitySelector}>
-                                <button
-                                  className={styles.quantityButton}
-                                  onClick={() => handleAccessoryQuantityChange(item.cartItemId, index, accessoryQuantity - 1)}
-                                  disabled={accessoryQuantity === 0}
-                                  aria-label="Decrease accessory quantity"
-                                >
-                                  −
-                                </button>
-                                <span className={styles.quantityValue}>{accessoryQuantity}</span>
-                                <button
-                                  className={styles.quantityButton}
-                                  onClick={() => handleAccessoryQuantityChange(item.cartItemId, index, accessoryQuantity + 1)}
-                                  disabled={accessoryQuantity >= item.quantity}
-                                  aria-label="Increase accessory quantity"
-                                >
-                                  +
-                                </button>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleAccessory(item.cartItemId, accessory)}
+                                style={{ cursor: 'pointer' }}
+                              />
+                              <span className={styles.accessoryName}>
+                                {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
+                              </span>
+                            </label>
+                            {isSelected && (
+                              <div className={styles.accessoryQuantityControls}>
+                                <div className={styles.quantitySelector}>
+                                  <button
+                                    className={styles.quantityButton}
+                                    onClick={() => handleAccessoryQuantityChange(item.cartItemId, accessoryIndex, accessoryQuantity - 1)}
+                                    disabled={accessoryQuantity <= 1}
+                                    aria-label="Decrease accessory quantity"
+                                  >
+                                    −
+                                  </button>
+                                  <span className={styles.quantityValue}>{accessoryQuantity}</span>
+                                  <button
+                                    className={styles.quantityButton}
+                                    onClick={() => handleAccessoryQuantityChange(item.cartItemId, accessoryIndex, accessoryQuantity + 1)}
+                                    disabled={accessoryQuantity >= item.quantity}
+                                    aria-label="Increase accessory quantity"
+                                  >
+                                    +
+                                  </button>
+                                </div>
                               </div>
-                              <button
-                                className={styles.removeButton}
-                                onClick={() => handleRemoveAccessory(item.cartItemId, index)}
-                                aria-label="Remove accessory"
-                                title="Remove accessory"
-                              >
-                                🗑️
-                              </button>
-                            </div>
+                            )}
                           </div>
                           <div className={styles.accessoryPrice}>
-                            <div>{formatPrice(accessory.Price * accessoryQuantity)}</div>
-                            <div className={styles.itemPriceEur}>{formatPriceEUR(accessory.Price * accessoryQuantity)}</div>
+                            {isSelected ? (
+                              <>
+                                <div>{formatPrice(accessory.Price * accessoryQuantity)}</div>
+                                <div className={styles.itemPriceEur}>{formatPriceEUR(accessory.Price * accessoryQuantity)}</div>
+                              </>
+                            ) : (
+                              <>
+                                <div style={{ color: '#999' }}>{formatPrice(accessory.Price)}</div>
+                                <div className={styles.itemPriceEur} style={{ color: '#999' }}>{formatPriceEUR(accessory.Price)}</div>
+                              </>
+                            )}
                           </div>
                         </div>
                       );
-                    })}
-                  </div>
-                )}
+                    })
+                  ) : (
+                    <div style={{ padding: '1rem', color: '#666' }}>
+                      {t('productDetail.noAccessories')}
+                    </div>
+                  )}
+                </div>
 
-                {/* Installation */}
-                {item.installation && (
-                  <div className={styles.installationSection}>
-                    <div className={styles.installationItem}>
-                      <div className={styles.installationDetails}>
+                {/* Installation - Always show installation option */}
+                <div className={styles.installationSection}>
+                  <div className={styles.installationItem}>
+                    <div className={styles.installationDetails}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={item.installation || false}
+                          onChange={(e) => updateCartItemInstallation(item.cartItemId, e.target.checked)}
+                          style={{ cursor: 'pointer' }}
+                        />
                         <span className={styles.installationName}>
-            {t('productDetail.installation.title')}
+                          {t('productDetail.installation.title')} ({t('productDetail.installation.perUnit')})
                         </span>
-                        <button
-                          className={styles.removeInstallationButton}
-                          onClick={() => handleRemoveInstallation(item.cartItemId)}
-                          aria-label="Remove installation service"
-                          title="Remove installation"
-                        >
-                          🗑️ {t('checkout.removeInstallation')}
-                        </button>
-                      </div>
-                      <div className={styles.installationPrice}>
-                        <div>{formatPrice((item.installationPrice || 0) * item.quantity)}</div>
-                        <div className={styles.itemPriceEur}>{formatPriceEUR((item.installationPrice || 0) * item.quantity)}</div>
-                      </div>
+                      </label>
+                      {item.installation && (
+                        <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+                          {t('productDetail.installation.description')}
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.installationPrice}>
+                      {item.installation ? (
+                        <>
+                          <div>{formatPrice(getInstallationPrice(item) * item.quantity)}</div>
+                          <div className={styles.itemPriceEur}>{formatPriceEUR(getInstallationPrice(item) * item.quantity)}</div>
+                        </>
+                      ) : (
+                        <>
+                          <div style={{ color: '#999' }}>{formatPrice(getInstallationPrice(item))}</div>
+                          <div className={styles.itemPriceEur} style={{ color: '#999' }}>{formatPriceEUR(getInstallationPrice(item))}</div>
+                        </>
+                      )}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             ))}
           </div>
@@ -934,30 +1054,34 @@ const CheckoutPage = () => {
             {expandedSections.payment && (
               <div className={styles.accordionContent}>
                 <div className={styles.paymentOptions}>
-                  <label className={styles.paymentOption}>
+                  <label className={`${styles.paymentOption} ${hasInstallation() ? styles.disabled : ''}`} style={hasInstallation() ? { opacity: 0.5, cursor: 'not-allowed' } : {}}>
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="office"
                       checked={formData.paymentMethod === 'office'}
                       onChange={() => handleInputChange('paymentMethod', 'office')}
+                      disabled={hasInstallation()}
+                      style={hasInstallation() ? { cursor: 'not-allowed' } : {}}
                     />
                     <div className={styles.paymentDetails}>
-                      <strong>{t('checkout.form.payment.office')}</strong>
+                      <strong>{t('checkout.form.payment.office')} {hasInstallation() && <span style={{ color: '#999', fontSize: '0.875rem' }}>({t('checkout.form.payment.notAvailableWithInstallation') || 'Not available with installation'})</span>}</strong>
                       <small>{t('checkout.form.payment.officeHelp')}</small>
                     </div>
                   </label>
                   
-                  <label className={styles.paymentOption}>
+                  <label className={`${styles.paymentOption} ${styles.disabled}`} style={{ opacity: 0.5, cursor: 'not-allowed' }}>
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="online"
                       checked={formData.paymentMethod === 'online'}
                       onChange={() => handleInputChange('paymentMethod', 'online')}
+                      disabled={true}
+                      style={{ cursor: 'not-allowed' }}
                     />
                     <div className={styles.paymentDetails}>
-                      <strong>{t('checkout.form.payment.online')}</strong>
+                      <strong>{t('checkout.form.payment.online')} <span style={{ color: '#999', fontSize: '0.875rem' }}>({t('checkout.form.payment.comingSoon') || 'Coming Soon'})</span></strong>
                       <small>{t('checkout.form.payment.onlineHelp')}</small>
                     </div>
                   </label>
@@ -1021,7 +1145,8 @@ const CheckoutPage = () => {
             >
               {isSubmitting ? t('checkout.form.submitting') : t('checkout.form.submit')}
             </button>
-            {formData.paymentMethod === 'online' && (
+            {/* Online payment notes hidden since online payment is disabled */}
+            {formData.paymentMethod === 'online' && false && (
               <div className={styles.onlinePaymentNote}>
                 <p>{t('checkout.form.onlinePaymentNote')}</p>
                 {!cardFormValid && (

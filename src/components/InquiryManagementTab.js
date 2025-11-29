@@ -615,7 +615,7 @@ export default function InquiryManagementTab() {
                       minHeight: '100px',
                       resize: 'vertical'
                     }}
-                    placeholder="Add admin notes..."
+                    placeholder="Добави бележки..."
                   />
                 </div>
 

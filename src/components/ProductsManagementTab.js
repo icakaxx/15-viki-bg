@@ -14,6 +14,8 @@ export default function ProductsManagementTab() {
     const [sortOrder, setSortOrder] = useState('desc');
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [updatingStockId, setUpdatingStockId] = useState(null);
+    const [stockValues, setStockValues] = useState({});
 
     // Form state
     const [showForm, setShowForm] = useState(false);
@@ -454,10 +456,18 @@ export default function ProductsManagementTab() {
 
             setProducts(transformedProducts);
             setFilteredProducts(transformedProducts);
+            
+            // Initialize stock values for quick update
+            const initialStockValues = {};
+            transformedProducts.forEach(product => {
+                initialStockValues[product.id] = product.stock || 0;
+            });
+            setStockValues(initialStockValues);
         } catch (error) {
             // Set empty arrays on error
             setProducts([]);
             setFilteredProducts([]);
+            setStockValues({});
         }
     };
 
@@ -787,6 +797,62 @@ export default function ProductsManagementTab() {
         } catch (error) {
             alert(t('admin.products.deleteError') + ' ' + error.message);
         }
+    };
+
+    const handleQuickStockUpdate = async (productId) => {
+        const newStock = stockValues[productId];
+        
+        if (newStock === undefined || newStock === null || isNaN(newStock)) {
+            alert('Моля, въведете валидно количество');
+            return;
+        }
+
+        setUpdatingStockId(productId);
+        try {
+            console.log('Sending stock update request:', { id: productId, stock: parseInt(newStock) });
+            
+            const response = await fetch('/api/update-product-stock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    id: productId, 
+                    stock: parseInt(newStock) 
+                }),
+            });
+
+            const data = await response.json();
+            console.log('Stock update response:', data);
+
+            if (response.ok) {
+                // Update the local products state
+                setProducts(prev => prev.map(p => 
+                    p.id === productId ? { ...p, stock: parseInt(newStock) } : p
+                ));
+                setFilteredProducts(prev => prev.map(p => 
+                    p.id === productId ? { ...p, stock: parseInt(newStock) } : p
+                ));
+                alert('Количеството е обновено успешно!');
+            } else {
+                const errorMsg = data.error || data.message || 'Неизвестна грешка';
+                console.error('Stock update failed:', errorMsg);
+                alert('Грешка при обновяване: ' + errorMsg);
+            }
+        } catch (error) {
+            console.error('Stock update exception:', error);
+            const errorMsg = error?.message || error?.toString() || 'Мрежова грешка';
+            alert('Грешка при обновяване на количество: ' + errorMsg);
+        } finally {
+            setUpdatingStockId(null);
+        }
+    };
+
+    const handleStockChange = (productId, value) => {
+        setStockValues(prev => ({
+            ...prev,
+            [productId]: value
+        }));
     };
 
     return (
@@ -1621,6 +1687,25 @@ export default function ProductsManagementTab() {
                                 <div className={styles.productMain}>
                                     <h4>{product.brand} {product.model}</h4>
                                     <p>Цена: €{product.price}</p>
+                                    <div className={styles.stockUpdateContainer}>
+                                        <label className={styles.stockLabel}>
+                                            Налични:
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={stockValues[product.id] !== undefined ? stockValues[product.id] : product.stock || 0}
+                                            onChange={(e) => handleStockChange(product.id, e.target.value)}
+                                            min="0"
+                                            className={styles.stockInput}
+                                        />
+                                        <button
+                                            onClick={() => handleQuickStockUpdate(product.id)}
+                                            disabled={updatingStockId === product.id}
+                                            className={`${styles.stockUpdateButton} ${updatingStockId === product.id ? styles.updating : ''}`}
+                                        >
+                                            {updatingStockId === product.id ? '⏳' : '✓ Обнови'}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className={styles.productActionsRow}>
                                     <button
@@ -1648,6 +1733,8 @@ export default function ProductsManagementTab() {
         </>
     );
 }
+
+
 
 
 

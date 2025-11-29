@@ -15,6 +15,16 @@ const nextConfig = {
     ],
   },
   i18n: nextI18NextConfig.i18n,
+  // Redirect from home page to /buy
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/buy',
+        permanent: false, // Use 307 temporary redirect
+      },
+    ];
+  },
 };
 
 export default nextConfig;

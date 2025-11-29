@@ -571,6 +571,8 @@
         "office": "Office Pickup",
         "online": "Online Payment",
         "cash": "Cash on Delivery",
+        "comingSoon": "Coming Soon",
+        "notAvailableWithInstallation": "Not available with installation",
         "onlineHelp": "Bank transfer or card payment",
         "officeHelp": "Free pickup from our office",
         "cashHelp": "Payment upon delivery",

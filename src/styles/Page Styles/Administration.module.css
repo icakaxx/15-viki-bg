@@ -4050,7 +4050,7 @@
 }
 
 /* Desktop Media Query */
-@media (min-width: 768px) {
+@media (min-width: 1025px) {
   .desktopOnly {
     display: block;
   }
@@ -4066,7 +4066,7 @@
 }
 
 /* Mobile Combined Modal - Stack Vertically */
-@media (max-width: 767px) {
+@media (max-width: 1024px) {
   .combinedModal {
     width: 95vw;
     height: 95vh;
@@ -4330,5 +4330,117 @@
   .updatePriceButton {
     align-self: stretch;
     width: 100%;
+  }
+}
+
+/* Quick Stock Update Styles */
+.stockUpdateContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.stockLabel {
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: #495057;
+}
+
+.stockInput {
+  width: 70px;
+  padding: 0.4rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.stockInput:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.stockUpdateButton {
+  padding: 0.4rem 0.8rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.stockUpdateButton:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.stockUpdateButton:disabled,
+.stockUpdateButton.updating {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Mobile responsive styles for stock update */
+@media (max-width: 768px) {
+  .stockUpdateContainer {
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e9ecef;
+    width: 100%;
+  }
+  
+  .stockLabel {
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  
+  .stockInput {
+    width: 60px;
+    padding: 0.5rem 0.4rem;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  
+  .stockUpdateButton {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+    flex: 1;
+    min-width: 80px;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .stockUpdateContainer {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+  
+  .stockLabel {
+    font-size: 0.8rem;
+  }
+  
+  .stockInput {
+    width: 55px;
+    padding: 0.45rem 0.3rem;
+    font-size: 0.8rem;
+  }
+  
+  .stockUpdateButton {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.75rem;
+    min-width: 70px;
   }
 }
