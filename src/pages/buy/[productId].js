@@ -6,6 +6,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { createClient } from '@supabase/supabase-js';
 import Image from 'next/image';
+import path from 'path';
 import { useCart } from '../../contexts/CartContext';
 import styles from '../../styles/Page Styles/ProductDetail.module.css';
 import { useConsent } from '../../components/ConsentProvider';
@@ -793,6 +794,15 @@ export async function getServerSideProps({ params, locale }) {
   
   const productId = params.productId;
   
+  // i18n config for serverSideTranslations (inline to avoid config file issues in serverless)
+  const i18nConfig = {
+    i18n: {
+      defaultLocale: 'bg',
+      locales: ['bg', 'en'],
+    },
+    localePath: path.resolve('./public/locales'),
+  };
+  
   // Check if Supabase is configured
   console.log('[SSR] Checking env vars - URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL, 'KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
   
@@ -800,7 +810,7 @@ export async function getServerSideProps({ params, locale }) {
     console.error('[SSR] ERROR: Missing Supabase environment variables!');
     return {
       props: {
-        ...(await serverSideTranslations(locale || 'bg', ['common'])),
+        ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
         initialProduct: null,
         initialAccessories: [],
         error: 'ENV_VARS_MISSING',
@@ -828,7 +838,7 @@ export async function getServerSideProps({ params, locale }) {
       console.error('[SSR] Supabase error fetching product:', productError);
       return {
         props: {
-          ...(await serverSideTranslations(locale || 'bg', ['common'])),
+          ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
           initialProduct: null,
           initialAccessories: [],
           error: 'PRODUCT_FETCH_ERROR',
@@ -840,7 +850,7 @@ export async function getServerSideProps({ params, locale }) {
       console.error('[SSR] No product data returned for ID:', productId);
       return {
         props: {
-          ...(await serverSideTranslations(locale || 'bg', ['common'])),
+          ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
           initialProduct: null,
           initialAccessories: [],
           error: 'PRODUCT_NOT_FOUND',
@@ -915,7 +925,7 @@ export async function getServerSideProps({ params, locale }) {
     console.log('[SSR] Returning props with product:', transformedProduct.ProductID);
     return {
       props: {
-        ...(await serverSideTranslations(locale || 'bg', ['common'])),
+        ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
         initialProduct: transformedProduct,
         initialAccessories: transformedAccessories,
         error: null,
@@ -926,7 +936,7 @@ export async function getServerSideProps({ params, locale }) {
     console.error('[SSR] Error stack:', error.stack);
     return {
       props: {
-        ...(await serverSideTranslations(locale || 'bg', ['common'])),
+        ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
         initialProduct: null,
         initialAccessories: [],
         error: 'FATAL_ERROR',

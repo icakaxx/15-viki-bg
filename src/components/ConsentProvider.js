@@ -13,11 +13,20 @@ export const useConsent = () => {
 };
 
 export const ConsentProvider = ({ children, termsText }) => {
-  const [hasConsent, setHasConsent] = useState(false);
+  const [hasConsent, setHasConsent] = useState(true); // Start with true to match server render
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+
+  // Set isClient flag after mount
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    // Only check consent on client side
+    if (!isClient) return;
+    
     // Check consent status on mount
     const checkConsent = () => {
       const accepted = consentManager.hasAcceptedTerms();
@@ -49,17 +58,21 @@ export const ConsentProvider = ({ children, termsText }) => {
     // Check initial consent
     checkConsent();
 
-    // Add event listeners
-    window.addEventListener('termsAccepted', handleTermsAccepted);
-    window.addEventListener('termsWithdrawn', handleTermsWithdrawn);
-    window.addEventListener('showTermsModal', handleShowTermsModal);
+    // Add event listeners (only on client)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('termsAccepted', handleTermsAccepted);
+      window.addEventListener('termsWithdrawn', handleTermsWithdrawn);
+      window.addEventListener('showTermsModal', handleShowTermsModal);
+    }
 
     return () => {
-      window.removeEventListener('termsAccepted', handleTermsAccepted);
-      window.removeEventListener('termsWithdrawn', handleTermsWithdrawn);
-      window.removeEventListener('showTermsModal', handleShowTermsModal);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('termsAccepted', handleTermsAccepted);
+        window.removeEventListener('termsWithdrawn', handleTermsWithdrawn);
+        window.removeEventListener('showTermsModal', handleShowTermsModal);
+      }
     };
-  }, []);
+  }, [isClient]);
 
   const handleAcceptTerms = () => {
     consentManager.acceptTerms();
