@@ -8,7 +8,7 @@ import { useCart } from '../../contexts/CartContext';
 import styles from '../../styles/Page Styles/ProductDetail.module.css';
 import { useConsent } from '../../components/ConsentProvider';
 
-const ProductDetailPage = () => {
+const ProductDetailPage = ({ initialProduct, initialAccessories }) => {
   const router = useRouter();
   const { productId, qty } = router.query;
   const { t } = useTranslation('common');
@@ -82,15 +82,15 @@ const ProductDetailPage = () => {
     return count;
   };
 
-  // State management
-  const [product, setProduct] = useState(null);
-  const [accessories, setAccessories] = useState([]);
+  // State management - Initialize with server-side data
+  const [product, setProduct] = useState(initialProduct);
+  const [accessories, setAccessories] = useState(initialAccessories || []);
   const [selectedAccessories, setSelectedAccessories] = useState([]);
   const [installationSelected, setInstallationSelected] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [accessoriesLoading, setAccessoriesLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(initialProduct ? null : 'Product not found');
   const [activeTab, setActiveTab] = useState('overview');
 
   // Fixed installation price per AC unit
@@ -124,65 +124,19 @@ const ProductDetailPage = () => {
     </div>
   );
 
-  // Fetch product data
+  // Update product if props change (for client-side navigation)
   useEffect(() => {
-    if (!productId) return;
-
-    const fetchProductData = async () => {
-      setLoading(true);
+    if (initialProduct) {
+      setProduct(initialProduct);
       setError(null);
+    }
+  }, [initialProduct]);
 
-      try {
-        // Fetch product details
-        // Use typeof window check to avoid SSR issues
-        const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-        if (!baseUrl) {
-          throw new Error('Unable to determine base URL');
-        }
-        
-        const productApiUrl = `${baseUrl}/api/get-product?id=${productId}`;
-        const productResponse = await fetch(productApiUrl);
-        const productData = await productResponse.json();
-
-        if (!productResponse.ok) {
-          throw new Error(productData.error || 'Failed to load product');
-        }
-
-        if (!productData.product) {
-          throw new Error('Product data is missing');
-        }
-
-        setProduct(productData.product);
-        setLoading(false);
-
-        // Fetch accessories separately (non-blocking)
-        try {
-          setAccessoriesLoading(true);
-          const accessoriesApiUrl = `${baseUrl}/api/get-accessories`;
-          const accessoriesResponse = await fetch(accessoriesApiUrl);
-          const accessoriesData = await accessoriesResponse.json();
-
-          if (accessoriesResponse.ok) {
-            setAccessories(accessoriesData.accessories || []);
-          } else {
-            setAccessories([]); // Fallback to empty array
-          }
-        } catch (accessoryErr) {
-          console.error('Error fetching accessories:', accessoryErr);
-          setAccessories([]); // Fallback to empty array
-        } finally {
-          setAccessoriesLoading(false);
-        }
-
-      } catch (err) {
-        console.error('Error fetching product:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchProductData();
-  }, [productId]);
+  useEffect(() => {
+    if (initialAccessories) {
+      setAccessories(initialAccessories);
+    }
+  }, [initialAccessories]);
 
   // Price calculations
   const formatPrice = (price) => {
@@ -815,21 +769,118 @@ const ProductDetailPage = () => {
   );
 };
 
-export async function getStaticPaths() {
-  return {
-    paths: [],
-    fallback: 'blocking'
-  };
-}
-
-export async function getStaticProps({ locale }) {
+export async function getServerSideProps({ params, locale }) {
   const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+  const { createClient } = await import('@supabase/supabase-js');
   
-  return {
-    props: {
-      ...(await serverSideTranslations(locale || 'bg', ['common'])),
-    },
-  };
+  const productId = params.productId;
+  
+  // Check if Supabase is configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return {
+      props: {
+        ...(await serverSideTranslations(locale || 'bg', ['common'])),
+        initialProduct: null,
+        initialAccessories: [],
+      },
+    };
+  }
+
+  try {
+    // Initialize Supabase client
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    // Fetch product data
+    const { data: productData, error: productError } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', productId)
+      .single();
+
+    if (productError || !productData) {
+      return {
+        props: {
+          ...(await serverSideTranslations(locale || 'bg', ['common'])),
+          initialProduct: null,
+          initialAccessories: [],
+        },
+      };
+    }
+
+    // Transform product data
+    const transformedProduct = {
+      ProductID: productData.id,
+      Brand: productData.brand,
+      Model: productData.model,
+      Colour: productData.colour,
+      CapacityBTU: productData.capacity_btu,
+      EnergyRating: productData.energy_rating,
+      Price: productData.price,
+      PreviousPrice: productData.previous_price,
+      ImageURL: productData.image_url,
+      Stock: productData.stock,
+      Discount: productData.discount,
+      IsArchived: productData.is_archived,
+      CreatedAt: productData.created_at,
+      UpdatedAt: productData.updated_at,
+      COP: productData.cop,
+      SCOP: productData.scop,
+      PowerConsumption: productData.power_consumption,
+      OperatingTempRange: productData.operating_temp_range,
+      IndoorDimensions: productData.indoor_dimensions,
+      OutdoorDimensions: productData.outdoor_dimensions,
+      IndoorWeight: productData.indoor_weight,
+      OutdoorWeight: productData.outdoor_weight,
+      NoiseLevel: productData.noise_level,
+      AirFlow: productData.air_flow,
+      Warranty: productData.warranty_period,
+      WarrantyPeriod: productData.warranty_period,
+      RoomSizeRecommendation: productData.room_size_recommendation,
+      InstallationType: productData.installation_type,
+      Description: productData.description || `Premium ${productData.brand} ${productData.model} air conditioner with ${productData.energy_rating} energy efficiency rating.`,
+      Features: productData.features ? (typeof productData.features === 'string' ? JSON.parse(productData.features) : productData.features) : [],
+      IsFeatured: productData.is_featured || false,
+      IsBestseller: productData.is_bestseller || false,
+      IsNew: productData.is_new || false,
+    };
+
+    // Fetch accessories
+    const { data: accessoriesData } = await supabase
+      .from('accessories')
+      .select('*')
+      .order('price', { ascending: true });
+
+    const transformedAccessories = (accessoriesData || []).map(acc => ({
+      AccessoryID: acc.id,
+      Name: acc.name,
+      Description: '',
+      Price: acc.price || 0,
+      ImageURL: '/images/accessories/default.jpg',
+      Category: 'General',
+      IsAvailable: acc.active !== false,
+      CreatedAt: acc.created_at,
+    }));
+
+    return {
+      props: {
+        ...(await serverSideTranslations(locale || 'bg', ['common'])),
+        initialProduct: transformedProduct,
+        initialAccessories: transformedAccessories,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return {
+      props: {
+        ...(await serverSideTranslations(locale || 'bg', ['common'])),
+        initialProduct: null,
+        initialAccessories: [],
+      },
+    };
+  }
 }
 
 export default ProductDetailPage; 
