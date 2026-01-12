@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { createClient } from '@supabase/supabase-js';
 import Image from 'next/image';
 import { useCart } from '../../contexts/CartContext';
 import styles from '../../styles/Page Styles/ProductDetail.module.css';
@@ -770,9 +772,6 @@ const ProductDetailPage = ({ initialProduct, initialAccessories }) => {
 };
 
 export async function getServerSideProps({ params, locale }) {
-  const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
-  const { createClient } = await import('@supabase/supabase-js');
-  
   const productId = params.productId;
   
   // Check if Supabase is configured
