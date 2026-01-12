@@ -43,14 +43,6 @@ const transformProduct = (product) => {
     };
 };
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-let supabase = null;
-if (supabaseUrl && supabaseKey) {
-    supabase = createClient(supabaseUrl, supabaseKey);
-}
-
 export default async function handler(req, res) {
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -62,11 +54,22 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Product ID is required' });
     }
 
-
-    // Check if Supabase is configured
-    if (!supabase) {
-        return res.status(500).json({ error: 'Database not configured' });
+    // Check environment variables
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return res.status(500).json({ 
+            error: 'Server configuration error - missing environment variables',
+            debug: {
+                url: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+                key: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+            }
+        });
     }
+
+    // Initialize Supabase client inside the handler to ensure env vars are loaded
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
 
     // Use Supabase if configured
     try {

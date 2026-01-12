@@ -42,22 +42,6 @@ const transformProduct = (product) => {
     };
 };
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-let supabase = null;
-try {
-  if (!supabaseUrl || !supabaseKey) {
-    // Supabase credentials are missing
-  } else {
-    supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: { persistSession: false }
-    });
-  }
-} catch (error) {
-  // Failed to initialize Supabase client
-}
-
 export default async function handler(req, res) {
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -73,16 +57,25 @@ export default async function handler(req, res) {
         offset = '0'
     } = req.query;
 
-    // If Supabase is not configured or failed to initialize
-    if (!supabase) {
+    // Check environment variables
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
         return res.status(500).json({ 
-            error: 'Database connection not available',
+            error: 'Server configuration error - missing environment variables',
             details: {
-                hasUrl: !!supabaseUrl,
-                hasKey: !!supabaseKey
+                url: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+                key: !!process.env.SUPABASE_SERVICE_ROLE_KEY
             }
         });
     }
+
+    // Initialize Supabase client inside the handler to ensure env vars are loaded
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY,
+        {
+            auth: { persistSession: false }
+        }
+    );
 
     // Use Supabase
     try {
