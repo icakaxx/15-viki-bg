@@ -266,7 +266,7 @@ const ProductDetailPage = ({ initialProduct, initialAccessories }) => {
     return (
       <>
         <Head>
-          <title>{t('productDetail.loading')} - {t('metaTitle')}</title>
+          <title>{`${t('productDetail.loading')} - ${t('metaTitle')}`}</title>
         </Head>
         <div className={styles.container}>
           <div className={styles.loading}>
@@ -282,7 +282,7 @@ const ProductDetailPage = ({ initialProduct, initialAccessories }) => {
     return (
       <>
         <Head>
-          <title>{t('productDetail.notFound')} - {t('metaTitle')}</title>
+          <title>{`${t('productDetail.notFound')} - ${t('metaTitle')}`}</title>
         </Head>
         <div className={styles.container}>
           <Link href="/buy" className={styles.backButton}>
