@@ -10,7 +10,14 @@ import { useCart } from '../../contexts/CartContext';
 import styles from '../../styles/Page Styles/ProductDetail.module.css';
 import { useConsent } from '../../components/ConsentProvider';
 
-const ProductDetailPage = ({ initialProduct, initialAccessories }) => {
+const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverError }) => {
+  console.log('[CLIENT] ProductDetailPage rendered with:', {
+    hasInitialProduct: !!initialProduct,
+    productId: initialProduct?.ProductID,
+    accessoriesCount: initialAccessories?.length || 0,
+    serverError: serverError
+  });
+
   const router = useRouter();
   const { productId, qty } = router.query;
   const { t } = useTranslation('common');
@@ -92,8 +99,18 @@ const ProductDetailPage = ({ initialProduct, initialAccessories }) => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [accessoriesLoading, setAccessoriesLoading] = useState(false);
-  const [error, setError] = useState(initialProduct ? null : 'Product not found');
+  const [error, setError] = useState(serverError || (initialProduct ? null : 'Product not found'));
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Debug log on mount
+  useEffect(() => {
+    console.log('[CLIENT] Component mounted with state:', {
+      hasProduct: !!product,
+      hasError: !!error,
+      productId: product?.ProductID,
+      serverError: serverError
+    });
+  }, []);
 
   // Fixed installation price per AC unit
   const INSTALLATION_PRICE_PER_UNIT = 300.00;
@@ -772,26 +789,34 @@ const ProductDetailPage = ({ initialProduct, initialAccessories }) => {
 };
 
 export async function getServerSideProps({ params, locale }) {
+  console.log('[SSR] getServerSideProps called for productId:', params?.productId);
+  
   const productId = params.productId;
   
   // Check if Supabase is configured
+  console.log('[SSR] Checking env vars - URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL, 'KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+  
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('[SSR] ERROR: Missing Supabase environment variables!');
     return {
       props: {
         ...(await serverSideTranslations(locale || 'bg', ['common'])),
         initialProduct: null,
         initialAccessories: [],
+        error: 'ENV_VARS_MISSING',
       },
     };
   }
 
   try {
+    console.log('[SSR] Initializing Supabase client...');
     // Initialize Supabase client
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
+    console.log('[SSR] Fetching product data for ID:', productId);
     // Fetch product data
     const { data: productData, error: productError } = await supabase
       .from('products')
@@ -799,16 +824,33 @@ export async function getServerSideProps({ params, locale }) {
       .eq('id', productId)
       .single();
 
-    if (productError || !productData) {
+    if (productError) {
+      console.error('[SSR] Supabase error fetching product:', productError);
       return {
         props: {
           ...(await serverSideTranslations(locale || 'bg', ['common'])),
           initialProduct: null,
           initialAccessories: [],
+          error: 'PRODUCT_FETCH_ERROR',
         },
       };
     }
 
+    if (!productData) {
+      console.error('[SSR] No product data returned for ID:', productId);
+      return {
+        props: {
+          ...(await serverSideTranslations(locale || 'bg', ['common'])),
+          initialProduct: null,
+          initialAccessories: [],
+          error: 'PRODUCT_NOT_FOUND',
+        },
+      };
+    }
+
+    console.log('[SSR] Product data fetched successfully:', productData.id, productData.brand, productData.model);
+
+    console.log('[SSR] Transforming product data...');
     // Transform product data
     const transformedProduct = {
       ProductID: productData.id,
@@ -846,11 +888,18 @@ export async function getServerSideProps({ params, locale }) {
       IsNew: productData.is_new || false,
     };
 
+    console.log('[SSR] Product transformed successfully. Fetching accessories...');
     // Fetch accessories
-    const { data: accessoriesData } = await supabase
+    const { data: accessoriesData, error: accessoriesError } = await supabase
       .from('accessories')
       .select('*')
       .order('price', { ascending: true });
+
+    if (accessoriesError) {
+      console.error('[SSR] Error fetching accessories:', accessoriesError);
+    } else {
+      console.log('[SSR] Fetched', accessoriesData?.length || 0, 'accessories');
+    }
 
     const transformedAccessories = (accessoriesData || []).map(acc => ({
       AccessoryID: acc.id,
@@ -863,20 +912,24 @@ export async function getServerSideProps({ params, locale }) {
       CreatedAt: acc.created_at,
     }));
 
+    console.log('[SSR] Returning props with product:', transformedProduct.ProductID);
     return {
       props: {
         ...(await serverSideTranslations(locale || 'bg', ['common'])),
         initialProduct: transformedProduct,
         initialAccessories: transformedAccessories,
+        error: null,
       },
     };
   } catch (error) {
-    console.error('Error fetching product:', error);
+    console.error('[SSR] FATAL ERROR in getServerSideProps:', error);
+    console.error('[SSR] Error stack:', error.stack);
     return {
       props: {
         ...(await serverSideTranslations(locale || 'bg', ['common'])),
         initialProduct: null,
         initialAccessories: [],
+        error: 'FATAL_ERROR',
       },
     };
   }

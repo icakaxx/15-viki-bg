@@ -44,27 +44,37 @@ const transformProduct = (product) => {
 };
 
 export default async function handler(req, res) {
+    console.log('[API] /api/get-product called with ID:', req.query.id);
+    
     if (req.method !== 'GET') {
+        console.log('[API] Method not allowed:', req.method);
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
     const { id } = req.query;
 
     if (!id) {
+        console.log('[API] No product ID provided');
         return res.status(400).json({ error: 'Product ID is required' });
     }
 
     // Check environment variables
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const hasKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+    console.log('[API] Environment check - URL:', hasUrl, 'KEY:', hasKey);
+    
+    if (!hasUrl || !hasKey) {
+        console.error('[API] Missing environment variables!');
         return res.status(500).json({ 
             error: 'Server configuration error - missing environment variables',
             debug: {
-                url: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-                key: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+                url: hasUrl,
+                key: hasKey
             }
         });
     }
 
+    console.log('[API] Initializing Supabase client...');
     // Initialize Supabase client inside the handler to ensure env vars are loaded
     const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -73,6 +83,7 @@ export default async function handler(req, res) {
 
     // Use Supabase if configured
     try {
+        console.log('[API] Querying database for product ID:', id);
         const { data, error } = await supabase
             .from('products')
             .select(`
@@ -113,26 +124,30 @@ export default async function handler(req, res) {
             .single();
 
         if (error) {
+            console.error('[API] Supabase query error:', error.code, error.message);
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Product not found' });
             }
-            console.error('Supabase error:', error);
             return res.status(500).json({ error: 'Database error', details: error.message });
         }
 
         if (!data) {
+            console.error('[API] No data returned for product ID:', id);
             return res.status(404).json({ error: 'Product not found' });
         }
 
+        console.log('[API] Product fetched successfully:', data.id, data.brand, data.model);
         // Transform product to match frontend expectations
         const transformedProduct = transformProduct(data);
         
+        console.log('[API] Returning product data');
         return res.status(200).json({ 
             product: transformedProduct
         });
 
     } catch (error) {
-        console.error('Unexpected error:', error);
+        console.error('[API] FATAL ERROR:', error);
+        console.error('[API] Error stack:', error.stack);
         return res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 } 
