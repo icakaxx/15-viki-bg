@@ -63,6 +63,11 @@ export default async function handler(req, res) {
     }
 
 
+    // Check if Supabase is configured
+    if (!supabase) {
+        return res.status(500).json({ error: 'Database not configured' });
+    }
+
     // Use Supabase if configured
     try {
         const { data, error } = await supabase
@@ -107,7 +112,13 @@ export default async function handler(req, res) {
         if (error) {
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Product not found' });
-            }  
+            }
+            console.error('Supabase error:', error);
+            return res.status(500).json({ error: 'Database error', details: error.message });
+        }
+
+        if (!data) {
+            return res.status(404).json({ error: 'Product not found' });
         }
 
         // Transform product to match frontend expectations
@@ -118,6 +129,7 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        return res.status(404).json({ error: 'Product not found' });
+        console.error('Unexpected error:', error);
+        return res.status(500).json({ error: 'Internal server error', details: error.message });
     }
 } 

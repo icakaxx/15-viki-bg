@@ -134,14 +134,22 @@ const ProductDetailPage = () => {
 
       try {
         // Fetch product details
-        // Force the correct port based on current server
-        const baseUrl = window.location.origin;
+        // Use typeof window check to avoid SSR issues
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+        if (!baseUrl) {
+          throw new Error('Unable to determine base URL');
+        }
+        
         const productApiUrl = `${baseUrl}/api/get-product?id=${productId}`;
         const productResponse = await fetch(productApiUrl);
         const productData = await productResponse.json();
 
         if (!productResponse.ok) {
           throw new Error(productData.error || 'Failed to load product');
+        }
+
+        if (!productData.product) {
+          throw new Error('Product data is missing');
         }
 
         setProduct(productData.product);
@@ -160,12 +168,14 @@ const ProductDetailPage = () => {
             setAccessories([]); // Fallback to empty array
           }
         } catch (accessoryErr) {
+          console.error('Error fetching accessories:', accessoryErr);
           setAccessories([]); // Fallback to empty array
         } finally {
           setAccessoriesLoading(false);
         }
 
       } catch (err) {
+        console.error('Error fetching product:', err);
         setError(err.message);
         setLoading(false);
       }
