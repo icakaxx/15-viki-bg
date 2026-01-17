@@ -981,11 +981,15 @@
         "cop": "COP (Коефициент на производителност)",
         "scop": "SCOP (Сезонен COP)",
         "powerConsumption": "Консумация на енергия",
+        "powerConsumptionCooling": "Консумация на мощност (охлаждане)",
+        "powerConsumptionHeating": "Консумация на мощност (отопление)",
         "refrigerantType": "Тип хладилен агент",
         "operatingTempRange": "Работен температурен диапазон",
         "copHint": "По-високо е по-добре (обикновено 3,5 - 5,0)",
         "scopHint": "Сезонна оценка на производителност",
         "powerHint": "напр. \"2,1 kW\" или \"1800W\"",
+        "powerCoolingHint": "напр. \"2,1 kW\" или \"1800W\"",
+        "powerHeatingHint": "напр. \"2,1 kW\" или \"1800W\"",
         "refrigerantHint": "R32 е най-екологичен",
         "tempRangeHint": "напр. \"-15°C до +50°C\""
       },
@@ -1045,6 +1049,8 @@
         "imageUpload": "Снимка на продукт",
         "scop": "SCOP (Сезонен COP)",
         "powerConsumption": "Консумация на мощност",
+        "powerConsumptionCooling": "Консумация на мощност (охлаждане)",
+        "powerConsumptionHeating": "Консумация на мощност (отопление)",
         "operatingTempRange": "Работен температурен диапазон",
         "dimensions": "Размери",
         "indoorDimensions": "Размери на вътрешното тяло",
@@ -1067,6 +1073,8 @@
         "copHint": "По-високо е по-добре (обикновено 3-6)",
         "scopHint": "За ефективност на отопление",
         "powerHint": "напр. 2,5 kW",
+        "powerCoolingHint": "напр. \"2,1 kW\" или \"1800W\"",
+        "powerHeatingHint": "напр. \"2,1 kW\" или \"1800W\"",
         "tempRangeHint": "напр. -15°C до +50°C",
         "dimensionsHint": "напр. 890×295×204 mm",
         "indoorDimensionsHint": "напр. 890×295×204 mm",
@@ -1137,6 +1145,24 @@
         "required": "Задължителен",
         "optional": "Незадължителен"
       },
+      "validation": {
+        "required": "Това поле е задължително",
+        "formValidationRequired": "⚠️ Валидация на формуляра",
+        "completeRequiredFields": "Трябва да попълните всички задължителни полета преди да изпратите:",
+        "fixIt": "Добре, ще го поправя",
+        "fieldRequired": "Задължително",
+        "missing": "Липсва:",
+        "requiredFieldsMissing": "задължителни полета липсват",
+        "brand": "Марката е задължителна",
+        "model": "Моделът е задължителен",
+        "price": "Цената е задължителна",
+        "capacityBtu": "Капацитетът (BTU) е задължителен",
+        "energyRating": "Енергийният клас е задължителен",
+        "colour": "Цветът е задължителен",
+        "stock": "Наличното количество е задължително",
+        "discount": "Отстъпката е задължителна",
+        "imageUrl": "URL на снимката е задължителен"
+      },
       "actions": {
         "cancel": "Отказ",
         "addProduct": "Добави продукт",
@@ -1149,7 +1175,12 @@
       "deleteError": "Грешка при изтриване на продукта:",
       "selectImage": "Избери снимка",
       "uploading": "Качване...",
-      "currentImage": "Текуща снимка"
+      "currentImage": "Текуща снимка",
+      "selectedFile": "Избран файл",
+      "errors": {
+        "invalidImageType": "Моля, изберете файл с изображение",
+        "imageTooLarge": "Размерът на изображението трябва да е по-малък от 5MB"
+      }
     },
     "orders": {
       "title": "Управление на Поръчки",
@@ -1456,6 +1487,7 @@
       "description": "Професионална услуга за монтаж от сертифицирани техници",
       "perUnit": "за единица"
     },
+    "accessoriesHeader": "Към този продукт може да поръчате също:",
     "loadingAccessories": "Зареждане на аксесоари",
     "noAccessories": "Няма налични аксесоари за този продукт",
     "warranty": {

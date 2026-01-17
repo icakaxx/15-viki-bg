@@ -34,15 +34,13 @@ export default async function handler(req, res) {
         // Technical Performance
         cop,
         scop,
-        power_consumption,
+        power_consumption_cooling,
+        power_consumption_heating,
         operating_temp_range,
         // Physical Characteristics
         indoor_dimensions,
         outdoor_dimensions,
-        indoor_weight,
-        outdoor_weight,
         noise_level,
-        air_flow,
         // Features & Usability
         warranty_period,
         room_size_recommendation,
@@ -134,15 +132,13 @@ export default async function handler(req, res) {
             // Technical Performance
             cop: cop !== undefined ? (cop ? parseFloat(cop) : null) : null,
             scop: scop !== undefined ? (scop ? parseFloat(scop) : null) : null,
-            power_consumption,
+            power_consumption_cooling,
+            power_consumption_heating,
             operating_temp_range,
             // Physical Characteristics
             indoor_dimensions,
             outdoor_dimensions,
-            indoor_weight,
-            outdoor_weight,
             noise_level,
-            air_flow,
             // Features & Usability
             warranty_period,
             room_size_recommendation,
@@ -183,7 +179,7 @@ export default async function handler(req, res) {
         if (brand !== undefined) updateData.brand = brand;
         if (model !== undefined) updateData.model = model;
         if (colour !== undefined) updateData.colour = colour;
-        if (capacity_btu !== undefined) updateData.capacity_btu = capacity_btu ? parseInt(capacity_btu) : null;
+        if (capacity_btu !== undefined) updateData.capacity_btu = capacity_btu || null;
         if (energy_rating !== undefined) updateData.energy_rating = energy_rating;
         if (price !== undefined) updateData.price = parseFloat(price);
         if (previous_price !== undefined) updateData.previous_price = previous_price ? parseFloat(previous_price) : null;
@@ -200,16 +196,14 @@ export default async function handler(req, res) {
         // Technical Performance
         if (cop !== undefined) updateData.cop = cop ? parseFloat(cop) : null;
         if (scop !== undefined) updateData.scop = scop ? parseFloat(scop) : null;
-        if (power_consumption !== undefined) updateData.power_consumption = power_consumption;
+        if (power_consumption_cooling !== undefined) updateData.power_consumption_cooling = power_consumption_cooling;
+        if (power_consumption_heating !== undefined) updateData.power_consumption_heating = power_consumption_heating;
         if (operating_temp_range !== undefined) updateData.operating_temp_range = operating_temp_range;
 
         // Physical Characteristics
         if (indoor_dimensions !== undefined) updateData.indoor_dimensions = indoor_dimensions;
         if (outdoor_dimensions !== undefined) updateData.outdoor_dimensions = outdoor_dimensions;
-        if (indoor_weight !== undefined) updateData.indoor_weight = indoor_weight;
-        if (outdoor_weight !== undefined) updateData.outdoor_weight = outdoor_weight;
         if (noise_level !== undefined) updateData.noise_level = noise_level;
-        if (air_flow !== undefined) updateData.air_flow = air_flow;
 
         // Features & Usability
         if (warranty_period !== undefined) updateData.warranty_period = warranty_period;

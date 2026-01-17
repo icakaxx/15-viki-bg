@@ -922,11 +922,15 @@
         "cop": "COP (Coefficient of Performance)",
         "scop": "SCOP (Seasonal COP)",
         "powerConsumption": "Power Consumption",
+        "powerConsumptionCooling": "Power Consumption (Cooling)",
+        "powerConsumptionHeating": "Power Consumption (Heating)",
         "refrigerantType": "Refrigerant Type",
         "operatingTempRange": "Operating Temperature Range",
         "copHint": "Higher is better (typically 3.5 - 5.0)",
         "scopHint": "Seasonal performance rating",
         "powerHint": "e.g., \"2.1 kW\" or \"1800W\"",
+        "powerCoolingHint": "e.g., \"2.1 kW\" or \"1800W\"",
+        "powerHeatingHint": "e.g., \"2.1 kW\" or \"1800W\"",
         "refrigerantHint": "R32 is most eco-friendly",
         "tempRangeHint": "e.g., \"-15°C to +50°C\""
       },
@@ -988,6 +992,8 @@
         "imageUpload": "Product Image",
         "scop": "SCOP (Seasonal COP)",
         "powerConsumption": "Power Consumption",
+        "powerConsumptionCooling": "Power Consumption (Cooling)",
+        "powerConsumptionHeating": "Power Consumption (Heating)",
         "operatingTempRange": "Operating Temperature Range",
         "dimensions": "Dimensions",
         "weight": "Weight",
@@ -1009,6 +1015,8 @@
         "copHint": "Higher is better (typically 3-6)",
         "scopHint": "For heating efficiency",
         "powerHint": "e.g. 2.5 kW",
+        "powerCoolingHint": "e.g., \"2.1 kW\" or \"1800W\"",
+        "powerHeatingHint": "e.g., \"2.1 kW\" or \"1800W\"",
         "tempRangeHint": "e.g. -15°C to +50°C",
         "dimensionsHint": "e.g. 890×295×204 mm",
         "indoorDimensionsHint": "e.g. 890×295×204 mm",
@@ -1079,6 +1087,24 @@
         "required": "Required",
         "optional": "Optional"
       },
+      "validation": {
+        "required": "This field is required",
+        "formValidationRequired": "⚠️ Form Validation Required",
+        "completeRequiredFields": "You must complete all required fields before submitting:",
+        "fixIt": "OK, I'll fix it",
+        "fieldRequired": "Required",
+        "missing": "Missing:",
+        "requiredFieldsMissing": "required fields missing",
+        "brand": "Brand is required",
+        "model": "Model is required",
+        "price": "Price is required",
+        "capacityBtu": "Capacity (BTU) is required",
+        "energyRating": "Energy rating is required",
+        "colour": "Color is required",
+        "stock": "Stock quantity is required",
+        "discount": "Discount is required",
+        "imageUrl": "Image URL is required"
+      },
       "actions": {
         "cancel": "Cancel",
         "addProduct": "Add Product",
@@ -1088,7 +1114,12 @@
       },
       "selectImage": "Select Image",
       "uploading": "Uploading...",
-      "currentImage": "Current Image"
+      "currentImage": "Current Image",
+      "selectedFile": "Selected file",
+      "errors": {
+        "invalidImageType": "Please select an image file",
+        "imageTooLarge": "Image size must be less than 5MB"
+      }
     },
     "orders": {
       "title": "Order Management",
@@ -1395,6 +1426,7 @@
       "description": "Professional installation service by certified technicians",
       "perUnit": "per unit"
     },
+    "accessoriesHeader": "You can also order with this product:",
     "loadingAccessories": "Loading accessories",
     "noAccessories": "No accessories available for this product",
     "warranty": {

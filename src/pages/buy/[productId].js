@@ -12,13 +12,6 @@ import styles from '../../styles/Page Styles/ProductDetail.module.css';
 import { useConsent } from '../../components/ConsentProvider';
 
 const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverError }) => {
-  console.log('[CLIENT] ProductDetailPage rendered with:', {
-    hasInitialProduct: !!initialProduct,
-    productId: initialProduct?.ProductID,
-    accessoriesCount: initialAccessories?.length || 0,
-    serverError: serverError
-  });
-
   const router = useRouter();
   const { productId, qty } = router.query;
   const { t } = useTranslation('common');
@@ -79,12 +72,10 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
     if (product.COP) count++;
     if (product.SCOP) count++;
     if (product.NoiseLevel) count++;
-    if (product.PowerConsumption) count++;
-    if (product.AirFlow) count++;
+    if (product.PowerConsumptionCooling) count++;
+    if (product.PowerConsumptionHeating) count++;
     if (product.IndoorDimensions) count++;
     if (product.OutdoorDimensions) count++;
-    if (product.IndoorWeight) count++;
-    if (product.OutdoorWeight) count++;
     if (product.Colour) count++;
     if (product.OperatingTempRange) count++;
     if (product.InstallationType) count++;
@@ -101,17 +92,6 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
   const [loading, setLoading] = useState(false);
   const [accessoriesLoading, setAccessoriesLoading] = useState(false);
   const [error, setError] = useState(serverError || (initialProduct ? null : 'Product not found'));
-  const [activeTab, setActiveTab] = useState('overview');
-
-  // Debug log on mount
-  useEffect(() => {
-    console.log('[CLIENT] Component mounted with state:', {
-      hasProduct: !!product,
-      hasError: !!error,
-      productId: product?.ProductID,
-      serverError: serverError
-    });
-  }, []);
 
   // Fixed installation price per AC unit
   const INSTALLATION_PRICE_PER_UNIT = 300.00;
@@ -445,148 +425,328 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                   </span>
                 )}
               </div>
-              
-              {product.Description && (
-                <p className={styles.description}>
-                  {product.Description}
-                </p>
-              )}
 
-              {/* Pricing */}
+              {/* Pricing - Moved up near title */}
               <div className={styles.pricing}>
                 {(() => {
                   const { discount, previousPrice, currentPrice } = getDynamicPricing();
                   return (
                     <>
+                      {discount > 0 && previousPrice && (
+                        <div style={{ marginBottom: '8px' }}>
+                          <span className={styles.originalPrice} style={{ fontSize: '1.1rem', textDecoration: 'line-through', color: '#999' }}>
+                            {formatPrice(previousPrice)}
+                          </span>
+                        </div>
+                      )}
                       <div className={styles.currentPrice}>
-                        {formatPrice(currentPrice)}
-                      </div>
-                      <div className={styles.priceDetails}>
-                        {discount > 0 && (
-                          <>
-                            <span className={styles.originalPrice}>
-                              {formatPrice(previousPrice)}
-                            </span>
-                            <span className={styles.discount}>
-                              -{discount}%
-                            </span>
-                          </>
-                        )}
-                      </div>
-                      <div className={styles.eurPrice}>
-                        {formatPriceEUR(currentPrice)}
+                        {formatPrice(currentPrice)} / {formatPriceEUR(currentPrice)}
                       </div>
                     </>
                   );
                 })()}
               </div>
 
-              {/* Quick Specs */}
-              <div className={styles.quickSpecs}>
-                <div className={styles.quickSpec}>
-                  <div className={styles.quickSpecLabel}>
-                    {t('productDetail.specs.capacity')}
-                  </div>
-                  <div className={styles.quickSpecValue}>
-                    {product.CapacityBTU?.toLocaleString()} BTU
-                  </div>
-                </div>
-                <div className={styles.quickSpec}>
-                  <div className={styles.quickSpecLabel}>
-                    {t('productDetail.specs.energyRating')}
-                  </div>
-                  <div className={styles.quickSpecValue}>
-                    {product.EnergyRating}
-                  </div>
-                </div>
+              {/* Warranty Info - Moved up */}
+              <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap', fontSize: '0.9rem', color: '#666' }}>
+                <div>{product.WarrantyPeriod || product.Warranty || '60 месеца'} Гаранция</div>
+              </div>
 
-                {product.RoomSizeRecommendation && (
-                  <div className={styles.quickSpec}>
-                    <div className={styles.quickSpecLabel}>
-                      {t('productDetail.specs.roomSize')}
-                      <span 
-                        className={styles.infoIcon}
-                        title={t('productDetail.tooltips.roomSizeRecommendation')}
+              {/* Accessories Section - Moved to top right */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#333' }}>
+                  {t('productDetail.accessoriesHeader')}
+                </h3>
+                
+                {/* Accessories List */}
+                {accessoriesLoading ? (
+                  <div style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
+                    Зареждане на аксесоари...
+                  </div>
+                ) : accessories.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                    {accessories.map((accessory) => (
+                      <label
+                        key={accessory.AccessoryID}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.75rem',
+                          border: selectedAccessories.includes(accessory.AccessoryID) ? '2px solid #4CAF50' : '1px solid #e0e0e0',
+                          borderRadius: '8px',
+                          backgroundColor: selectedAccessories.includes(accessory.AccessoryID) ? '#f0f9f0' : 'white',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
                       >
-                        ?
-                      </span>
-                    </div>
-                    <div className={styles.quickSpecValue}>
-                      {product.RoomSizeRecommendation}
-                    </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                          <input
+                            type="checkbox"
+                            checked={selectedAccessories.includes(accessory.AccessoryID)}
+                            onChange={() => toggleAccessory(accessory.AccessoryID)}
+                            style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                          />
+                          <span style={{ fontSize: '0.95rem' }}>
+                            1 × {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: '0.5rem' }}>
+                          {formatPriceEUR(accessory.Price)} / {formatPrice(accessory.Price)}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                ) : null}
+
+                {/* Installation Option */}
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.75rem',
+                    border: installationSelected ? '2px solid #4CAF50' : '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    backgroundColor: installationSelected ? '#f0f9f0' : 'white',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    marginTop: accessories.length > 0 ? '0.75rem' : '0'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                    <input
+                      type="checkbox"
+                      checked={installationSelected}
+                      onChange={() => setInstallationSelected(!installationSelected)}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontSize: '0.95rem' }}>
+                      {t('productDetail.installation.title')}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: '0.5rem' }}>
+                    {formatPriceEUR(INSTALLATION_PRICE_PER_UNIT)} / {formatPrice(INSTALLATION_PRICE_PER_UNIT)} за единица
+                  </div>
+                </label>
+              </div>
+
+              {/* Price Summary - Compact version */}
+              <div style={{ 
+                marginBottom: '1.5rem', 
+                padding: '1rem', 
+                backgroundColor: '#f8f9fa', 
+                borderRadius: '8px',
+                border: '1px solid #e0e0e0'
+              }}>
+                {selectedAccessories.length > 0 && (
+                  <div style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
+                    <div>Добавка към цената: {formatPriceEUR(getAccessoryTotal() * quantity)}</div>
                   </div>
                 )}
-                <div className={styles.quickSpec}>
-                  <div className={styles.quickSpecLabel}>
-                    {t('productDetail.specs.warranty')}
+                {installationSelected && (
+                  <div style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
+                    <div>Монтаж: {formatPriceEUR(INSTALLATION_PRICE_PER_UNIT * quantity)}</div>
                   </div>
-                  <div className={styles.quickSpecValue}>
-                    {product.WarrantyPeriod || product.Warranty || t('productDetail.warranty.default')}
+                )}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  paddingTop: '0.75rem',
+                  borderTop: '2px solid #333',
+                  marginTop: '0.5rem'
+                }}>
+                  <strong style={{ fontSize: '1.1rem' }}>Обща сума на поръчката:</strong>
+                  <div style={{ textAlign: 'right' }}>
+                    {product.PreviousPrice && product.PreviousPrice > getDynamicPricing().currentPrice && (
+                      <div style={{ 
+                        textDecoration: 'line-through', 
+                        color: '#999', 
+                        fontSize: '0.85rem',
+                        marginBottom: '0.25rem'
+                      }}>
+                        {formatPriceEUR(product.PreviousPrice * quantity + getAccessoryTotal() * quantity + (installationSelected ? INSTALLATION_PRICE_PER_UNIT * quantity : 0))}
+                      </div>
+                    )}
+                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#d32f2f' }}>
+                      {formatPriceEUR(getTotalPrice())}
+                    </div>
+                    <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.25rem' }}>
+                      {formatPrice(getTotalPrice())}
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Quantity and Add to Cart */}
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                  <label style={{ fontWeight: '500' }}>{t('productDetail.quantity.label')}:</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <button
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        background: 'white',
+                        cursor: quantity <= 1 ? 'not-allowed' : 'pointer',
+                        opacity: quantity <= 1 ? 0.5 : 1
+                      }}
+                      onClick={() => handleQuantityChange(quantity - 1)}
+                      disabled={quantity <= 1}
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                      min="1"
+                      max="10"
+                      style={{
+                        width: '60px',
+                        height: '36px',
+                        textAlign: 'center',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px'
+                      }}
+                    />
+                    <button
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        background: 'white',
+                        cursor: quantity >= 10 ? 'not-allowed' : 'pointer',
+                        opacity: quantity >= 10 ? 0.5 : 1
+                      }}
+                      onClick={() => handleQuantityChange(quantity + 1)}
+                      disabled={quantity >= 10}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                <button
+                  className={`${styles.addToCartButton} ${!hasConsent ? styles.consentRequired : ''}`}
+                  onClick={handleAddToCart}
+                  disabled={product.IsArchived || product.Stock === 0}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    backgroundColor: product.IsArchived || product.Stock === 0 ? '#ccc' : '#d32f2f',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: product.IsArchived || product.Stock === 0 ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {product.IsArchived || product.Stock === 0
+                    ? t('productDetail.outOfStock')
+                    : !hasConsent 
+                      ? t('consent.warning')
+                      : 'поръчай с един клик'
+                  }
+                </button>
+              </div>
+
             </div>
           </div>
 
-          {/* Technical Specifications */}
-          <div className={styles.specsSection}>
-            <h2 className={styles.sectionTitle}>
+          {/* Technical Specifications - Table Format */}
+          <div className={styles.specsSection} style={{ marginTop: '2rem', padding: '1.5rem' }}>
+            <h2 className={styles.sectionTitle} style={{ marginBottom: '1.5rem' }}>
               {t('productDetail.technicalSpecs')}
             </h2>
             
-            {/* Tab Navigation */}
-            <div className={styles.specsTabs}>
-              <button
-                className={`${styles.specsTab} ${activeTab === 'overview' ? styles.active : ''}`}
-                onClick={() => setActiveTab('overview')}
-              >
-                {t('productDetail.specsTabs.overview')}
-              </button>
-              <button
-                className={`${styles.specsTab} ${activeTab === 'technical' ? styles.active : ''}`}
-                onClick={() => setActiveTab('technical')}
-              >
-                {t('productDetail.specsTabs.technical')}
-              </button>
-              <button
-                className={`${styles.specsTab} ${activeTab === 'physical' ? styles.active : ''}`}
-                onClick={() => setActiveTab('physical')}
-              >
-                {t('productDetail.specsTabs.physical')}
-              </button>
-            </div>
-
-            {/* Overview Tab */}
-            <div className={`${styles.specsTabContent} ${activeTab === 'overview' ? styles.active : ''}`}>
-              <div className={styles.specsGrid}>
-                {product.COP && renderSpecCard('⚡', 'COP', product.COP, t('productDetail.tooltips.cop'))}
-                {product.SCOP && renderSpecCard('🔥', 'SCOP', product.SCOP, t('productDetail.tooltips.scop'))}
-                {product.NoiseLevel && renderSpecCard('🔇', t('productDetail.specs.noise'), product.NoiseLevel, t('productDetail.tooltips.noiseLevel'))}
-                {product.PowerConsumption && renderSpecCard('⚡', t('productDetail.specs.power'), product.PowerConsumption, t('productDetail.tooltips.powerConsumption'))}
-                {product.AirFlow && renderSpecCard('💨', t('productDetail.specs.airflow'), product.AirFlow, t('productDetail.tooltips.airFlow'))}
-                {product.OperatingTempRange && renderSpecCard('🌡️', t('productDetail.specs.operatingRange'), product.OperatingTempRange, t('productDetail.tooltips.operatingTempRange'))}
-              </div>
-            </div>
-
-            {/* Technical Details Tab */}
-            <div className={`${styles.specsTabContent} ${activeTab === 'technical' ? styles.active : ''}`}>
-              <div className={styles.specsGrid}>
-                {product.InstallationType && renderSpecCard('🔧', t('productDetail.specs.installation'), translateInstallationType(product.InstallationType), t('productDetail.tooltips.installationType'))}
-                {product.Stock !== undefined && product.Stock !== null && renderSpecCard('📦', t('productDetail.specs.stock'), product.Stock > 0 ? `${product.Stock} ${t('productDetail.stock.available')}` : t('productDetail.stock.outOfStockShort'), t('productDetail.tooltips.stock'))}
-              </div>
-            </div>
-
-            {/* Physical Characteristics Tab */}
-            <div className={`${styles.specsTabContent} ${activeTab === 'physical' ? styles.active : ''}`}>
-              <div className={styles.specsGrid}>
-                {product.IndoorDimensions && renderSpecCard('🏠', t('productDetail.specs.indoorDimensions'), product.IndoorDimensions, t('productDetail.tooltips.dimensions'), true)}
-                {product.OutdoorDimensions && renderSpecCard('🏢', t('productDetail.specs.outdoorDimensions'), product.OutdoorDimensions, t('productDetail.tooltips.dimensions'), true)}
-                {product.IndoorWeight && renderSpecCard('⚖️', t('productDetail.specs.indoorWeight'), `${product.IndoorWeight} ${t('buyPage.physicalCharacteristics.kg')}`, t('productDetail.tooltips.weight'))}
-                {product.OutdoorWeight && renderSpecCard('⚖️', t('productDetail.specs.outdoorWeight'), `${product.OutdoorWeight} ${t('buyPage.physicalCharacteristics.kg')}`, t('productDetail.tooltips.weight'))}
-                {renderSpecCard('🎨', t('productDetail.specs.color'), product.Colour, t('productDetail.tooltips.color'))}
-              </div>
-            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff' }}>
+              <tbody>
+                {product.CapacityBTU && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Btu</td>
+                    <td style={{ padding: '0.75rem' }}>{product.CapacityBTU}</td>
+                  </tr>
+                )}
+                {product.EnergyRating && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Енергиен клас</td>
+                    <td style={{ padding: '0.75rem' }}>{product.EnergyRating}</td>
+                  </tr>
+                )}
+                {product.COP && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>COP</td>
+                    <td style={{ padding: '0.75rem' }}>{product.COP}</td>
+                  </tr>
+                )}
+                {product.SCOP && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>SCOP</td>
+                    <td style={{ padding: '0.75rem' }}>{product.SCOP}</td>
+                  </tr>
+                )}
+                {product.PowerConsumptionCooling && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ел.Консумация - охлаждане,kW</td>
+                    <td style={{ padding: '0.75rem' }}>{product.PowerConsumptionCooling}</td>
+                  </tr>
+                )}
+                {product.PowerConsumptionHeating && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ел.Консумация - отопление,kW</td>
+                    <td style={{ padding: '0.75rem' }}>{product.PowerConsumptionHeating}</td>
+                  </tr>
+                )}
+                {product.NoiseLevel && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ниво на шум /Hi/Lo/S-lo/, dB</td>
+                    <td style={{ padding: '0.75rem' }}>{product.NoiseLevel}</td>
+                  </tr>
+                )}
+                {product.IndoorDimensions && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Размери Вътрешно тяло,мм</td>
+                    <td style={{ padding: '0.75rem' }}>{product.IndoorDimensions}</td>
+                  </tr>
+                )}
+                {product.OutdoorDimensions && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Размери Външно тяло,мм</td>
+                    <td style={{ padding: '0.75rem' }}>{product.OutdoorDimensions}</td>
+                  </tr>
+                )}
+                {product.InstallationType && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Тип</td>
+                    <td style={{ padding: '0.75rem' }}>{translateInstallationType(product.InstallationType)}</td>
+                  </tr>
+                )}
+                {product.Colour && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Цвят на панела</td>
+                    <td style={{ padding: '0.75rem' }}>{product.Colour}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
+
+          {/* Description - Below Technical Specifications */}
+          {product.Description && (
+            <div className={styles.specsSection} style={{ marginTop: '2rem', padding: '1.5rem' }}>
+              <h2 className={styles.sectionTitle} style={{ marginBottom: '1rem' }}>
+                Описание
+              </h2>
+              <p className={styles.description} style={{ lineHeight: '1.6', color: '#555', fontSize: '1rem' }}>
+                {product.Description}
+              </p>
+            </div>
+          )}
 
           {/* Features */}
           {product.Features && product.Features.length > 0 && (
@@ -606,192 +766,12 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
           )}
         </div>
 
-        {/* Accessories & Options */}
-        <div className={styles.optionsSection}>
-          <h2 className={styles.sectionTitle}>
-            {t('productDetail.options')}
-          </h2>
-
-          {/* Accessories */}
-          <h3>{t('productDetail.accessories')}</h3>
-          {accessoriesLoading ? (
-            <div className={styles.accessoriesLoading}>
-              <div className={styles.loadingText}>
-                {t('productDetail.loadingAccessories')}...
-              </div>
-            </div>
-          ) : accessories.length > 0 ? (
-            <div className={styles.accessoriesGrid}>
-              {accessories.map((accessory) => (
-                <label
-                  key={accessory.AccessoryID}
-                  className={`${styles.accessoryCard} ${
-                    selectedAccessories.includes(accessory.AccessoryID) ? styles.selected : ''
-                  }`}
-                >
-                  <div className={styles.accessoryHeader}>
-                    <div className={styles.accessoryInfo}>
-                      <h4>{t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}</h4>
-                      {accessory.Description && (
-                        <div className={styles.accessoryDescription}>
-                          {accessory.Description}
-                        </div>
-                      )}
-                    </div>
-                    <div className={styles.accessoryPriceAndCheckbox}>
-                      <div className={styles.accessoryPrice}>
-                        <div className={styles.priceMain}>{formatPrice(accessory.Price)}</div>
-                        <div className={styles.priceSecondary}>{formatPriceEUR(accessory.Price)}</div>
-                      </div>
-                      <input
-                        type="checkbox"
-                        className={styles.checkbox}
-                        checked={selectedAccessories.includes(accessory.AccessoryID)}
-                        onChange={() => toggleAccessory(accessory.AccessoryID)}
-                      />
-                    </div>
-                  </div>
-                </label>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.noAccessories}>
-              <p>{t('productDetail.noAccessories')}</p>
-            </div>
-          )}
-
-          {/* Installation Option */}
-          <label
-            className={`${styles.installationOption} ${
-              installationSelected ? styles.selected : ''
-            }`}
-          >
-            <div className={styles.installationHeader}>
-              <div className={styles.installationInfo}>
-                <h3>{t('productDetail.installation.title')}</h3>
-                <div className={styles.installationDescription}>
-                  {t('productDetail.installation.description')} ({t('productDetail.installation.perUnit')})
-                </div>
-              </div>
-              <div className={styles.installationPriceAndCheckbox}>
-                <div className={styles.installationPrice}>
-                  <div className={styles.priceMain}>{formatPrice(INSTALLATION_PRICE_PER_UNIT)} {t('productDetail.installation.perUnit')}</div>
-                  <div className={styles.priceSecondary}>{formatPriceEUR(INSTALLATION_PRICE_PER_UNIT)} {t('productDetail.installation.perUnit')}</div>
-                </div>
-                <input
-                  type="checkbox"
-                  className={styles.checkbox}
-                  checked={installationSelected}
-                  onChange={() => setInstallationSelected(!installationSelected)}
-                />
-              </div>
-            </div>
-          </label>
-
-          {/* Price Summary */}
-          <div className={styles.priceSummary}>
-            <div className={styles.priceRow}>
-              <span className={styles.priceLabel}>
-                {product.Brand} {product.Model} × {quantity}
-              </span>
-              <span className={styles.priceValue}>
-                <div className={styles.priceMain}>{formatPrice(getDynamicPricing().currentPrice * quantity)}</div>
-                <div className={styles.priceSecondary}>{formatPriceEUR(getDynamicPricing().currentPrice * quantity)}</div>
-              </span>
-            </div>
-            {selectedAccessories.map(accessoryId => {
-              const accessory = accessories.find(acc => acc.AccessoryID === accessoryId);
-              if (!accessory) return null;
-              return (
-                <div key={accessoryId} className={styles.priceRow}>
-                  <span className={styles.priceLabel}>
-                    {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name} × {quantity}
-                  </span>
-                  <span className={styles.priceValue}>
-                    <div className={styles.priceMain}>{formatPrice(accessory.Price * quantity)}</div>
-                    <div className={styles.priceSecondary}>{formatPriceEUR(accessory.Price * quantity)}</div>
-                  </span>
-                </div>
-              );
-            })}
-            {installationSelected && (
-              <div className={styles.priceRow}>
-                <span className={styles.priceLabel}>
-                  {t('productDetail.priceBreakdown.installation')}
-                </span>
-                <span className={styles.priceValue}>
-                  <div className={styles.priceMain}>{formatPrice(INSTALLATION_PRICE_PER_UNIT * quantity)}</div>
-                  <div className={styles.priceSecondary}>{formatPriceEUR(INSTALLATION_PRICE_PER_UNIT * quantity)}</div>
-                </span>
-              </div>
-            )}
-            <div className={styles.priceRow}>
-              <span className={styles.priceLabel}>
-                <strong>{t('productDetail.total')}</strong>
-              </span>
-              <span className={`${styles.priceValue} ${styles.totalPrice}`}>
-                <div className={styles.priceMain}>{formatPrice(getTotalPrice())}</div>
-                <div className={styles.priceSecondary}>{formatPriceEUR(getTotalPrice())}</div>
-              </span>
-            </div>
-          </div>
-
-          {/* Add to Cart Section */}
-          <div className={styles.addToCartSection}>
-            <div className={styles.quantitySelector}>
-              <label className={styles.quantityLabel}>
-                {t('productDetail.quantity.label')}:
-              </label>
-              <button
-                className={styles.quantityButton}
-                onClick={() => handleQuantityChange(quantity - 1)}
-                disabled={quantity <= 1}
-                aria-label="Decrease quantity"
-                title={t('productDetail.quantity.min')}
-              >
-                −
-              </button>
-              <input
-                type="number"
-                className={styles.quantityInput}
-                value={quantity}
-                onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
-                min="1"
-                max="10"
-                aria-label={t('productDetail.quantity.label')}
-              />
-              <button
-                className={styles.quantityButton}
-                onClick={() => handleQuantityChange(quantity + 1)}
-                disabled={quantity >= 10}
-                aria-label="Increase quantity"
-                title={t('productDetail.quantity.max')}
-              >
-                +
-              </button>
-            </div>
-            <button
-              className={`${styles.addToCartButton} ${!hasConsent ? styles.consentRequired : ''}`}
-              onClick={handleAddToCart}
-              disabled={product.IsArchived || product.Stock === 0}
-            >
-              {product.IsArchived || product.Stock === 0
-                ? t('productDetail.outOfStock')
-                : !hasConsent 
-                  ? t('consent.warning')
-                  : t('productDetail.addToCart')
-              }
-            </button>
-          </div>
-        </div>
       </div>
     </>
   );
 };
 
 export async function getServerSideProps({ params, locale }) {
-  console.log('[SSR] getServerSideProps called for productId:', params?.productId);
-  
   const productId = params.productId;
   
   // i18n config for serverSideTranslations (inline to avoid config file issues in serverless)
@@ -804,10 +784,8 @@ export async function getServerSideProps({ params, locale }) {
   };
   
   // Check if Supabase is configured
-  console.log('[SSR] Checking env vars - URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL, 'KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
-  
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('[SSR] ERROR: Missing Supabase environment variables!');
+    console.error('Product page SSR: Missing Supabase environment variables');
     return {
       props: {
         ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
@@ -819,14 +797,12 @@ export async function getServerSideProps({ params, locale }) {
   }
 
   try {
-    console.log('[SSR] Initializing Supabase client...');
     // Initialize Supabase client
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    console.log('[SSR] Fetching product data for ID:', productId);
     // Fetch product data
     const { data: productData, error: productError } = await supabase
       .from('products')
@@ -835,7 +811,7 @@ export async function getServerSideProps({ params, locale }) {
       .single();
 
     if (productError) {
-      console.error('[SSR] Supabase error fetching product:', productError);
+      console.error(`Product page SSR: Error fetching product ${productId}:`, productError.message);
       return {
         props: {
           ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
@@ -847,7 +823,7 @@ export async function getServerSideProps({ params, locale }) {
     }
 
     if (!productData) {
-      console.error('[SSR] No product data returned for ID:', productId);
+      console.error(`Product page SSR: No data found for product ${productId}`);
       return {
         props: {
           ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
@@ -858,47 +834,45 @@ export async function getServerSideProps({ params, locale }) {
       };
     }
 
-    console.log('[SSR] Product data fetched successfully:', productData.id, productData.brand, productData.model);
-
-    console.log('[SSR] Transforming product data...');
     // Transform product data
     const transformedProduct = {
       ProductID: productData.id,
-      Brand: productData.brand,
-      Model: productData.model,
-      Colour: productData.colour,
-      CapacityBTU: productData.capacity_btu,
-      EnergyRating: productData.energy_rating,
-      Price: productData.price,
-      PreviousPrice: productData.previous_price,
-      ImageURL: productData.image_url,
-      Stock: productData.stock,
-      Discount: productData.discount,
-      IsArchived: productData.is_archived,
-      CreatedAt: productData.created_at,
-      UpdatedAt: productData.updated_at,
-      COP: productData.cop,
-      SCOP: productData.scop,
-      PowerConsumption: productData.power_consumption,
-      OperatingTempRange: productData.operating_temp_range,
-      IndoorDimensions: productData.indoor_dimensions,
-      OutdoorDimensions: productData.outdoor_dimensions,
-      IndoorWeight: productData.indoor_weight,
-      OutdoorWeight: productData.outdoor_weight,
-      NoiseLevel: productData.noise_level,
-      AirFlow: productData.air_flow,
-      Warranty: productData.warranty_period,
-      WarrantyPeriod: productData.warranty_period,
-      RoomSizeRecommendation: productData.room_size_recommendation,
-      InstallationType: productData.installation_type,
+      Brand: productData.brand ?? null,
+      Model: productData.model ?? null,
+      Colour: productData.colour ?? null,
+      CapacityBTU: productData.capacity_btu ?? null, // Now supports text
+      EnergyRating: productData.energy_rating ?? null, // Now supports A+, A++
+      Price: productData.price ?? null,
+      PreviousPrice: productData.previous_price ?? null,
+      ImageURL: productData.image_url ?? null,
+      Stock: productData.stock ?? null,
+      Discount: productData.discount ?? null,
+      IsArchived: productData.is_archived ?? false,
+      CreatedAt: productData.created_at ?? null,
+      UpdatedAt: productData.updated_at ?? null,
+      COP: productData.cop ?? null,
+      SCOP: productData.scop ?? null,
+      PowerConsumptionCooling: productData.power_consumption_cooling ?? 
+                               productData.electricity_cooling_kw ?? 
+                               null,
+      PowerConsumptionHeating: productData.power_consumption_heating ?? 
+                               productData.electricity_heating_kw ?? 
+                               null,
+      OperatingTempRange: productData.operating_temp_range ?? null,
+      IndoorDimensions: productData.indoor_dimensions ?? null,
+      OutdoorDimensions: productData.outdoor_dimensions ?? null,
+      NoiseLevel: productData.noise_level ?? null, // Now text field
+      Warranty: productData.warranty_period ?? null,
+      WarrantyPeriod: productData.warranty_period ?? null,
+      RoomSizeRecommendation: productData.room_size_recommendation ?? null,
+      InstallationType: productData.installation_type ?? null,
       Description: productData.description || `Premium ${productData.brand} ${productData.model} air conditioner with ${productData.energy_rating} energy efficiency rating.`,
       Features: productData.features ? (typeof productData.features === 'string' ? JSON.parse(productData.features) : productData.features) : [],
-      IsFeatured: productData.is_featured || false,
-      IsBestseller: productData.is_bestseller || false,
-      IsNew: productData.is_new || false,
+      IsFeatured: productData.is_featured ?? false,
+      IsBestseller: productData.is_bestseller ?? false,
+      IsNew: productData.is_new ?? false,
     };
 
-    console.log('[SSR] Product transformed successfully. Fetching accessories...');
     // Fetch accessories
     const { data: accessoriesData, error: accessoriesError } = await supabase
       .from('accessories')
@@ -906,9 +880,7 @@ export async function getServerSideProps({ params, locale }) {
       .order('price', { ascending: true });
 
     if (accessoriesError) {
-      console.error('[SSR] Error fetching accessories:', accessoriesError);
-    } else {
-      console.log('[SSR] Fetched', accessoriesData?.length || 0, 'accessories');
+      console.error('Product page SSR: Error fetching accessories:', accessoriesError.message);
     }
 
     const transformedAccessories = (accessoriesData || []).map(acc => ({
@@ -922,7 +894,6 @@ export async function getServerSideProps({ params, locale }) {
       CreatedAt: acc.created_at,
     }));
 
-    console.log('[SSR] Returning props with product:', transformedProduct.ProductID);
     return {
       props: {
         ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
@@ -932,8 +903,8 @@ export async function getServerSideProps({ params, locale }) {
       },
     };
   } catch (error) {
-    console.error('[SSR] FATAL ERROR in getServerSideProps:', error);
-    console.error('[SSR] Error stack:', error.stack);
+    console.error('Product page SSR: Fatal error:', error.message);
+    console.error('Stack trace:', error.stack);
     return {
       props: {
         ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),

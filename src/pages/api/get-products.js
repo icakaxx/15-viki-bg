@@ -7,8 +7,8 @@ const transformProduct = (product) => {
         Brand: product.brand,
         Model: product.model,
         Colour: product.colour,
-        CapacityBTU: product.capacity_btu,
-        EnergyRating: product.energy_rating,
+        CapacityBTU: product.capacity_btu, // Now supports text
+        EnergyRating: product.energy_rating, // Now supports A+, A++
         Price: product.price,
         PreviousPrice: product.previous_price,
         ImageURL: product.image_url,
@@ -18,17 +18,21 @@ const transformProduct = (product) => {
         CreatedAt: product.created_at,
         UpdatedAt: product.updated_at,
         // Technical Performance (with defaults for missing columns)
+        // Support both old and new column names
         COP: product.cop || null,
         SCOP: product.scop || null,
-        PowerConsumption: product.power_consumption || null,
+        // Try new column names first, then fall back to old ones
+        PowerConsumptionCooling: product.power_consumption_cooling || 
+                                 product.electricity_cooling_kw || 
+                                 (product.power_consumption ? product.power_consumption : null),
+        PowerConsumptionHeating: product.power_consumption_heating || 
+                                 product.electricity_heating_kw || 
+                                 null,
         OperatingTempRange: product.operating_temp_range || null,
         // Physical Characteristics (with defaults for missing columns)
         IndoorDimensions: product.indoor_dimensions || null,
         OutdoorDimensions: product.outdoor_dimensions || null,
-        IndoorWeight: product.indoor_weight || null,
-        OutdoorWeight: product.outdoor_weight || null,
-        NoiseLevel: product.noise_level || null,
-        AirFlow: product.air_flow || null,
+        NoiseLevel: product.noise_level || null, // Now text field
         // Features & Usability (with defaults for missing columns)
         WarrantyPeriod: product.warranty_period || null,
         RoomSizeRecommendation: product.room_size_recommendation || null,
@@ -80,6 +84,7 @@ export default async function handler(req, res) {
     // Use Supabase
     try {
         // Start with basic columns that should always exist
+        // Try to select columns - if new columns don't exist, we'll catch the error and use old ones
         let query = supabase.from('products').select(`
             id,
             brand,
@@ -97,14 +102,12 @@ export default async function handler(req, res) {
             updated_at,
             cop,
             scop,
-            power_consumption,
+            power_consumption_cooling,
+            power_consumption_heating,
             operating_temp_range,
             indoor_dimensions,
             outdoor_dimensions,
-            indoor_weight,
-            outdoor_weight,
             noise_level,
-            air_flow,
             warranty_period,
             room_size_recommendation,
             installation_type,
@@ -114,6 +117,9 @@ export default async function handler(req, res) {
             is_bestseller,
             is_new
         `)
+        
+        // Try to add new power consumption columns if they exist
+        // We'll handle this in the transform function instead
 
         // Apply archived filter
         if (showArchived === 'false') {
@@ -132,18 +138,11 @@ export default async function handler(req, res) {
         query = query.order(sortField, { ascending: order });
 
         // Apply pagination
-        const limitNum = parseInt(limit);
-        const offsetNum = parseInt(offset);
-        query = query.range(offsetNum, offsetNum + limitNum - 1);
-
-        const { data, error, count } = await query;
-
-    if (error) {
-            // Error fetching products from Supabase
-        }
-
-        // Get total count for pagination
-        let totalQuery = supabase.from('products').select('id', { count: 'exact' });
+        const limitNum = parseInt(limit) || 50;
+        const offsetNum = parseInt(offset) || 0;
+        
+        // Get total count first (before pagination)
+        let totalQuery = supabase.from('products').select('id', { count: 'exact', head: true });
         if (showArchived === 'false') {
             totalQuery = totalQuery.eq('is_archived', false);
         }
@@ -151,10 +150,61 @@ export default async function handler(req, res) {
             totalQuery = totalQuery.or(`brand.ilike.%${search}%,model.ilike.%${search}%`);
         }
         
-        const { count: totalCount } = await totalQuery;
+        const { count: totalCount, error: countError } = await totalQuery;
+        
+        if (countError) {
+            console.error('Error getting count:', countError);
+            // Don't fail the request if count fails, just log it
+        }
+
+        // Now get the actual data with pagination
+        query = query.range(offsetNum, offsetNum + limitNum - 1);
+
+        let { data, error } = await query;
+
+        // If error occurs, it might be due to missing columns
+        // Try a fallback with select('*') which will work if table exists
+        if (error) {
+            console.warn('Error with column-specific query, trying with select(*):', error.message);
+            // Retry with select all
+            let simpleQuery = supabase.from('products').select('*');
+            if (showArchived === 'false') {
+                simpleQuery = simpleQuery.eq('is_archived', false);
+            }
+            if (search) {
+                simpleQuery = simpleQuery.or(`brand.ilike.%${search}%,model.ilike.%${search}%`);
+            }
+            simpleQuery = simpleQuery.order(sortField, { ascending: order });
+            simpleQuery = simpleQuery.range(offsetNum, offsetNum + limitNum - 1);
+            
+            const retryResult = await simpleQuery;
+            if (!retryResult.error) {
+                console.log('Fallback query successful, got', retryResult.data?.length || 0, 'products');
+                data = retryResult.data;
+                error = null;
+            } else {
+                console.error('Fallback query also failed:', retryResult.error);
+            }
+        }
+
+        if (error) {
+            console.error('Error fetching products from Supabase:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
+            return res.status(500).json({ 
+                error: 'Database error', 
+                details: error.message,
+                code: error.code,
+                hint: error.hint
+            });
+        }
+
+        console.log('Raw data from Supabase:', data?.length || 0, 'products');
+        console.log('Total count:', totalCount);
 
         // Transform products to match frontend expectations
         const transformedProducts = (data || []).map(transformProduct);
+        
+        console.log('Transformed products:', transformedProducts.length);
         
         return res.status(200).json({ 
             products: transformedProducts,

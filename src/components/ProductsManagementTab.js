@@ -46,15 +46,13 @@ export default function ProductsManagementTab() {
         is_new: false,
         cop: '',
         scop: '',
-        power_consumption: '',
+        power_consumption_cooling: '',
+        power_consumption_heating: '',
         operating_temp_range: '',
         dimensions: '',
         indoor_dimensions: '',
         outdoor_dimensions: '',
-        indoor_weight: '',
-        outdoor_weight: '',
         noise_level: '',
-        air_flow: '',
         room_size_recommendation: '',
         installation_type: '',
         warranty_period: '',
@@ -79,15 +77,13 @@ export default function ProductsManagementTab() {
         is_new: false,
         cop: '',
         scop: '',
-        power_consumption: '',
+        power_consumption_cooling: '',
+        power_consumption_heating: '',
         operating_temp_range: '',
         dimensions: '',
         indoor_dimensions: '',
         outdoor_dimensions: '',
-        indoor_weight: '',
-        outdoor_weight: '',
         noise_level: '',
-        air_flow: '',
         room_size_recommendation: '',
         installation_type: '',
         warranty_period: '',
@@ -101,6 +97,7 @@ export default function ProductsManagementTab() {
     // Image upload state
     const [uploading, setUploading] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
+    const [selectedFileName, setSelectedFileName] = useState(null);
 
     // Enhanced form validation helpers with smart default detection
     const getSectionProgress = (sectionName) => {
@@ -110,15 +107,13 @@ export default function ProductsManagementTab() {
                 optional: []
             },
             technical: {
-                required: ['cop', 'scop', 'power_consumption', 'operating_temp_range'],
+                required: ['cop', 'scop', 'power_consumption_cooling', 'power_consumption_heating', 'operating_temp_range'],
                 optional: []
             },
             physical: {
                 required: [
                     'indoor_dimensions',
                     'outdoor_dimensions',
-                    'indoor_weight',
-                    'outdoor_weight',
                     'colour'
                 ],
                 optional: []
@@ -214,13 +209,10 @@ export default function ProductsManagementTab() {
 
         // For number fields, treat any value that is not '', null, or undefined as filled
         if ([
-            'indoor_weight',
-            'outdoor_weight',
-            'noise_level',
-            'air_flow',
             'cop',
             'scop',
-            'power_consumption'
+            'power_consumption_cooling',
+            'power_consumption_heating'
         ].includes(fieldName)) {
             return value !== '' && value !== null && value !== undefined;
         }
@@ -279,20 +271,20 @@ export default function ProductsManagementTab() {
             const progress = getSectionProgress(section);
             if (progress.totalRequired > 0 && progress.completedRequired < progress.totalRequired) {
                 const sectionNames = {
-                    basic: 'Basic Information',
-                    technical: 'Technical Performance',
-                    physical: 'Physical Characteristics',
-                    installation: 'Installation & Warranty',
-                    features: 'Features & Promotional',
-                    description: 'Description'
+                    basic: t('admin.products.sections.basic'),
+                    technical: t('admin.products.sections.technical'),
+                    physical: t('admin.products.sections.physical'),
+                    installation: t('admin.products.sections.installation'),
+                    features: t('admin.products.sections.features'),
+                    description: t('admin.products.sections.description')
                 };
 
                 // Get specific missing required fields for better error messages
                 const missingFields = [];
                 const sectionConfig = {
                     basic: ['brand', 'model', 'price', 'capacity_btu', 'energy_rating', 'colour', 'stock', 'discount', 'image_url'],
-                    technical: ['cop', 'scop', 'power_consumption', 'operating_temp_range'],
-                    physical: ['indoor_dimensions', 'outdoor_dimensions', 'indoor_weight', 'outdoor_weight', 'colour'],
+                    technical: ['cop', 'scop', 'power_consumption_cooling', 'power_consumption_heating', 'operating_temp_range'],
+                    physical: ['indoor_dimensions', 'outdoor_dimensions', 'colour'],
                     installation: ['room_size_recommendation', 'installation_type', 'warranty_period'],
                     features: [],
                     description: ['description']
@@ -302,40 +294,40 @@ export default function ProductsManagementTab() {
                 requiredFields.forEach(field => {
                     if (!hasMeaningfulInput(field, formData[field])) {
                         const fieldNames = {
-                            brand: 'Brand',
-                            model: 'Model',
-                            price: 'Price',
-                            capacity_btu: 'Capacity (BTU)',
-                            energy_rating: 'Energy Rating',
-                            colour: 'Color',
-                            stock: 'Stock Quantity',
-                            discount: 'Discount',
-                            image_url: 'Image URL',
-                            cop: 'COP',
-                            scop: 'SCOP',
-                            power_consumption: 'Power Consumption',
-                            operating_temp_range: 'Operating Temperature Range',
-                            dimensions: 'Dimensions',
-                            weight: 'Weight',
-                            noise_level: 'Noise Level',
-                            air_flow: 'Air Flow',
-                            room_size_recommendation: 'Room Size Recommendation',
-                            installation_type: 'Installation Type',
-                            warranty_period: 'Warranty Period',
-                            features: 'Features',
-                            is_featured: 'Featured',
-                            is_bestseller: 'Bestseller',
-                            is_new: 'New Product',
-                            description: 'Description'
+                            brand: t('admin.products.validation.brand'),
+                            model: t('admin.products.validation.model'),
+                            price: t('admin.products.validation.price'),
+                            capacity_btu: t('admin.products.validation.capacityBtu'),
+                            energy_rating: t('admin.products.validation.energyRating'),
+                            colour: t('admin.products.validation.colour'),
+                            stock: t('admin.products.validation.stock'),
+                            discount: t('admin.products.validation.discount'),
+                            image_url: t('admin.products.validation.imageUrl'),
+                            cop: t('admin.products.technical.cop'),
+                            scop: t('admin.products.technical.scop'),
+                            power_consumption_cooling: t('admin.products.technical.powerConsumptionCooling'),
+                            power_consumption_heating: t('admin.products.technical.powerConsumptionHeating'),
+                            operating_temp_range: t('admin.products.technical.operatingTempRange'),
+                            dimensions: t('admin.products.physical.dimensions'),
+                            weight: t('admin.products.physical.weight'),
+                            noise_level: t('admin.products.physical.noiseLevel'),
+                            room_size_recommendation: t('admin.products.features.roomSizeRecommendation'),
+                            installation_type: t('admin.products.features.installationType'),
+                            warranty_period: t('admin.products.features.warrantyPeriod'),
+                            features: t('admin.products.features.productFeatures'),
+                            is_featured: t('admin.products.fields.isFeatured'),
+                            is_bestseller: t('admin.products.fields.isBestseller'),
+                            is_new: t('admin.products.fields.isNew'),
+                            description: t('admin.products.features.description')
                         };
                         missingFields.push(fieldNames[field] || field);
                     }
                 });
 
                 if (missingFields.length > 0) {
-                    errors.push(`${sectionNames[section]} - Missing: ${missingFields.join(', ')}`);
+                    errors.push(`${sectionNames[section]} - ${t('admin.products.validation.missing')} ${missingFields.join(', ')}`);
                 } else {
-                    errors.push(`${sectionNames[section]} - ${progress.totalRequired - progress.completedRequired} required fields missing`);
+                    errors.push(`${sectionNames[section]} - ${progress.totalRequired - progress.completedRequired} ${t('admin.products.validation.requiredFieldsMissing')}`);
                 }
             }
         });
@@ -421,8 +413,8 @@ export default function ProductsManagementTab() {
                         capacity_btu: product.CapacityBTU || product.capacity_btu || '',
                         energy_rating: product.EnergyRating || product.energy_rating || '',
                         colour: product.Colour || product.colour || '',
-                        price: product.Price || product.price || '',
-                        previous_price: product.PreviousPrice || product.previous_price || '',
+                        price: product.Price || product.price ? ((product.Price || product.price) / 1.95583).toFixed(2) : '', // Convert BGN to EUR for display
+                        previous_price: product.PreviousPrice || product.previous_price ? ((product.PreviousPrice || product.previous_price) / 1.95583).toFixed(2) : '', // Convert BGN to EUR for display
                         stock: product.Stock || product.stock || '',
                         discount: product.Discount || product.discount || '',
                         image_url: product.ImageURL || product.image_url || '',
@@ -432,15 +424,13 @@ export default function ProductsManagementTab() {
                         is_archived: product.IsArchived || product.is_archived || false,
                         cop: product.COP || product.cop || '',
                         scop: product.SCOP || product.scop || '',
-                        power_consumption: product.PowerConsumption || product.power_consumption || '',
+                        power_consumption_cooling: product.PowerConsumptionCooling || product.power_consumption_cooling || '',
+                        power_consumption_heating: product.PowerConsumptionHeating || product.power_consumption_heating || '',
                         operating_temp_range: product.OperatingTempRange || product.operating_temp_range || '',
                         dimensions: product.Dimensions || product.dimensions || '',
                         indoor_dimensions: product.IndoorDimensions || product.indoor_dimensions || '',
                         outdoor_dimensions: product.OutdoorDimensions || product.outdoor_dimensions || '',
-                        indoor_weight: product.IndoorWeight || product.indoor_weight || '',
-                        outdoor_weight: product.OutdoorWeight || product.outdoor_weight || '',
                         noise_level: product.NoiseLevel || product.noise_level || '',
-                        air_flow: product.AirFlow || product.air_flow || '',
                         room_size_recommendation: product.RoomSizeRecommendation || product.room_size_recommendation || '',
                         installation_type: product.InstallationType || product.installation_type || '',
                         warranty_period: product.WarrantyPeriod || product.warranty_period || '',
@@ -492,15 +482,13 @@ export default function ProductsManagementTab() {
             is_new: false,
             cop: '',
             scop: '',
-            power_consumption: '',
+            power_consumption_cooling: '',
+            power_consumption_heating: '',
             operating_temp_range: '',
             dimensions: '',
             indoor_dimensions: '',
             outdoor_dimensions: '',
-            indoor_weight: '',
-            outdoor_weight: '',
             noise_level: '',
-            air_flow: '',
             room_size_recommendation: '',
             installation_type: '',
             warranty_period: '',
@@ -510,6 +498,7 @@ export default function ProductsManagementTab() {
         setDuplicateWarning(null);
         setExpandedSections(['basic']);
         setImagePreview(null);
+        setSelectedFileName(null);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -526,17 +515,25 @@ export default function ProductsManagementTab() {
     // Handle image upload to Supabase storage
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file) {
+            setSelectedFileName(null);
+            return;
+        }
+
+        // Store the selected filename
+        setSelectedFileName(file.name);
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            alert('Моля, изберете файл с изображение');
+            alert(t('admin.products.errors.invalidImageType'));
+            setSelectedFileName(null);
             return;
         }
 
         // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
-            alert('Размерът на изображението трябва да е по-малък от 5MB');
+            alert(t('admin.products.errors.imageTooLarge'));
+            setSelectedFileName(null);
             return;
         }
 
@@ -624,14 +621,12 @@ export default function ProductsManagementTab() {
                 previous_price: formData.discount > 0 ? parseFloat(formData.price) : (formData.previous_price ? parseFloat(formData.previous_price) : null),
                 stock: formData.stock ? parseInt(formData.stock) : 0,
                 discount: formData.discount ? parseFloat(formData.discount) : 0,
-                capacity_btu: formData.capacity_btu ? parseInt(formData.capacity_btu) : null,
+                capacity_btu: formData.capacity_btu || null,
                 cop: formData.cop ? parseFloat(formData.cop) : null,
                 scop: formData.scop ? parseFloat(formData.scop) : null,
-                power_consumption: formData.power_consumption ? parseFloat(formData.power_consumption) : null,
-                indoor_weight: formData.indoor_weight ? parseFloat(formData.indoor_weight) : null,
-                outdoor_weight: formData.outdoor_weight ? parseFloat(formData.outdoor_weight) : null,
-                noise_level: formData.noise_level ? parseInt(formData.noise_level) : null,
-                air_flow: formData.air_flow ? parseInt(formData.air_flow) : null,
+                power_consumption_cooling: formData.power_consumption_cooling || null,
+                power_consumption_heating: formData.power_consumption_heating || null,
+                noise_level: formData.noise_level || null,
                 // Convert empty strings to null for text fields
                 colour: formData.colour || null,
                 energy_rating: formData.energy_rating || null,
@@ -684,15 +679,13 @@ export default function ProductsManagementTab() {
             is_new: product.is_new || false,
             cop: (product.COP || product.cop) ? (product.COP || product.cop).toString() : '',
             scop: (product.SCOP || product.scop) ? (product.SCOP || product.scop).toString() : '',
-            power_consumption: (product.PowerConsumption || product.power_consumption) ? (product.PowerConsumption || product.power_consumption).toString() : '',
+            power_consumption_cooling: (product.PowerConsumptionCooling || product.power_consumption_cooling) || '',
+            power_consumption_heating: (product.PowerConsumptionHeating || product.power_consumption_heating) || '',
             operating_temp_range: product.OperatingTempRange || product.operating_temp_range || '',
             dimensions: product.dimensions || '',
             indoor_dimensions: product.IndoorDimensions || product.indoor_dimensions || '',
             outdoor_dimensions: product.OutdoorDimensions || product.outdoor_dimensions || '',
-            indoor_weight: (product.IndoorWeight || product.indoor_weight) ? (product.IndoorWeight || product.indoor_weight).toString() : '',
-            outdoor_weight: (product.OutdoorWeight || product.outdoor_weight) ? (product.OutdoorWeight || product.outdoor_weight).toString() : '',
             noise_level: (product.NoiseLevel || product.noise_level) ? (product.NoiseLevel || product.noise_level).toString() : '',
-            air_flow: (product.AirFlow || product.air_flow) ? (product.AirFlow || product.air_flow).toString() : '',
             room_size_recommendation: product.RoomSizeRecommendation || product.room_size_recommendation || '',
             installation_type: product.InstallationType || product.installation_type || '',
             warranty_period: product.WarrantyPeriod || product.warranty_period || '',
@@ -721,19 +714,17 @@ export default function ProductsManagementTab() {
             // Clean and validate data before sending
             const cleanedData = {
                 ...formData,
-                // Convert empty strings to null for numeric fields
-                price: formData.price ? parseFloat(formData.price) : null,
-                previous_price: formData.discount > 0 ? parseFloat(formData.price) : (formData.previous_price ? parseFloat(formData.previous_price) : null),
+                // Convert EUR to BGN for storage (EUR * 1.95583 = BGN)
+                price: formData.price ? parseFloat(formData.price) * 1.95583 : null,
+                previous_price: formData.discount > 0 ? parseFloat(formData.price) * 1.95583 : (formData.previous_price ? parseFloat(formData.previous_price) * 1.95583 : null),
                 stock: formData.stock ? parseInt(formData.stock) : 0,
                 discount: formData.discount ? parseFloat(formData.discount) : 0,
-                capacity_btu: formData.capacity_btu ? parseInt(formData.capacity_btu) : null,
+                capacity_btu: formData.capacity_btu || null,
                 cop: formData.cop ? parseFloat(formData.cop) : null,
                 scop: formData.scop ? parseFloat(formData.scop) : null,
-                power_consumption: formData.power_consumption ? parseFloat(formData.power_consumption) : null,
-                indoor_weight: formData.indoor_weight ? parseFloat(formData.indoor_weight) : null,
-                outdoor_weight: formData.outdoor_weight ? parseFloat(formData.outdoor_weight) : null,
-                noise_level: formData.noise_level ? parseInt(formData.noise_level) : null,
-                air_flow: formData.air_flow ? parseInt(formData.air_flow) : null,
+                power_consumption_cooling: formData.power_consumption_cooling || null,
+                power_consumption_heating: formData.power_consumption_heating || null,
+                noise_level: formData.noise_level || null,
                 // Promotional flags - ensure they are boolean values
                 is_featured: Boolean(formData.is_featured),
                 is_bestseller: Boolean(formData.is_bestseller),
@@ -862,7 +853,7 @@ export default function ProductsManagementTab() {
                 <div className={styles.modalOverlay}>
                     <div className={styles.modalContent}>
                         <div className={styles.modalHeader}>
-                            <h3>⚠️ Form Validation Required</h3>
+                            <h3>{t('admin.products.validation.formValidationRequired')}</h3>
                             <button
                                 className={styles.modalCloseButton}
                                 onClick={() => setShowValidationModal(false)}
@@ -871,7 +862,7 @@ export default function ProductsManagementTab() {
                             </button>
                         </div>
                         <div className={styles.modalBody}>
-                            <p>You must complete all required fields before submitting:</p>
+                            <p>{t('admin.products.validation.completeRequiredFields')}</p>
                             <ul className={styles.validationErrors}>
                                 {validationErrors.map((error, index) => (
                                     <li key={index} className={styles.validationError}>
@@ -885,7 +876,7 @@ export default function ProductsManagementTab() {
                                 className={styles.modalButton}
                                 onClick={() => setShowValidationModal(false)}
                             >
-                                OK, I'll fix it
+                                {t('admin.products.validation.fixIt')}
                             </button>
                         </div>
                     </div>
@@ -964,7 +955,7 @@ export default function ProductsManagementTab() {
                                                         className={getFieldStatus('brand') === 'invalid' ? styles.invalidField : ''}
                                                     />
                                                     {getFieldStatus('brand') === 'invalid' && (
-                                                        <span className={styles.fieldError}>Required</span>
+                                                        <span className={styles.fieldError}>{t('admin.products.validation.fieldRequired')}</span>
                                                     )}
                                                 </label>
                                             </div>
@@ -981,13 +972,13 @@ export default function ProductsManagementTab() {
                                                         className={getFieldStatus('model') === 'invalid' ? styles.invalidField : ''}
                                                     />
                                                     {getFieldStatus('model') === 'invalid' && (
-                                                        <span className={styles.fieldError}>Required</span>
+                                                        <span className={styles.fieldError}>{t('admin.products.validation.fieldRequired')}</span>
                                                     )}
                                                 </label>
                                             </div>
                                             <div className={`${styles.formGroup} ${styles[getFieldStatus('price')]}`}>
                                                 <label>
-                                                    {t('admin.products.price')} (лв. / BGN):
+                                                    {t('admin.products.price')} (€ / EUR):
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                                         <input
                                                             type="number"
@@ -1002,11 +993,11 @@ export default function ProductsManagementTab() {
                                                             style={{ maxWidth: 120 }}
                                                         />
                                                         <span style={{ color: '#888', fontSize: '0.95em' }}>
-                                                            €{formData.price && !isNaN(formData.price) ? (parseFloat(formData.price) / 1.95583).toFixed(2) : '0.00'}
+                                                            лв. {formData.price && !isNaN(formData.price) ? (parseFloat(formData.price) * 1.95583).toFixed(2) : '0.00'}
                                                         </span>
                                                     </div>
                                                     {getFieldStatus('price') === 'invalid' && (
-                                                        <span className={styles.fieldError}>Required</span>
+                                                        <span className={styles.fieldError}>{t('admin.products.validation.fieldRequired')}</span>
                                                     )}
                                                 </label>
                                             </div>
@@ -1017,37 +1008,41 @@ export default function ProductsManagementTab() {
                                         <h3 className={styles.cardTitle}>🏷️ {t('admin.products.formCards.productDetails')}</h3>
                                         <div className={styles.formGrid}>
 
-                                            <div className={styles.formGroup}>
+                                            <div className={`${styles.formGroup} ${styles[getFieldStatus('capacity_btu')]}`}>
                                                 <label>
                                                     {t('admin.products.capacity')} (BTU):
                                                     <input
-                                                        type="number"
+                                                        type="text"
                                                         name="capacity_btu"
                                                         value={formData.capacity_btu}
                                                         onChange={handleChange}
-                                                        placeholder="e.g. 12000"
+                                                        placeholder="e.g. 12000 BTU or 9K BTU"
+                                                        required
+                                                        className={getFieldStatus('capacity_btu') === 'invalid' ? styles.invalidField : ''}
                                                     />
+                                                    {getFieldStatus('capacity_btu') === 'invalid' && (
+                                                        <span className={styles.fieldError}>{t('admin.products.validation.fieldRequired')}</span>
+                                                    )}
                                                 </label>
                                             </div>
-                                            <div className={styles.formGroup}>
+                                            <div className={`${styles.formGroup} ${styles[getFieldStatus('energy_rating')]}`}>
                                                 <label>
                                                     {t('admin.products.energyRating')}:
-                                                    <select
+                                                    <input
+                                                        type="text"
                                                         name="energy_rating"
                                                         value={formData.energy_rating}
                                                         onChange={handleChange}
-                                                    >
-                                                        <option value="">{t('admin.products.dropdowns.selectRating')}</option>
-                                                        <option value="A+++">{t('admin.products.dropdowns.energyRatings.aPlusPlus')}</option>
-                                                        <option value="A++">{t('admin.products.dropdowns.energyRatings.aPlus')}</option>
-                                                        <option value="A+">{t('admin.products.dropdowns.energyRatings.a')}</option>
-                                                        <option value="A">{t('admin.products.dropdowns.energyRatings.b')}</option>
-                                                        <option value="B">{t('admin.products.dropdowns.energyRatings.c')}</option>
-                                                        <option value="C">{t('admin.products.dropdowns.energyRatings.d')}</option>
-                                                    </select>
+                                                        placeholder="e.g. A+++, A++, A+, A, B, C"
+                                                        required
+                                                        className={getFieldStatus('energy_rating') === 'invalid' ? styles.invalidField : ''}
+                                                    />
+                                                    {getFieldStatus('energy_rating') === 'invalid' && (
+                                                        <span className={styles.fieldError}>{t('admin.products.validation.fieldRequired')}</span>
+                                                    )}
                                                 </label>
                                             </div>
-                                            <div className={styles.formGroup}>
+                                            <div className={`${styles.formGroup} ${styles[getFieldStatus('colour')]}`}>
                                                 <label>
                                                     {t('admin.products.color')}:
                                                     <input
@@ -1056,11 +1051,16 @@ export default function ProductsManagementTab() {
                                                         value={formData.colour}
                                                         onChange={handleChange}
                                                         placeholder="e.g. White, Black"
+                                                        required
+                                                        className={getFieldStatus('colour') === 'invalid' ? styles.invalidField : ''}
                                                     />
+                                                    {getFieldStatus('colour') === 'invalid' && (
+                                                        <span className={styles.fieldError}>{t('admin.products.validation.fieldRequired')}</span>
+                                                    )}
                                                 </label>
                                             </div>
 
-                                            <div className={styles.formGroup}>
+                                            <div className={`${styles.formGroup} ${styles[getFieldStatus('stock')]}`}>
                                                 <label>
                                                     {t('admin.products.fields.stockQuantity')}:
                                                     <input
@@ -1069,11 +1069,16 @@ export default function ProductsManagementTab() {
                                                         value={formData.stock}
                                                         onChange={handleChange}
                                                         min="0"
+                                                        required
                                                         placeholder={t('admin.products.placeholders.stockExample')}
+                                                        className={getFieldStatus('stock') === 'invalid' ? styles.invalidField : ''}
                                                     />
+                                                    {getFieldStatus('stock') === 'invalid' && (
+                                                        <span className={styles.fieldError}>{t('admin.products.validation.fieldRequired')}</span>
+                                                    )}
                                                 </label>
                                             </div>
-                                            <div className={styles.formGroup}>
+                                            <div className={`${styles.formGroup} ${styles[getFieldStatus('discount')]}`}>
                                                 <label>
                                                     {t('admin.products.discount')} (%):
                                                     <input
@@ -1084,8 +1089,13 @@ export default function ProductsManagementTab() {
                                                         min="0"
                                                         max="100"
                                                         step="0.1"
+                                                        required
                                                         placeholder={t('admin.products.placeholders.discountExample')}
+                                                        className={getFieldStatus('discount') === 'invalid' ? styles.invalidField : ''}
                                                     />
+                                                    {getFieldStatus('discount') === 'invalid' && (
+                                                        <span className={styles.fieldError}>{t('admin.products.validation.fieldRequired')}</span>
+                                                    )}
                                                     {formData.price && formData.discount > 0 && (
                                                         <div style={{
                                                             marginTop: '8px',
@@ -1104,7 +1114,7 @@ export default function ProductsManagementTab() {
                                                     )}
                                                 </label>
                                             </div>
-                                            <div className={styles.formGroup}>
+                                            <div className={`${styles.formGroup} ${styles[getFieldStatus('image_url')]}`}>
                                                 <label>
                                                     {t('admin.products.fields.imageUpload')}:
                                                     <div className={styles.imageUploadContainer}>
@@ -1115,6 +1125,7 @@ export default function ProductsManagementTab() {
                                                             onChange={handleImageUpload}
                                                             disabled={uploading}
                                                             className={styles.fileInput}
+                                                            required
                                                         />
                                                         <button
                                                             type="button"
@@ -1125,6 +1136,11 @@ export default function ProductsManagementTab() {
                                                             {uploading ? t('admin.products.uploading') : t('admin.products.selectImage')}
                                                         </button>
                                                     </div>
+                                                    {selectedFileName && !uploading && (
+                                                        <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
+                                                            {t('admin.products.selectedFile')}: <strong>{selectedFileName}</strong>
+                                                        </div>
+                                                    )}
                                                     {imagePreview && (
                                                         <div className={styles.imagePreview}>
                                                             <img src={imagePreview} alt="Preview" />
@@ -1132,6 +1148,7 @@ export default function ProductsManagementTab() {
                                                                 type="button"
                                                                 onClick={() => {
                                                                     setImagePreview(null);
+                                                                    setSelectedFileName(null);
                                                                     setFormData(prev => ({ ...prev, image_url: '' }));
                                                                     if (fileInputRef.current) fileInputRef.current.value = '';
                                                                 }}
@@ -1145,6 +1162,9 @@ export default function ProductsManagementTab() {
                                                         <div className={styles.currentImage}>
                                                             <p>{t('admin.products.currentImage')}: {formData.image_url}</p>
                                                         </div>
+                                                    )}
+                                                    {getFieldStatus('image_url') === 'invalid' && (
+                                                        <span className={styles.fieldError}>{t('admin.products.validation.fieldRequired')}</span>
                                                     )}
                                                 </label>
                                             </div>
@@ -1224,15 +1244,25 @@ export default function ProductsManagementTab() {
                                             </div>
                                             <div className={styles.formGroup}>
                                                 <label>
-                                                    {t('admin.products.fields.powerConsumption')} (kW):
+                                                    {t('admin.products.fields.powerConsumptionCooling')} (kW):
                                                     <input
-                                                        type="number"
-                                                        name="power_consumption"
-                                                        value={formData.power_consumption}
+                                                        type="text"
+                                                        name="power_consumption_cooling"
+                                                        value={formData.power_consumption_cooling}
                                                         onChange={handleChange}
-                                                        step="0.1"
-                                                        min="0"
-                                                        placeholder={t('admin.products.hints.powerHint')}
+                                                        placeholder={t('admin.products.hints.powerCoolingHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {t('admin.products.fields.powerConsumptionHeating')} (kW):
+                                                    <input
+                                                        type="text"
+                                                        name="power_consumption_heating"
+                                                        value={formData.power_consumption_heating}
+                                                        onChange={handleChange}
+                                                        placeholder={t('admin.products.hints.powerHeatingHint')}
                                                     />
                                                 </label>
                                             </div>
@@ -1317,56 +1347,13 @@ export default function ProductsManagementTab() {
                                             </div>
                                             <div className={styles.formGroup}>
                                                 <label>
-                                                    {t('admin.products.fields.indoorWeight')} (kg):
+                                                    {t('admin.products.fields.noiseLevel')}:
                                                     <input
-                                                        type="number"
-                                                        name="indoor_weight"
-                                                        value={formData.indoor_weight}
-                                                        onChange={handleChange}
-                                                        step="0.1"
-                                                        min="0"
-                                                        placeholder={t('admin.products.hints.indoorWeightHint')}
-                                                    />
-                                                </label>
-                                            </div>
-                                            <div className={styles.formGroup}>
-                                                <label>
-                                                    {t('admin.products.fields.outdoorWeight')} (kg):
-                                                    <input
-                                                        type="number"
-                                                        name="outdoor_weight"
-                                                        value={formData.outdoor_weight}
-                                                        onChange={handleChange}
-                                                        step="0.1"
-                                                        min="0"
-                                                        placeholder={t('admin.products.hints.outdoorWeightHint')}
-                                                    />
-                                                </label>
-                                            </div>
-                                            <div className={styles.formGroup}>
-                                                <label>
-                                                    {t('admin.products.fields.noiseLevel')} (dB):
-                                                    <input
-                                                        type="number"
+                                                        type="text"
                                                         name="noise_level"
                                                         value={formData.noise_level}
                                                         onChange={handleChange}
-                                                        min="0"
-                                                        max="100"
-                                                        placeholder={t('admin.products.hints.noiseHint')}
-                                                    />
-                                                </label>
-                                            </div>
-                                            <div className={styles.formGroup}>
-                                                <label>
-                                                    {t('admin.products.fields.airFlow')} (m³/h):
-                                                    <input
-                                                        type="number"
-                                                        name="air_flow"
-                                                        value={formData.air_flow}
-                                                        onChange={handleChange}
-                                                        min="0"
-                                                        placeholder={t('admin.products.hints.airFlowHint')}
+                                                        placeholder="e.g. 19-23 dB или 22 dB"
                                                     />
                                                 </label>
                                             </div>

@@ -68,13 +68,19 @@ const BuyPage = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
+        console.log('Fetching products...');
         // Include archived products so they show as "out of stock"
         const response = await fetch('/api/get-products?showArchived=true');
+        console.log('Response status:', response.status);
         if (!response.ok) {
-          throw new Error('Failed to fetch products');
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('API Error:', errorData);
+          throw new Error(errorData.error || `Failed to fetch products: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
+        console.log('Products data:', data);
         const productsArray = data.products || data || [];
+        console.log('Products array length:', productsArray.length);
         
         setProducts(productsArray);
         
@@ -104,6 +110,7 @@ const BuyPage = () => {
       }
     };
 
+    console.log('useEffect running, mounted:', mounted);
     // Only fetch products after component is mounted (client-side)
     if (mounted) {
       fetchProducts();
