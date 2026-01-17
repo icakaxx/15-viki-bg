@@ -93,8 +93,8 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
   const [accessoriesLoading, setAccessoriesLoading] = useState(false);
   const [error, setError] = useState(serverError || (initialProduct ? null : 'Product not found'));
 
-  // Fixed installation price per AC unit
-  const INSTALLATION_PRICE_PER_UNIT = 300.00;
+  // Fixed installation price per AC unit (converted from 300 BGN to EUR)
+  const INSTALLATION_PRICE_PER_UNIT = 300.00 / 1.95583; // 153.39 EUR
 
   // Initialize quantity from URL parameter
   useEffect(() => {
@@ -140,12 +140,14 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
 
   // Price calculations
   const formatPrice = (price) => {
-    return `${price?.toFixed(2)} ${t('productDetail.currency.bgn')}`;
+    // Price is stored in EUR, convert to BGN for display
+    const eurRate = 1.95583;
+    return `${(price * eurRate)?.toFixed(2)} ${t('productDetail.currency.bgn')}`;
   };
 
   const formatPriceEUR = (price) => {
-    const eurRate = 1.95583;
-    return `${t('productDetail.currency.eur')}${(price / eurRate).toFixed(2)}`;
+    // Price is stored in EUR, display as-is
+    return `${t('productDetail.currency.eur')}${price?.toFixed(2)}`;
   };
 
   const formatPriceBoth = (price) => {
@@ -440,7 +442,7 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                         </div>
                       )}
                       <div className={styles.currentPrice}>
-                        {formatPrice(currentPrice)} / {formatPriceEUR(currentPrice)}
+                        {formatPriceEUR(currentPrice)} / {formatPrice(currentPrice)}
                       </div>
                     </>
                   );

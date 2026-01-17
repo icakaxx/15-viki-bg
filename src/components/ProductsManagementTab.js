@@ -413,8 +413,8 @@ export default function ProductsManagementTab() {
                         capacity_btu: product.CapacityBTU || product.capacity_btu || '',
                         energy_rating: product.EnergyRating || product.energy_rating || '',
                         colour: product.Colour || product.colour || '',
-                        price: product.Price || product.price ? ((product.Price || product.price) / 1.95583).toFixed(2) : '', // Convert BGN to EUR for display
-                        previous_price: product.PreviousPrice || product.previous_price ? ((product.PreviousPrice || product.previous_price) / 1.95583).toFixed(2) : '', // Convert BGN to EUR for display
+                        price: product.Price || product.price ? (product.Price || product.price).toString() : '', // Price is stored in EUR
+                        previous_price: product.PreviousPrice || product.previous_price ? (product.PreviousPrice || product.previous_price).toString() : '', // Price is stored in EUR
                         stock: product.Stock || product.stock || '',
                         discount: product.Discount || product.discount || '',
                         image_url: product.ImageURL || product.image_url || '',
@@ -616,9 +616,9 @@ export default function ProductsManagementTab() {
             // Clean and validate data before sending
             const cleanedData = {
                 ...formData,
-                // Convert empty strings to null for numeric fields
-                price: formData.price ? parseFloat(formData.price) : null,
-                previous_price: formData.discount > 0 ? parseFloat(formData.price) : (formData.previous_price ? parseFloat(formData.previous_price) : null),
+                // Convert EUR to BGN for storage (EUR * 1.95583 = BGN)
+                price: formData.price ? parseFloat(formData.price) * 1.95583 : null,
+                previous_price: formData.discount > 0 ? parseFloat(formData.price) * 1.95583 : (formData.previous_price ? parseFloat(formData.previous_price) * 1.95583 : null),
                 stock: formData.stock ? parseInt(formData.stock) : 0,
                 discount: formData.discount ? parseFloat(formData.discount) : 0,
                 capacity_btu: formData.capacity_btu || null,
@@ -714,9 +714,9 @@ export default function ProductsManagementTab() {
             // Clean and validate data before sending
             const cleanedData = {
                 ...formData,
-                // Convert EUR to BGN for storage (EUR * 1.95583 = BGN)
-                price: formData.price ? parseFloat(formData.price) * 1.95583 : null,
-                previous_price: formData.discount > 0 ? parseFloat(formData.price) * 1.95583 : (formData.previous_price ? parseFloat(formData.previous_price) * 1.95583 : null),
+                // Store price in EUR (no conversion needed)
+                price: formData.price ? parseFloat(formData.price) : null,
+                previous_price: formData.discount > 0 ? parseFloat(formData.price) : (formData.previous_price ? parseFloat(formData.previous_price) : null),
                 stock: formData.stock ? parseInt(formData.stock) : 0,
                 discount: formData.discount ? parseFloat(formData.discount) : 0,
                 capacity_btu: formData.capacity_btu || null,

@@ -27,14 +27,15 @@
   text-decoration: none;
   font-size: 1rem;
   font-weight: 600;
-  letter-spacing: -0.01em;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0.75rem 1rem;
+  letter-spacing: 0.02em;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.625rem 1.125rem;
   position: relative;
   white-space: nowrap;
-  border-radius: 12px;
+  border-radius: 14px;
   background: transparent;
   overflow: hidden;
+  z-index: 1;
 }
 
 .navLink::before {
@@ -44,52 +45,61 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(44, 85, 48, 0.08) 0%, rgba(74, 124, 89, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(44, 85, 48, 0.06) 0%, rgba(74, 124, 89, 0.04) 100%);
   opacity: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 12px;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 14px;
+  z-index: -1;
 }
 
 .navLink:hover::before {
   opacity: 1;
+  background: linear-gradient(135deg, rgba(44, 85, 48, 0.1) 0%, rgba(74, 124, 89, 0.08) 100%);
 }
 
 .navLink:hover {
   color: #1e3a21;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(44, 85, 48, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(44, 85, 48, 0.12);
 }
 
 .navLink::after {
   content: '';
   position: absolute;
-  bottom: 8px;
+  bottom: 6px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 2px;
+  transform: translateX(-50%) scaleX(0);
+  width: calc(100% - 24px);
+  height: 3px;
   background: linear-gradient(90deg, #2c5530 0%, #4a7c59 100%);
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 1px;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+  box-shadow: 0 2px 6px rgba(44, 85, 48, 0.3);
 }
 
 .navLink:hover::after {
-  width: calc(100% - 20px);
+  transform: translateX(-50%) scaleX(1);
 }
 
 .activeNavLink {
-  color: #1e3a21;
+  color: #fff;
   font-weight: 700;
-  background: rgba(44, 85, 48, 0.08);
-  box-shadow: 0 2px 8px rgba(44, 85, 48, 0.1);
+  background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+  box-shadow: 0 4px 16px rgba(44, 85, 48, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .activeNavLink::before {
-  opacity: 1;
+  opacity: 0;
 }
 
 .activeNavLink::after {
-  width: calc(100% - 20px);
+  display: none;
+}
+
+.activeNavLink:hover {
+  background: linear-gradient(135deg, #1e3a21 0%, #2c5530 100%);
+  box-shadow: 0 6px 24px rgba(44, 85, 48, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.2);
 }
 
 /* Responsive adjustments */

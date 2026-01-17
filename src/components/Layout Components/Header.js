@@ -67,16 +67,19 @@ const Header = () => {
                   className={`${styles.langOption} ${router.locale === 'bg' ? styles.activeLang : ''}`}
                   onClick={() => switchLanguage('bg')}
                   type="button"
+                  aria-label="Switch to Bulgarian"
                 >
-                  BG
+                  <span className={styles.flagIcon}>🇧🇬</span>
+                  <span className={styles.langText}>BG</span>
                 </button>
-                <span className={styles.langSeparator}>|</span>
                 <button 
                   className={`${styles.langOption} ${router.locale === 'en' ? styles.activeLang : ''}`}
                   onClick={() => switchLanguage('en')}
                   type="button"
+                  aria-label="Switch to English"
                 >
-                  EN
+                  <span className={styles.flagIcon}>🇬🇧</span>
+                  <span className={styles.langText}>EN</span>
                 </button>
               </div>
             </div>
@@ -132,8 +135,10 @@ const Header = () => {
                         setMobileMenuOpen(false);
                       }}
                       type="button"
+                      aria-label="Превключи на български"
                     >
-                      🇧🇬 Български
+                      <span className={styles.mobileFlagIcon}>🇧🇬</span>
+                      <span>Български</span>
                     </button>
                     <button 
                       className={`${styles.mobileLangOption} ${router.locale === 'en' ? styles.activeLang : ''}`}
@@ -142,8 +147,10 @@ const Header = () => {
                         setMobileMenuOpen(false);
                       }}
                       type="button"
+                      aria-label="Switch to English"
                     >
-                      🇺🇸 English
+                      <span className={styles.mobileFlagIcon}>🇬🇧</span>
+                      <span>English</span>
                     </button>
                   </div>
                 </nav>
