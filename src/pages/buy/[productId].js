@@ -14,7 +14,7 @@ import { useConsent } from '../../components/ConsentProvider';
 const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverError }) => {
   const router = useRouter();
   const { productId, qty } = router.query;
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const { addToCartEnhanced } = useCart();
   const { hasConsent } = useConsent();
 
@@ -66,6 +66,118 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
     return translationKey ? t(translationKey) || installationType : installationType;
   };
 
+  // Helper function to get accessory image URL
+  const getAccessoryImage = (accessoryName) => {
+    if (!accessoryName) return null;
+    
+    // Map accessory names to image URLs
+    if (accessoryName === 'Anti-vibration Mount Kit') {
+      return 'https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/tamponi-300x300.png';
+    }
+    if (accessoryName === 'Condensate Tray' || accessoryName === 'Condensate Tray with Heater and Thermostat') {
+      return 'https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/kondenzna-vana-300x300.jpg';
+    }
+    return null;
+  };
+
+  // Helper function to get accessory tooltip text
+  const getAccessoryTooltip = (accessoryName) => {
+    if (!accessoryName) return null;
+    
+    try {
+      // Get current locale from router (more reliable for next-i18next)
+      const currentLocale = router.locale || i18n.language || 'bg';
+      
+      // Method 1: Access translations directly from i18n resources using current locale
+      // This is the most reliable method for next-i18next
+      try {
+        const resourceBundle = i18n.getResourceBundle(currentLocale, 'common');
+        if (resourceBundle && 
+            resourceBundle.productDetail && 
+            resourceBundle.productDetail.accessoryTooltips) {
+          const tooltipObj = resourceBundle.productDetail.accessoryTooltips;
+          if (typeof tooltipObj === 'object' && tooltipObj[accessoryName]) {
+            const tooltip = tooltipObj[accessoryName];
+            if (typeof tooltip === 'string' && tooltip.length > 0) {
+              return tooltip;
+            }
+          }
+        }
+      } catch (resourceError) {
+        // Continue to next method if this fails
+      }
+      
+      // Method 2: Get the entire tooltips object using t() with returnObjects
+      // This should work but might return the wrong language if locale hasn't updated
+      const tooltips = t('productDetail.accessoryTooltips', { returnObjects: true, lng: currentLocale });
+      
+      // Check if we got a valid object (not a string)
+      if (tooltips && typeof tooltips === 'object' && !Array.isArray(tooltips) && tooltips.constructor === Object) {
+        const tooltip = tooltips[accessoryName];
+        if (tooltip && typeof tooltip === 'string' && tooltip.length > 0) {
+          // Make sure it's not the fallback key itself
+          if (!tooltip.startsWith('productDetail.accessoryTooltips')) {
+            return tooltip;
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error getting tooltip:', e);
+    }
+    
+    return null;
+  };
+
+  // Helper function to check if accessory should show tooltip icon
+  const shouldShowTooltipIcon = (accessoryName) => {
+    if (!accessoryName) return false;
+    
+    // Show icon if there's an image (all accessories with images should have tooltips)
+    const hasImage = getAccessoryImage(accessoryName) !== null;
+    
+    // Also show for installation (which always has an image)
+    if (accessoryName === 'Installation') return true;
+    
+    return hasImage;
+  };
+
+  // Handle image modal
+  const openImageModal = (imageUrl) => {
+    setModalImage(imageUrl);
+  };
+
+  const closeImageModal = () => {
+    setModalImage(null);
+  };
+
+  // Helper function to format warranty period
+  const formatWarrantyPeriod = (warranty) => {
+    if (!warranty) return '60 месеца';
+    
+    const warrantyStr = String(warranty).toLowerCase().trim();
+    
+    // Convert "1 year" or "1 years" to "1 година"
+    if (warrantyStr.includes('year')) {
+      const match = warrantyStr.match(/(\d+)\s*year/i);
+      if (match) {
+        const years = match[1];
+        return `${years} ${years === '1' ? 'година' : 'години'}`;
+      }
+    }
+    
+    // Convert "1 month" or "1 months" to "1 месец"
+    if (warrantyStr.includes('month')) {
+      const match = warrantyStr.match(/(\d+)\s*month/i);
+      if (match) {
+        const months = match[1];
+        return `${months} ${months === '1' ? 'месец' : 'месеца'}`;
+      }
+    }
+    
+    // If it's already in Bulgarian format, return as is
+    return warranty;
+  };
+
   // Helper function to count all technical specifications
   const getTechnicalSpecsCount = () => {
     let count = 0;
@@ -92,6 +204,9 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
   const [loading, setLoading] = useState(false);
   const [accessoriesLoading, setAccessoriesLoading] = useState(false);
   const [error, setError] = useState(serverError || (initialProduct ? null : 'Product not found'));
+  const [modalImage, setModalImage] = useState(null);
+  const [tooltipContent, setTooltipContent] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   // Fixed installation price per AC unit (converted from 300 BGN to EUR)
   const INSTALLATION_PRICE_PER_UNIT = 300.00 / 1.95583; // 153.39 EUR
@@ -105,6 +220,36 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
       }
     }
   }, [qty]);
+
+  // Handle Escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && modalImage) {
+        setModalImage(null);
+      }
+      if (e.key === 'Escape' && tooltipContent) {
+        setTooltipContent(null);
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [modalImage, tooltipContent]);
+
+  // Handle tooltip
+  const showTooltip = (e, content) => {
+    if (!content) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipPosition({ 
+      x: rect.left + rect.width / 2, 
+      y: rect.top - 10,
+      elementRect: rect 
+    });
+    setTooltipContent(content);
+  };
+
+  const hideTooltip = () => {
+    setTooltipContent(null);
+  };
 
   // Helper function to render spec cards with value next to name
   const renderSpecCard = (icon, name, value, tooltip, useSmallFont = false) => (
@@ -139,18 +284,20 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
   }, [initialAccessories]);
 
   // Price calculations
+  // Prices are stored in BGN (converted from EUR when saved)
   const formatPrice = (price) => {
-    // Price is stored in EUR, convert to BGN for display
-    const eurRate = 1.95583;
-    return `${(price * eurRate)?.toFixed(2)} ${t('productDetail.currency.bgn')}`;
+    // Price is stored in BGN, display as-is
+    return `${price?.toFixed(2)} ${t('productDetail.currency.bgn')}`;
   };
 
   const formatPriceEUR = (price) => {
-    // Price is stored in EUR, display as-is
-    return `${t('productDetail.currency.eur')}${price?.toFixed(2)}`;
+    // Price is stored in BGN, convert to EUR for display (BGN / 1.95583 = EUR)
+    const eurRate = 1.95583;
+    return `${t('productDetail.currency.eur')}${(price / eurRate)?.toFixed(2)}`;
   };
 
   const formatPriceBoth = (price) => {
+    // Price is stored in BGN
     const eurRate = 1.95583;
     return `${price?.toFixed(2)} ${t('productDetail.currency.bgn')} / ${t('productDetail.currency.eur')}${(price / eurRate).toFixed(2)}`;
   };
@@ -451,7 +598,7 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
 
               {/* Warranty Info - Moved up */}
               <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap', fontSize: '0.9rem', color: '#666' }}>
-                <div>{product.WarrantyPeriod || product.Warranty || '60 месеца'} Гаранция</div>
+                <div>{formatWarrantyPeriod(product.WarrantyPeriod || product.Warranty || '60 месеца')} гаранция</div>
               </div>
 
               {/* Accessories Section - Moved to top right */}
@@ -482,18 +629,81 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                           transition: 'all 0.2s ease'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: 0, overflow: 'hidden' }}>
                           <input
                             type="checkbox"
                             checked={selectedAccessories.includes(accessory.AccessoryID)}
                             onChange={() => toggleAccessory(accessory.AccessoryID)}
-                            style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0 }}
                           />
-                          <span style={{ fontSize: '0.95rem' }}>
-                            1 × {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
-                          </span>
+                          <div style={{ 
+                            fontSize: '0.95rem', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '0.5rem',
+                            flexWrap: 'nowrap',
+                            overflow: 'hidden'
+                          }}>
+                            <span style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+                              1 × {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
+                            </span>
+                            {getAccessoryImage(accessory.Name) && (
+                              <img
+                                src={getAccessoryImage(accessory.Name)}
+                                alt={t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openImageModal(getAccessoryImage(accessory.Name));
+                                }}
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  objectFit: 'cover',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                  border: '1px solid #e0e0e0',
+                                  transition: 'transform 0.2s ease',
+                                  flexShrink: 0,
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.transform = 'scale(1.1)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.transform = 'scale(1)';
+                                }}
+                              />
+                            )}
+                            {shouldShowTooltipIcon(accessory.Name) && (
+                              <span
+                                style={{
+                                  position: 'relative',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '18px',
+                                  height: '18px',
+                                  borderRadius: '50%',
+                                  backgroundColor: '#007bff',
+                                  color: 'white',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold',
+                                  cursor: 'help',
+                                  flexShrink: 0,
+                                }}
+                                onMouseEnter={(e) => {
+                                  const tooltip = getAccessoryTooltip(accessory.Name);
+                                  if (tooltip) {
+                                    showTooltip(e, tooltip);
+                                  }
+                                }}
+                                onMouseLeave={hideTooltip}
+                              >
+                                ?
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: '0.5rem' }}>
+                        <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: '0.5rem', flexShrink: 0, whiteSpace: 'nowrap' }}>
                           {formatPriceEUR(accessory.Price)} / {formatPrice(accessory.Price)}
                         </div>
                       </label>
@@ -523,8 +733,59 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                       onChange={() => setInstallationSelected(!installationSelected)}
                       style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
-                    <span style={{ fontSize: '0.95rem' }}>
+                    <span style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       {t('productDetail.installation.title')}
+                      <img
+                        src="https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/mon-3.jpg"
+                        alt={t('productDetail.installation.title')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openImageModal('https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/mon-3.jpg');
+                        }}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          objectFit: 'cover',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          border: '1px solid #e0e0e0',
+                          transition: 'transform 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.transform = 'scale(1.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.transform = 'scale(1)';
+                        }}
+                      />
+                      {shouldShowTooltipIcon('Installation') && (
+                        <span
+                          style={{
+                            position: 'relative',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '18px',
+                            height: '18px',
+                            borderRadius: '50%',
+                            backgroundColor: '#007bff',
+                            color: 'white',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            cursor: 'help',
+                            flexShrink: 0,
+                          }}
+                          onMouseEnter={(e) => {
+                            const tooltip = getAccessoryTooltip('Installation');
+                            if (tooltip) {
+                              showTooltip(e, tooltip);
+                            }
+                          }}
+                          onMouseLeave={hideTooltip}
+                        >
+                          ?
+                        </span>
+                      )}
                     </span>
                   </div>
                   <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: '0.5rem' }}>
@@ -670,13 +931,13 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
               <tbody>
                 {product.CapacityBTU && (
                   <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Btu</td>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>BTU</td>
                     <td style={{ padding: '0.75rem' }}>{product.CapacityBTU}</td>
                   </tr>
                 )}
                 {product.EnergyRating && (
                   <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Енергиен клас</td>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Енергиен Клас</td>
                     <td style={{ padding: '0.75rem' }}>{product.EnergyRating}</td>
                   </tr>
                 )}
@@ -694,31 +955,31 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                 )}
                 {product.PowerConsumptionCooling && (
                   <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ел.Консумация - охлаждане,kW</td>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ел.Консумация - Охлаждане, kW</td>
                     <td style={{ padding: '0.75rem' }}>{product.PowerConsumptionCooling}</td>
                   </tr>
                 )}
                 {product.PowerConsumptionHeating && (
                   <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ел.Консумация - отопление,kW</td>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ел.Консумация - Отопление, kW</td>
                     <td style={{ padding: '0.75rem' }}>{product.PowerConsumptionHeating}</td>
                   </tr>
                 )}
                 {product.NoiseLevel && (
                   <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ниво на шум /Hi/Lo/S-lo/, dB</td>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ниво На Шум /Hi/Lo/S-lo/, dB</td>
                     <td style={{ padding: '0.75rem' }}>{product.NoiseLevel}</td>
                   </tr>
                 )}
                 {product.IndoorDimensions && (
                   <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Размери Вътрешно тяло,мм</td>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Размери Вътрешно Тяло, мм</td>
                     <td style={{ padding: '0.75rem' }}>{product.IndoorDimensions}</td>
                   </tr>
                 )}
                 {product.OutdoorDimensions && (
                   <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Размери Външно тяло,мм</td>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Размери Външно Тяло, мм</td>
                     <td style={{ padding: '0.75rem' }}>{product.OutdoorDimensions}</td>
                   </tr>
                 )}
@@ -730,7 +991,7 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                 )}
                 {product.Colour && (
                   <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Цвят на панела</td>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Цвят На Панела</td>
                     <td style={{ padding: '0.75rem' }}>{product.Colour}</td>
                   </tr>
                 )}
@@ -769,6 +1030,139 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
         </div>
 
       </div>
+
+      {/* Tooltip */}
+      {tooltipContent && (
+        <div
+          style={{
+            position: 'fixed',
+            left: `${tooltipPosition.x}px`,
+            top: `${tooltipPosition.y}px`,
+            transform: 'translate(-50%, -100%)',
+            marginBottom: '10px',
+            backgroundColor: '#333',
+            color: 'white',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            maxWidth: '400px',
+            minWidth: '300px',
+            fontSize: '13px',
+            lineHeight: '1.6',
+            zIndex: 10000,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            pointerEvents: 'auto',
+            whiteSpace: 'pre-line',
+          }}
+          onMouseEnter={() => setTooltipContent(tooltipContent)}
+          onMouseLeave={hideTooltip}
+        >
+          {tooltipContent.split('\n').map((line, index) => {
+            if (line.trim().startsWith('•')) {
+              return (
+                <div key={index} style={{ marginLeft: '12px', marginTop: index > 0 ? '4px' : '0' }}>
+                  {line}
+                </div>
+              );
+            }
+            if (line.trim() === '') {
+              return <br key={index} />;
+            }
+            return (
+              <div key={index} style={{ fontWeight: index === 0 ? 'bold' : 'normal', marginTop: index > 0 ? '8px' : '0' }}>
+                {line}
+              </div>
+            );
+          })}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-8px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 0,
+              height: 0,
+              borderLeft: '8px solid transparent',
+              borderRight: '8px solid transparent',
+              borderTop: '8px solid #333',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {modalImage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            cursor: 'pointer',
+          }}
+          onClick={closeImageModal}
+        >
+          <div
+            style={{
+              position: 'relative',
+              maxWidth: '90%',
+              maxHeight: '90%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeImageModal}
+              style={{
+                position: 'absolute',
+                top: '-40px',
+                right: '0',
+                background: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                fontSize: '24px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#333',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#f0f0f0';
+                e.target.style.transform = 'scale(1.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'white';
+                e.target.style.transform = 'scale(1)';
+              }}
+            >
+              ×
+            </button>
+            <img
+              src={modalImage}
+              alt="Accessory"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '90vh',
+                objectFit: 'contain',
+                borderRadius: '8px',
+              }}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

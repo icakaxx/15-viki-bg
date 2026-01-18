@@ -410,30 +410,46 @@
   transform: scale(1.05);
 }
 
+/* Brand Strip */
+.brandStrip {
+  background-color: #f5f5f5;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  color: #ff6600;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  border-radius: 0 0 8px 8px;
+}
+
 /* Promotional Badges */
 .promotionalBadges {
   position: absolute;
   top: 0.75rem;
-  left: 0.75rem;
+  right: 0.75rem;
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
   z-index: 10;
+  align-items: flex-end;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.25em 0.5em;
-  border-radius: 20px;
+  padding: 0.35em 0.7em;
+  border-radius: 4px;
   font-size: 0.75rem;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: help;
   animation: badgeAppear 0.4s ease-out;
+  white-space: nowrap;
 }
 
 .badge:hover {
@@ -479,9 +495,14 @@
 
 .brandModel {
   color: #333;
-  margin-bottom: 1.5rem;
-  font-size: 2rem;
-  font-weight: bold;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: normal;
+  line-height: 1.5;
+  min-height: auto;
+  max-height: none;
+  overflow: visible;
+  display: block;
 }
 
 .specs {
@@ -489,6 +510,7 @@
   flex-direction: column;
   gap: 0.25rem;
   margin-bottom: 1rem;
+  min-height: 3rem; /* Consistent height for specs section (1 or 2 lines) */
 }
 
 .spec {
@@ -531,6 +553,7 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.75rem;
+  min-height: 2rem; /* Consistent height even if no features */
 }
 
 .featureTag {
@@ -556,6 +579,7 @@
 /* Stock Status */
 .stockStatus {
   margin-top: 0.75rem;
+  min-height: 2.4rem; /* Consistent height for stock badge */
 }
 
 .stockBadge {
@@ -784,11 +808,10 @@
 }
 
 .price {
-  color: #2c5530;
+  color: #d91a1a;
   font-size: 1.7rem;
   font-weight: bold;
   line-height: 1.2;
-  margin-top: -1rem;
 }
 
 .previousPriceContainer {
@@ -830,30 +853,37 @@
 
 /* New Discounted Price Layout */
 .originalPriceContainer {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.priceLabel {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .originalPrice {
-  color: #d91a1a;
-  font-size: 1.4rem;
+  color: #999;
+  font-size: 0.95rem;
   line-height: 1.2;
   text-decoration: line-through;
-  margin-bottom: 1rem;
 }
 
 .currentPriceContainer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-bottom: 0.5rem;
 }
 
 .currentPrice {
-  color: #2c5530;
+  color: #d91a1a;
   font-size: 1.7rem;
   font-weight: bold;
   line-height: 1.2;
-  margin-top: -1rem;
 }
 
 .discountBadge {

@@ -1459,6 +1459,12 @@
       "Condensate Tray": "Condensate Tray",
       "Condensate Tray with Heater and Thermostat": "Condensate Tray with Heater and Thermostat",
       "Anti-vibration Mount Kit": "Anti-vibration Mount Kit"
+    },
+    "accessoryTooltips": {
+      "Anti-vibration Mount Kit": "Anti-vibration mounts are placed between the outdoor unit and the base on which it is mounted.\n\nThey provide:\n• significant reduction of noise and vibrations\n• greater comfort for residents\n• protection of the building and mounting structure\n• longer lifespan of the unit\n\nEspecially recommended for installation on balconies, terraces and near residential areas.",
+      "Condensate Tray": "The condensate tray serves to collect and control the drainage of water (condensate) that forms during the operation of the air conditioner.\n\nAdvantages:\n• prevents water dripping on facades, sidewalks and balconies\n• protects from pollution and inconvenience for neighbors\n• ensures cleaner and more aesthetic installation",
+      "Condensate Tray with Heater and Thermostat": "This type of condensate tray is equipped with a heater and thermostat that prevent water freezing at low temperatures.\n\nPurpose and benefits:\n• guarantees normal operation of the air conditioner during winter\n• prevents ice formation and blockages\n• protects the outdoor unit and fan\n• the thermostat activates heating only when needed → economical solution\n\nHighly recommended for heating, heat pumps and outdoor installations.",
+      "Installation": "Professional Installation\n\nThe correct installation is key to the long-term and trouble-free operation of the air conditioning system.\n\nProfessional installation includes:\n• proper leveling and slope for condensate drainage\n• correct installation of anti-vibration elements\n• safe electrical connection of heaters and thermostats\n• minimizing noise, vibrations and future damage\n• compliance with manufacturer requirements and warranty conditions"
     }
   },
   "consent": {

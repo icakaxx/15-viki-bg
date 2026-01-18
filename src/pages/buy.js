@@ -832,7 +832,7 @@ const BuyPage = () => {
                       {/* Clickable Product Info Section */}
                       <Link href={`/buy/${product.ProductID}`} className={styles.productLink}>
                         <div className={styles.imageContainer}>
-                          {/* Promotional Badges */}
+                          {/* Promotional Badges - Top Right */}
                           {(flags.IsFeatured || flags.IsBestseller || flags.IsNew || flags.HasDiscount) && (
                             <div className={styles.promotionalBadges}>
                               {flags.IsNew && (
@@ -869,53 +869,40 @@ const BuyPage = () => {
                           />
                         </div>
                         
-                        <div className={styles.productInfo}>
+                        {/* Brand Strip */}
+                        <div className={styles.brandStrip}>
+                          {product.Brand}
+                        </div>
+                        
+                          <div className={styles.productInfo}>
                           <h2 className={styles.brandModel}>
                             {product.Brand} {product.Model}
                           </h2>
                           
-                          <div className={styles.specs}>
-                            <div className={styles.spec}>
-                              <span className={styles.specLabel}>{t ? t('buyPage.capacity') : 'Capacity'}:</span> {product.CapacityBTU} BTU
-                            </div>
-                            <div className={styles.spec}>
-                              <span className={styles.specLabel}>{t ? t('buyPage.energyRating') : 'Energy Rating'}:</span> {product.EnergyRating}
-                            </div>
-                            {product.Colour && (
-                              <div className={styles.spec}>
-                                <span className={styles.specLabel}>{t ? t('buyPage.color') : 'Color'}:</span> {translateColor(product.Colour)}
+                          {/* Feature Tags - Filter out Wi-Fi */}
+                          {product.Features && product.Features.length > 0 && (() => {
+                            const filteredFeatures = product.Features.filter(feature => {
+                              const featureLower = translateFeature(feature).toLowerCase();
+                              return featureLower !== 'wi-fi' && featureLower !== 'wifi';
+                            });
+                            return filteredFeatures.length > 0 && (
+                              <div className={styles.featureTags}>
+                                {filteredFeatures.slice(0, 4).map((feature, featureIndex) => (
+                                  <span key={featureIndex} className={styles.featureTag}>
+                                    {translateFeature(feature)}
+                                  </span>
+                                ))}
+                                {filteredFeatures.length > 4 && (
+                                  <span
+                                    className={styles.featureTag}
+                                    title={filteredFeatures.slice(4).map(translateFeature).join(', ')}
+                                  >
+                                    +{filteredFeatures.length - 4} more
+                                  </span>
+                                )}
                               </div>
-                            )}
-                            {product.NoiseLevel && (
-                              <div className={styles.spec}>
-                                <span className={styles.specLabel}>{t ? t('buyPage.noiseLevel') : 'Noise'}:</span> {product.NoiseLevel} dB
-                              </div>
-                            )}
-                            {product.WarrantyPeriod && (
-                              <div className={styles.spec}>
-                                <span className={styles.specLabel}>{t ? t('buyPage.warranty.label') : 'Warranty'}:</span> {translateWarranty(product.WarrantyPeriod)}
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Feature Tags */}
-                          {product.Features && product.Features.length > 0 && (
-                            <div className={styles.featureTags}>
-                              {product.Features.slice(0, 4).map((feature, featureIndex) => (
-                                <span key={featureIndex} className={styles.featureTag}>
-                                  {translateFeature(feature)}
-                                </span>
-                              ))}
-                              {product.Features.length > 4 && (
-                                <span
-                                  className={styles.featureTag}
-                                  title={product.Features.slice(4).map(translateFeature).join(', ')}
-                                >
-                                  +{product.Features.length - 4} more
-                                </span>
-                              )}
-                            </div>
-                          )}
+                            );
+                          })()}
                           
                           {/* Stock Status */}
                           <div className={styles.stockStatus}>
@@ -973,27 +960,25 @@ const BuyPage = () => {
                         <div className={styles.pricing}>
                           {discount > 0 ? (
                             <>
-                              {/* Original Price (Crossed Out) */}
+                              {/* Original Price with ПЦД label (Crossed Out) */}
                               <div className={styles.originalPriceContainer}>
+                                <span className={styles.priceLabel}>ПЦД:</span>
                                 <span className={styles.originalPrice}>
-                                  {formatPrice(previousPrice)} / {formatPriceEUR(previousPrice)}
+                                  {formatPriceEUR(previousPrice)} | {formatPrice(previousPrice)}
                                 </span>
                               </div>
-                              {/* Current Price (Dynamically Calculated) */}
+                              {/* Current Price (Dynamically Calculated) - Bold Red */}
                               <div className={styles.currentPriceContainer}>
                                 <span className={styles.currentPrice}>
-                                  {formatPrice(currentPrice)} / {formatPriceEUR(currentPrice)}
+                                  {formatPriceEUR(currentPrice)} | {formatPrice(currentPrice)}
                                 </span>
-                                {discount && (
-                                  <span className={styles.discountBadge}>-{discount}%</span>
-                                )}
                               </div>
                             </>
                           ) : (
                             /* Regular Price (No Discount) */
                             <div className={styles.priceContainer}>
                               <span className={styles.price}>
-                                {formatPrice(currentPrice)} / {formatPriceEUR(currentPrice)}
+                                {formatPriceEUR(currentPrice)} | {formatPrice(currentPrice)}
                               </span>
                             </div>
                           )}

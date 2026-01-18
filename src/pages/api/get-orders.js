@@ -23,14 +23,24 @@ export default async function handler(req, res) {
     // First try to use the order_status_view if it exists
     let { data, error } = await supabase
       .from('order_status_view')
-      .select('*')
+      .select(`
+        *,
+        invoice_info (
+          invoice_enabled,
+          company_name,
+          address,
+          bulstat,
+          mol,
+          mol_custom
+        )
+      `)
       .neq('current_status', 'installed')
       .order('order_created_at', { ascending: false });
 
     // If view doesn't exist, fall back to manual join
     if (error && error.code === '42P01') {
       
-      // Get orders with payment info using manual join, excluding installed orders
+      // Get orders with payment info and invoice info using manual join, excluding installed orders
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select(`
@@ -48,6 +58,14 @@ export default async function handler(req, res) {
             payment_method,
             total_amount,
             paid_amount
+          ),
+          invoice_info (
+            invoice_enabled,
+            company_name,
+            address,
+            bulstat,
+            mol,
+            mol_custom
           )
         `)
         .neq('orders.status', 'installed')
@@ -74,7 +92,8 @@ export default async function handler(req, res) {
         current_status: order.status || 'new',
         total_amount: order.payment_and_tracking?.[0]?.total_amount || 0,
         paid_amount: order.payment_and_tracking?.[0]?.paid_amount || 0,
-        notes: order.notes
+        notes: order.notes,
+        invoice_info: order.invoice_info?.[0] || null
       })) || [];
 
     } else if (error) {
@@ -82,7 +101,21 @@ export default async function handler(req, res) {
         error: 'Failed to load orders',
         details: error.message
       });
-    } 
+    }
+    
+    // Normalize invoice_info for all orders (handle both array and object formats)
+    if (data && Array.isArray(data)) {
+      data = data.map(order => {
+        if (order.invoice_info) {
+          // If invoice_info is an array, take the first element
+          if (Array.isArray(order.invoice_info)) {
+            order.invoice_info = order.invoice_info[0] || null;
+          }
+          // If it's already an object or null, keep it as is
+        }
+        return order;
+      });
+    }
 
     return res.status(200).json({ 
       success: true,

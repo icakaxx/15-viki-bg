@@ -25,16 +25,15 @@ const CheckoutPage = () => {
     lastName: '',
     phone: '',
     town: '',
-    address: '',
+    personalAddress: '',
     email: '',
     
     // Invoice Information
     invoiceEnabled: '', // Changed to empty string - options: '', 'yes', 'no'
     companyName: '',
-    address: '',
+    invoiceAddress: '',
     bulstat: '',
     mol: '',
-    molCustom: '',
     
     // Payment
     paymentMethod: ''
@@ -246,7 +245,7 @@ const CheckoutPage = () => {
            formData.lastName.trim() && 
            formData.phone.trim() && 
            formData.town.trim() &&
-           formData.address.trim();
+           formData.personalAddress.trim();
   };
 
   // Check if invoice info is complete (if enabled)
@@ -260,9 +259,9 @@ const CheckoutPage = () => {
     // If "yes" is selected, all invoice fields must be filled
     if (formData.invoiceEnabled === 'yes') {
       return formData.companyName.trim() && 
-             formData.address.trim() && 
+             formData.invoiceAddress.trim() && 
              formData.bulstat.trim() && 
-             (formData.mol.trim() || formData.molCustom.trim());
+             formData.mol.trim();
     }
     
     return false;
@@ -307,16 +306,15 @@ const CheckoutPage = () => {
         lastName: formData.lastName,
         phone: formData.phone,
         town: formData.town,
-        address: formData.address,
+        address: formData.personalAddress,
         email: formData.email
       },
       invoiceInfo: {
         invoiceEnabled: formData.invoiceEnabled === 'yes',
         companyName: formData.companyName || '',
-        address: formData.address || '',
+        address: formData.invoiceAddress || '',
         bulstat: formData.bulstat || '',
-        mol: formData.mol || '',
-        molCustom: formData.molCustom || ''
+        mol: formData.mol || ''
       },
       paymentInfo: {
         paymentMethod: formData.paymentMethod,
@@ -418,7 +416,7 @@ const CheckoutPage = () => {
       errors.phone = t('checkout.form.validation.invalidPhone');
     }
     if (!formData.town.trim()) errors.town = t('checkout.form.validation.required');
-    if (!formData.address.trim()) errors.address = t('checkout.form.validation.required');
+    if (!formData.personalAddress.trim()) errors.personalAddress = t('checkout.form.validation.required');
 
     // Email validation (optional - only validate format if provided)
     if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -430,13 +428,13 @@ const CheckoutPage = () => {
       errors.invoiceEnabled = t('checkout.form.validation.required');
     } else if (formData.invoiceEnabled === 'yes') {
       if (!formData.companyName.trim()) errors.companyName = t('checkout.form.validation.required');
-      if (!formData.address.trim()) errors.address = t('checkout.form.validation.required');
+      if (!formData.invoiceAddress.trim()) errors.invoiceAddress = t('checkout.form.validation.required');
       if (!formData.bulstat.trim()) {
         errors.bulstat = t('checkout.form.validation.required');
       } else if (!/^\d{9}$/.test(formData.bulstat)) {
         errors.bulstat = t('checkout.form.validation.invalidBulstat');
       }
-      if (!formData.mol.trim() && !formData.molCustom.trim()) {
+      if (!formData.mol.trim()) {
         errors.mol = t('checkout.form.validation.required');
       }
     }
@@ -489,16 +487,15 @@ const CheckoutPage = () => {
           lastName: formData.lastName,
           phone: formData.phone,
           town: formData.town,
-          address: formData.address,
+          address: formData.personalAddress,
           email: formData.email
         },
         invoiceInfo: {
           invoiceEnabled: formData.invoiceEnabled === 'yes',
           companyName: formData.companyName || '',
-          address: formData.address || '',
+          address: formData.invoiceAddress || '',
           bulstat: formData.bulstat || '',
-          mol: formData.mol || '',
-          molCustom: formData.molCustom || ''
+          mol: formData.mol || ''
         },
         paymentInfo: {
           paymentMethod: formData.paymentMethod,
@@ -888,16 +885,16 @@ const CheckoutPage = () => {
                   </div>
                   
                   <div className={styles.formGroup}>
-                    <label htmlFor="address">{t('checkout.form.personalInfo.address')} *</label>
+                    <label htmlFor="personalAddress">{t('checkout.form.personalInfo.address')} *</label>
                     <input
                       type="text"
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      className={formErrors.address ? styles.inputError : ''}
+                      id="personalAddress"
+                      value={formData.personalAddress}
+                      onChange={(e) => handleInputChange('personalAddress', e.target.value)}
+                      className={formErrors.personalAddress ? styles.inputError : ''}
                       placeholder={t('checkout.form.personalInfo.addressPlaceholder')}
                     />
-                    {formErrors.address && <span className={styles.error}>{formErrors.address}</span>}
+                    {formErrors.personalAddress && <span className={styles.error}>{formErrors.personalAddress}</span>}
                   </div>
                   
                   <div className={styles.formGroup}>
@@ -976,15 +973,15 @@ const CheckoutPage = () => {
                     </div>
                     
                     <div className={styles.formGroup}>
-                      <label htmlFor="address">{t('checkout.form.invoice.address')} *</label>
+                      <label htmlFor="invoiceAddress">{t('checkout.form.invoice.address')} *</label>
                       <input
                         type="text"
-                        id="address"
-                        value={formData.address}
-                        onChange={(e) => handleInputChange('address', e.target.value)}
-                        className={formErrors.address ? styles.inputError : ''}
+                        id="invoiceAddress"
+                        value={formData.invoiceAddress}
+                        onChange={(e) => handleInputChange('invoiceAddress', e.target.value)}
+                        className={formErrors.invoiceAddress ? styles.inputError : ''}
                       />
-                      {formErrors.address && <span className={styles.error}>{formErrors.address}</span>}
+                      {formErrors.invoiceAddress && <span className={styles.error}>{formErrors.invoiceAddress}</span>}
                     </div>
                     
                     <div className={styles.formGroup}>
@@ -1003,28 +1000,14 @@ const CheckoutPage = () => {
                     
                     <div className={styles.formGroup}>
                       <label htmlFor="mol">{t('checkout.form.invoice.mol')} *</label>
-                      <select
+                      <input
+                        type="text"
                         id="mol"
                         value={formData.mol}
                         onChange={(e) => handleInputChange('mol', e.target.value)}
                         className={formErrors.mol ? styles.inputError : ''}
-                      >
-                        <option value="">-- {t('checkout.form.invoice.mol')} --</option>
-                        <option value="manager">{t('checkout.form.invoice.molSuggestions.manager')}</option>
-                        <option value="director">{t('checkout.form.invoice.molSuggestions.director')}</option>
-                        <option value="owner">{t('checkout.form.invoice.molSuggestions.owner')}</option>
-                        <option value="representative">{t('checkout.form.invoice.molSuggestions.representative')}</option>
-                        <option value="custom">{t('checkout.form.invoice.molSuggestions.custom')}</option>
-                      </select>
-                      {formData.mol === 'custom' && (
-                        <input
-                          type="text"
-                          value={formData.molCustom}
-                          onChange={(e) => handleInputChange('molCustom', e.target.value)}
-                          placeholder={t('checkout.form.invoice.mol')}
-                          style={{ marginTop: '0.5rem' }}
-                        />
-                      )}
+                        placeholder={t('checkout.form.invoice.mol')}
+                      />
                       {formErrors.mol && <span className={styles.error}>{formErrors.mol}</span>}
                     </div>
                   </div>

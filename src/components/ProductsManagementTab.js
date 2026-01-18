@@ -413,8 +413,9 @@ export default function ProductsManagementTab() {
                         capacity_btu: product.CapacityBTU || product.capacity_btu || '',
                         energy_rating: product.EnergyRating || product.energy_rating || '',
                         colour: product.Colour || product.colour || '',
-                        price: product.Price || product.price ? (product.Price || product.price).toString() : '', // Price is stored in EUR
-                        previous_price: product.PreviousPrice || product.previous_price ? (product.PreviousPrice || product.previous_price).toString() : '', // Price is stored in EUR
+                        // Price is stored in BGN, convert to EUR for form display
+                        price: product.Price || product.price ? ((product.Price || product.price) / 1.95583).toFixed(2) : '',
+                        previous_price: product.PreviousPrice || product.previous_price ? ((product.PreviousPrice || product.previous_price) / 1.95583).toFixed(2) : '',
                         stock: product.Stock || product.stock || '',
                         discount: product.Discount || product.discount || '',
                         image_url: product.ImageURL || product.image_url || '',
@@ -714,9 +715,9 @@ export default function ProductsManagementTab() {
             // Clean and validate data before sending
             const cleanedData = {
                 ...formData,
-                // Store price in EUR (no conversion needed)
-                price: formData.price ? parseFloat(formData.price) : null,
-                previous_price: formData.discount > 0 ? parseFloat(formData.price) : (formData.previous_price ? parseFloat(formData.previous_price) : null),
+                // Convert EUR to BGN for storage (EUR * 1.95583 = BGN)
+                price: formData.price ? parseFloat(formData.price) * 1.95583 : null,
+                previous_price: formData.discount > 0 ? parseFloat(formData.price) * 1.95583 : (formData.previous_price ? parseFloat(formData.previous_price) * 1.95583 : null),
                 stock: formData.stock ? parseInt(formData.stock) : 0,
                 discount: formData.discount ? parseFloat(formData.discount) : 0,
                 capacity_btu: formData.capacity_btu || null,
@@ -1673,7 +1674,7 @@ export default function ProductsManagementTab() {
                                 </div>
                                 <div className={styles.productMain}>
                                     <h4>{product.brand} {product.model}</h4>
-                                    <p>Цена: €{product.price}</p>
+                                    <p>Цена: €{product.price ? parseFloat(product.price).toFixed(2) : '0.00'}</p>
                                     <div className={styles.stockUpdateContainer}>
                                         <label className={styles.stockLabel}>
                                             Налични:

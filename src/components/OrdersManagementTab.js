@@ -470,8 +470,31 @@ export default function OrdersManagementTab() {
                     <td>{order.phone}</td>
                     <td>{formatDate(order.order_created_at)}</td>
                     <td>{getPaymentMethodLabel(order.payment_method)}</td>
-                    <td>{order.total_amount ? `${order.total_amount.toFixed(2)} лв.` : '-'}</td>
-                    <td>{order.paid_amount ? `${order.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</td>
+                    <td>
+                      {order.total_amount ? (
+                        <>
+                          <div>{order.total_amount.toFixed(2)} лв.</div>
+                          <div style={{ fontSize: '0.85em', color: '#666' }}>
+                            {(order.total_amount / 1.95583).toFixed(2)} €
+                          </div>
+                        </>
+                      ) : '-'}
+                    </td>
+                    <td>
+                      {order.paid_amount ? (
+                        <>
+                          <div>{order.paid_amount.toFixed(2)} лв.</div>
+                          <div style={{ fontSize: '0.85em', color: '#666' }}>
+                            {(order.paid_amount / 1.95583).toFixed(2)} €
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div>0.00 лв.</div>
+                          <div style={{ fontSize: '0.85em', color: '#666' }}>0.00 €</div>
+                        </>
+                      )}
+                    </td>
                     <td>
                       <span 
                         className={styles.statusBadge}
@@ -532,11 +555,25 @@ export default function OrdersManagementTab() {
                     </div>
                     <div className={styles.mobileOrderInfo}>
                       <span className={styles.mobileOrderLabel}>{t('admin.orders.table.totalAmount')}:</span>
-                      <span>{order.total_amount ? `${order.total_amount.toFixed(2)} лв.` : '-'}</span>
+                      <span>
+                        {order.total_amount ? (
+                          <>
+                            {order.total_amount.toFixed(2)} лв. / {(order.total_amount / 1.95583).toFixed(2)} €
+                          </>
+                        ) : '-'}
+                      </span>
                     </div>
                     <div className={styles.mobileOrderInfo}>
                       <span className={styles.mobileOrderLabel}>{t('admin.orders.table.paidAmount')}:</span>
-                      <span>{order.paid_amount ? `${order.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</span>
+                      <span>
+                        {order.paid_amount ? (
+                          <>
+                            {order.paid_amount.toFixed(2)} лв. / {(order.paid_amount / 1.95583).toFixed(2)} €
+                          </>
+                        ) : (
+                          <>0.00 лв. / 0.00 €</>
+                        )}
+                      </span>
                     </div>
                   </div>
                   
@@ -621,11 +658,21 @@ export default function OrdersManagementTab() {
                   <p><strong>{t('admin.orders.modal.orderDate')}:</strong> {formatDate(selectedOrder.order_created_at)}</p>
                 </div>
                 
+                {selectedOrder.invoice_info && (
+                  <div className={styles.infoSection}>
+                    <h4>📄 {t('checkout.form.invoice.title')}</h4>
+                    <p><strong>{t('checkout.form.invoice.companyName')}:</strong> {selectedOrder.invoice_info.company_name || '-'}</p>
+                    <p><strong>{t('checkout.form.invoice.address')}:</strong> {selectedOrder.invoice_info.address || '-'}</p>
+                    <p><strong>{t('checkout.form.invoice.bulstat')}:</strong> {selectedOrder.invoice_info.bulstat || '-'}</p>
+                    <p><strong>{t('checkout.form.invoice.mol')}:</strong> {selectedOrder.invoice_info.mol_custom || selectedOrder.invoice_info.mol || '-'}</p>
+                  </div>
+                )}
+                
                 <div className={styles.infoSection}>
                   <h4>💳 {t('admin.orders.paymentInformation')}</h4>
                   <p><strong>{t('admin.orders.modal.paymentMethod')}:</strong> {getPaymentMethodLabel(selectedOrder.payment_method)}</p>
-                  <p><strong>{t('admin.orders.modal.totalAmount')}:</strong> {selectedOrder.total_amount ? `${selectedOrder.total_amount.toFixed(2)} лв.` : '-'}</p>
-                  <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${selectedOrder.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</p>
+                  <p><strong>{t('admin.orders.modal.totalAmount')}:</strong> {selectedOrder.total_amount ? `${selectedOrder.total_amount.toFixed(2)} лв. / ${(selectedOrder.total_amount / 1.95583).toFixed(2)} €` : '-'}</p>
+                  <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${selectedOrder.paid_amount.toFixed(2)} лв. / ${(selectedOrder.paid_amount / 1.95583).toFixed(2)} €` : '0.00 лв. / 0.00 €'}</p>
                   <p><strong>{t('admin.orders.modal.currentStatus')}:</strong> 
                     <span 
                       className={styles.statusBadge}
@@ -835,12 +882,6 @@ export default function OrdersManagementTab() {
                             <div className={styles.productQuantity}>
                               {t('admin.orders.products.quantity')}: {product.quantity}
                             </div>
-                            <div className={styles.productPrice}>
-                              <div>{product.price ? `${parseFloat(product.price).toFixed(2)} лв.` : '-'}</div>
-                              <div style={{ fontSize: '0.85em', color: '#666' }}>
-                                {product.price ? `${(parseFloat(product.price) / 1.95583).toFixed(2)} €` : '-'}
-                              </div>
-                            </div>
                             <div className={styles.productTotal}>
                               <div>{product.total_price ? `${product.total_price.toFixed(2)} лв.` : '-'}</div>
                               <div style={{ fontSize: '0.85em', color: '#666' }}>
@@ -860,12 +901,6 @@ export default function OrdersManagementTab() {
                                   </div>
                                   <div className={styles.productQuantity}>
                                     {t('admin.orders.products.quantity')}: {accessory.quantity || 1}
-                                  </div>
-                                  <div className={styles.productPrice}>
-                                    <div>{accessory.price ? `${parseFloat(accessory.price).toFixed(2)} лв.` : '-'}</div>
-                                    <div style={{ fontSize: '0.85em', color: '#666' }}>
-                                      {accessory.price ? `${(parseFloat(accessory.price) / 1.95583).toFixed(2)} €` : '-'}
-                                    </div>
                                   </div>
                                   <div className={styles.productTotal}>
                                     <div>{accessoryTotal ? `${accessoryTotal.toFixed(2)} лв.` : '-'}</div>
@@ -891,12 +926,6 @@ export default function OrdersManagementTab() {
                               </div>
                               <div className={styles.productQuantity}>
                                 {t('admin.orders.products.quantity')}: {product.quantity}
-                              </div>
-                              <div className={styles.productPrice}>
-                                <div>300.00 лв.</div>
-                                <div style={{ fontSize: '0.85em', color: '#666' }}>
-                                  {(300 / 1.95583).toFixed(2)} €
-                                </div>
                               </div>
                               <div className={styles.productTotal}>
                                 <div>{(300 * product.quantity).toFixed(2)} лв.</div>
@@ -988,11 +1017,21 @@ export default function OrdersManagementTab() {
                     <p><strong>{t('admin.orders.modal.orderDate')}:</strong> {formatDate(selectedOrder.order_created_at)}</p>
                   </div>
                   
+                  {selectedOrder.invoice_info && (
+                    <div className={styles.infoSection}>
+                      <h4>📄 {t('checkout.form.invoice.title')}</h4>
+                      <p><strong>{t('checkout.form.invoice.companyName')}:</strong> {selectedOrder.invoice_info.company_name || '-'}</p>
+                      <p><strong>{t('checkout.form.invoice.address')}:</strong> {selectedOrder.invoice_info.address || '-'}</p>
+                      <p><strong>{t('checkout.form.invoice.bulstat')}:</strong> {selectedOrder.invoice_info.bulstat || '-'}</p>
+                      <p><strong>{t('checkout.form.invoice.mol')}:</strong> {selectedOrder.invoice_info.mol_custom || selectedOrder.invoice_info.mol || '-'}</p>
+                    </div>
+                  )}
+                  
                   <div className={styles.infoSection}>
                     <h4>💳 {t('admin.orders.paymentInformation')}</h4>
                     <p><strong>{t('admin.orders.modal.paymentMethod')}:</strong> {getPaymentMethodLabel(selectedOrder.payment_method)}</p>
-                    <p><strong>{t('admin.orders.modal.totalAmount')}:</strong> {selectedOrder.total_amount ? `${selectedOrder.total_amount.toFixed(2)} лв.` : '-'}</p>
-                    <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${selectedOrder.paid_amount.toFixed(2)} лв.` : '0.00 лв.'}</p>
+                    <p><strong>{t('admin.orders.modal.totalAmount')}:</strong> {selectedOrder.total_amount ? `${selectedOrder.total_amount.toFixed(2)} лв. / ${(selectedOrder.total_amount / 1.95583).toFixed(2)} €` : '-'}</p>
+                    <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${selectedOrder.paid_amount.toFixed(2)} лв. / ${(selectedOrder.paid_amount / 1.95583).toFixed(2)} €` : '0.00 лв. / 0.00 €'}</p>
                     <p><strong>{t('admin.orders.modal.currentStatus')}:</strong> 
                       <span 
                         className={styles.statusBadge}
@@ -1175,11 +1214,11 @@ export default function OrdersManagementTab() {
                               <div className={styles.productQuantity}>
                                 <small>{t('admin.orders.products.quantity')}: {product.quantity}</small>
                               </div>
-                              <div className={styles.productPrice}>
-                                <div style={{ fontSize: '0.85rem' }}>{product.price ? `${parseFloat(product.price).toFixed(2)} лв.` : '-'}</div>
-                              </div>
                               <div className={styles.productTotal}>
                                 <div style={{ fontSize: '0.85rem' }}>{product.total_price ? `${product.total_price.toFixed(2)} лв.` : '-'}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                                  {product.total_price ? `${(product.total_price / 1.95583).toFixed(2)} €` : '-'}
+                                </div>
                               </div>
                             </div>
 
@@ -1195,11 +1234,11 @@ export default function OrdersManagementTab() {
                                     <div className={styles.productQuantity}>
                                       <small>{t('admin.orders.products.quantity')}: {accessory.quantity || 1}</small>
                                     </div>
-                                    <div className={styles.productPrice}>
-                                      <div style={{ fontSize: '0.75rem' }}>{accessory.price ? `${parseFloat(accessory.price).toFixed(2)} лв.` : '-'}</div>
-                                    </div>
                                     <div className={styles.productTotal}>
                                       <div style={{ fontSize: '0.75rem' }}>{accessoryTotal ? `${accessoryTotal.toFixed(2)} лв.` : '-'}</div>
+                                      <div style={{ fontSize: '0.7rem', color: '#666' }}>
+                                        {accessoryTotal ? `${(accessoryTotal / 1.95583).toFixed(2)} €` : '-'}
+                                      </div>
                                     </div>
                                   </div>
                                 );
@@ -1220,11 +1259,11 @@ export default function OrdersManagementTab() {
                                 <div className={styles.productQuantity}>
                                   <small>{t('admin.orders.products.quantity')}: {product.quantity}</small>
                                 </div>
-                                <div className={styles.productPrice}>
-                                  <div style={{ fontSize: '0.75rem' }}>300.00 лв.</div>
-                                </div>
                                 <div className={styles.productTotal}>
                                   <div style={{ fontSize: '0.75rem' }}>{(300 * product.quantity).toFixed(2)} лв.</div>
+                                  <div style={{ fontSize: '0.7rem', color: '#666' }}>
+                                    {((300 / 1.95583) * product.quantity).toFixed(2)} €
+                                  </div>
                                 </div>
                               </div>
                             )}
@@ -1253,6 +1292,24 @@ export default function OrdersManagementTab() {
                               }, 0);
                               return (productTotal + accessoryTotal + installationTotal).toFixed(2);
                             })()} лв.</strong>
+                          </div>
+                          <div style={{ fontSize: '0.85em', color: '#666', marginTop: '0.25rem' }}>
+                            <strong>{(() => {
+                              const productTotal = orderProducts.reduce((sum, product) => sum + (product.total_price || 0), 0);
+                              const accessoryTotal = orderProducts.reduce((sum, product) => {
+                                if (product.accessories && product.accessories.length > 0) {
+                                  return sum + product.accessories.reduce((accSum, acc) => accSum + ((acc.price || 0) * (acc.quantity || 1)), 0);
+                                }
+                                return sum;
+                              }, 0);
+                              const installationTotal = orderProducts.reduce((sum, product) => {
+                                if (product.includes_installation) {
+                                  return sum + (300 * product.quantity);
+                                }
+                                return sum;
+                              }, 0);
+                              return ((productTotal + accessoryTotal + installationTotal) / 1.95583).toFixed(2);
+                            })()} €</strong>
                           </div>
                         </div>
                       </div>
