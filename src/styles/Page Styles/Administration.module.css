@@ -4444,3 +4444,160 @@
     min-width: 70px;
   }
 }
+
+/* ========== MOBILE UX ENHANCEMENTS (Mobile-Only, Desktop Unchanged) ========== */
+
+/* Mobile: Admin panel usability improvements */
+@media (max-width: 768px) {
+  /* Ensure tables are horizontally scrollable */
+  .tableContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+    width: 100%;
+  }
+  
+  .productsTable,
+  .ordersTable {
+    min-width: 800px; /* Ensure table doesn't collapse */
+  }
+  
+  /* Add scroll indicator shadow */
+  .tableContainer {
+    background: 
+      linear-gradient(to right, white 30%, rgba(255,255,255,0)),
+      linear-gradient(to right, rgba(255,255,255,0), white 70%) 100% 0,
+      radial-gradient(farthest-side at 0% 50%, rgba(0,0,0,.2), rgba(0,0,0,0)),
+      radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.2), rgba(0,0,0,0)) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
+  }
+  
+  /* Buttons: Minimum tap targets */
+  .primaryButton,
+  .secondaryButton,
+  .editButton,
+  .archiveButton,
+  .deleteButton,
+  .updateStatusButton,
+  .cancelButton,
+  .saveButton,
+  .viewButton {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Form inputs: Prevent iOS zoom */
+  .formInput,
+  .searchInput,
+  .priceInput,
+  .stockInput,
+  .textInput,
+  .selectInput {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+  
+  /* Global element selectors need :global() wrapper in CSS Modules */
+  :global(select),
+  :global(input[type="text"]),
+  :global(input[type="email"]),
+  :global(input[type="number"]),
+  :global(input[type="tel"]),
+  :global(textarea) {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+  
+  /* Modal: Full screen on mobile for better UX */
+  .modalContent {
+    max-width: 100%;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+    overflow-y: auto;
+  }
+  
+  .modalHeader {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  /* Tab navigation: Better mobile spacing */
+  .tabNavigation {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  
+  .tabButton {
+    min-height: 48px;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
+  
+  /* Cards: Better mobile layout */
+  .productCard,
+  .orderCard {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Stats cards: Stack on mobile */
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* Filter controls: Stack vertically */
+  .controlsSection {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .searchInput {
+    width: 100%;
+  }
+  
+  /* Action buttons: Better mobile layout */
+  .actionButtons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .actionButtons button {
+    width: 100%;
+  }
+  
+  /* Prevent text overflow */
+  .productCardRow,
+  .orderRow,
+  .customerInfo {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+}
+
+/* Mobile: Reduce motion for performance */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  .modalOverlay,
+  .modalContent,
+  .tabButton,
+  .primaryButton,
+  .secondaryButton,
+  .productCard,
+  .orderCard {
+    transition: none;
+    animation: none;
+  }
+  
+  *:hover {
+    transform: none !important;
+  }
+}

@@ -23,6 +23,24 @@ body {
                "Noto Color Emoji", "Noto Sans", "Twemoji Mozilla", 
                sans-serif;  font-weight: 400;
   font-style: normal;
+  overflow-x: hidden; /* Mobile: prevent horizontal scroll globally */
+  width: 100%;
+}
+
+/* Mobile-only: Prevent zoom on input focus (iOS) */
+@media (max-width: 768px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  input,
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevent iOS zoom */
+  }
 }
 
 ::-webkit-scrollbar {
@@ -170,4 +188,135 @@ body {
 
 .service-card button:active {
   transform: translateY(0);
+}
+
+/* ========== MOBILE PERFORMANCE OPTIMIZATIONS (Mobile-Only) ========== */
+
+/* Mobile: Optimize service cards for smaller screens */
+@media (max-width: 768px) {
+  .service-card {
+    width: 100%;
+    max-width: 400px;
+    min-height: 480px;
+    padding: 24px;
+  }
+  
+  .service-card:hover {
+    transform: translateY(-4px); /* Reduce transform for mobile */
+  }
+  
+  .service-card h3 {
+    font-size: 20px;
+  }
+  
+  .service-card .description {
+    font-size: 15px;
+  }
+  
+  .service-card button {
+    padding: 12px 28px;
+    font-size: 15px;
+    min-height: 48px; /* Minimum tap target */
+  }
+}
+
+/* Mobile: Reduce animations and transforms for better performance */
+@media (max-width: 768px) {
+  /* Optimize images for mobile */
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+  
+  /* Reduce box-shadow complexity on mobile */
+  *:not(.modal):not(.card) {
+    box-shadow: none;
+  }
+  
+  /* Simplify shadows only where needed */
+  .modal,
+  .card,
+  [class*="Card"],
+  [class*="Modal"] {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+/* Mobile: Reduce motion for users who prefer it OR on mobile for performance */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce),
+       (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .service-card,
+  .service-card:hover,
+  .service-card button,
+  .service-card button:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Mobile: Smaller scrollbar on touch devices */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    border: 1px solid #F9F7F7;
+  }
+}
+
+/* Mobile: Optimize fonts for better readability */
+@media (max-width: 768px) {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  /* Improve text contrast on mobile */
+  * {
+    -webkit-tap-highlight-color: rgba(44, 85, 48, 0.1);
+  }
+}
+
+/* Mobile: Prevent zoom on double-tap (iOS) */
+@media (max-width: 768px) {
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+}
+
+/* Very small screens: Further optimizations */
+@media (max-width: 430px) {
+  .service-card {
+    min-height: 440px;
+    padding: 20px;
+  }
+  
+  .service-card h3 {
+    font-size: 18px;
+  }
+  
+  .service-card .description {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  
+  .service-card button {
+    padding: 10px 24px;
+    font-size: 14px;
+  }
 }

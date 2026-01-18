@@ -1182,4 +1182,346 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* ========== MOBILE UX ENHANCEMENTS (Mobile-Only, Desktop Unchanged) ========== */
+
+/* Mobile: Checkout optimization for conversions */
+@media (max-width: 768px) {
+  /* Container: Reduce padding on mobile */
+  .container {
+    padding: 1rem 0.75rem;
+  }
+  
+  /* Title: Scale for mobile */
+  .title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Order Summary: Full width on mobile */
+  .orderSummary {
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .summaryTitle {
+    font-size: 1.25rem;
+  }
+  
+  /* Cart Items: Optimize layout */
+  .cartItem {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .itemImage {
+    width: 100%;
+    max-width: 120px;
+    height: 120px;
+  }
+  
+  .itemDetails {
+    max-width: 100%;
+    margin-right: 0;
+  }
+  
+  .itemDetails h4 {
+    font-size: 1.05rem;
+  }
+  
+  .quantityControls {
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+  
+  /* Form Inputs: Prevent iOS zoom & improve tap targets */
+  .formGroup input,
+  .formGroup select,
+  .formGroup textarea {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    min-height: 48px;
+    padding: 0.875rem 1rem;
+  }
+  
+  .formGroup textarea {
+    min-height: 100px;
+  }
+  
+  /* Form layout: Single column on mobile */
+  .formRow {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .formGroup {
+    margin-bottom: 1.25rem;
+  }
+  
+  /* Labels: Increase size for readability */
+  .formGroup label {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Radio & Checkbox: Larger tap targets */
+  .radioLabel,
+  .checkboxLabel {
+    padding: 1rem;
+    min-height: 52px;
+    font-size: 1rem;
+  }
+  
+  .radioLabel input[type="radio"],
+  .checkboxLabel input[type="checkbox"] {
+    min-width: 20px;
+    min-height: 20px;
+  }
+  
+  /* Accordion: Improve mobile interaction */
+  .accordionHeader {
+    padding: 1.25rem;
+    min-height: 60px;
+  }
+  
+  .sectionTitle {
+    font-size: 1.15rem;
+  }
+  
+  .accordionIcon {
+    font-size: 1.25rem;
+    min-width: 28px;
+    min-height: 28px;
+  }
+  
+  .accordionContent {
+    padding: 1.25rem;
+  }
+  
+  /* Payment options: Stack on mobile */
+  .paymentOptions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .paymentOption {
+    padding: 1rem;
+    min-height: 56px;
+  }
+  
+  /* Submit button: Larger and sticky on mobile */
+  .submitButton {
+    width: 100%;
+    min-height: 56px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Button: All buttons meet minimum tap target */
+  .button,
+  .quantityButton,
+  .removeButton {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  /* Quantity selector: Larger buttons */
+  .quantityButton {
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+  }
+  
+  .quantityValue {
+    min-width: 50px;
+    font-size: 1.05rem;
+  }
+  
+  /* Remove button: Easier to tap */
+  .removeButton {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  /* Accessories: Improve layout */
+  .accessoryItem {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .accessoryInfo {
+    gap: 0.75rem;
+  }
+  
+  /* Installation option: Better spacing */
+  .installationOption {
+    padding: 1.25rem;
+    margin-top: 1rem;
+  }
+  
+  /* Service options: Stack vertically */
+  .serviceOptions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  /* Summary totals: Improve readability */
+  .summaryRow {
+    padding: 0.75rem 0;
+    font-size: 1rem;
+  }
+  
+  .summaryTotal {
+    font-size: 1.35rem;
+    padding: 1rem 0;
+  }
+  
+  /* Stripe section: Full width */
+  .stripeSection {
+    padding: 1.25rem;
+    margin-top: 1rem;
+  }
+  
+  /* Toast notifications: Adjust for mobile */
+  .toast {
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+    max-width: none;
+    width: calc(100% - 20px);
+  }
+  
+  /* Order success: Optimize spacing */
+  .orderSuccess {
+    padding: 2rem 1.25rem;
+    margin: 1.5rem 0;
+  }
+  
+  .orderSuccess h2 {
+    font-size: 1.5rem;
+  }
+  
+  .orderSuccess p {
+    font-size: 1rem;
+  }
+  
+  .successIcon {
+    font-size: 3rem;
+  }
+  
+  /* Empty cart: Better mobile presentation */
+  .emptyCart {
+    padding: 2rem 1.25rem;
+    margin: 1.5rem 0;
+  }
+  
+  .emptyCart p {
+    font-size: 1.05rem;
+  }
+  
+  /* Prevent text overflow */
+  .itemDetails,
+  .formGroup,
+  .accordionContent,
+  .summaryRow {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+}
+
+/* Mobile: Very small screens (360px - 430px) */
+@media (max-width: 430px) {
+  .container {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .orderSummary {
+    padding: 1rem;
+  }
+  
+  .summaryTitle {
+    font-size: 1.15rem;
+  }
+  
+  .accordionHeader {
+    padding: 1rem;
+  }
+  
+  .sectionTitle {
+    font-size: 1.05rem;
+  }
+  
+  .accordionContent {
+    padding: 1rem;
+  }
+  
+  .formGroup input,
+  .formGroup select {
+    font-size: 16px; /* Maintain to prevent zoom */
+    padding: 0.75rem 0.875rem;
+  }
+  
+  .submitButton {
+    min-height: 52px;
+    font-size: 1.05rem;
+  }
+  
+  .itemImage {
+    max-width: 100px;
+    height: 100px;
+  }
+}
+
+/* Mobile: Reduce motion for better performance */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  .accordionSection,
+  .accordionHeader,
+  .accordionContent,
+  .submitButton,
+  .button,
+  .cartItem,
+  .toast {
+    transition: none;
+    animation: none;
+  }
+  
+  .accordionIcon {
+    transition: none;
+  }
+  
+  @keyframes slideIn {
+    from, to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from, to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  
+  @keyframes bounceIn {
+    from, to {
+      transform: none;
+      opacity: 1;
+    }
+  }
 } 

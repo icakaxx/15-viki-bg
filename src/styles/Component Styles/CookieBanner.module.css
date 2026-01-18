@@ -280,4 +280,21 @@
     padding: 0.6rem 1rem;
     font-size: 0.85rem;
   }
+  
+  /* Mobile: Ensure buttons meet minimum tap target */
+  .bannerButton {
+    min-height: 44px;
+  }
+}
+
+/* Mobile: Ensure cookie banner doesn't block important CTAs */
+@media (max-width: 768px) {
+  .banner {
+    z-index: 999; /* Lower than modals but above content */
+  }
+  
+  /* Add slight transparency so users can see beneath if needed */
+  .banner {
+    backdrop-filter: blur(4px);
+  }
 } 

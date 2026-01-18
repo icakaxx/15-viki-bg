@@ -2190,4 +2190,116 @@
   .actionButton:hover .buttonImage {
     transform: scale(1.05);
   }
+}
+
+/* ========== MOBILE UX ENHANCEMENTS (Mobile-Only, Desktop Unchanged) ========== */
+
+/* Mobile: Very small screens (360px - 430px typical) */
+@media (max-width: 430px) {
+  /* Container: Reduce padding on very small screens */
+  .container {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  /* Title: Scale down for small screens */
+  .title {
+    font-size: 1.75rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  /* Product grid: Force single column on very small screens */
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  /* Card: Optimize padding for small screens */
+  .card {
+    padding: 1.25rem;
+  }
+  
+  /* Product title: Reduce font size for small screens */
+  .brandModel {
+    font-size: 1.5rem; /* Down from 2rem */
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  
+  /* Pricing: Adjust for small screens */
+  .currentPrice {
+    font-size: 1.75rem; /* Slightly smaller */
+  }
+  
+  .originalPrice {
+    font-size: 1rem;
+  }
+  
+  /* Action buttons: Ensure minimum tap target */
+  .actionButtons {
+    gap: 0.75rem;
+  }
+  
+  .actionButton {
+    min-height: 48px; /* Accessibility: minimum 44px, prefer 48px */
+    font-size: 0.875rem;
+    padding: 0 1rem;
+  }
+  
+  /* Mobile filter toggle: Larger tap target */
+  .mobileFilterToggle {
+    min-height: 48px;
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+  }
+  
+  /* Sort dropdown: Ensure readability */
+  .sortSelect {
+    font-size: 0.9rem;
+    min-height: 44px;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+  }
+}
+
+/* Mobile: Improve tap targets and spacing across all mobile (max 768px) */
+@media (max-width: 768px) {
+  /* Ensure all interactive elements meet 44px minimum */
+  .mobileFilterToggle,
+  .button,
+  .sortSelect {
+    min-height: 44px;
+  }
+  
+  /* Reduce transform on hover for mobile (prevent layout shift) */
+  .card:hover {
+    transform: translateY(-1px); /* Subtle instead of -2px */
+  }
+  
+  /* Prevent horizontal scroll caused by wide content */
+  .card,
+  .productInfo,
+  .specs,
+  .brandModel {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+}
+
+/* Mobile: Reduce motion for better performance and accessibility */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  .card,
+  .actionButton,
+  .button,
+  .badge,
+  .mobileFilterToggle {
+    transition: none;
+    animation: none;
+  }
+  
+  .card:hover,
+  .actionButton:hover,
+  .button:hover {
+    transform: none;
+  }
 } 

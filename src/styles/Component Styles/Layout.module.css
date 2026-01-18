@@ -3,8 +3,12 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #F9F7F7;
+  overflow-x: hidden; /* Mobile: prevent horizontal scroll */
+  width: 100%;
 }
 
 .main {
   flex: 1;
+  overflow-x: hidden; /* Mobile: prevent content overflow */
+  width: 100%;
 }
