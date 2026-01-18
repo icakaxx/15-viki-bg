@@ -706,24 +706,66 @@
 @media (max-width: 768px) {
   .container {
     padding: 1rem 0.5rem;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  .productDetail {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   .productHeader {
     grid-template-columns: 1fr;
     gap: 2rem;
-    padding: 1.5rem;
+    padding: 1rem;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .imageSection {
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .imageContainer {
     height: 300px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .productImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Changed from cover to contain for mobile */
+  }
+
+  .productInfo {
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
 
   .brandModel {
     font-size: 1.5rem;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+  
+  .description {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   .currentPrice {
     font-size: 2rem;
+  }
+  
+  .pricing {
+    max-width: 100%;
   }
 
   .quickSpecs {
@@ -803,7 +845,29 @@
   .specsSection,
   .featuresSection,
   .optionsSection {
-    padding: 1.5rem;
+    padding: 1rem;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+  
+  /* Fix accessory cards overflow */
+  .accessoryCard,
+  .installationOption {
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 1rem;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+  
+  .accessoryName,
+  .accessoryDescription,
+  .installationTitle,
+  .installationDescription {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 }
 
@@ -959,14 +1023,39 @@
     margin-bottom: 1rem;
   }
   
-  /* Prevent horizontal overflow */
+  /* Prevent horizontal overflow - CRITICAL for mobile */
+  .container,
+  .productDetail,
   .productHeader,
   .productInfo,
+  .imageSection,
+  .imageContainer,
   .brandModel,
-  .description {
+  .description,
+  .pricing,
+  .addToCartSection,
+  .quickSpecs,
+  .specsSection,
+  .featuresSection,
+  .optionsSection,
+  .accessoriesGrid,
+  .accessoryCard,
+  .installationOption {
     max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+  
+  /* Text elements need word-wrap */
+  .brandModel,
+  .description,
+  .accessoryName,
+  .accessoryDescription,
+  .installationTitle,
+  .installationDescription {
     overflow-wrap: break-word;
     word-wrap: break-word;
+    word-break: break-word;
   }
   
   /* Back button: Larger tap target */
