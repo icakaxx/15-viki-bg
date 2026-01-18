@@ -485,6 +485,15 @@
   transform: scale(1.1);
 }
 
+/* Accessory text wrapper - allows wrapping on mobile */
+.accessoryTextWrapper {
+  max-width: 100%;
+}
+
+.accessoryText {
+  white-space: nowrap;
+}
+
 /* Installation Option */
 .installationOption {
   background: #e8f5e8;
@@ -798,9 +807,54 @@
     align-items: stretch;
   }
   
+  /* CRITICAL: Force accessory info to wrap properly on mobile */
+  .accessoryInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: visible;
+  }
+  
+  .accessoryInfo h4 {
+    font-size: 1rem;
+    line-height: 1.4;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    padding-right: 0;
+  }
+  
   .accessoryPriceAndCheckbox {
+    display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+  
+  .accessoryPrice {
+    flex-shrink: 0;
+    text-align: right;
+  }
+  
+  /* CRITICAL: Force wrapping on mobile for accessory text + icons */
+  .accessoryTextWrapper {
+    flex-wrap: wrap !important;
+    max-width: 100%;
+    overflow: visible !important;
+  }
+  
+  .accessoryText {
+    white-space: normal !important; /* Allow wrapping on mobile */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+    max-width: 100%;
   }
   
   .installationHeader {

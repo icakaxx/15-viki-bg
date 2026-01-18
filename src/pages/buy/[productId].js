@@ -636,15 +636,17 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                             onChange={() => toggleAccessory(accessory.AccessoryID)}
                             style={{ width: '18px', height: '18px', cursor: 'pointer', flexShrink: 0 }}
                           />
-                          <div style={{ 
-                            fontSize: '0.95rem', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '0.5rem',
-                            flexWrap: 'nowrap',
-                            overflow: 'hidden'
-                          }}>
-                            <span style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          <div 
+                            className={styles.accessoryTextWrapper}
+                            style={{ 
+                              fontSize: '0.95rem', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '0.5rem',
+                              flexWrap: 'wrap', /* Changed from nowrap to wrap for mobile */
+                            }}
+                          >
+                            <span className={styles.accessoryText} style={{ flexShrink: 0 }}>
                               1 × {t(`productDetail.accessoryNames.${accessory.Name}`) || accessory.Name}
                             </span>
                             {getAccessoryImage(accessory.Name) && (
@@ -733,8 +735,13 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                       onChange={() => setInstallationSelected(!installationSelected)}
                       style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
-                    <span style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      {t('productDetail.installation.title')}
+                    <span 
+                      className={styles.accessoryTextWrapper}
+                      style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}
+                    >
+                      <span className={styles.accessoryText}>
+                        {t('productDetail.installation.title')}
+                      </span>
                       <img
                         src="https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg/mon-3.jpg"
                         alt={t('productDetail.installation.title')}
