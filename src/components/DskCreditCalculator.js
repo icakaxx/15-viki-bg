@@ -7,7 +7,7 @@ const EUR_RATE = 1.95583;
 const toEur = (bgnAmount) => (parseFloat(bgnAmount) / EUR_RATE).toFixed(2);
 
 const DskCreditCalculator = ({ price, productId, onSchemeSelect }) => {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -70,6 +70,15 @@ const DskCreditCalculator = ({ price, productId, onSchemeSelect }) => {
   };
 
   const selectedScheme = schemes.find(s => s.id === selectedSchemeId);
+
+  const getGlpLabel = () => {
+    const key = 'dsk.calculator.glp';
+    const value = t(key);
+    if (value === key) {
+      return i18n.language === 'bg' ? 'ГЛП' : 'AIR';
+    }
+    return value;
+  };
 
   if (loading) {
     return (
@@ -150,7 +159,7 @@ const DskCreditCalculator = ({ price, productId, onSchemeSelect }) => {
                 <span className={styles.detailValue}>{selectedScheme.gpr}%</span>
               </div>
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>{t('dsk.calculator.glp')}</span>
+                <span className={styles.detailLabel}>{getGlpLabel()}</span>
                 <span className={styles.detailValue}>{selectedScheme.glp}%</span>
               </div>
             </div>
