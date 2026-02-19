@@ -92,8 +92,10 @@ export default async function handler(req, res) {
         town: personalInfo.town,
         address: personalInfo.address,
         email: personalInfo.email,
-        status: 'new',
-        notes: 'Поръчка създадена автоматично от системата',
+        status: paymentInfo.paymentMethod === 'dsk_credit' ? 'pending_credit' : 'new',
+        notes: paymentInfo.paymentMethod === 'dsk_credit'
+          ? 'Поръчка с кредит чрез Банка ДСК - очаква одобрение'
+          : 'Поръчка създадена автоматично от системата',
         modifiedDT: new Date().toISOString()
       }])
       .select()
@@ -132,8 +134,8 @@ export default async function handler(req, res) {
     const paymentData = {
       order_id: orderId,
       payment_method: paymentInfo.paymentMethod,
-      total_amount: paymentInfo.totalAmount, // Use frontend total
-      paid_amount: paymentInfo.paymentMethod === 'online' ? paymentInfo.totalAmount : 0
+      total_amount: paymentInfo.totalAmount,
+      paid_amount: paymentInfo.paid_amount || 0
     };
     
     try {

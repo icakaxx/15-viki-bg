@@ -76,7 +76,6 @@ const CookiePolicy = () => {
               <h3 className={styles.cookieTypeTitle}>{t('cookiePolicy.cookieTypes.thirdParty.title')}</h3>
               <p>{t('cookiePolicy.cookieTypes.thirdParty.description')}</p>
               <ul className={styles.list}>
-                <li><strong>Stripe:</strong> {t('cookiePolicy.cookieTypes.thirdParty.stripe')}</li>
                 <li><strong>Supabase:</strong> {t('cookiePolicy.cookieTypes.thirdParty.supabase')}</li>
               </ul>
             </div>

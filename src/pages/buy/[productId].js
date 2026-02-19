@@ -10,6 +10,7 @@ import path from 'path';
 import { useCart } from '../../contexts/CartContext';
 import styles from '../../styles/Page Styles/ProductDetail.module.css';
 import { useConsent } from '../../components/ConsentProvider';
+import DskCreditCalculator from '../../components/DskCreditCalculator';
 
 const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverError }) => {
   const router = useRouter();
@@ -924,6 +925,14 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                   }
                 </button>
               </div>
+
+              {/* DSK Credit Calculator */}
+              {!product.IsArchived && product.Stock > 0 && (
+                <DskCreditCalculator
+                  price={getDynamicPricing().currentPrice * quantity}
+                  productId={product.ProductID}
+                />
+              )}
 
             </div>
           </div>

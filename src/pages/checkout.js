@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { useTranslation } from 'next-i18next';
 import { useCart } from '../contexts/CartContext';
-import StripePaymentForm from '../components/StripePaymentForm';
+import DskCreditCalculator from '../components/DskCreditCalculator';
 import styles from '../styles/Page Styles/CheckoutPage.module.css';
 
 const CheckoutPage = () => {
@@ -41,11 +41,9 @@ const CheckoutPage = () => {
 
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showStripeForm, setShowStripeForm] = useState(false);
-  const [stripePaymentSuccess, setStripePaymentSuccess] = useState(false);
-  const [stripePaymentError, setStripePaymentError] = useState(null);
-  const [cardFormValid, setCardFormValid] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
+  const [selectedDskScheme, setSelectedDskScheme] = useState(null);
+  const [dskError, setDskError] = useState(null);
 
   // Fetch all available accessories
   useEffect(() => {
@@ -67,11 +65,6 @@ const CheckoutPage = () => {
 
     fetchAccessories();
   }, []);
-
-  // Handle card form validation
-  const handleCardValidationChange = (isValid) => {
-    setCardFormValid(isValid);
-  };
 
   // Accordion state - which sections are expanded
   const [expandedSections, setExpandedSections] = useState({
@@ -229,13 +222,6 @@ const CheckoutPage = () => {
     if (formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: '' }));
     }
-    
-    // Show/hide Stripe form based on payment method
-    if (field === 'paymentMethod') {
-      setShowStripeForm(value === 'online');
-      setStripePaymentSuccess(false);
-      setStripePaymentError(null);
-    }
   };
 
   // Check if personal info is complete
@@ -295,89 +281,6 @@ const CheckoutPage = () => {
     }
     
     return false;
-  };
-
-  // Prepare order data for Stripe payment
-  const prepareOrderData = () => {
-    return {
-      personalInfo: {
-        firstName: formData.firstName,
-        middleName: formData.middleName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        town: formData.town,
-        address: formData.personalAddress,
-        email: formData.email
-      },
-      invoiceInfo: {
-        invoiceEnabled: formData.invoiceEnabled === 'yes',
-        companyName: formData.companyName || '',
-        address: formData.invoiceAddress || '',
-        bulstat: formData.bulstat || '',
-        mol: formData.mol || ''
-      },
-      paymentInfo: {
-        paymentMethod: formData.paymentMethod,
-        stripePaymentId: null,
-        totalAmount: grandTotal,
-        paid_amount: formData.paymentMethod === 'online' ? grandTotal : 0 // Set paid_amount based on payment method
-      },
-      cartItems: cart.items.map(item => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        serviceOption: 'ac-only',
-        product: item.product,
-        accessories: item.accessories,
-        installation: item.installation,
-        installationPrice: item.installationPrice
-      })),
-      sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-      totals: {
-        productsTotal: cart.totalPrice,
-        installationCost: 0,
-        grandTotal: grandTotal
-      }
-    };
-  };
-
-  // Submit order function for Stripe
-  const submitOrderFromStripe = async (orderData) => {
-    const response = await fetch('/api/submit-order', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderData)
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || !result.success) {
-      throw new Error(result.error || 'Order submission failed');
-    }
-
-    return result;
-  };
-
-  // Stripe payment handlers
-  const handleStripePaymentSuccess = (paymentIntent) => {
-    setStripePaymentSuccess(true);
-    setStripePaymentError(null);
-    setOrderCompleted(true);
-    // Scroll to top of page
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Clear cart and redirect to success page
-    clearCart();
-    setTimeout(() => {
-      window.location.href = `/order-success?orderId=stripe_${paymentIntent.id}&paymentMethod=online`;
-    }, 2000);
-  };
-
-  const handleStripePaymentError = (error) => {
-    setStripePaymentError(error);
-    setStripePaymentSuccess(false);
-    // Show error toast
-    showToast('error', t('checkout.form.stripe.paymentError'), error);
   };
 
   // Toast notification function
@@ -448,108 +351,132 @@ const CheckoutPage = () => {
     return Object.keys(errors).length === 0;
   };
 
+  const buildOrderData = () => ({
+    personalInfo: {
+      firstName: formData.firstName,
+      middleName: formData.middleName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      town: formData.town,
+      address: formData.personalAddress,
+      email: formData.email
+    },
+    invoiceInfo: {
+      invoiceEnabled: formData.invoiceEnabled === 'yes',
+      companyName: formData.companyName || '',
+      address: formData.invoiceAddress || '',
+      bulstat: formData.bulstat || '',
+      mol: formData.mol || ''
+    },
+    paymentInfo: {
+      paymentMethod: formData.paymentMethod,
+      totalAmount: cart.totalPrice,
+      paid_amount: 0
+    },
+    cartItems: cart.items.map(item => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      serviceOption: 'ac-only',
+      product: item.product,
+      accessories: item.accessories,
+      installation: item.installation,
+      installationPrice: item.installationPrice
+    })),
+    sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    totals: {
+      productsTotal: cart.totalPrice,
+      installationCost: 0,
+      grandTotal: cart.totalPrice
+    }
+  });
+
+  const submitDskCredit = async (orderId) => {
+    const dskItems = cart.items.map(item => ({
+      products_id: String(item.productId),
+      products_name: `${item.product.Brand} ${item.product.Model}`.substring(0, 103),
+      products_q: String(item.quantity),
+      products_p: item.product.Price.toFixed(2),
+      products_i: item.product.ImageURL || '',
+    }));
+
+    const response = await fetch('/api/dsk-pay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderid: String(orderId),
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+        email: formData.email || '',
+        address: formData.personalAddress,
+        addresscity: formData.town,
+        address2: formData.personalAddress,
+        address2city: formData.town,
+        postcode: '',
+        price: cart.totalPrice.toFixed(2),
+        currency: '0',
+        type_client: '0',
+        items: dskItems,
+      }),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.error || t('dsk.checkout.applicationError'));
+    }
+    return result.url_redirect;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    // For online payment, process payment first
-    if (formData.paymentMethod === 'online') {
-      if (!cardFormValid) {
-        alert(t('checkout.form.stripe.completePaymentFirst'));
-        return;
-      }
-      
-      try {
-        // Process payment through Stripe
-        const result = await window.stripeProcessPayment();
-        
-        if (result.success) {
-          // Payment was successful, order will be submitted automatically
-          return;
-        } else {
-          // Payment failed, show error message
-          showToast('error', t('checkout.form.stripe.paymentError'), result.error);
-          return;
-        }
-      } catch (paymentError) {
-        showToast('error', t('checkout.form.stripe.paymentError'), paymentError.message);
-        return;
-      }
-    }
-
     setIsSubmitting(true);
+    setDskError(null);
     try {
-      // Format data for API
-      const orderData = {
-        personalInfo: {
-          firstName: formData.firstName,
-          middleName: formData.middleName,
-          lastName: formData.lastName,
-          phone: formData.phone,
-          town: formData.town,
-          address: formData.personalAddress,
-          email: formData.email
-        },
-        invoiceInfo: {
-          invoiceEnabled: formData.invoiceEnabled === 'yes',
-          companyName: formData.companyName || '',
-          address: formData.invoiceAddress || '',
-          bulstat: formData.bulstat || '',
-          mol: formData.mol || ''
-        },
-        paymentInfo: {
-          paymentMethod: formData.paymentMethod,
-          stripePaymentId: stripePaymentSuccess ? 'stripe_payment_completed' : null,
-          totalAmount: cart.totalPrice,
-          paid_amount: formData.paymentMethod === 'online' ? cart.totalPrice : 0 // Set paid_amount based on payment method
-        },
-        cartItems: cart.items.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          serviceOption: 'ac-only',
-          product: item.product,
-          accessories: item.accessories,
-          installation: item.installation,
-          installationPrice: item.installationPrice
-        })),
-        sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-        totals: {
-          productsTotal: cart.totalPrice,
-          installationCost: 0,
-          grandTotal: cart.totalPrice
-        }
-      };
+      const orderData = buildOrderData();
 
-      // Submit to API
       const response = await fetch('/api/submit-order', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       });
 
       const result = await response.json();
 
-      if (response.ok && result.success) {
-        // Show success toast with order details
-        showToast('success', t('checkout.form.stripe.orderSuccess'), 
-          `${t('checkout.form.stripe.orderId')}: ${result.orderId}\n${t('checkout.form.stripe.emailSent')}`);
-        setOrderCompleted(true);
-        // Scroll to top of page
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        clearCart();
-        
-        // Redirect to success page
-        setTimeout(() => {
-          window.location.href = `/order-success?orderId=${result.orderId}&paymentMethod=${formData.paymentMethod}`;
-        }, 2000);
-      } else {
+      if (!response.ok || !result.success) {
         throw new Error(result.error || 'Order submission failed');
       }
+
+      const orderId = result.orderId;
+
+      if (formData.paymentMethod === 'dsk_credit') {
+        try {
+          const redirectUrl = await submitDskCredit(orderId);
+          showToast('success', t('dsk.checkout.redirecting'), t('dsk.checkout.redirectingMessage'));
+          clearCart();
+          window.location.href = redirectUrl;
+          return;
+        } catch (dskErr) {
+          setDskError(dskErr.message);
+          showToast('error', t('dsk.checkout.applicationError'), dskErr.message);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      showToast('success', t('checkout.form.orderSuccess'), 
+        `${t('checkout.form.orderId')}: ${orderId}`);
+      setOrderCompleted(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      clearCart();
+      
+      setTimeout(() => {
+        window.location.href = `/order-success?orderId=${orderId}&paymentMethod=${formData.paymentMethod}`;
+      }, 2000);
       
     } catch (error) {
-      showToast('error', t('checkout.form.stripe.orderError'), error.message);
+      showToast('error', t('checkout.form.orderError'), error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -567,7 +494,7 @@ const CheckoutPage = () => {
           {orderCompleted ? (
             <div className={styles.orderSuccess}>
               <div className={styles.successIcon}>✅</div>
-              <h2>{t('checkout.form.stripe.orderSuccess')}</h2>
+              <h2>{t('checkout.form.orderSuccess')}</h2>
               <p>{t('checkout.orderSuccessMessage')}</p>
               <div className={styles.loadingSpinner}>
                 <div className={styles.spinner}></div>
@@ -1052,20 +979,18 @@ const CheckoutPage = () => {
                       <small>{t('checkout.form.payment.officeHelp')}</small>
                     </div>
                   </label>
-                  
-                  <label className={`${styles.paymentOption} ${styles.disabled}`} style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+
+                  <label className={styles.paymentOption}>
                     <input
                       type="radio"
                       name="paymentMethod"
-                      value="online"
-                      checked={formData.paymentMethod === 'online'}
-                      onChange={() => handleInputChange('paymentMethod', 'online')}
-                      disabled={true}
-                      style={{ cursor: 'not-allowed' }}
+                      value="dsk_credit"
+                      checked={formData.paymentMethod === 'dsk_credit'}
+                      onChange={() => handleInputChange('paymentMethod', 'dsk_credit')}
                     />
                     <div className={styles.paymentDetails}>
-                      <strong>{t('checkout.form.payment.online')} <span style={{ color: '#999', fontSize: '0.875rem' }}>({t('checkout.form.payment.comingSoon') || 'Coming Soon'})</span></strong>
-                      <small>{t('checkout.form.payment.onlineHelp')}</small>
+                      <strong>{t('checkout.form.payment.dskCredit')}</strong>
+                      <small>{t('checkout.form.payment.dskCreditHelp')}</small>
                     </div>
                   </label>
                   
@@ -1085,33 +1010,18 @@ const CheckoutPage = () => {
                 </div>
                 
                 {formErrors.paymentMethod && <span className={styles.error}>{formErrors.paymentMethod}</span>}
-                
-                {/* Stripe Payment Form */}
-                {showStripeForm && (
-                  <div className={styles.stripeSection}>
-                    {stripePaymentSuccess ? (
-                      <div className={styles.paymentSuccess}>
-                        <div className={styles.successIcon}>✅</div>
-                        <p>{t('checkout.form.stripe.paymentSuccess')}</p>
+
+                {formData.paymentMethod === 'dsk_credit' && (
+                  <div style={{ marginTop: '1rem' }}>
+                    <DskCreditCalculator
+                      price={cart.totalPrice}
+                      productId={cart.items[0]?.productId || '0'}
+                      onSchemeSelect={setSelectedDskScheme}
+                    />
+                    {dskError && (
+                      <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: '#fff3f3', color: '#c62828', borderRadius: '6px', fontSize: '0.9rem' }}>
+                        {dskError}
                       </div>
-                    ) : (
-                      <>
-                        <StripePaymentForm
-                          amount={grandTotal}
-                          onPaymentSuccess={handleStripePaymentSuccess}
-                          onPaymentError={handleStripePaymentError}
-                          isProcessing={isSubmitting}
-                          setIsProcessing={setIsSubmitting}
-                          orderData={prepareOrderData()}
-                          onSubmitOrder={submitOrderFromStripe}
-                          onValidationChange={handleCardValidationChange}
-                        />
-                        {stripePaymentError && (
-                          <div className={styles.paymentError}>
-                            <p>{stripePaymentError}</p>
-                          </div>
-                        )}
-                      </>
                     )}
                   </div>
                 )}
@@ -1128,22 +1038,6 @@ const CheckoutPage = () => {
             >
               {isSubmitting ? t('checkout.form.submitting') : t('checkout.form.submit')}
             </button>
-            {/* Online payment notes hidden since online payment is disabled */}
-            {formData.paymentMethod === 'online' && false && (
-              <div className={styles.onlinePaymentNote}>
-                <p>{t('checkout.form.onlinePaymentNote')}</p>
-                {!cardFormValid && (
-                  <p style={{ color: '#dc2626', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                    {t('checkout.form.stripe.completePaymentFirst')}
-                  </p>
-                )}
-                {cardFormValid && (
-                  <p style={{ color: '#059669', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                    ✓ {t('checkout.form.stripe.cardDetailsComplete')}
-                  </p>
-                )}
-              </div>
-            )}
           </div>
 
         </form>

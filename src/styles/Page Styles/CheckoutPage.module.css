@@ -951,15 +951,6 @@
   }
 }
 
-/* Stripe Payment Section */
-.stripeSection {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-}
-
 .paymentSuccess {
   display: flex;
   align-items: center;
@@ -1384,12 +1375,6 @@
   .summaryTotal {
     font-size: 1.35rem;
     padding: 1rem 0;
-  }
-  
-  /* Stripe section: Full width */
-  .stripeSection {
-    padding: 1.25rem;
-    margin-top: 1rem;
   }
   
   /* Toast notifications: Adjust for mobile */
