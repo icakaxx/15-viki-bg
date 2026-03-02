@@ -90,11 +90,14 @@ export default async function handler(req, res) {
         last_name: personalInfo.lastName,
         phone: personalInfo.phone,
         town: personalInfo.town,
+        postcode: personalInfo.postcode || null,
         address: personalInfo.address,
         email: personalInfo.email,
-        status: paymentInfo.paymentMethod === 'dsk_credit' ? 'pending_credit' : 'new',
+        status: (paymentInfo.paymentMethod === 'dsk_credit' || paymentInfo.paymentMethod === 'tbi_credit') ? 'pending_credit' : 'new',
         notes: paymentInfo.paymentMethod === 'dsk_credit'
           ? 'Поръчка с кредит чрез Банка ДСК - очаква одобрение'
+          : paymentInfo.paymentMethod === 'tbi_credit'
+          ? 'Поръчка с кредит чрез TBI Bank - очаква одобрение'
           : 'Поръчка създадена автоматично от системата',
         modifiedDT: new Date().toISOString()
       }])

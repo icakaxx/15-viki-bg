@@ -511,6 +511,27 @@
       "applicationError": "Error submitting credit application"
     }
   },
+  "tbi": {
+    "calculator": {
+      "title": "Buy on credit via TBI Bank",
+      "from": "from",
+      "month": "month",
+      "loading": "Loading credit schemes...",
+      "fetchError": "Failed to load credit schemes. Please try again later.",
+      "period": "Period",
+      "monthlyPayment": "Monthly Payment",
+      "totalDue": "Total Amount Due",
+      "apr": "APR",
+      "nir": "NIR",
+      "months": "months",
+      "disclaimer": "This information is indicative. Final terms are determined by TBI Bank upon credit approval."
+    },
+    "checkout": {
+      "redirecting": "Redirecting to TBI Bank",
+      "redirectingMessage": "You will be redirected to TBI Bank's website to complete your credit application.",
+      "applicationError": "Error submitting credit application"
+    }
+  },
   "checkout": {
     "title": "Checkout",
     "productTitle": "Selected Product:",
@@ -550,6 +571,8 @@
         "phoneHelp": "For contact regarding your order",
         "town": "Town/City",
         "townPlaceholder": "e.g., Sofia, Plovdiv, Varna...",
+        "postcode": "Postal Code",
+        "postcodePlaceholder": "e.g., 1000",
         "address": "Address",
         "addressPlaceholder": "Street, number, entrance, apartment...",
         "email": "Email Address (optional)",
@@ -593,6 +616,8 @@
         "cash": "Cash on Delivery",
         "dskCredit": "Credit via DSK Bank",
         "dskCreditHelp": "Buy on installments via DSK Bank",
+        "tbiCredit": "Credit via TBI Bank",
+        "tbiCreditHelp": "Buy on installments via TBI Bank (3-60 months)",
         "notAvailableWithInstallation": "Not available with installation",
         "officeHelp": "Free pickup from our office",
         "cashHelp": "Payment upon delivery",

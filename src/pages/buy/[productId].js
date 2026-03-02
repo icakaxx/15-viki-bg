@@ -11,6 +11,7 @@ import { useCart } from '../../contexts/CartContext';
 import styles from '../../styles/Page Styles/ProductDetail.module.css';
 import { useConsent } from '../../components/ConsentProvider';
 import DskCreditCalculator from '../../components/DskCreditCalculator';
+import TbiCreditCalculator from '../../components/TbiCreditCalculator';
 
 const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverError }) => {
   const router = useRouter();
@@ -926,12 +927,18 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                 </button>
               </div>
 
-              {/* DSK Credit Calculator */}
+              {/* Credit Calculators */}
               {!product.IsArchived && product.Stock > 0 && (
-                <DskCreditCalculator
-                  price={getDynamicPricing().currentPrice * quantity}
-                  productId={product.ProductID}
-                />
+                <>
+                  <DskCreditCalculator
+                    price={getDynamicPricing().currentPrice * quantity}
+                    productId={product.ProductID}
+                  />
+                  <TbiCreditCalculator
+                    price={(getDynamicPricing().currentPrice * quantity) / 1.95583}
+                    productId={product.ProductID}
+                  />
+                </>
               )}
 
             </div>

@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { useTranslation } from 'next-i18next';
 import { useCart } from '../contexts/CartContext';
 import DskCreditCalculator from '../components/DskCreditCalculator';
+import TbiCreditCalculator from '../components/TbiCreditCalculator';
 import styles from '../styles/Page Styles/CheckoutPage.module.css';
 
 const CheckoutPage = () => {
@@ -25,6 +26,7 @@ const CheckoutPage = () => {
     lastName: '',
     phone: '',
     town: '',
+    postcode: '',
     personalAddress: '',
     email: '',
     
@@ -44,6 +46,8 @@ const CheckoutPage = () => {
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [selectedDskScheme, setSelectedDskScheme] = useState(null);
   const [dskError, setDskError] = useState(null);
+  const [selectedTbiScheme, setSelectedTbiScheme] = useState(null);
+  const [tbiError, setTbiError] = useState(null);
 
   // Fetch all available accessories
   useEffect(() => {
@@ -347,6 +351,11 @@ const CheckoutPage = () => {
       errors.paymentMethod = t('checkout.form.validation.selectPayment');
     }
 
+    // Postcode required for DSK credit
+    if (formData.paymentMethod === 'dsk_credit' && !formData.postcode.trim()) {
+      errors.postcode = t('checkout.form.validation.required');
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -358,6 +367,7 @@ const CheckoutPage = () => {
       lastName: formData.lastName,
       phone: formData.phone,
       town: formData.town,
+      postcode: formData.postcode,
       address: formData.personalAddress,
       email: formData.email
     },
@@ -412,7 +422,7 @@ const CheckoutPage = () => {
         addresscity: formData.town,
         address2: formData.personalAddress,
         address2city: formData.town,
-        postcode: '',
+        postcode: formData.postcode || '',
         price: cart.totalPrice.toFixed(2),
         currency: '0',
         type_client: '0',
@@ -427,12 +437,55 @@ const CheckoutPage = () => {
     return result.url_redirect;
   };
 
+  const submitTbiCredit = async (orderId) => {
+    const EUR_RATE = 1.95583;
+    const tbiItems = cart.items.map(item => ({
+      name: `${item.product.Brand} ${item.product.Model}`.substring(0, 255),
+      description: item.product.Description || '',
+      qty: String(item.quantity),
+      price: (item.product.Price / EUR_RATE).toFixed(2),
+      sku: String(item.productId),
+      category: 0,
+      imagelink: item.product.ImageURL || '',
+    }));
+
+    const response = await fetch('/api/tbi-pay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderid: String(orderId),
+        firstname: formData.firstName,
+        lastname: formData.lastName,
+        surname: formData.middleName || '',
+        email: formData.email || '',
+        phone: formData.phone,
+        deliveryaddress: {
+          country: 'Bulgaria',
+          city: formData.town,
+          streetname: formData.personalAddress,
+          postalcode: formData.postcode || '',
+        },
+        items: tbiItems,
+        period: selectedTbiScheme?.period || 12,
+        successRedirectURL: `${window.location.origin}/order-success?orderId=${orderId}&paymentMethod=tbi_credit`,
+        failRedirectURL: `${window.location.origin}/checkout?error=tbi_failed`,
+      }),
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.error || t('tbi.checkout.applicationError'));
+    }
+    return result.url;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setIsSubmitting(true);
     setDskError(null);
+    setTbiError(null);
     try {
       const orderData = buildOrderData();
 
@@ -460,6 +513,21 @@ const CheckoutPage = () => {
         } catch (dskErr) {
           setDskError(dskErr.message);
           showToast('error', t('dsk.checkout.applicationError'), dskErr.message);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      if (formData.paymentMethod === 'tbi_credit') {
+        try {
+          const redirectUrl = await submitTbiCredit(orderId);
+          showToast('success', t('tbi.checkout.redirecting'), t('tbi.checkout.redirectingMessage'));
+          clearCart();
+          window.location.href = redirectUrl;
+          return;
+        } catch (tbiErr) {
+          setTbiError(tbiErr.message);
+          showToast('error', t('tbi.checkout.applicationError'), tbiErr.message);
           setIsSubmitting(false);
           return;
         }
@@ -812,6 +880,22 @@ const CheckoutPage = () => {
                   </div>
                   
                   <div className={styles.formGroup}>
+                    <label htmlFor="postcode">
+                      {t('checkout.form.personalInfo.postcode')}
+                      {formData.paymentMethod === 'dsk_credit' && ' *'}
+                    </label>
+                    <input
+                      type="text"
+                      id="postcode"
+                      value={formData.postcode}
+                      onChange={(e) => handleInputChange('postcode', e.target.value)}
+                      className={formErrors.postcode ? styles.inputError : ''}
+                      placeholder={t('checkout.form.personalInfo.postcodePlaceholder')}
+                    />
+                    {formErrors.postcode && <span className={styles.error}>{formErrors.postcode}</span>}
+                  </div>
+                  
+                  <div className={styles.formGroup}>
                     <label htmlFor="personalAddress">{t('checkout.form.personalInfo.address')} *</label>
                     <input
                       type="text"
@@ -993,6 +1077,20 @@ const CheckoutPage = () => {
                       <small>{t('checkout.form.payment.dskCreditHelp')}</small>
                     </div>
                   </label>
+
+                  <label className={styles.paymentOption}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="tbi_credit"
+                      checked={formData.paymentMethod === 'tbi_credit'}
+                      onChange={() => handleInputChange('paymentMethod', 'tbi_credit')}
+                    />
+                    <div className={styles.paymentDetails}>
+                      <strong>{t('checkout.form.payment.tbiCredit')}</strong>
+                      <small>{t('checkout.form.payment.tbiCreditHelp')}</small>
+                    </div>
+                  </label>
                   
                   <label className={styles.paymentOption}>
                     <input
@@ -1021,6 +1119,21 @@ const CheckoutPage = () => {
                     {dskError && (
                       <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: '#fff3f3', color: '#c62828', borderRadius: '6px', fontSize: '0.9rem' }}>
                         {dskError}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {formData.paymentMethod === 'tbi_credit' && (
+                  <div style={{ marginTop: '1rem' }}>
+                    <TbiCreditCalculator
+                      price={cart.totalPrice / 1.95583}
+                      productId={cart.items[0]?.productId || '0'}
+                      onSchemeSelect={setSelectedTbiScheme}
+                    />
+                    {tbiError && (
+                      <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: '#fff3f3', color: '#c62828', borderRadius: '6px', fontSize: '0.9rem' }}>
+                        {tbiError}
                       </div>
                     )}
                   </div>

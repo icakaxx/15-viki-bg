@@ -27,6 +27,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
+    // Ensure items is an array (parse if string)
+    const itemsArray = typeof items === 'string' ? JSON.parse(items) : items;
+
     const result = await callDskApi('sendDskPay', {
       orderid: String(orderid),
       first_name,
@@ -41,7 +44,7 @@ export default async function handler(req, res) {
       price: String(price),
       currency,
       type_client,
-      items: typeof items === 'string' ? items : JSON.stringify(items),
+      items: itemsArray,
     });
 
     if (result.message === 'success') {

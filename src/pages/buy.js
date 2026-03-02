@@ -929,15 +929,15 @@ const BuyPage = () => {
                           {/* Action Buttons */}
                           <div className={styles.actionButtons}>
                             <button 
-                              className={`${styles.actionButton} ${styles.actionButtonRed}`}
+                              className={`${styles.actionButton} ${styles.actionButtonOrange}`}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                               }}
                             >
                               <img 
-                                src="https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg//UniCredit.jpg"
-                                alt="UniCredit"
+                                src="https://cdn.tbibank.support/logo/tbi-bank.png"
+                                alt="TBI Bank"
                                 className={styles.buttonImage}
                               />
                             </button>
@@ -949,8 +949,8 @@ const BuyPage = () => {
                                 }}
                             >
                               <img 
-                                src="https://nticlbmuetfeuwkkukwz.supabase.co/storage/v1/object/public/images-viki15bg//dsk.png"
-                                alt="DSK"
+                                src="https://dskbank.bg/images/default-source/%D0%BC%D0%B5%D0%B4%D0%B8%D0%B5%D0%BD-%D1%86%D0%B5%D0%BD%D1%82%D1%8A%D1%80-%D0%B1%D0%B0%D0%BD%D0%BA%D0%B0-%D0%B4%D1%81%D0%BA/%D0%BB%D0%BE%D0%B3%D0%BE-%D0%BD%D0%B0-%D0%B1%D0%B0%D0%BD%D0%BA%D0%B0-%D0%B4%D1%81%D0%BA.png"
+                                alt="DSK Bank"
                                 className={styles.buttonImage}
                               />
                             </button>

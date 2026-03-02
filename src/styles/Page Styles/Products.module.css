@@ -657,6 +657,17 @@
   box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
 }
 
+.actionButtonOrange {
+  border: 1px solid #f57c00;
+  color: #f57c00;
+}
+
+.actionButtonOrange:hover {
+  background: rgba(245, 124, 0, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(245, 124, 0, 0.2);
+}
+
 .actionButtonGreen {
   border: 1px solid #28a745;
   color: #28a745;

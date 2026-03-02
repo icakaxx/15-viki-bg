@@ -1,0 +1,204 @@
+.container {
+  margin-top: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #f57c00;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorBanner {
+  padding: 0.75rem 1rem;
+  background: #fff3f3;
+  color: #c62828;
+  font-size: 0.9rem;
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #fff8f0 0%, #ffefe0 100%);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+.banner:hover {
+  background: linear-gradient(135deg, #ffefe0 0%, #ffe5d0 100%);
+}
+
+.bannerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bankLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #f57c00;
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  text-transform: lowercase;
+}
+
+.bannerText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.bannerTitle {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.bannerAmount {
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.bannerAmount strong {
+  color: #f57c00;
+  font-size: 1.05rem;
+}
+
+.expandIcon {
+  font-size: 0.75rem;
+  color: #999;
+  transition: transform 0.3s ease;
+}
+
+.expandedIcon {
+  transform: rotate(180deg);
+}
+
+.details {
+  border-top: 1px solid #e0e0e0;
+  padding: 1rem;
+}
+
+.dropdownRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dropdownLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+}
+
+.dropdown {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.dropdown:focus {
+  border-color: #f57c00;
+  box-shadow: 0 0 0 2px rgba(245, 124, 0, 0.16);
+}
+
+.schemeDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem 1.5rem;
+  padding: 0.85rem 1rem;
+  background: #fffbf7;
+  border-radius: 8px;
+  border: 1px solid #ffe8d6;
+  margin-bottom: 0.75rem;
+}
+
+.detailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+}
+
+.detailValue {
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.detailValueHighlight {
+  font-size: 1.1rem;
+  color: #f57c00;
+  font-weight: 700;
+}
+
+.disclaimer {
+  padding: 0.5rem 0;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+@media (max-width: 600px) {
+  .schemeDetails {
+    grid-template-columns: 1fr;
+  }
+
+  .bannerAmount {
+    font-size: 0.85rem;
+  }
+
+  .bannerAmount strong {
+    font-size: 0.95rem;
+  }
+
+  .dropdownRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+  }
+}
