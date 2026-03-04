@@ -233,7 +233,7 @@ const BuyPage = ({
   const formatPriceEUR = (price) => {
     if (price == null || isNaN(price)) return '€0.00';
     const eurPrice = price / 1.95583;
-    return new Intl.NumberFormat('en-EU', {
+    return new Intl.NumberFormat('bg-BG', {
       style: 'currency',
       currency: 'EUR'
     }).format(eurPrice);
@@ -426,7 +426,7 @@ const BuyPage = ({
                       checked={currentFilters.capacities.includes(parseInt(capacity))}
                       onChange={() => filterChangeHandler('capacities', parseInt(capacity))}
                     />
-                    <span className={styles.filterLabel}>{capacity ? capacity.toLocaleString() : capacity} BTU</span>
+                    <span className={styles.filterLabel}>{capacity != null ? capacity.toLocaleString('bg-BG') : ''} BTU</span>
                   </label>
                 ))}
               </div>
@@ -894,7 +894,7 @@ const BuyPage = ({
                           checked={(tempMobileFilters || filters).capacities.includes(parseInt(capacity))}
                           onChange={() => handleFilterChangeMobileSafe('capacities', parseInt(capacity))}
                         />
-                        <span className={styles.filterLabel}>{capacity ? capacity.toLocaleString() : capacity} BTU</span>
+                        <span className={styles.filterLabel}>{capacity != null ? capacity.toLocaleString('bg-BG') : ''} BTU</span>
                       </label>
                     ))}
                   </div>
