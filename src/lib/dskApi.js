@@ -1,10 +1,9 @@
 import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
 import https from 'https';
 
 const DSK_API_URL = process.env.DSK_API_URL || 'https://merchantsonline.dskbank.bg/api/index.php';
 const DSK_UNICID = process.env.DSK_UNICID || '';
+const DSK_PUBLIC_CERT_PEM = process.env.DSK_PUBLIC_CERT_PEM || '';
 
 const DSK_ERROR_CODES = {
   100: 'REQUEST_METHOD_NOT_VALID',
@@ -25,12 +24,14 @@ let cachedPublicKey = null;
 function loadPublicKey() {
   if (cachedPublicKey) return cachedPublicKey;
 
-  const certPath = path.resolve(process.cwd(), 'certificates', 'pub.pem');
-  if (!fs.existsSync(certPath)) {
-    throw new Error(`DSK certificate not found at ${certPath}`);
+  if (!DSK_PUBLIC_CERT_PEM) {
+    throw new Error('DSK_PUBLIC_CERT_PEM environment variable is not configured');
   }
 
-  cachedPublicKey = fs.readFileSync(certPath, 'utf8');
+  // Support both multiline PEMs and single-line with literal "\n"
+  cachedPublicKey = DSK_PUBLIC_CERT_PEM.includes('\\n')
+    ? DSK_PUBLIC_CERT_PEM.replace(/\\n/g, '\n')
+    : DSK_PUBLIC_CERT_PEM;
   return cachedPublicKey;
 }
 
