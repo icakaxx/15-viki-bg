@@ -1,54 +1,98 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Component Styles/TbiCreditCalculator.module.css';
 
-const TbiCreditCalculator = ({ price, productId, onSchemeSelect }) => {
+const DEBOUNCE_MS = 500;
+const tbiCache = new Map();
+
+const tbiCacheKey = (termId, priceEUR) => `tbi|${termId ?? ''}|${Number(priceEUR).toFixed(2)}`;
+
+const TbiCreditCalculator = ({ price, productId, onSchemeSelect, onContinue, showSummaryAndCta }) => {
   const { t, i18n } = useTranslation('common');
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [selectedSchemeId, setSelectedSchemeId] = useState(null);
+  const abortRef = useRef(null);
+  const debounceRef = useRef(null);
+
+  const fetchSchemes = useCallback(async (priceEUR) => {
+    if (!priceEUR || priceEUR <= 0) return;
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
+    const key = tbiCacheKey(null, priceEUR);
+    const cached = tbiCache.get(key);
+    if (cached && cached.schemes?.length > 0) {
+      setSchemes(cached.schemes);
+      const defaultScheme = cached.schemes.find(s => s.period === 12) || cached.schemes[0];
+      setSelectedSchemeId(defaultScheme?.id ?? null);
+      if (onSchemeSelect && defaultScheme) onSchemeSelect(defaultScheme);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/tbi-calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: Number(priceEUR).toFixed(2),
+          category_id: null,
+        }),
+        signal: abortRef.current.signal,
+      });
+      const data = await response.json();
+      if (data.success && data.schemes) {
+        const schemeArray = Array.isArray(data.schemes) ? data.schemes : Object.values(data.schemes);
+        setSchemes(schemeArray);
+        tbiCache.set(key, { schemes: schemeArray });
+        const defaultScheme = schemeArray.find(s => s.period === 12) || schemeArray[0];
+        if (defaultScheme) {
+          setSelectedSchemeId(defaultScheme.id);
+          if (onSchemeSelect) onSchemeSelect(defaultScheme);
+        }
+      } else {
+        if (data.error) {
+          console.error('TBI calculator API error:', data.error);
+        }
+        const msgKey = 'tbi.calculator.fetchError';
+        const translated = t(msgKey);
+        const friendly =
+          translated === msgKey
+            ? 'Възникна грешка при зареждане на условията. Опитайте отново или изберете друга банка.'
+            : translated;
+        setError(friendly);
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.error('TBI calculator fetch error:', err);
+      const msgKey = 'tbi.calculator.fetchError';
+      const translated = t(msgKey);
+      const baseFallback =
+        translated === msgKey
+          ? 'Възникна грешка при зареждане на условията. Опитайте отново или изберете друга банка.'
+          : translated;
+      setError(baseFallback);
+    } finally {
+      setLoading(false);
+      abortRef.current = null;
+    }
+  }, [onSchemeSelect, t]);
 
   useEffect(() => {
     if (!price || price <= 0) return;
-
-    const fetchSchemes = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/tbi-calculate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: price.toFixed(2),
-            category_id: null,
-          }),
-        });
-
-        const data = await response.json();
-        if (data.success && data.schemes) {
-          const schemeArray = Array.isArray(data.schemes) ? data.schemes : Object.values(data.schemes);
-          setSchemes(schemeArray);
-
-          const defaultScheme = schemeArray.find(s => s.period === 12) || schemeArray[0];
-          if (defaultScheme) {
-            setSelectedSchemeId(defaultScheme.id);
-            if (onSchemeSelect) onSchemeSelect(defaultScheme);
-          }
-        } else {
-          setError(data.error || t('tbi.calculator.fetchError'));
-        }
-      } catch (err) {
-        console.error('TBI calculator fetch error:', err);
-        setError(t('tbi.calculator.fetchError'));
-      } finally {
-        setLoading(false);
-      }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchSchemes(price);
+    }, DEBOUNCE_MS);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (abortRef.current) abortRef.current.abort();
     };
-
-    fetchSchemes();
-  }, [price, productId]);
+  }, [price, productId, fetchSchemes]);
 
   const handleSchemeChange = (e) => {
     const id = parseInt(e.target.value, 10);
@@ -89,7 +133,27 @@ const TbiCreditCalculator = ({ price, productId, onSchemeSelect }) => {
   if (error) {
     return (
       <div className={styles.container}>
-        <div className={styles.errorBanner}>{error}</div>
+        <div className={styles.errorBanner}>
+          <div>{error}</div>
+          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button type="button" className={styles.retryButton} onClick={() => fetchSchemes(price)}>
+              {(() => {
+                const key = 'tbi.calculator.retry';
+                const translated = t(key);
+                return translated === key ? 'Опитай отново' : translated;
+              })()}
+            </button>
+            {showSummaryAndCta && onContinue && (
+              <span className={styles.switchBank} onClick={() => onContinue('dsk')} role="button" tabIndex={0}>
+                {(() => {
+                  const key = 'tbi.calculator.switchBank';
+                  const translated = t(key);
+                  return translated === key ? 'Смени банка' : translated;
+                })()}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -158,6 +222,38 @@ const TbiCreditCalculator = ({ price, productId, onSchemeSelect }) => {
                 <span className={styles.detailValue}>{selectedScheme.nir}%</span>
               </div>
             </div>
+          )}
+
+          {showSummaryAndCta && selectedScheme && (
+            <>
+              <div className={styles.summaryRow}>
+                {(() => {
+                  const key = 'productDetail.installments.selected';
+                  const translated = t(key);
+                  return translated === key ? 'Избрано:' : translated;
+                })()}{' '}
+                TBI · {selectedScheme.name || `${selectedScheme.period} ${t('tbi.calculator.months')}`} · €{parseFloat(selectedScheme.monthly_payment).toFixed(2)}{' '}
+                {(() => {
+                  const key = 'tbi.calculator.monthly';
+                  const translated = t(key);
+                  return translated === key ? 'месечна вноска' : translated;
+                })()}{' '}
+                ({(() => {
+                  const key = 'productDetail.installments.forTotal';
+                  const translated = t(key);
+                  return translated === key ? 'за текущата обща сума' : translated;
+                })()})
+              </div>
+              {onContinue && (
+                <button type="button" className={styles.ctaButton} onClick={() => onContinue('tbi', selectedScheme)}>
+                  {(() => {
+                    const key = 'productDetail.installments.continueTbi';
+                    const translated = t(key);
+                    return translated === key ? 'Продължи с TBI' : translated;
+                  })()}
+                </button>
+              )}
+            </>
           )}
 
           <div className={styles.disclaimer}>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { useCart } from '../contexts/CartContext';
 import DskCreditCalculator from '../components/DskCreditCalculator';
@@ -8,15 +9,17 @@ import TbiCreditCalculator from '../components/TbiCreditCalculator';
 import styles from '../styles/Page Styles/CheckoutPage.module.css';
 
 const CheckoutPage = () => {
+  const router = useRouter();
   const { cart, updateQuantity, removeFromCart, updateItemAccessories, updateAccessoryQuantity, updateItemInstallation, clearCart, formatPrice, formatPriceEUR } = useCart();
   const { t } = useTranslation('common');
 
-  // State for all available accessories
+  // State for all available accessories and installation (from DB, same table)
   const [allAccessories, setAllAccessories] = useState([]);
+  const [installation, setInstallation] = useState(null);
   const [accessoriesLoading, setAccessoriesLoading] = useState(true);
 
-  // Fixed installation price per AC unit
-  const INSTALLATION_PRICE_PER_UNIT = 300.00;
+  // Installation price from DB (fallback 300 BGN if migration not run)
+  const INSTALLATION_PRICE_PER_UNIT = installation?.Price ?? 300;
 
   // Form state
   const [formData, setFormData] = useState({
@@ -58,10 +61,12 @@ const CheckoutPage = () => {
         const data = await response.json();
         if (response.ok) {
           setAllAccessories(data.accessories || []);
+          setInstallation(data.installation || null);
         }
       } catch (error) {
         console.error('Error fetching accessories:', error);
         setAllAccessories([]);
+        setInstallation(null);
       } finally {
         setAccessoriesLoading(false);
       }
@@ -72,10 +77,23 @@ const CheckoutPage = () => {
 
   // Accordion state - which sections are expanded
   const [expandedSections, setExpandedSections] = useState({
-    personal: true,    // All sections expanded by default
+    personal: true,
     invoice: true,
     payment: true
   });
+
+  // Preselect payment from query (e.g. /checkout?payment=installments&bank=dsk&term=12)
+  useEffect(() => {
+    if (!router.isReady) return;
+    const { payment, bank } = router.query;
+    if (payment === 'installments' && bank) {
+      const method = bank === 'dsk' ? 'dsk_credit' : bank === 'tbi' ? 'tbi_credit' : '';
+      if (method) {
+        setFormData(prev => ({ ...prev, paymentMethod: method }));
+        setExpandedSections(prev => ({ ...prev, payment: true }));
+      }
+    }
+  }, [router.isReady, router.query]);
 
   // Toggle accordion section
   const toggleSection = (sectionKey) => {
@@ -644,14 +662,14 @@ const CheckoutPage = () => {
                           aria-label="Remove product from cart"
                           title="Remove product"
                         >
-                          🗑️ {t('checkout.removeItem')}
+                          <span className={styles.removeIcon} aria-hidden>×</span>
+                          {t('checkout.removeItem')}
                         </button>
                       </div>
                     </div>
                   </div>
                   <div className={styles.itemPrice}>
-                    <div>{formatPrice(item.product.Price * item.quantity)}</div>
-                    <div className={styles.itemPriceEur}>{formatPriceEUR(item.product.Price * item.quantity)}</div>
+                    {formatPriceEUR(item.product.Price * item.quantity)} | {formatPrice(item.product.Price * item.quantity)}
                   </div>
                 </div>
 
@@ -708,15 +726,9 @@ const CheckoutPage = () => {
                           </div>
                           <div className={styles.accessoryPrice}>
                             {isSelected ? (
-                              <>
-                                <div>{formatPrice(accessory.Price * accessoryQuantity)}</div>
-                                <div className={styles.itemPriceEur}>{formatPriceEUR(accessory.Price * accessoryQuantity)}</div>
-                              </>
+                              <span>{formatPriceEUR(accessory.Price * accessoryQuantity)} | {formatPrice(accessory.Price * accessoryQuantity)}</span>
                             ) : (
-                              <>
-                                <div style={{ color: '#999' }}>{formatPrice(accessory.Price)}</div>
-                                <div className={styles.itemPriceEur} style={{ color: '#999' }}>{formatPriceEUR(accessory.Price)}</div>
-                              </>
+                              <span style={{ color: '#999' }}>{formatPriceEUR(accessory.Price)} | {formatPrice(accessory.Price)}</span>
                             )}
                           </div>
                         </div>
@@ -752,15 +764,9 @@ const CheckoutPage = () => {
                     </div>
                     <div className={styles.installationPrice}>
                       {item.installation ? (
-                        <>
-                          <div>{formatPrice(getInstallationPrice(item) * item.quantity)}</div>
-                          <div className={styles.itemPriceEur}>{formatPriceEUR(getInstallationPrice(item) * item.quantity)}</div>
-                        </>
+                        <span>{formatPriceEUR(getInstallationPrice(item) * item.quantity)} | {formatPrice(getInstallationPrice(item) * item.quantity)}</span>
                       ) : (
-                        <>
-                          <div style={{ color: '#999' }}>{formatPrice(getInstallationPrice(item))}</div>
-                          <div className={styles.itemPriceEur} style={{ color: '#999' }}>{formatPriceEUR(getInstallationPrice(item))}</div>
-                        </>
+                        <span style={{ color: '#999' }}>{formatPriceEUR(getInstallationPrice(item))} | {formatPrice(getInstallationPrice(item))}</span>
                       )}
                     </div>
                   </div>
@@ -773,7 +779,7 @@ const CheckoutPage = () => {
           <div className={styles.totals}>
             <div className={styles.grandTotal}>
               <span>{t('checkout.total')}:</span>
-              <span>{formatPrice(cart.totalPrice)} / {formatPriceEUR(cart.totalPrice)}</span>
+              <span>{formatPriceEUR(cart.totalPrice)} | {formatPrice(cart.totalPrice)}</span>
             </div>
           </div>
         </div>

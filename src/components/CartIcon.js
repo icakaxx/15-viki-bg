@@ -91,7 +91,7 @@ const CartIcon = ({ onDropdownChange }) => {
                             {item.product.Brand} {item.product.Model}
                           </h4>
                           <div className={styles.itemPrice}>
-                            {formatPrice(item.product.Price)} / {formatPriceEUR(item.product.Price)}
+                            {formatPriceEUR(item.product.Price)} | {formatPrice(item.product.Price)}
                           </div>
                           <div className={styles.itemQuantity}>
                             {t('cart.quantity')}: {item.quantity}
@@ -118,7 +118,7 @@ const CartIcon = ({ onDropdownChange }) => {
               <div className={styles.cartFooter}>
                 <div className={styles.cartTotal}>
                   <strong>
-                    {t('cart.total')}: {formatPrice(cart.totalPrice)} / {formatPriceEUR(cart.totalPrice)}
+                    {t('cart.total')}: {formatPriceEUR(cart.totalPrice)} | {formatPrice(cart.totalPrice)}
                   </strong>
                 </div>
                 

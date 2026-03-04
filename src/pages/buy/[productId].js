@@ -12,15 +12,22 @@ import styles from '../../styles/Page Styles/ProductDetail.module.css';
 import { useConsent } from '../../components/ConsentProvider';
 import DskCreditCalculator from '../../components/DskCreditCalculator';
 import TbiCreditCalculator from '../../components/TbiCreditCalculator';
+import InstallmentContinueModal from '../../components/InstallmentContinueModal';
 
-const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverError }) => {
+const ProductDetailPage = ({ initialProduct, initialAccessories, initialInstallation = null, error: serverError }) => {
   const router = useRouter();
   const { productId, qty } = router.query;
   const { t, i18n } = useTranslation('common');
   const { addToCartEnhanced } = useCart();
   const { hasConsent } = useConsent();
 
-
+  // Scroll to installments section when navigating with #installments (e.g. from /buy "Виж условия")
+  useEffect(() => {
+    if (typeof window === 'undefined' || !router.isReady) return;
+    if (window.location.hash !== '#installments') return;
+    const el = document.getElementById('installments');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [router.isReady, initialProduct]);
 
   // Helper function to translate features
   const translateFeature = (feature) => {
@@ -209,9 +216,12 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
   const [modalImage, setModalImage] = useState(null);
   const [tooltipContent, setTooltipContent] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [showInstallmentModal, setShowInstallmentModal] = useState(false);
+  const [installmentBank, setInstallmentBank] = useState(null);
+  const [installmentTerm, setInstallmentTerm] = useState(null);
 
-  // Fixed installation price per AC unit (converted from 300 BGN to EUR)
-  const INSTALLATION_PRICE_PER_UNIT = 300.00 / 1.95583; // 153.39 EUR
+  // Installation price from DB (same table as accessories, type='installation'); fallback 300 BGN
+  const INSTALLATION_PRICE_PER_UNIT = (initialInstallation?.Price != null ? initialInstallation.Price : 300);
 
   // Initialize quantity from URL parameter
   useEffect(() => {
@@ -412,6 +422,13 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
     router.push('/buy');
   };
 
+  const handleInstallmentContinue = (bank, scheme) => {
+    if (!scheme) return; // "Switch bank" calls onContinue(otherBank) with no scheme
+    setInstallmentBank(bank);
+    setInstallmentTerm(scheme.period ?? scheme.id ?? '');
+    setShowInstallmentModal(true);
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -591,7 +608,7 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                         </div>
                       )}
                       <div className={styles.currentPrice}>
-                        {formatPriceEUR(currentPrice)} / {formatPrice(currentPrice)}
+                        {formatPriceEUR(currentPrice)} | {formatPrice(currentPrice)}
                       </div>
                     </>
                   );
@@ -708,7 +725,7 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                           </div>
                         </div>
                         <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: '0.5rem', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                          {formatPriceEUR(accessory.Price)} / {formatPrice(accessory.Price)}
+                          {formatPriceEUR(accessory.Price)} | {formatPrice(accessory.Price)}
                         </div>
                       </label>
                     ))}
@@ -798,7 +815,7 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                     </span>
                   </div>
                   <div style={{ fontSize: '0.9rem', color: '#666', marginLeft: '0.5rem' }}>
-                    {formatPriceEUR(INSTALLATION_PRICE_PER_UNIT)} / {formatPrice(INSTALLATION_PRICE_PER_UNIT)} за единица
+                    {formatPriceEUR(INSTALLATION_PRICE_PER_UNIT)} | {formatPrice(INSTALLATION_PRICE_PER_UNIT)} за единица
                   </div>
                 </label>
               </div>
@@ -813,12 +830,12 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
               }}>
                 {selectedAccessories.length > 0 && (
                   <div style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
-                    <div>Добавка към цената: {formatPriceEUR(getAccessoryTotal() * quantity)}</div>
+                    <div>Добавка към цената: {formatPriceEUR(getAccessoryTotal() * quantity)} | {formatPrice(getAccessoryTotal() * quantity)}</div>
                   </div>
                 )}
                 {installationSelected && (
                   <div style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
-                    <div>Монтаж: {formatPriceEUR(INSTALLATION_PRICE_PER_UNIT * quantity)}</div>
+                    <div>Монтаж: {formatPriceEUR(INSTALLATION_PRICE_PER_UNIT * quantity)} | {formatPrice(INSTALLATION_PRICE_PER_UNIT * quantity)}</div>
                   </div>
                 )}
                 <div style={{ 
@@ -838,14 +855,11 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                         fontSize: '0.85rem',
                         marginBottom: '0.25rem'
                       }}>
-                        {formatPriceEUR(product.PreviousPrice * quantity + getAccessoryTotal() * quantity + (installationSelected ? INSTALLATION_PRICE_PER_UNIT * quantity : 0))}
+                        {formatPriceEUR(product.PreviousPrice * quantity + getAccessoryTotal() * quantity + (installationSelected ? INSTALLATION_PRICE_PER_UNIT * quantity : 0))} | {formatPrice(product.PreviousPrice * quantity + getAccessoryTotal() * quantity + (installationSelected ? INSTALLATION_PRICE_PER_UNIT * quantity : 0))}
                       </div>
                     )}
                     <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#d32f2f' }}>
-                      {formatPriceEUR(getTotalPrice())}
-                    </div>
-                    <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.25rem' }}>
-                      {formatPrice(getTotalPrice())}
+                      {formatPriceEUR(getTotalPrice())} | {formatPrice(getTotalPrice())}
                     </div>
                   </div>
                 </div>
@@ -922,24 +936,42 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, error: serverEr
                     ? t('productDetail.outOfStock')
                     : !hasConsent 
                       ? t('consent.warning')
-                      : 'поръчай с един клик'
+                      : (t('productDetail.addToCart') || 'Добави в количката')
                   }
                 </button>
               </div>
 
-              {/* Credit Calculators */}
-              {!product.IsArchived && product.Stock > 0 && (
-                <>
-                  <DskCreditCalculator
-                    price={getDynamicPricing().currentPrice * quantity}
-                    productId={product.ProductID}
-                  />
-                  <TbiCreditCalculator
-                    price={(getDynamicPricing().currentPrice * quantity) / 1.95583}
-                    productId={product.ProductID}
-                  />
-                </>
-              )}
+              {/* Credit Calculators / Installments section (anchor for /buy#installments) */}
+              <div id="installments">
+                {!product.IsArchived && product.Stock > 0 && (
+                  <>
+                    <DskCreditCalculator
+                      price={getTotalPrice()}
+                      productId={product.ProductID}
+                      showSummaryAndCta
+                      onContinue={handleInstallmentContinue}
+                    />
+                    <TbiCreditCalculator
+                      price={getTotalPrice() / 1.95583}
+                      productId={product.ProductID}
+                      showSummaryAndCta
+                      onContinue={handleInstallmentContinue}
+                    />
+                    <InstallmentContinueModal
+                      visible={showInstallmentModal}
+                      onClose={() => setShowInstallmentModal(false)}
+                      bank={installmentBank}
+                      term={installmentTerm}
+                      product={product ? { ...product, Price: getDynamicPricing().currentPrice } : null}
+                      quantity={quantity}
+                      selectedAccessories={selectedAccessories.map(accId => accessories.find(acc => acc.AccessoryID === accId)).filter(Boolean)}
+                      installationSelected={installationSelected}
+                      installationPrice={INSTALLATION_PRICE_PER_UNIT}
+                      onAddedToCart={() => {}}
+                    />
+                  </>
+                )}
+              </div>
 
             </div>
           </div>
@@ -1292,7 +1324,7 @@ export async function getServerSideProps({ params, locale }) {
       IsNew: productData.is_new ?? false,
     };
 
-    // Fetch accessories
+    // Fetch accessories and installation (same table, type = 'accessory' | 'installation')
     const { data: accessoriesData, error: accessoriesError } = await supabase
       .from('accessories')
       .select('*')
@@ -1302,7 +1334,11 @@ export async function getServerSideProps({ params, locale }) {
       console.error('Product page SSR: Error fetching accessories:', accessoriesError.message);
     }
 
-    const transformedAccessories = (accessoriesData || []).map(acc => ({
+    const allRows = accessoriesData || [];
+    const accessoryRows = allRows.filter(acc => (acc.type || 'accessory') !== 'installation');
+    const installationRow = allRows.find(acc => acc.type === 'installation');
+
+    const transformedAccessories = accessoryRows.map(acc => ({
       AccessoryID: acc.id,
       Name: acc.name,
       Description: '',
@@ -1313,11 +1349,18 @@ export async function getServerSideProps({ params, locale }) {
       CreatedAt: acc.created_at,
     }));
 
+    const initialInstallation = installationRow ? {
+      id: installationRow.id,
+      Name: installationRow.name,
+      Price: installationRow.price || 0,
+    } : null;
+
     return {
       props: {
         ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
         initialProduct: transformedProduct,
         initialAccessories: transformedAccessories,
+        initialInstallation,
         error: null,
       },
     };
@@ -1329,6 +1372,7 @@ export async function getServerSideProps({ params, locale }) {
         ...(await serverSideTranslations(locale || 'bg', ['common'], i18nConfig)),
         initialProduct: null,
         initialAccessories: [],
+        initialInstallation: null,
         error: 'FATAL_ERROR',
       },
     };

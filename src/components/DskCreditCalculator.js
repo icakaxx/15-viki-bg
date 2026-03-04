@@ -1,59 +1,102 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Component Styles/DskCreditCalculator.module.css';
 
 const EUR_RATE = 1.95583;
+const DEBOUNCE_MS = 500;
+const cache = new Map();
 
 const toEur = (bgnAmount) => (parseFloat(bgnAmount) / EUR_RATE).toFixed(2);
 
-const DskCreditCalculator = ({ price, productId, onSchemeSelect }) => {
+const cacheKey = (bank, termId, totalBGN) => `dsk|${termId ?? ''}|${Number(totalBGN).toFixed(2)}`;
+
+const DskCreditCalculator = ({ price, productId, onSchemeSelect, onContinue, showSummaryAndCta }) => {
   const { t, i18n } = useTranslation('common');
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [selectedSchemeId, setSelectedSchemeId] = useState(null);
+  const abortRef = useRef(null);
+  const debounceRef = useRef(null);
+
+  const fetchSchemes = useCallback(async (totalBGN, productIdVal) => {
+    if (!totalBGN || totalBGN <= 0) return;
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = new AbortController();
+    const key = cacheKey('dsk', null, totalBGN);
+    const cached = cache.get(key);
+    if (cached && cached.schemes?.length > 0) {
+      setSchemes(cached.schemes);
+      const defaultScheme = cached.schemes.find(s => s.default === 'Yes') || cached.schemes[0];
+      setSelectedSchemeId(defaultScheme?.id ?? null);
+      if (onSchemeSelect && defaultScheme) onSchemeSelect(defaultScheme);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/dsk-calculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          price: Number(totalBGN).toFixed(2),
+          product_id: String(productIdVal),
+          initial_payment: '0',
+        }),
+        signal: abortRef.current.signal,
+      });
+      const data = await response.json();
+      if (data.success && data.schemes) {
+        const schemeArray = Array.isArray(data.schemes) ? data.schemes : Object.values(data.schemes);
+        setSchemes(schemeArray);
+        cache.set(key, { schemes: schemeArray });
+        const defaultScheme = schemeArray.find(s => s.default === 'Yes') || schemeArray[0];
+        if (defaultScheme) {
+          setSelectedSchemeId(defaultScheme.id);
+          if (onSchemeSelect) onSchemeSelect(defaultScheme);
+        }
+      } else {
+        if (data.error) {
+          console.error('DSK calculator API error:', data.error);
+        }
+        const msgKey = 'dsk.calculator.fetchError';
+        const translated = t(msgKey);
+        const friendly =
+          translated === msgKey
+            ? 'Възникна грешка при зареждане на условията. Опитайте отново или изберете друга банка.'
+            : translated;
+        setError(friendly);
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.error('DSK calculator fetch error:', err);
+      const msgKey = 'dsk.calculator.fetchError';
+      const translated = t(msgKey);
+      const baseFallback =
+        translated === msgKey
+          ? 'Възникна грешка при зареждане на условията. Опитайте отново или изберете друга банка.'
+          : translated;
+      setError(baseFallback);
+    } finally {
+      setLoading(false);
+      abortRef.current = null;
+    }
+  }, [onSchemeSelect, t]);
 
   useEffect(() => {
     if (!price || price <= 0) return;
-
-    const fetchSchemes = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/dsk-calculate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            price: price.toFixed(2),
-            product_id: String(productId),
-            initial_payment: '0',
-          }),
-        });
-
-        const data = await response.json();
-        if (data.success && data.schemes) {
-          const schemeArray = Array.isArray(data.schemes) ? data.schemes : Object.values(data.schemes);
-          setSchemes(schemeArray);
-
-          const defaultScheme = schemeArray.find(s => s.default === 'Yes') || schemeArray[0];
-          if (defaultScheme) {
-            setSelectedSchemeId(defaultScheme.id);
-            if (onSchemeSelect) onSchemeSelect(defaultScheme);
-          }
-        } else {
-          setError(data.error || t('dsk.calculator.fetchError'));
-        }
-      } catch (err) {
-        console.error('DSK calculator fetch error:', err);
-        setError(t('dsk.calculator.fetchError'));
-      } finally {
-        setLoading(false);
-      }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchSchemes(price, productId);
+    }, DEBOUNCE_MS);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (abortRef.current) abortRef.current.abort();
     };
-
-    fetchSchemes();
-  }, [price, productId]);
+  }, [price, productId, fetchSchemes]);
 
   const handleSchemeChange = (e) => {
     const id = parseInt(e.target.value, 10);
@@ -94,7 +137,27 @@ const DskCreditCalculator = ({ price, productId, onSchemeSelect }) => {
   if (error) {
     return (
       <div className={styles.container}>
-        <div className={styles.errorBanner}>{error}</div>
+        <div className={styles.errorBanner}>
+          <div>{error}</div>
+          <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button type="button" className={styles.retryButton} onClick={() => fetchSchemes(price, productId)}>
+              {(() => {
+                const key = 'dsk.calculator.retry';
+                const translated = t(key);
+                return translated === key ? 'Опитай отново' : translated;
+              })()}
+            </button>
+            {showSummaryAndCta && onContinue && (
+              <span className={styles.switchBank} onClick={() => onContinue('tbi')} role="button" tabIndex={0}>
+                {(() => {
+                  const key = 'dsk.calculator.switchBank';
+                  const translated = t(key);
+                  return translated === key ? 'Смени банка' : translated;
+                })()}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -163,6 +226,38 @@ const DskCreditCalculator = ({ price, productId, onSchemeSelect }) => {
                 <span className={styles.detailValue}>{selectedScheme.glp}%</span>
               </div>
             </div>
+          )}
+
+          {showSummaryAndCta && selectedScheme && (
+            <>
+              <div className={styles.summaryRow}>
+                {(() => {
+                  const key = 'productDetail.installments.selected';
+                  const translated = t(key);
+                  return translated === key ? 'Избрано:' : translated;
+                })()}{' '}
+                DSK · {selectedScheme.name || `${selectedScheme.id} ${t('dsk.calculator.months')}`} · €{toEur(selectedScheme.monthly_payment)} ({parseFloat(selectedScheme.monthly_payment).toFixed(2)} {t('dsk.calculator.currencyBGN')}){' '}
+                {(() => {
+                  const key = 'dsk.calculator.monthly';
+                  const translated = t(key);
+                  return translated === key ? 'месечна вноска' : translated;
+                })()}{' '}
+                ({(() => {
+                  const key = 'productDetail.installments.forTotal';
+                  const translated = t(key);
+                  return translated === key ? 'за текущата обща сума' : translated;
+                })()})
+              </div>
+              {onContinue && (
+                <button type="button" className={styles.ctaButton} onClick={() => onContinue('dsk', selectedScheme)}>
+                  {(() => {
+                    const key = 'productDetail.installments.continueDsk';
+                    const translated = t(key);
+                    return translated === key ? 'Продължи с DSK' : translated;
+                  })()}
+                </button>
+              )}
+            </>
           )}
 
           <div className={styles.disclaimer}>

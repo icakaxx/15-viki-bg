@@ -19,27 +19,40 @@ const DSK_ERROR_CODES = {
   200: 'SUCCESS_RESPONSE',
 };
 
-let cachedPublicKey = null;
+let cachedPublicKeyPem = null;
 
-function loadPublicKey() {
-  if (cachedPublicKey) return cachedPublicKey;
+function normalizePem(pem) {
+  if (!pem || typeof pem !== 'string') return '';
+  let s = pem.trim();
+  // .env truncates at first newline; use single-line with literal \n and convert here
+  if (s.includes('\\n')) {
+    s = s.replace(/\\n/g, '\n');
+  }
+  s = s.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  s = s.trim();
+  if (!s.includes('-----END')) {
+    throw new Error('DSK_PUBLIC_CERT_PEM is incomplete (env truncated at newline). Use one line with \\n for newlines.');
+  }
+  return s;
+}
 
-  if (!DSK_PUBLIC_CERT_PEM) {
+function loadPublicKeyPem() {
+  if (cachedPublicKeyPem) return cachedPublicKeyPem;
+
+  const pem = normalizePem(DSK_PUBLIC_CERT_PEM);
+  if (!pem) {
     throw new Error('DSK_PUBLIC_CERT_PEM environment variable is not configured');
   }
 
-  // Support both multiline PEMs and single-line with literal "\n"
-  cachedPublicKey = DSK_PUBLIC_CERT_PEM.includes('\\n')
-    ? DSK_PUBLIC_CERT_PEM.replace(/\\n/g, '\n')
-    : DSK_PUBLIC_CERT_PEM;
-  return cachedPublicKey;
+  cachedPublicKeyPem = pem;
+  return cachedPublicKeyPem;
 }
 
 function encryptChunked(plaintext) {
-  const publicKeyPem = loadPublicKey();
-  const publicKey = crypto.createPublicKey(publicKeyPem);
-  const jwk = publicKey.export({ format: 'jwk' });
-  const modulusBytes = Buffer.from(jwk.n, 'base64url').length;
+  const publicKeyPem = loadPublicKeyPem();
+  // DSK currently provides a 2048‑bit RSA public key (256 bytes modulus).
+  // With PKCS#1 v1.5 padding, the maximum chunk size is keySize - 11.
+  const modulusBytes = 256;
   const chunkSize = modulusBytes - 11;
 
   const inputBuffer = Buffer.from(plaintext, 'utf8');
@@ -48,7 +61,7 @@ function encryptChunked(plaintext) {
   for (let i = 0; i < inputBuffer.length; i += chunkSize) {
     const chunk = inputBuffer.subarray(i, i + chunkSize);
     const encrypted = crypto.publicEncrypt(
-      { key: publicKey, padding: crypto.constants.RSA_PKCS1_PADDING },
+      { key: publicKeyPem, padding: crypto.constants.RSA_PKCS1_PADDING },
       chunk
     );
     chunks.push(encrypted);
@@ -56,6 +69,8 @@ function encryptChunked(plaintext) {
 
   return Buffer.concat(chunks).toString('base64');
 }
+
+const DSK_REQUEST_TIMEOUT_MS = 20000; // 20 seconds
 
 function httpPost(url, jsonBody) {
   return new Promise((resolve, reject) => {
@@ -77,10 +92,22 @@ function httpPost(url, jsonBody) {
     const req = https.request(options, (res) => {
       let body = '';
       res.on('data', (chunk) => { body += chunk; });
-      res.on('end', () => resolve(body));
+      res.on('end', () => {
+        clearTimeout(timeout);
+        resolve(body);
+      });
     });
 
-    req.on('error', reject);
+    req.on('error', (err) => {
+      clearTimeout(timeout);
+      reject(err);
+    });
+
+    const timeout = setTimeout(() => {
+      req.destroy();
+      reject(new Error('DSK API timeout'));
+    }, DSK_REQUEST_TIMEOUT_MS);
+
     req.write(data);
     req.end();
   });

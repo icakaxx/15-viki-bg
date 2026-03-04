@@ -568,7 +568,7 @@ export default function OrdersManagementTab() {
                       <span>
                         {order.paid_amount ? (
                           <>
-                            {order.paid_amount.toFixed(2)} лв. / {(order.paid_amount / 1.95583).toFixed(2)} €
+                            {(order.paid_amount / 1.95583).toFixed(2)} € | {order.paid_amount.toFixed(2)} лв.
                           </>
                         ) : (
                           <>0.00 лв. / 0.00 €</>
@@ -672,7 +672,7 @@ export default function OrdersManagementTab() {
                   <h4>💳 {t('admin.orders.paymentInformation')}</h4>
                   <p><strong>{t('admin.orders.modal.paymentMethod')}:</strong> {getPaymentMethodLabel(selectedOrder.payment_method)}</p>
                   <p><strong>{t('admin.orders.modal.totalAmount')}:</strong> {selectedOrder.total_amount ? `${selectedOrder.total_amount.toFixed(2)} лв. / ${(selectedOrder.total_amount / 1.95583).toFixed(2)} €` : '-'}</p>
-                  <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${selectedOrder.paid_amount.toFixed(2)} лв. / ${(selectedOrder.paid_amount / 1.95583).toFixed(2)} €` : '0.00 лв. / 0.00 €'}</p>
+                  <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${(selectedOrder.paid_amount / 1.95583).toFixed(2)} € | ${selectedOrder.paid_amount.toFixed(2)} лв.` : '0.00 € | 0.00 лв.'}</p>
                   <p><strong>{t('admin.orders.modal.currentStatus')}:</strong> 
                     <span 
                       className={styles.statusBadge}
@@ -1031,7 +1031,7 @@ export default function OrdersManagementTab() {
                     <h4>💳 {t('admin.orders.paymentInformation')}</h4>
                     <p><strong>{t('admin.orders.modal.paymentMethod')}:</strong> {getPaymentMethodLabel(selectedOrder.payment_method)}</p>
                     <p><strong>{t('admin.orders.modal.totalAmount')}:</strong> {selectedOrder.total_amount ? `${selectedOrder.total_amount.toFixed(2)} лв. / ${(selectedOrder.total_amount / 1.95583).toFixed(2)} €` : '-'}</p>
-                    <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${selectedOrder.paid_amount.toFixed(2)} лв. / ${(selectedOrder.paid_amount / 1.95583).toFixed(2)} €` : '0.00 лв. / 0.00 €'}</p>
+                    <p><strong>{t('admin.orders.modal.paidAmount')}:</strong> {selectedOrder.paid_amount ? `${(selectedOrder.paid_amount / 1.95583).toFixed(2)} € | ${selectedOrder.paid_amount.toFixed(2)} лв.` : '0.00 € | 0.00 лв.'}</p>
                     <p><strong>{t('admin.orders.modal.currentStatus')}:</strong> 
                       <span 
                         className={styles.statusBadge}

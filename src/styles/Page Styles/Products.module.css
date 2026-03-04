@@ -622,6 +622,56 @@
   letter-spacing: 0.5px;
 }
 
+/* Installments teaser: two rows – (1) text + DSK/TBI icons, (2) Виж условия link */
+.installmentTeaserRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.installmentTeaserBankRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.installmentTeaserText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.installmentTeaserIcons {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.89rem;
+}
+
+.installmentTeaserIcon {
+  width: 4.5rem;
+  height: 3.25rem;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.installmentTeaserLink {
+  font-size: 0.85rem;
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.installmentTeaserLink:hover {
+  text-decoration: underline;
+}
+
 /* Action Buttons */
 .actionButtons {
   display: flex;

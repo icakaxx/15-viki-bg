@@ -55,23 +55,28 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing payment information' });
     }
 
-    // Calculate and validate total price independently on backend
+    // Calculate and validate total price independently on backend (BGN only)
     let calculatedTotal = 0;
     
-    // Calculate cart items total
+    // Calculate cart items total (must mirror CartContext.calculateItemTotal)
     for (const item of cartItems) {
+      const quantity = item.quantity || 1;
       const basePrice = item.product?.Price || 0;
-      let itemTotal = basePrice * item.quantity;
+      let itemTotal = basePrice * quantity;
       
-      // Add accessories for this item
+      // Accessories: sum (price * per-accessory quantity), no extra multiply by item.quantity
       if (item.accessories && item.accessories.length > 0) {
-        const accessoryTotal = item.accessories.reduce((sum, acc) => sum + (acc.Price || 0), 0);
-        itemTotal += accessoryTotal * item.quantity;
+        const accessoryTotal = item.accessories.reduce((sum, acc) => {
+          const unitPrice = acc.Price ?? acc.price ?? 0;
+          const accQuantity = acc.quantity ?? quantity ?? 1;
+          return sum + (unitPrice * accQuantity);
+        }, 0);
+        itemTotal += accessoryTotal;
       }
       
-      // Add installation (per cart item, not per quantity)
+      // Installation: per unit (за единица) – multiply by quantity
       if (item.installation && item.installationPrice) {
-        itemTotal += item.installationPrice;
+        itemTotal += item.installationPrice * quantity;
       }
       
       calculatedTotal += itemTotal;
@@ -79,6 +84,12 @@ export default async function handler(req, res) {
 
     // Optional: Validate total (with small tolerance for floating point differences)
     if (paymentInfo.totalAmount && Math.abs(calculatedTotal - paymentInfo.totalAmount) > 0.01) {
+      console.warn('[submit-order] Total mismatch (BGN)', {
+        frontendTotal: paymentInfo.totalAmount,
+        backendTotal: calculatedTotal,
+        diff: calculatedTotal - paymentInfo.totalAmount,
+        paymentMethod: paymentInfo.paymentMethod,
+      });
     }
 
     // Insert into orders table

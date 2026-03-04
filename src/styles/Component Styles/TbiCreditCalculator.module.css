@@ -183,6 +183,48 @@
   color: #999;
 }
 
+.retryButton {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  background: #f57c00;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.switchBank {
+  font-size: 0.85rem;
+  color: #0066cc;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.summaryRow {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.ctaButton {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: #f57c00;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ctaButton:hover {
+  background: #e66d00;
+}
+
 @media (max-width: 600px) {
   .schemeDetails {
     grid-template-columns: 1fr;
