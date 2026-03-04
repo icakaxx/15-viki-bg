@@ -20,7 +20,7 @@ const SEOHead = ({
     'air conditioning, climate control, BGVIKI15, Bulgaria, energy efficiency'
   );
   const fullImage = image || '/images/bgVIKI15-eood.jpg';
-  const fullUrl = url || 'https://bgviki15.bg';
+  const fullUrl = url || 'https://www.hc-clima.bg';
 
   return (
     <Head>

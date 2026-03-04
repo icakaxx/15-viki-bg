@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /administraciq
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://www.hc-clima.bg/sitemap.xml

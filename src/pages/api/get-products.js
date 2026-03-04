@@ -51,6 +51,9 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Add caching headers for CDN/edge caching
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+
     // Extract query parameters
     const { 
         showArchived = 'false', 

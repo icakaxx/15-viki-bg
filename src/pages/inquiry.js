@@ -320,7 +320,7 @@ const InquiryPage = () => {
                   <span style={{ fontSize: '1.2rem' }}>✉️</span>
                   <strong>{t('inquiryPage.contact.email')}:</strong>
                 </div>
-                <p style={{ margin: 0, color: '#666', paddingLeft: '1.7rem' }}>info@bgviki15.bg</p>
+                <p style={{ margin: 0, color: '#666', paddingLeft: '1.7rem' }}>info@hc-clima.bg</p>
               </div>
 
               <div>

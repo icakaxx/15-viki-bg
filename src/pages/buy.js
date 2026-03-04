@@ -1,29 +1,47 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
 import PriceFilter from '../components/PriceFilter';
 import QuantitySelector from '../components/QuantitySelector';
-// Layout is already provided by _app.js, no need to import
 import styles from '../styles/Page Styles/Products.module.css';
 import Image from 'next/image';
+import { fetchProductsServer } from '../lib/supabaseServer';
 
+const PRODUCTS_PER_PAGE = 20;
+const SITE_URL = 'https://www.hc-clima.bg';
 
-const BuyPage = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const BuyPage = ({ 
+  initialProducts = [], 
+  totalProducts = 0, 
+  currentPage = 1, 
+  pageSize = PRODUCTS_PER_PAGE,
+  ssrError = null,
+  ssrSortBy = 'default',
+  ssrSearch = '',
+  filterOptions = { brands: [], capacities: [], energyRatings: [], colors: [] },
+  priceBounds = { min: 0, max: 10000 }
+}) => {
+  const [products] = useState(initialProducts);
+  const [loading, setLoading] = useState(false);
+  const [error] = useState(ssrError);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const { t } = useTranslation('common');
   const router = useRouter();
   
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 20;
+  const [filters, setFilters] = useState({
+    brands: [],
+    capacities: [],
+    energyRatings: [],
+    colors: [],
+    priceRange: { min: priceBounds.min, max: priceBounds.max }
+  });
+
+  const [sortBy, setSortBy] = useState(ssrSortBy);
+  const [searchTerm, setSearchTerm] = useState(ssrSearch);
+  const [tempMobileFilters, setTempMobileFilters] = useState(null);
   
-  // Skeleton Loading Component
   const SkeletonLoader = () => (
     <div className={styles.skeletonGrid}>
       {[...Array(6)].map((_, index) => (
@@ -39,206 +57,78 @@ const BuyPage = () => {
     </div>
   );
 
-  // Handle hydration safely
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  
-  // Filter states
-  const [filters, setFilters] = useState({
-    brands: [],
-    capacities: [],
-    energyRatings: [],
-    colors: [],
-    priceRange: { min: 0, max: 3000 }
-  });
+  const totalPages = Math.ceil(totalProducts / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalProducts);
 
-  // Sort state
-  const [sortBy, setSortBy] = useState('default'); // 'default', 'price-low', 'price-high'
-
-  // Temporary filters for mobile (applied only when user hits "Apply")
-  const [tempMobileFilters, setTempMobileFilters] = useState(null);
-
-  // Price bounds state
-  const [priceBounds, setPriceBounds] = useState({ min: 0, max: 10000 });
-  
-
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        console.log('Fetching products...');
-        // Include archived products so they show as "out of stock"
-        const response = await fetch('/api/get-products?showArchived=true');
-        console.log('Response status:', response.status);
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-          console.error('API Error:', errorData);
-          throw new Error(errorData.error || `Failed to fetch products: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-        console.log('Products data:', data);
-        const productsArray = data.products || data || [];
-        console.log('Products array length:', productsArray.length);
-        
-        setProducts(productsArray);
-        
-        // Set initial price range based on products
-        if (productsArray.length > 0) {
-          const prices = productsArray.map(p => p.Price);
-          const calculatedMinPrice = Math.floor(Math.min(...prices) / 100) * 100;
-          const calculatedMaxPrice = Math.ceil(Math.max(...prices) / 100) * 100;
-          
-          // Update the price bounds state
-          setPriceBounds({ min: calculatedMinPrice, max: calculatedMaxPrice });
-          
-          // Only set the initial range if it hasn't been set yet
-          setFilters(prev => ({
-            ...prev,
-            priceRange: { 
-              min: calculatedMinPrice, 
-              max: calculatedMaxPrice 
-            }
-          }));
-        }
-      } catch (err) {
-        setError(err.message);
-        console.error('Error fetching products:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    console.log('useEffect running, mounted:', mounted);
-    // Only fetch products after component is mounted (client-side)
-    if (mounted) {
-      fetchProducts();
-    }
-  }, [mounted]);
-
-  // Get unique filter options and counts
-  const filterOptions = useMemo(() => {
-    const brands = {};
-    const capacities = {};
-    const energyRatings = {};
-    const colors = {};
-
-    products.forEach(product => {
-      // Count brands
-      brands[product.Brand] = (brands[product.Brand] || 0) + 1;
-      
-
-      
-      // Count capacities
-      const capacity = product.CapacityBTU;
-      capacities[capacity] = (capacities[capacity] || 0) + 1;
-      
-      // Count energy ratings
-      energyRatings[product.EnergyRating] = (energyRatings[product.EnergyRating] || 0) + 1;
-      
-      // Count colors
-      if (product.Colour) {
-        colors[product.Colour] = (colors[product.Colour] || 0) + 1;
+  const updateUrlAndNavigate = useCallback((newParams) => {
+    setLoading(true);
+    const query = { ...router.query };
+    
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === '' || value === 1 || value === 'default') {
+        delete query[key];
+      } else {
+        query[key] = String(value);
       }
     });
+    
+    router.push({ pathname: '/buy', query }, undefined, { scroll: false });
+  }, [router]);
 
-    return { brands, capacities, energyRatings, colors };
-  }, [products]);
+  const handlePageChange = useCallback((newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
+    updateUrlAndNavigate({ page: newPage === 1 ? null : newPage });
+  }, [currentPage, totalPages, updateUrlAndNavigate]);
 
-  // Get unique values for filters
-  const uniqueBrands = [...new Set(products.map(p => p.Brand))].filter(Boolean).sort();
-  const uniqueCapacities = [...new Set(products.map(p => p.CapacityBTU))].filter(val => val != null && val !== undefined && !isNaN(val)).sort((a, b) => a - b);
-  const uniqueEnergyRatings = [...new Set(products.map(p => p.EnergyRating))].filter(Boolean).sort();
-  const uniqueColors = [...new Set(products.map(p => p.Colour))].filter(Boolean).sort();
+  const handleSortChange = useCallback((newSortBy) => {
+    setSortBy(newSortBy);
+    updateUrlAndNavigate({ sortBy: newSortBy === 'default' ? null : newSortBy, page: null });
+  }, [updateUrlAndNavigate]);
 
-  // Apply filters to products
+  const handleSearchSubmit = useCallback((e) => {
+    e?.preventDefault();
+    updateUrlAndNavigate({ search: searchTerm || null, page: null });
+  }, [searchTerm, updateUrlAndNavigate]);
+
+  const handleRetry = useCallback(() => {
+    setLoading(true);
+    router.replace(router.asPath);
+  }, [router]);
+
+  useEffect(() => {
+    setLoading(false);
+  }, [initialProducts, currentPage]);
+
+  const uniqueBrands = filterOptions.brands;
+  const uniqueCapacities = filterOptions.capacities;
+  const uniqueEnergyRatings = filterOptions.energyRatings;
+  const uniqueColors = filterOptions.colors;
+
   const filteredProducts = useMemo(() => {
     const activeFilters = tempMobileFilters || filters;
     
-    let filtered = products.filter(product => {
-      // Brand filter
+    return products.filter(product => {
       if (activeFilters.brands.length > 0 && !activeFilters.brands.includes(product.Brand)) {
         return false;
       }
-      
-
-      
-      // Capacity filter
       if (activeFilters.capacities.length > 0 && !activeFilters.capacities.includes(product.CapacityBTU)) {
         return false;
       }
-      
-      // Energy rating filter
       if (activeFilters.energyRatings.length > 0 && !activeFilters.energyRatings.includes(product.EnergyRating)) {
         return false;
       }
-      
-      // Color filter
       if (activeFilters.colors.length > 0 && !activeFilters.colors.includes(product.Colour)) {
         return false;
       }
-      
-      // Price range filter
       if (product.Price < activeFilters.priceRange.min || product.Price > activeFilters.priceRange.max) {
         return false;
       }
-      
       return true;
     });
+  }, [products, filters, tempMobileFilters]);
 
-    // Apply sorting
-    switch (sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.Price - b.Price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.Price - a.Price);
-        break;
-      case 'capacity-low':
-        filtered.sort((a, b) => (a.CapacityBTU || 0) - (b.CapacityBTU || 0));
-        break;
-      case 'capacity-high':
-        filtered.sort((a, b) => (b.CapacityBTU || 0) - (a.CapacityBTU || 0));
-        break;
-      case 'energy-best': {
-        // Custom order: A+++ > A++ > A+ > A > B > C
-        const order = ['A+++', 'A++', 'A+', 'A', 'B', 'C'];
-        filtered.sort((a, b) => {
-          const aIndex = order.indexOf(a.EnergyRating);
-          const bIndex = order.indexOf(b.EnergyRating);
-          return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex);
-        });
-        break;
-      }
-      case 'energy-worst': {
-        // Custom order: C > B > A > A+ > A++ > A+++
-        const order = ['C', 'B', 'A', 'A+', 'A++', 'A+++'];
-        filtered.sort((a, b) => {
-          const aIndex = order.indexOf(a.EnergyRating);
-          const bIndex = order.indexOf(b.EnergyRating);
-          return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex);
-        });
-        break;
-      }
-      default:
-        // Keep original order (default)
-        break;
-    }
-
-    return filtered;
-  }, [products, filters, tempMobileFilters, sortBy]);
-
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-  const startIndex = (currentPage - 1) * productsPerPage;
-  const endIndex = startIndex + productsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters, tempMobileFilters]);
+  const displayProducts = filteredProducts;
 
   const handleFilterChange = (filterType, value) => {
     const updateFunction = tempMobileFilters ? setTempMobileFilters : setFilters;
@@ -261,23 +151,13 @@ const BuyPage = () => {
     }));
   };
 
-  const handleSortChange = (newSortBy) => {
-    setSortBy(newSortBy);
-    setCurrentPage(1); // Reset to first page when sorting changes
-  };
-
   const clearAllFilters = () => {
-    // Calculate the default price range from actual products
-    const productPrices = products.map(p => p.Price);
-    const actualMinPrice = productPrices.length > 0 ? Math.floor(Math.min(...productPrices) / 100) * 100 : 0;
-    const actualMaxPrice = productPrices.length > 0 ? Math.ceil(Math.max(...productPrices) / 100) * 100 : 10000;
-    
     const defaultFilters = {
       brands: [],
       capacities: [],
       energyRatings: [],
       colors: [],
-      priceRange: { min: actualMinPrice, max: actualMaxPrice }
+      priceRange: { min: priceBounds.min, max: priceBounds.max }
     };
     
     if (tempMobileFilters) {
@@ -287,9 +167,7 @@ const BuyPage = () => {
     }
   };
 
-  // Mobile filter handlers
   const openMobileFilters = () => {
-    // Create a clean copy of current filters for mobile editing
     setTempMobileFilters({
       brands: [...filters.brands],
       capacities: [...filters.capacities],
@@ -298,24 +176,20 @@ const BuyPage = () => {
       priceRange: { ...filters.priceRange }
     });
     setMobileFiltersOpen(true);
-    // Prevent body scroll when modal is open
     document.body.style.overflow = 'hidden';
   };
 
   const closeMobileFilters = () => {
     setMobileFiltersOpen(false);
     setTempMobileFilters(null);
-    // Restore body scroll
     document.body.style.overflow = 'unset';
   };
 
-  // Only allow filter changes when mobileFiltersOpen is true
   const handleFilterChangeMobileSafe = (filterType, value) => {
     if (!mobileFiltersOpen) return;
     handleFilterChange(filterType, value);
   };
 
-  // Only allow price changes when mobileFiltersOpen is true
   const handlePriceChangeMobileSafe = (min, max) => {
     if (!mobileFiltersOpen) return;
     handlePriceChange(min, max);
@@ -336,21 +210,12 @@ const BuyPage = () => {
     count += activeFilters.energyRatings.length;
     count += activeFilters.colors.length;
     
-    // Only count price range as active if user has manually changed it from the product-based range
-    const productPrices = products.map(p => p.Price);
-    if (productPrices.length > 0) {
-      const actualMinPrice = Math.floor(Math.min(...productPrices) / 100) * 100;
-      const actualMaxPrice = Math.ceil(Math.max(...productPrices) / 100) * 100;
-      
-      if (activeFilters.priceRange.min !== actualMinPrice || activeFilters.priceRange.max !== actualMaxPrice) {
-        count += 1;
-      }
+    if (activeFilters.priceRange.min !== priceBounds.min || activeFilters.priceRange.max !== priceBounds.max) {
+      count += 1;
     }
     
     return count;
   };
-
-
 
   const calculateDiscount = (price, previousPrice) => {
     if (!previousPrice || previousPrice <= price) return null;
@@ -367,7 +232,6 @@ const BuyPage = () => {
 
   const formatPriceEUR = (price) => {
     if (price == null || isNaN(price)) return '€0.00';
-    // BGN to EUR conversion rate (1 EUR = 1.95583 BGN - official rate)
     const eurPrice = price / 1.95583;
     return new Intl.NumberFormat('en-EU', {
       style: 'currency',
@@ -375,13 +239,9 @@ const BuyPage = () => {
     }).format(eurPrice);
   };
 
-
-
-  // Helper function to translate features
   const translateFeature = (feature) => {
     if (!feature) return '';
     
-    // Create a mapping from English feature names to translation keys
     const featureMapping = {
       'WiFi Control': 'wifi',
       'Inverter Technology': 'inverter',
@@ -407,10 +267,9 @@ const BuyPage = () => {
       return t(`buyPage.features.${translationKey}`) || feature;
     }
     
-    return feature; // Return original if no translation found
+    return feature;
   };
 
-  // Helper function to translate colors
   const translateColor = (color) => {
     if (!color) return '';
     
@@ -428,44 +287,9 @@ const BuyPage = () => {
       return t(`buyPage.colors.${translationKey}`) || color;
     }
     
-    return color; // Return original if no translation found
+    return color;
   };
 
-  // Helper function to translate warranty periods
-  const translateWarranty = (warranty) => {
-    if (!warranty) return '';
-    
-    // Extract number and unit from warranty string (e.g., "3 years" -> "3" and "years")
-    const match = warranty.match(/^(\d+)\s*(year|years|години|година)$/i);
-    if (match) {
-      const number = match[1];
-      const unit = match[2].toLowerCase();
-      
-      // Try to get the translation with fallback
-      let translatedYears;
-      try {
-        translatedYears = t('buyPage.warranty.years');
-        // If the translation returns the key itself, use fallback
-        if (translatedYears === 'buyPage.warranty.years') {
-          translatedYears = 'years';
-        }
-      } catch (error) {
-        translatedYears = 'years';
-      }
-      
-      if (unit === 'year' || unit === 'years') {
-        return `${number} ${translatedYears}`;
-      } else if (unit === 'години' || unit === 'година') {
-        return `${number} ${translatedYears}`;
-      }
-    }
-    
-    return warranty; // Return original if no translation found
-  };
-
-
-
-  // Handle escape key and back button
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape' && mobileFiltersOpen) {
@@ -490,7 +314,6 @@ const BuyPage = () => {
     }
   }, [mobileFiltersOpen]);
 
-  // Touch gesture handling for bottom sheet
   useEffect(() => {
     let startY = 0;
     let currentY = 0;
@@ -513,7 +336,7 @@ const BuyPage = () => {
       currentY = e.touches[0].clientY;
       const deltaY = currentY - startY;
       
-      if (deltaY > 0) { // Only allow downward drag
+      if (deltaY > 0) {
         const panel = document.querySelector(`.${styles.mobileFilterPanel}`);
         if (panel) {
           panel.style.transform = `translateY(${deltaY}px)`;
@@ -529,7 +352,7 @@ const BuyPage = () => {
         panel.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
         
         const deltaY = currentY - startY;
-        if (deltaY > 100) { // Threshold for closing
+        if (deltaY > 100) {
           closeMobileFilters();
         } else {
           panel.style.transform = 'translateY(0)';
@@ -557,8 +380,6 @@ const BuyPage = () => {
     const filterChangeHandler = isMobile ? handleFilterChangeMobileSafe : handleFilterChange;
     const priceChangeHandler = isMobile ? handlePriceChangeMobileSafe : handlePriceChange;
 
-
-
     return (
       <div className={styles.filterSidebar}>
         <div className={styles.filterSidebarContent}>
@@ -577,7 +398,6 @@ const BuyPage = () => {
           </div>
           
           <div className={styles.filterSidebarBody}>
-            {/* Brand Filter */}
             <div className={styles.filterGroup}>
               <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.brand')}</h3>
               <div className={styles.filterOptions}>
@@ -595,9 +415,6 @@ const BuyPage = () => {
               </div>
             </div>
 
-
-
-            {/* Capacity Filter */}
             <div className={styles.filterGroup}>
               <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.capacity')}</h3>
               <div className={styles.filterOptions}>
@@ -615,7 +432,6 @@ const BuyPage = () => {
               </div>
             </div>
 
-            {/* Energy Rating Filter */}
             <div className={styles.filterGroup}>
               <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.energyRating')}</h3>
               <div className={styles.filterOptions}>
@@ -633,7 +449,6 @@ const BuyPage = () => {
               </div>
             </div>
 
-            {/* Color Filter */}
             {uniqueColors.length > 0 && (
               <div className={styles.filterGroup}>
                 <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.color')}</h3>
@@ -653,7 +468,6 @@ const BuyPage = () => {
               </div>
             )}
 
-            {/* Price Filter */}
             <PriceFilter
               minValue={currentFilters.priceRange.min}
               maxValue={currentFilters.priceRange.max}
@@ -667,35 +481,32 @@ const BuyPage = () => {
     );
   };
 
-  // Show loading state during hydration or when fetching
-  if (!mounted || loading) {
-    return (
-      <>
-        <Head>
-          <title>Buy ACs - BGVIKI15 Ltd</title>
-          <meta name="description" content="Air conditioners and climate solutions" />
-        </Head>
-        <div className={styles.container}>
-          <h1 className={styles.title}>{t('buyPage.title')}</h1>
-          <p style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.1rem', color: '#666' }}>
-            {t('buyPage.loading')}
-          </p>
-          <SkeletonLoader />
-        </div>
-      </>
-    );
-  }
+  const pageTitle = `${t('buyPage.title')} - ${t('metaTitle')}`;
+  const pageDescription = t('metaDescription');
 
-  if (error) {
+  if (error && products.length === 0) {
     return (
       <>
         <Head>
-          <title>{`${t('buyPage.title')} - ${t('metaTitle')}`}</title>
-          <meta name="description" content={t('metaDescription')} />
+          <title>{pageTitle}</title>
+          <meta name="description" content={pageDescription} />
+          <meta name="robots" content="index, follow" />
+          <link rel="canonical" href={`${SITE_URL}/buy`} />
+          <meta property="og:title" content={pageTitle} />
+          <meta property="og:description" content={pageDescription} />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content={`${SITE_URL}/buy`} />
+          <meta property="og:image" content={`${SITE_URL}/images/og-buy.jpg`} />
         </Head>
         <div className={styles.container}>
           <h1 className={styles.title}>{t('buyPage.title')}</h1>
-          <div className={styles.error}>{t('buyPage.error')}: {error}</div>
+          <div className={styles.error}>
+            {t('buyPage.error')}: {error}
+            <br />
+            <button onClick={handleRetry} style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer' }}>
+              {t('buyPage.retry') || 'Try Again'}
+            </button>
+          </div>
         </div>
       </>
     );
@@ -704,24 +515,24 @@ const BuyPage = () => {
   return (
     <>
       <Head>
-        <title>{`${t('buyPage.title')} - ${t('metaTitle')}`}</title>
-        <meta name="description" content={t('metaDescription')} />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content={`${t('buyPage.title')} - ${t('metaTitle')}`} />
-        <meta property="og:description" content={t('metaDescription')} />
+        <link rel="canonical" href={`${SITE_URL}/buy`} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${SITE_URL}/buy`} />
+        <meta property="og:image" content={`${SITE_URL}/images/og-buy.jpg`} />
       </Head>
       <div className={styles.container}>
         
         <div className={styles.pageLayout}>
-          {/* Desktop Sidebar */}
           <div className={styles.sidebarContainer}>
             <FilterSidebar />
           </div>
 
-          {/* Main Content */}
           <div className={styles.mainContent}>
-            {/* Mobile Filter Toggle */}
             <button
               className={styles.mobileFilterToggle}
               onClick={openMobileFilters}
@@ -729,14 +540,15 @@ const BuyPage = () => {
               {t('buyPage.filters.title')} ({getActiveFilterCount()})
             </button>
 
-            {/* Results Header */}
             <div className={styles.resultsHeader}>
               <div className={styles.resultsCount}>
-                {filteredProducts.length > 0 ? (
+                {loading ? (
+                  <span>{t('buyPage.loading')}</span>
+                ) : displayProducts.length > 0 ? (
                   <>
                     {t ? 
-                      `${t('buyPage.pagination.showing')} ${startIndex + 1}-${Math.min(endIndex, filteredProducts.length)} ${t('buyPage.pagination.of')} ${filteredProducts.length} ${t('buyPage.filters.results')}` :
-                      `Showing ${startIndex + 1}-${Math.min(endIndex, filteredProducts.length)} of ${filteredProducts.length} results`
+                      `${t('buyPage.pagination.showing')} ${startIndex + 1}-${Math.min(endIndex, startIndex + displayProducts.length)} ${t('buyPage.pagination.of')} ${totalProducts} ${t('buyPage.filters.results')}` :
+                      `Showing ${startIndex + 1}-${Math.min(endIndex, startIndex + displayProducts.length)} of ${totalProducts} results`
                     }
                     {totalPages > 1 && (
                       <span className={styles.pageInfo}>
@@ -750,8 +562,7 @@ const BuyPage = () => {
               </div>
             </div>
 
-            {/* Sort Dropdown */}
-            {filteredProducts.length > 0 && (
+            {displayProducts.length > 0 && (
               <div className={styles.sortContainer}>
                 <label htmlFor="sort-select" className={styles.sortLabel}>
                   {t && t('buyPage.sort.label') !== 'buyPage.sort.label' ? t('buyPage.sort.label') : 'Sort by'}:
@@ -779,7 +590,9 @@ const BuyPage = () => {
               </div>
             )}
             
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              <SkeletonLoader />
+            ) : displayProducts.length === 0 ? (
               <div className={styles.noProducts}>
                 {getActiveFilterCount() > 0 ? 
                   t('buyPage.filters.noResults') : 
@@ -788,29 +601,24 @@ const BuyPage = () => {
             ) : (
               <>
                 <div className={styles.grid}>
-                  {currentProducts.map((product, index) => {
-                  // Dynamic discount calculation system
+                  {displayProducts.map((product, index) => {
                   let discount, previousPrice, currentPrice, calculatedPrice;
                   
                   if (product.Discount > 0) {
-                    // If discount percentage is provided, calculate the discounted price dynamically
                     discount = product.Discount;
-                    previousPrice = product.PreviousPrice || product.Price; // Original price (before discount)
-                    calculatedPrice = previousPrice * (1 - discount / 100); // Calculate discounted price
-                    currentPrice = calculatedPrice; // Use calculated price for display
+                    previousPrice = product.PreviousPrice || product.Price;
+                    calculatedPrice = previousPrice * (1 - discount / 100);
+                    currentPrice = calculatedPrice;
                   } else if (product.PreviousPrice && product.PreviousPrice > product.Price) {
-                    // If previous price is provided and higher than current price, calculate discount
                     discount = calculateDiscount(product.Price, product.PreviousPrice);
                     previousPrice = product.PreviousPrice;
                     currentPrice = product.Price;
                   } else {
-                    // No discount
                     discount = 0;
                     previousPrice = null;
                     currentPrice = product.Price;
                   }
                   
-                  // Use actual product data for promotional flags instead of config file
                 const flags = {
                   IsNew: product.IsNew || false,
                   IsBestseller: product.IsBestseller || false,
@@ -820,7 +628,6 @@ const BuyPage = () => {
                   
                   return (
                     <div key={product.ProductID} className={`${styles.card} ${product.IsArchived ? styles.outOfStock : ''}`}>
-                      {/* Out of Stock Overlay for Archived Products */}
                       {product.IsArchived && (
                         <div className={styles.outOfStockOverlay}>
                           <div className={styles.outOfStockText}>
@@ -829,10 +636,8 @@ const BuyPage = () => {
                         </div>
                       )}
                       
-                      {/* Clickable Product Info Section */}
                       <Link href={`/buy/${product.ProductID}`} className={styles.productLink}>
                         <div className={styles.imageContainer}>
-                          {/* Promotional Badges - Top Right */}
                           {(flags.IsFeatured || flags.IsBestseller || flags.IsNew || flags.HasDiscount) && (
                             <div className={styles.promotionalBadges}>
                               {flags.IsNew && (
@@ -863,13 +668,12 @@ const BuyPage = () => {
                             alt={`${product.Brand} ${product.Model}`}
                             fill
                             className={styles.image}
-                            priority={index < 6} // Priority loading for first 6 images
+                            priority={index < 6}
                             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             quality={85}
                           />
                         </div>
                         
-                        {/* Brand Strip */}
                         <div className={styles.brandStrip}>
                           {product.Brand}
                         </div>
@@ -879,7 +683,6 @@ const BuyPage = () => {
                             {product.Brand} {product.Model}
                           </h2>
                           
-                          {/* Feature Tags - Filter out Wi-Fi */}
                           {product.Features && product.Features.length > 0 && (() => {
                             const filteredFeatures = product.Features.filter(feature => {
                               const featureLower = translateFeature(feature).toLowerCase();
@@ -904,7 +707,6 @@ const BuyPage = () => {
                             );
                           })()}
                           
-                          {/* Stock Status */}
                           <div className={styles.stockStatus}>
                             {product.IsArchived ? (
                               <span className={`${styles.stockBadge} ${styles.outOfStock}`}>
@@ -921,12 +723,10 @@ const BuyPage = () => {
                             )}
                           </div>
                           
-                          {/* Installment Text */}
                           <div className={styles.installmentText}>
                             {t('buyPage.actionButtons.buyOnInstallment')}
                           </div>
                           
-                          {/* Action Buttons */}
                           <div className={styles.actionButtons}>
                             <button 
                               className={`${styles.actionButton} ${styles.actionButtonOrange}`}
@@ -960,14 +760,12 @@ const BuyPage = () => {
                         <div className={styles.pricing}>
                           {discount > 0 ? (
                             <>
-                              {/* Original Price with ПЦД label (Crossed Out) */}
                               <div className={styles.originalPriceContainer}>
                                 <span className={styles.priceLabel}>ПЦД:</span>
                                 <span className={styles.originalPrice}>
                                   {formatPriceEUR(previousPrice)} | {formatPrice(previousPrice)}
                                 </span>
                               </div>
-                              {/* Current Price (Dynamically Calculated) - Bold Red */}
                               <div className={styles.currentPriceContainer}>
                                 <span className={styles.currentPrice}>
                                   {formatPriceEUR(currentPrice)} | {formatPrice(currentPrice)}
@@ -975,7 +773,6 @@ const BuyPage = () => {
                               </div>
                             </>
                           ) : (
-                            /* Regular Price (No Discount) */
                             <div className={styles.priceContainer}>
                               <span className={styles.price}>
                                 {formatPriceEUR(currentPrice)} | {formatPrice(currentPrice)}
@@ -985,20 +782,18 @@ const BuyPage = () => {
                         </div>
                       </Link>
                       
-                      {/* Quantity Selector stays outside Link to maintain functionality */}
                       <QuantitySelector product={product} />
                     </div>
                   );
                 })}
                 </div>
                 
-                {/* Pagination Controls */}
                 {totalPages > 1 && (
                   <div className={styles.pagination}>
                     <button
                       className={`${styles.paginationButton} ${currentPage === 1 ? styles.disabled : ''}`}
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 1}
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1 || loading}
                     >
                       {t ? t('buyPage.pagination.previous') : 'Previous'}
                     </button>
@@ -1008,13 +803,11 @@ const BuyPage = () => {
                         const pageNumber = index + 1;
                         const isCurrentPage = pageNumber === currentPage;
                         
-                        // Show first page, last page, current page, and pages around current
                         const showPage = pageNumber === 1 || 
                                         pageNumber === totalPages || 
                                         Math.abs(pageNumber - currentPage) <= 2;
                         
                         if (!showPage) {
-                          // Show ellipsis for gaps
                           if (pageNumber === 2 && currentPage > 4) {
                             return <span key={pageNumber} className={styles.ellipsis}>...</span>;
                           }
@@ -1028,7 +821,8 @@ const BuyPage = () => {
                           <button
                             key={pageNumber}
                             className={`${styles.pageNumber} ${isCurrentPage ? styles.active : ''}`}
-                            onClick={() => setCurrentPage(pageNumber)}
+                            onClick={() => handlePageChange(pageNumber)}
+                            disabled={loading}
                           >
                             {pageNumber}
                           </button>
@@ -1038,8 +832,8 @@ const BuyPage = () => {
                     
                     <button
                       className={`${styles.paginationButton} ${currentPage === totalPages ? styles.disabled : ''}`}
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages || loading}
                     >
                       {t ? t('buyPage.pagination.next') : 'Next'}
                     </button>
@@ -1050,13 +844,11 @@ const BuyPage = () => {
           </div>
         </div>
 
-        {/* Mobile Filter Overlay */}
         {mobileFiltersOpen && (
           <div className={`${styles.mobileFilterOverlay} ${styles.active}`}
                onClick={closeMobileFilters}>
             <div className={`${styles.mobileFilterPanel} ${styles.active}`}
                  onClick={(e) => e.stopPropagation()}>
-              {/* ...filter content... */}
               <div className={styles.mobileFilterHeader}>
                 <h2 className={styles.filterTitle}>{t('buyPage.filters.title')}</h2>
                 <div className={styles.mobileFilterHeaderActions}>
@@ -1073,9 +865,7 @@ const BuyPage = () => {
                   </button>
                 </div>
               </div>
-              {/* Mobile Filter Content */}
               <div className={styles.mobileFilterContent}>
-                {/* Brand Filter */}
                 <div className={styles.filterGroup}>
                   <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.brand')}</h3>
                   <div className={styles.filterOptions}>
@@ -1093,7 +883,6 @@ const BuyPage = () => {
                   </div>
                 </div>
 
-                {/* Capacity Filter */}
                 <div className={styles.filterGroup}>
                   <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.capacity')}</h3>
                   <div className={styles.filterOptions}>
@@ -1110,7 +899,6 @@ const BuyPage = () => {
                     ))}
                   </div>
                 </div>
-                {/* Energy Rating Filter */}
                 <div className={styles.filterGroup}>
                   <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.energyRating')}</h3>
                   <div className={styles.filterOptions}>
@@ -1127,7 +915,6 @@ const BuyPage = () => {
                     ))}
                   </div>
                 </div>
-                {/* Color Filter */}
                 {uniqueColors.length > 0 && (
                   <div className={styles.filterGroup}>
                     <h3 className={styles.filterGroupTitle}>{t('buyPage.filters.color')}</h3>
@@ -1146,7 +933,6 @@ const BuyPage = () => {
                     </div>
                   </div>
                 )}
-                {/* Price Filter */}
                 <div className={styles.filterGroup}>
                   <PriceFilter
                     minValue={(tempMobileFilters || filters).priceRange.min}
@@ -1180,14 +966,106 @@ const BuyPage = () => {
   );
 };
 
-export async function getStaticProps({ locale }) {
+function mapSortByToSupabase(sortBy) {
+  switch (sortBy) {
+    case 'price-low':
+      return { sortBy: 'price', sortOrder: 'asc' };
+    case 'price-high':
+      return { sortBy: 'price', sortOrder: 'desc' };
+    default:
+      return { sortBy: 'updated_at', sortOrder: 'desc' };
+  }
+}
+
+export async function getServerSideProps({ locale, query }) {
   const { serverSideTranslations } = await import('next-i18next/serverSideTranslations');
+  
+  const page = Math.max(1, parseInt(query.page) || 1);
+  const search = query.search || '';
+  const sortByParam = query.sortBy || 'default';
+  const { sortBy, sortOrder } = mapSortByToSupabase(sortByParam);
+  
+  const limit = PRODUCTS_PER_PAGE;
+  const offset = (page - 1) * limit;
+  
+  let initialProducts = [];
+  let totalProducts = 0;
+  let ssrError = null;
+  let filterOptions = { brands: [], capacities: [], energyRatings: [], colors: [] };
+  let priceBounds = { min: 0, max: 10000 };
+  
+  try {
+    const [pageResult, allProductsResult] = await Promise.all([
+      fetchProductsServer({
+        showArchived: false,
+        search,
+        sortBy,
+        sortOrder,
+        limit,
+        offset
+      }),
+      fetchProductsServer({
+        showArchived: false,
+        search: '',
+        sortBy: 'updated_at',
+        sortOrder: 'desc',
+        limit: 1000,
+        offset: 0
+      })
+    ]);
+    
+    initialProducts = pageResult.products;
+    totalProducts = pageResult.total;
+    
+    const allProducts = allProductsResult.products;
+    
+    const brands = new Set();
+    const capacities = new Set();
+    const energyRatings = new Set();
+    const colors = new Set();
+    const prices = [];
+    
+    allProducts.forEach(product => {
+      if (product.Brand) brands.add(product.Brand);
+      if (product.CapacityBTU != null && !isNaN(product.CapacityBTU)) capacities.add(product.CapacityBTU);
+      if (product.EnergyRating) energyRatings.add(product.EnergyRating);
+      if (product.Colour) colors.add(product.Colour);
+      if (product.Price != null) prices.push(product.Price);
+    });
+    
+    filterOptions = {
+      brands: [...brands].sort(),
+      capacities: [...capacities].sort((a, b) => a - b),
+      energyRatings: [...energyRatings].sort(),
+      colors: [...colors].sort()
+    };
+    
+    if (prices.length > 0) {
+      priceBounds = {
+        min: Math.floor(Math.min(...prices) / 100) * 100,
+        max: Math.ceil(Math.max(...prices) / 100) * 100
+      };
+    }
+    
+  } catch (error) {
+    console.error('Error fetching products in getServerSideProps:', error);
+    ssrError = 'Failed to load products. Please try again.';
+  }
   
   return {
     props: {
       ...(await serverSideTranslations(locale || 'bg', ['common'])),
+      initialProducts,
+      totalProducts,
+      currentPage: page,
+      pageSize: limit,
+      ssrError,
+      ssrSortBy: sortByParam,
+      ssrSearch: search,
+      filterOptions,
+      priceBounds,
     },
   };
 }
 
-export default BuyPage; 
+export default BuyPage;
