@@ -11,7 +11,11 @@ export function getSupabaseServer() {
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase environment variables');
+    console.error('Missing Supabase environment variables:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseKey
+    });
+    return null;
   }
 
   supabaseInstance = createClient(supabaseUrl, supabaseKey, {
@@ -69,6 +73,15 @@ export async function fetchProductsServer({
   offset = 0
 } = {}) {
   const supabase = getSupabaseServer();
+  
+  if (!supabase) {
+    console.error('Supabase client not initialized - missing environment variables');
+    return {
+      products: [],
+      total: 0,
+      hasMore: false
+    };
+  }
   
   const columns = `
     id, brand, model, colour, capacity_btu, energy_rating, price, previous_price,

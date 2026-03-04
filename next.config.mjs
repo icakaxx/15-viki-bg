@@ -15,6 +15,12 @@ const nextConfig = {
     ],
   },
   i18n: nextI18NextConfig.i18n,
+  
+  // Include next-i18next config in serverless function bundle (required for Vercel)
+  outputFileTracingIncludes: {
+    '/*': ['./next-i18next.config.js', './public/locales/**/*'],
+  },
+  
   // Redirect from home page to /buy
   async redirects() {
     return [
