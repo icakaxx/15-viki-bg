@@ -457,15 +457,68 @@ const CheckoutPage = () => {
 
   const submitTbiCredit = async (orderId) => {
     const EUR_RATE = 1.95583;
-    const tbiItems = cart.items.map(item => ({
-      name: `${item.product.Brand} ${item.product.Model}`.substring(0, 255),
-      description: item.product.Description || '',
-      qty: String(item.quantity),
-      price: (item.product.Price / EUR_RATE).toFixed(2),
-      sku: String(item.productId),
-      category: 0,
-      imagelink: item.product.ImageURL || '',
-    }));
+    const tbiItems = [];
+
+    cart.items.forEach(item => {
+      const qty = item.quantity || 1;
+
+      // Product line
+      tbiItems.push({
+        name: `${item.product.Brand} ${item.product.Model}`.substring(0, 255),
+        description: item.product.Description || '',
+        qty: String(qty),
+        price: (item.product.Price / EUR_RATE).toFixed(2),
+        sku: String(item.productId),
+        category: 0,
+        imagelink: item.product.ImageURL || '',
+      });
+
+      // Accessory lines
+      if (item.accessories && item.accessories.length > 0) {
+        item.accessories.forEach(acc => {
+          const accQty = acc.quantity ?? qty;
+          const accPrice = acc.Price ?? acc.price ?? 0;
+          if (accPrice <= 0) return;
+          tbiItems.push({
+            name: (acc.Name || 'Аксесоар').substring(0, 255),
+            description: acc.Description || '',
+            qty: String(accQty),
+            price: (accPrice / EUR_RATE).toFixed(2),
+            sku: acc.AccessoryID ? String(acc.AccessoryID) : `acc-${item.productId}`,
+            category: 0,
+            imagelink: acc.ImageURL || '',
+          });
+        });
+      }
+
+      // Installation line (if selected)
+      if (item.installation && item.installationPrice) {
+        const instPrice = item.installationPrice || 0;
+        if (instPrice > 0) {
+          tbiItems.push({
+            name: 'Монтаж',
+            description: 'Професионален монтаж',
+            qty: String(qty),
+            price: (instPrice / EUR_RATE).toFixed(2),
+            sku: `installation-${item.productId}`,
+            category: 0,
+            imagelink: '',
+          });
+        }
+      }
+    });
+
+    // Sanity check: payload total vs expected cart total (EUR)
+    const payloadTotalEUR = tbiItems.reduce((sum, it) => sum + parseFloat(it.price) * parseInt(it.qty, 10), 0);
+    const expectedTotalEUR = cart.totalPrice / EUR_RATE;
+    const diff = Math.abs(payloadTotalEUR - expectedTotalEUR);
+    if (diff > 0.01) {
+      console.warn('[TBI submit] Total mismatch (EUR)', {
+        payloadTotalEUR: Math.round(payloadTotalEUR * 100) / 100,
+        expectedTotalEUR: Math.round(expectedTotalEUR * 100) / 100,
+        diff: Math.round(diff * 100) / 100,
+      });
+    }
 
     const response = await fetch('/api/tbi-pay', {
       method: 'POST',
