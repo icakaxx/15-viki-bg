@@ -8,6 +8,29 @@ import DskCreditCalculator from '../components/DskCreditCalculator';
 import TbiCreditCalculator from '../components/TbiCreditCalculator';
 import styles from '../styles/Page Styles/CheckoutPage.module.css';
 
+/** TBI payload: map accessory/installation English names to Bulgarian (used only for TBI item names). Prefer by AccessoryID, fallback by Name. */
+const TBI_ACCESSORY_NAME_BG_BY_NAME = {
+  'Anti-vibration Mount Kit': 'Комплект антивибрационни тампони',
+  'Condensate Tray': 'Кондензна вана',
+  'Condensate Tray with Heater and Thermostat': 'Кондензна вана с нагревател и термостат',
+};
+const TBI_ACCESSORY_NAME_BG_BY_ID = {};
+const TBI_INSTALLATION_NAME_BG = 'Професионален монтаж';
+
+function getTbiItemNameBg(acc, kind) {
+  if (kind === 'installation') {
+    return TBI_INSTALLATION_NAME_BG.substring(0, 255);
+  }
+  const id = acc.AccessoryID;
+  if (id != null && TBI_ACCESSORY_NAME_BG_BY_ID[id] !== undefined) {
+    return String(TBI_ACCESSORY_NAME_BG_BY_ID[id]).substring(0, 255);
+  }
+  const en = (acc.Name || '').trim();
+  const bg = TBI_ACCESSORY_NAME_BG_BY_NAME[en];
+  const name = bg != null ? bg : (acc.Name || 'Аксесоар');
+  return String(name).substring(0, 255);
+}
+
 const CheckoutPage = () => {
   const router = useRouter();
   const { cart, updateQuantity, removeFromCart, updateItemAccessories, updateAccessoryQuantity, updateItemInstallation, clearCart, formatPrice, formatPriceEUR } = useCart();
@@ -462,9 +485,9 @@ const CheckoutPage = () => {
     cart.items.forEach(item => {
       const qty = item.quantity || 1;
 
-      // Product line
+      // Product line (AC unit – prefix for TBI hosted page)
       tbiItems.push({
-        name: `${item.product.Brand} ${item.product.Model}`.substring(0, 255),
+        name: `Климатик: ${item.product.Brand} ${item.product.Model}`.substring(0, 255),
         description: item.product.Description || '',
         qty: String(qty),
         price: (item.product.Price / EUR_RATE).toFixed(2),
@@ -473,14 +496,14 @@ const CheckoutPage = () => {
         imagelink: item.product.ImageURL || '',
       });
 
-      // Accessory lines
+      // Accessory lines (consumables – Bulgarian + prefix for TBI hosted page)
       if (item.accessories && item.accessories.length > 0) {
         item.accessories.forEach(acc => {
           const accQty = acc.quantity ?? qty;
           const accPrice = acc.Price ?? acc.price ?? 0;
           if (accPrice <= 0) return;
           tbiItems.push({
-            name: (acc.Name || 'Аксесоар').substring(0, 255),
+            name: `Консуматив: ${getTbiItemNameBg(acc, 'accessory')}`.substring(0, 255),
             description: acc.Description || '',
             qty: String(accQty),
             price: (accPrice / EUR_RATE).toFixed(2),
@@ -491,12 +514,12 @@ const CheckoutPage = () => {
         });
       }
 
-      // Installation line (if selected)
+      // Installation line (service – prefix for TBI hosted page)
       if (item.installation && item.installationPrice) {
         const instPrice = item.installationPrice || 0;
         if (instPrice > 0) {
           tbiItems.push({
-            name: 'Монтаж',
+            name: 'Услуга: Професионален монтаж',
             description: 'Професионален монтаж',
             qty: String(qty),
             price: (instPrice / EUR_RATE).toFixed(2),

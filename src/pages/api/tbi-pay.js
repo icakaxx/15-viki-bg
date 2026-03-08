@@ -20,11 +20,29 @@ export default async function handler(req, res) {
       successRedirectURL,
       failRedirectURL,
       statusURL,
+      currency: bodyCurrency,
     } = req.body;
 
     if (!orderid || !items || items.length === 0) {
       return res.status(400).json({ error: 'Missing required parameters: orderid, items' });
     }
+
+    if (bodyCurrency != null && String(bodyCurrency).toUpperCase() !== 'EUR') {
+      console.warn('[TBI pay] Request body currency is not EUR; overriding to EUR', {
+        orderid: String(orderid),
+        receivedCurrency: bodyCurrency,
+      });
+    }
+
+    const mappedItems = items.map(item => ({
+      name: String(item.name || '').substring(0, 255),
+      description: item.description || '',
+      qty: String(item.qty || 1),
+      price: String(item.price),
+      sku: item.sku || '',
+      category: item.category || 0,
+      imagelink: item.imagelink || '',
+    }));
 
     const applicationData = {
       orderid: String(orderid),
@@ -45,16 +63,15 @@ export default async function handler(req, res) {
         apartmentno: deliveryaddress.apartmentno || '',
         postalcode: deliveryaddress.postalcode || '',
       },
-      items: items.map(item => ({
-        name: String(item.name || '').substring(0, 255),
-        description: item.description || '',
-        qty: String(item.qty || 1),
-        price: String(item.price),
-        sku: item.sku || '',
-        category: item.category || 0,
-        imagelink: item.imagelink || '',
-      })),
+      items: mappedItems,
+      currency: 'EUR',
     };
+
+    console.log('[TBI pay] applicationData summary (redacted)', {
+      orderid: applicationData.orderid,
+      currency: applicationData.currency,
+      firstTwoItems: mappedItems.slice(0, 2).map(({ name, qty, price }) => ({ name, qty, price })),
+    });
 
     if (period) applicationData.period = parseInt(period, 10);
     if (promo) applicationData.promo = true;
