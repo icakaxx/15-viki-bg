@@ -48,6 +48,8 @@ export default function ProductsManagementTab() {
         scop: '',
         power_consumption_cooling: '',
         power_consumption_heating: '',
+        cooling_power_kw: '',
+        heating_power_kw: '',
         operating_temp_range: '',
         dimensions: '',
         indoor_dimensions: '',
@@ -79,6 +81,8 @@ export default function ProductsManagementTab() {
         scop: '',
         power_consumption_cooling: '',
         power_consumption_heating: '',
+        cooling_power_kw: '',
+        heating_power_kw: '',
         operating_temp_range: '',
         dimensions: '',
         indoor_dimensions: '',
@@ -427,6 +431,8 @@ export default function ProductsManagementTab() {
                         scop: product.SCOP || product.scop || '',
                         power_consumption_cooling: product.PowerConsumptionCooling || product.power_consumption_cooling || '',
                         power_consumption_heating: product.PowerConsumptionHeating || product.power_consumption_heating || '',
+                        cooling_power_kw: product.CoolingPowerKw || product.cooling_power_kw || '',
+                        heating_power_kw: product.HeatingPowerKw || product.heating_power_kw || '',
                         operating_temp_range: product.OperatingTempRange || product.operating_temp_range || '',
                         dimensions: product.Dimensions || product.dimensions || '',
                         indoor_dimensions: product.IndoorDimensions || product.indoor_dimensions || '',
@@ -485,6 +491,8 @@ export default function ProductsManagementTab() {
             scop: '',
             power_consumption_cooling: '',
             power_consumption_heating: '',
+            cooling_power_kw: '',
+            heating_power_kw: '',
             operating_temp_range: '',
             dimensions: '',
             indoor_dimensions: '',
@@ -627,6 +635,8 @@ export default function ProductsManagementTab() {
                 scop: formData.scop ? parseFloat(formData.scop) : null,
                 power_consumption_cooling: formData.power_consumption_cooling || null,
                 power_consumption_heating: formData.power_consumption_heating || null,
+                cooling_power_kw: formData.cooling_power_kw || null,
+                heating_power_kw: formData.heating_power_kw || null,
                 noise_level: formData.noise_level || null,
                 // Convert empty strings to null for text fields
                 colour: formData.colour || null,
@@ -682,6 +692,8 @@ export default function ProductsManagementTab() {
             scop: (product.SCOP || product.scop) ? (product.SCOP || product.scop).toString() : '',
             power_consumption_cooling: (product.PowerConsumptionCooling || product.power_consumption_cooling) || '',
             power_consumption_heating: (product.PowerConsumptionHeating || product.power_consumption_heating) || '',
+            cooling_power_kw: (product.CoolingPowerKw || product.cooling_power_kw) || '',
+            heating_power_kw: (product.HeatingPowerKw || product.heating_power_kw) || '',
             operating_temp_range: product.OperatingTempRange || product.operating_temp_range || '',
             dimensions: product.dimensions || '',
             indoor_dimensions: product.IndoorDimensions || product.indoor_dimensions || '',
@@ -725,6 +737,8 @@ export default function ProductsManagementTab() {
                 scop: formData.scop ? parseFloat(formData.scop) : null,
                 power_consumption_cooling: formData.power_consumption_cooling || null,
                 power_consumption_heating: formData.power_consumption_heating || null,
+                cooling_power_kw: formData.cooling_power_kw || null,
+                heating_power_kw: formData.heating_power_kw || null,
                 noise_level: formData.noise_level || null,
                 // Promotional flags - ensure they are boolean values
                 is_featured: Boolean(formData.is_featured),
@@ -1264,6 +1278,46 @@ export default function ProductsManagementTab() {
                                                         value={formData.power_consumption_heating}
                                                         onChange={handleChange}
                                                         placeholder={t('admin.products.hints.powerHeatingHint')}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {(() => {
+                                                        const key = 'admin.products.fields.coolingPowerKw';
+                                                        const translated = t(key);
+                                                        return translated === key ? 'Мощност при охлаждане (kW)' : translated;
+                                                    })()}:
+                                                    <input
+                                                        type="text"
+                                                        name="cooling_power_kw"
+                                                        value={formData.cooling_power_kw}
+                                                        onChange={handleChange}
+                                                        placeholder={(() => {
+                                                            const key = 'admin.products.hints.coolingPowerKw';
+                                                            const translated = t(key);
+                                                            return translated === key ? 'напр. 2.57 (1.3–3.0)' : translated;
+                                                        })()}
+                                                    />
+                                                </label>
+                                            </div>
+                                            <div className={styles.formGroup}>
+                                                <label>
+                                                    {(() => {
+                                                        const key = 'admin.products.fields.heatingPowerKw';
+                                                        const translated = t(key);
+                                                        return translated === key ? 'Мощност при отопление (kW)' : translated;
+                                                    })()}:
+                                                    <input
+                                                        type="text"
+                                                        name="heating_power_kw"
+                                                        value={formData.heating_power_kw}
+                                                        onChange={handleChange}
+                                                        placeholder={(() => {
+                                                            const key = 'admin.products.hints.heatingPowerKw';
+                                                            const translated = t(key);
+                                                            return translated === key ? 'напр. 2.23 (1.3–4.0)' : translated;
+                                                        })()}
                                                     />
                                                 </label>
                                             </div>

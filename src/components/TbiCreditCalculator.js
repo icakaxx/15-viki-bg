@@ -166,7 +166,11 @@ const TbiCreditCalculator = ({ price, productId, onSchemeSelect, onContinue, sho
     <div className={styles.container}>
       <div className={styles.banner} onClick={() => setExpanded(!expanded)}>
         <div className={styles.bannerLeft}>
-          <span className={styles.bankLogo}>tbi</span>
+          <img
+            src="https://cdn.tbibank.support/logo/tbi-bank.png"
+            alt="TBI Bank"
+            className={styles.bankLogoImage}
+          />
           <div className={styles.bannerText}>
             <span className={styles.bannerTitle}>{t('tbi.calculator.title')}</span>
             <span className={styles.bannerAmount}>

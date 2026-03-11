@@ -49,6 +49,8 @@ export const transformProduct = (product) => {
     PowerConsumptionHeating: product.power_consumption_heating || 
                              product.electricity_heating_kw || 
                              null,
+    CoolingPowerKw: product.cooling_power_kw || null,
+    HeatingPowerKw: product.heating_power_kw || null,
     OperatingTempRange: product.operating_temp_range || null,
     IndoorDimensions: product.indoor_dimensions || null,
     OutdoorDimensions: product.outdoor_dimensions || null,
@@ -86,8 +88,8 @@ export async function fetchProductsServer({
   const columns = `
     id, brand, model, colour, capacity_btu, energy_rating, price, previous_price,
     image_url, stock, discount, is_archived, created_at, updated_at, cop, scop,
-    power_consumption_cooling, power_consumption_heating, operating_temp_range,
-    indoor_dimensions, outdoor_dimensions, noise_level, warranty_period,
+    power_consumption_cooling, power_consumption_heating, cooling_power_kw, heating_power_kw,
+    operating_temp_range, indoor_dimensions, outdoor_dimensions, noise_level, warranty_period,
     room_size_recommendation, installation_type, description, features,
     is_featured, is_bestseller, is_new
   `;

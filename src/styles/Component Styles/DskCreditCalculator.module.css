@@ -70,6 +70,12 @@
   letter-spacing: 0.5px;
 }
 
+.bankLogoImage {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+
 .bannerText {
   display: flex;
   flex-direction: column;

@@ -26,6 +26,8 @@ const transformProduct = (product) => {
         PowerConsumptionHeating: product.power_consumption_heating ?? 
                                 product.electricity_heating_kw ?? 
                                 null,
+        CoolingPowerKw: product.cooling_power_kw ?? null,
+        HeatingPowerKw: product.heating_power_kw ?? null,
         OperatingTempRange: product.operating_temp_range ?? null,
         // Physical Characteristics
         IndoorDimensions: product.indoor_dimensions ?? null,
@@ -97,6 +99,8 @@ export default async function handler(req, res) {
                 scop,
                 power_consumption_cooling,
                 power_consumption_heating,
+                cooling_power_kw,
+                heating_power_kw,
                 operating_temp_range,
                 indoor_dimensions,
                 outdoor_dimensions,

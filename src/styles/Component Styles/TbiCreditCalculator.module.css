@@ -71,6 +71,12 @@
   text-transform: lowercase;
 }
 
+.bankLogoImage {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+
 .bannerText {
   display: flex;
   flex-direction: column;

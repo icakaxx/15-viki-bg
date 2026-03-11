@@ -1020,6 +1020,18 @@ const ProductDetailPage = ({ initialProduct, initialAccessories, initialInstalla
                     <td style={{ padding: '0.75rem' }}>{product.PowerConsumptionHeating}</td>
                   </tr>
                 )}
+                {product.CoolingPowerKw && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Мощност при охлаждане (kW)</td>
+                    <td style={{ padding: '0.75rem' }}>{product.CoolingPowerKw}</td>
+                  </tr>
+                )}
+                {product.HeatingPowerKw && (
+                  <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
+                    <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Мощност при отопление (kW)</td>
+                    <td style={{ padding: '0.75rem' }}>{product.HeatingPowerKw}</td>
+                  </tr>
+                )}
                 {product.NoiseLevel && (
                   <tr style={{ borderBottom: '1px solid #e0e0e0' }}>
                     <td style={{ padding: '0.75rem', fontWeight: '500', width: '40%', backgroundColor: '#f8f9fa' }}>Ниво На Шум /Hi/Lo/S-lo/, dB</td>
