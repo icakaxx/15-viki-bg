@@ -29,6 +29,11 @@ const nextConfig = {
         destination: '/buy',
         permanent: false, // Use 307 temporary redirect
       },
+      {
+        source: '/solutions/air_conditioning',
+        destination: '/buy',
+        permanent: false, // Fix broken solution path (air_conditioning → buy)
+      },
     ];
   },
 };

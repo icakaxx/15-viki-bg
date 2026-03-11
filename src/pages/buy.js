@@ -484,7 +484,7 @@ const BuyPage = ({
   };
 
   const pageTitle = `${t('buyPage.title')} - ${t('metaTitle')}`;
-  const pageDescription = t('metaDescription');
+  const pageDescription = t('buyPage.metaDescription') || t('metaDescription');
 
   if (error && products.length === 0) {
     return (

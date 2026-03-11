@@ -1,6 +1,6 @@
 {
   "metaTitle": "BGVIKI15 Ltd - Air Conditioners and HVAC Solutions",
-  "metaDescription": "BGVIKI15 Ltd - Quality and reliable solutions since 2000. Air conditioners, HVAC, and energy-efficient solutions in Bulgaria.",
+  "metaDescription": "BGVIKI15 Ltd – air conditioners and HVAC in Lovech and the region. Quality since 2000. Sales, installation and service.",
   "close": "Close",
   "today": "Today",
   "weekdays": {
@@ -215,8 +215,8 @@
     }
   },
   "productsPage": {
-    "title": "Products & Solutions",
-    "metaDescription": "Complete range of air conditioners and climate solutions for home, office and industry. Professional services and maintenance.",
+    "title": "Services and Solutions",
+    "metaDescription": "HVAC services and solutions in Lovech – sales, installation, service for air conditioners, chillers, heat pumps and VRV/VRF systems.",
     "hero": {
       "title": "Complete Climate Solutions",
       "subtitle": "From residential air conditioners to complex industrial systems - we offer quality products and professional services for all your needs.",
@@ -295,6 +295,7 @@
     "chillers": {
       "title": "Chillers – Industrial and Commercial Cooling Solutions for Buildings and Technological Processes",
       "short": "Flexible and energy-efficient chillers for any needs – from offices to industrial facilities.",
+      "metaDescription": "Chillers in Lovech – industrial and commercial cooling solutions. Design, installation and maintenance.",
       "p1": "Chillers are essential for large-scale cooling in commercial and industrial buildings.",
       "p2": "They work by removing heat from a liquid via a vapor-compression or absorption refrigeration cycle.",
       "p3": "Our chillers are energy-efficient and designed for reliable, long-term operation.",
@@ -303,6 +304,7 @@
     "vrv_vrf": {
       "title": "VRV/VRF Systems",
       "short": "High-efficiency air conditioning and heating systems for large facilities like offices, hotels, and shopping centers.",
+      "metaDescription": "VRV/VRF systems in Lovech – climate control and heating for offices, hotels and large buildings.",
       "p1": "VRV/VRF systems provide flexible and efficient climate control for buildings of all sizes.",
       "p2": "They allow for individual temperature control in different zones, maximizing comfort.",
       "p3": "Our solutions are suitable for offices, hotels, and residential complexes.",
@@ -311,6 +313,7 @@
     "heat_pumps": {
       "title": "Heat Pumps – Modern Energy-Efficient Solutions for Heating and Cooling Residential and Commercial Buildings",
       "short": "Modern energy-efficient solutions for heating and cooling residential and commercial buildings",
+      "metaDescription": "Heat pumps in Lovech – energy-efficient heating and cooling for home and business.",
       "p1": "Heat pumps are an eco-friendly solution for both heating and cooling your property.",
       "p2": "They transfer heat from the outside air or ground into your building, reducing energy costs.",
       "p3": "Our heat pumps are suitable for homes, offices, and industrial facilities.",
@@ -319,6 +322,7 @@
     "cold_rooms": {
       "title": "Cold Rooms – Design and Installation for Storage of Food Products, Medical Materials, and More",
       "short": "Optimal storage conditions for food products, medical materials, and other perishable goods",
+      "metaDescription": "Cold rooms in Lovech – design and installation for food and pharmaceutical storage.",
       "p1": "Cold rooms are vital for the storage of perishable goods in the food and pharmaceutical industries.",
       "p2": "We design and build custom cold rooms to meet your specific requirements.",
       "p3": "Our systems ensure precise temperature control and energy efficiency.",
@@ -327,6 +331,7 @@
     "ventilation": {
       "title": "Ventilation Systems – Solutions for Clean Air, Recuperation, and Optimal Circulation in All Types of Premises",
       "short": "Solutions for clean air, recuperation, and optimal circulation in all types of premises",
+      "metaDescription": "Ventilation systems in Lovech – recuperation, clean air and energy efficiency.",
       "p1": "Proper ventilation is crucial for healthy indoor air quality and comfort.",
       "p2": "We offer advanced ventilation systems for homes, offices, and industrial spaces.",
       "p3": "Our solutions help remove pollutants, control humidity, and save energy.",
@@ -335,13 +340,14 @@
   },
   "nav": {
     "about": "About",
-    "products": "Products & Solutions",
+    "products": "Services and Solutions",
     "buy": "Buy ACs",
     "inquiry": "Make an inquiry",
     "contact": "Contact"
   },
   "buyPage": {
     "title": "Buy Air Conditioners",
+    "metaDescription": "Buy air conditioners in Lovech – professional installation and warranty. Brands like Daikin, Gree, Mitsubishi. Free consultation.",
     "loading": "Loading...",
     "error": "Error loading products",
     "noProducts": "No products found",
@@ -661,15 +667,23 @@
   },
   "footer": {
     "brandInfo": {
-      "tagline": "Quality and reliable solutions since 2000"
+      "tagline": "Quality and reliability since 2000 – Lovech and region"
     },
     "navigation": {
       "title": "Navigation",
       "about": "About",
-      "products": "Products & Solutions",
+      "products": "Services and Solutions",
       "buy": "Buy ACs",
       "inquiry": "Make an inquiry",
       "contact": "Contact"
+    },
+    "services": {
+      "title": "Services",
+      "chillers": "Chillers",
+      "vrvVrf": "VRV/VRF Systems",
+      "heatPumps": "Heat Pumps",
+      "coldRooms": "Cold Rooms",
+      "ventilation": "Ventilation"
     },
     "policies": {
       "title": "Policies"
@@ -709,7 +723,7 @@
   "country": "🇧🇬 Bulgaria",
   "inquiryPage": {
     "title": "Make an Inquiry",
-    "metaDescription": "Make an inquiry for air conditioners and climate solutions. Free consultation and quote from experts.",
+    "metaDescription": "Inquiry for air conditioners in Lovech and the region. Free consultation and quote from experts.",
     "hero": {
       "title": "Free Consultation & Quote",
       "subtitle": "Share your needs with us and we'll offer you the most suitable solution. Our experts will contact you within 24 hours."
@@ -770,7 +784,7 @@
   },
   "contactPage": {
     "title": "Contact",
-    "metaDescription": "Contact BGVIKI15 Ltd for air conditioners and climate solutions. Address, phones, emails and working hours.",
+    "metaDescription": "Contact – BGVIKI15 | Air conditioners and HVAC solutions in Lovech. Office at Lovech Center, phone, email and working hours.",
     "hero": {
       "title": "Contact Us",
       "subtitle": "We're here to answer all your questions and help you choose the most suitable climate solution."

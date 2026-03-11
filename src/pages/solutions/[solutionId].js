@@ -1,7 +1,10 @@
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import styles from '../../styles/Page Styles/SolutionDetail.module.css';
+
+const SITE_URL = 'https://www.hc-clima.bg';
 
 const placeholder = '/images/products/placeholder-product.svg';
 const solutions = {
@@ -72,8 +75,19 @@ export default function SolutionPage({ solutionId: propSolutionId }) {
 
   if (!solution) return <div className={styles.notFound}>Solution not found</div>;
 
+  const solutionTranslationKey = solutionId.replace(/-/g, '_');
+  const pageTitle = `${t(solution.titleKey)} - ${t('metaTitle')}`;
+  const metaDescriptionKey = `solutions.${solutionTranslationKey}.metaDescription`;
+  const metaDescription = t(metaDescriptionKey) !== metaDescriptionKey ? t(metaDescriptionKey) : t(solution.shortKey);
+
   return (
     <div className={`${styles.pageContainer} ${styles.solutionsPageBackground}`}>
+      <Head>
+        <title>{pageTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={`${SITE_URL}/solutions/${solutionId}`} />
+      </Head>
       <div className={styles.backButtonContainer}>
         <a href="/products" className={styles.backButton}>← {t('nav.products')}</a>
       </div>

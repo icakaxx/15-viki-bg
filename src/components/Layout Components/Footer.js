@@ -73,12 +73,13 @@ const Footer = () => {
     { href: "/contact", translationKey: "footer.navigation.contact", title: t('footer.navigation.contact') }
   ];
 
-  const policyItems = [
-    { href: "/privacy-policy", translationKey: "privacyPolicy.title", title: t('privacyPolicy.title') },
-    { href: "/cookie-policy", translationKey: "cookiePolicy.title", title: t('cookiePolicy.title') }
+  const solutionItems = [
+    { href: "/solutions/chillers", translationKey: "footer.services.chillers" },
+    { href: "/solutions/vrv-vrf", translationKey: "footer.services.vrvVrf" },
+    { href: "/solutions/heat-pumps", translationKey: "footer.services.heatPumps" },
+    { href: "/solutions/cold-rooms", translationKey: "footer.services.coldRooms" },
+    { href: "/solutions/ventilation", translationKey: "footer.services.ventilation" }
   ];
-
-
 
   const companyName = "БГВИКИ15 ЕООД";
 
@@ -147,20 +148,20 @@ const Footer = () => {
             </nav>
           </section>
 
-          {/* Policy Links Section */}
-          <section className={styles.policySection} aria-labelledby="policy-heading">
-            <h3 id="policy-heading" className={styles.sectionTitle}>
-              {t('footer.policies.title')}
+          {/* Services Section */}
+          <section className={styles.servicesSection} aria-labelledby="services-heading">
+            <h3 id="services-heading" className={styles.sectionTitle}>
+              {t('footer.services.title')}
             </h3>
-            <nav aria-label="Policy navigation" role="navigation">
+            <nav aria-label="Services navigation" role="navigation">
               <ul className={styles.navList}>
-                {policyItems.map((item, index) => (
+                {solutionItems.map((item, index) => (
                   <li key={index}>
                     <Link 
                       href={item.href} 
                       className={styles.navLink}
-                      title={item.title}
-                      aria-label={item.title}
+                      title={t(item.translationKey)}
+                      aria-label={t(item.translationKey)}
                       onFocus={(e) => e.target.setAttribute('data-focused', 'true')}
                       onBlur={(e) => e.target.removeAttribute('data-focused')}
                     >
@@ -172,7 +173,7 @@ const Footer = () => {
             </nav>
           </section>
 
-          {/* Contact & Social Section (Right) */}
+          {/* Contact & Social Section */}
           <section className={styles.contactSection} aria-labelledby="contact-heading">
             <h3 id="contact-heading" className={styles.sectionTitle}>
               {t('footer.contact.title')}
@@ -210,9 +211,8 @@ const Footer = () => {
                             </div>
             </div>
 
-            {/* Social Media Section */}
+            {/* Social Media - directly under contact info */}
             <div className={styles.socialSection}>
-              <h4 className={styles.socialTitle}>{t('footer.contact.social')}</h4>
               <div className={styles.socialLinks}>
                 <a 
                   href="https://facebook.com/bgviki15" 
@@ -272,13 +272,20 @@ const Footer = () => {
           </section>
         </div>
 
-        {/* Bottom Bar with Atribution */}
+        {/* Bottom Bar: Policies, Copyright, Credit */}
         <div className={styles.bottomBar}>
           <div className={styles.bottomContainer}>
-            <p className={styles.copyright}>
-              {t('footer.copyright')} 
-            </p>
-            
+            <div className={styles.bottomBarLinks}>
+              <Link href="/privacy-policy" className={styles.bottomBarLink} title={t('privacyPolicy.title')} aria-label={t('privacyPolicy.title')}>
+                {t('privacyPolicy.title')}
+              </Link>
+              <span className={styles.bottomBarSeparator} aria-hidden="true">·</span>
+              <Link href="/cookie-policy" className={styles.bottomBarLink} title={t('cookiePolicy.title')} aria-label={t('cookiePolicy.title')}>
+                {t('cookiePolicy.title')}
+              </Link>
+              <span className={styles.bottomBarSeparator} aria-hidden="true">·</span>
+              <span className={styles.copyright}>{t('footer.copyright')}</span>
+            </div>
             <div className={styles.creatorSection}>
               <span className={styles.creatorText}>
                 Изработка от <a 

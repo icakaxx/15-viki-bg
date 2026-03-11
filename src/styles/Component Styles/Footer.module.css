@@ -21,19 +21,19 @@
 
 .container {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 1fr;
-  gap: 4rem;
+  grid-template-columns: 1.1fr 1fr 1fr 1.2fr;
+  gap: 2.5rem 3rem;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
   align-items: start;
 }
 
-/* Brand Section (Left) - Enhanced */
+/* Brand Section (Left) */
 .brandSection {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.75rem;
   align-items: flex-start;
 }
 
@@ -41,8 +41,8 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 0.75rem;
-  padding: 0.5rem 0;
+  margin-bottom: 0.25rem;
+  padding: 0.25rem 0;
   position: relative;
 }
 
@@ -96,21 +96,21 @@
   font-size: 0.8rem;
 }
 
-/* Navigation Section (Center) - Enhanced */
+/* Navigation & Services Sections */
 .navigationSection,
-.policySection {
+.servicesSection {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.75rem;
 }
 
 .sectionTitle {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   color: var(--background-white);
   position: relative;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
 }
 
 .sectionTitle::after {
@@ -176,17 +176,17 @@
   border-radius: 4px;
 }
 
-/* Contact Section (Right) - Enhanced */
+/* Contact Section */
 .contactSection {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .contactInfo {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.75rem;
 }
 
 .contactItem {
@@ -257,11 +257,11 @@
 
 
 
-/* Bottom Bar - Enhanced */
+/* Bottom Bar */
 .bottomBar {
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
-  margin-top: 4rem;
-  padding: 2rem 0;
+  margin-top: 2.5rem;
+  padding: 1.25rem 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
 }
@@ -273,26 +273,52 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.bottomBarLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.bottomBarLink {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 400;
+  transition: color 0.2s ease;
+}
+
+.bottomBarLink:hover {
+  color: var(--background-white);
+}
+
+.bottomBarLink:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.bottomBarSeparator {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+  user-select: none;
 }
 
 .copyright {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
-  line-height: 1.6;
+  line-height: 1.5;
   font-weight: 400;
 }
 
-/* Social Media Section */
+/* Social Media - under contact info */
 .socialSection {
-  margin-top: 1.5rem;
-}
-
-.socialTitle {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 1rem 0;
-  color: var(--background-white);
+  margin-top: 0.5rem;
 }
 
 .socialLinks {
@@ -458,7 +484,7 @@
   }
   .container {
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 3rem;
+    gap: 2rem 2.5rem;
   }
   
   .brandSection {
@@ -484,8 +510,13 @@
     text-align: center;
   }
   
-  .contactSection {
+  .servicesSection {
     grid-column: 2;
+    text-align: center;
+  }
+
+  .contactSection {
+    grid-column: 3;
     text-align: center;
   }
 
@@ -541,7 +572,7 @@
   }
   
   .navigationSection,
-  .policySection,
+  .servicesSection,
   .contactSection {
     grid-column: 1;
     text-align: center;
