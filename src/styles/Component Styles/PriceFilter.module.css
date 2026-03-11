@@ -5,7 +5,7 @@
 
 .label {
   font-weight: 600;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   color: #444;
   margin-bottom: 0.75rem;
   display: block;
@@ -207,12 +207,12 @@
 
 /* Dual Range Slider Styles */
 .sliderContainer {
-  margin: 1rem 0;
+  margin: 0.5rem 0 0.75rem;
 }
 
 .sliderTrack {
   position: relative;
-  height: 6px;
+  height: 4px;
   background: #e0e0e0;
   border-radius: 3px;
   cursor: pointer;
@@ -228,8 +228,8 @@
 
 .sliderThumb {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   background: white;
   border: 3px solid #2c5530;
   border-radius: 50%;
@@ -250,14 +250,28 @@
 }
 
 .sliderLabels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: #666;
-  margin-top: 0.5rem;
+  display: none;
 }
 
 /* Responsive Design */
+
+.priceSummaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 0.75rem;
+}
+
+.priceSummaryLabel {
+  font-weight: 500;
+  color: #444;
+}
+
+.priceSummaryValue {
+  font-weight: 600;
+  color: #000;
+}
 @media (max-width: 768px) {
   .inputRow {
     flex-wrap: wrap;

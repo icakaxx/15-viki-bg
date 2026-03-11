@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'next-i18next';
 import styles from '../styles/Component Styles/PriceFilter.module.css';
+
+const EUR_RATE = 1.95583;
 
 const PriceFilterWithSlider = ({ 
   minValue = 0, 
@@ -16,6 +18,9 @@ const PriceFilterWithSlider = ({
   const [toPrice, setToPrice] = useState(maxValue);
   const [errors, setErrors] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const activeThumbRef = useRef(null); // 'min' | 'max' | null
+  const trackRef = useRef(null);
 
   // Update local state when props change
   useEffect(() => {
@@ -62,11 +67,12 @@ const PriceFilterWithSlider = ({
   };
 
   const handleSliderChange = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
+    if (!trackRef.current) return;
+    const rect = trackRef.current.getBoundingClientRect();
     const percent = (e.clientX - rect.left) / rect.width;
-    const value = Math.round(minBound + (maxBound - minBound) * percent);
+    const value = Math.round(minBound + (maxBound - minBound) * Math.min(1, Math.max(0, percent)));
     
-    // Determine which handle is closer
+    // Determine which handle is closer when clicking on the track
     const distToMin = Math.abs(value - fromPrice);
     const distToMax = Math.abs(value - toPrice);
     
@@ -76,6 +82,53 @@ const PriceFilterWithSlider = ({
       setToPrice(Math.min(maxBound, Math.max(value, fromPrice)));
     }
   };
+
+  const startDrag = (thumb, event) => {
+    if (disabled) return;
+    event.preventDefault();
+    activeThumbRef.current = thumb; // 'min' or 'max'
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handlePointerMove = (event) => {
+      if (!trackRef.current || !activeThumbRef.current) return;
+      const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+      const rect = trackRef.current.getBoundingClientRect();
+      const percent = (clientX - rect.left) / rect.width;
+      const rawValue = minBound + (maxBound - minBound) * Math.min(1, Math.max(0, percent));
+      const value = Math.round(rawValue);
+
+      if (activeThumbRef.current === 'min') {
+        setFromPrice(prev =>
+          Math.max(minBound, Math.min(value, toPrice))
+        );
+      } else if (activeThumbRef.current === 'max') {
+        setToPrice(prev =>
+          Math.min(maxBound, Math.max(value, fromPrice))
+        );
+      }
+    };
+
+    const handlePointerUp = () => {
+      activeThumbRef.current = null;
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('mouseup', handlePointerUp);
+    window.addEventListener('touchmove', handlePointerMove, { passive: false });
+    window.addEventListener('touchend', handlePointerUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handlePointerMove);
+      window.removeEventListener('mouseup', handlePointerUp);
+      window.removeEventListener('touchmove', handlePointerMove);
+      window.removeEventListener('touchend', handlePointerUp);
+    };
+  }, [isDragging, minBound, maxBound, fromPrice, toPrice]);
 
   const handleApply = () => {
     if (validateInputs() && onPriceChange) {
@@ -107,10 +160,18 @@ const PriceFilterWithSlider = ({
   const fromPercent = ((fromPrice - minBound) / (maxBound - minBound)) * 100;
   const toPercent = ((toPrice - minBound) / (maxBound - minBound)) * 100;
 
+  // Display values in EUR for the summary row
+  const fromEur = Math.round(((fromPrice || 0) / EUR_RATE) * 100) / 100;
+  const toEur = Math.round(((toPrice || 0) / EUR_RATE) * 100) / 100;
+
   return (
     <div className={styles.priceFilter}>
       <label className={styles.label} htmlFor="price-filter">
-        {t('buyPage.filters.priceRange')}
+        {(() => {
+          const key = 'buyPage.filters.priceTitle';
+          const translated = t(key);
+          return translated === key ? 'ФИЛТЪР ПО ЦЕНА' : translated;
+        })()}
       </label>
       
       {/* Dual Range Slider */}
@@ -119,6 +180,7 @@ const PriceFilterWithSlider = ({
           <div 
             className={styles.sliderTrack}
             onClick={handleSliderChange}
+            ref={trackRef}
           >
             <div 
               className={styles.sliderRange}
@@ -130,83 +192,46 @@ const PriceFilterWithSlider = ({
             <div 
               className={styles.sliderThumb}
               style={{ left: `${fromPercent}%` }}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                // Add drag functionality here
-              }}
+              onMouseDown={(e) => startDrag('min', e)}
+              onTouchStart={(e) => startDrag('min', e)}
             />
             <div 
               className={styles.sliderThumb}
               style={{ left: `${toPercent}%` }}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                // Add drag functionality here
-              }}
+              onMouseDown={(e) => startDrag('max', e)}
+              onTouchStart={(e) => startDrag('max', e)}
             />
-          </div>
-          <div className={styles.sliderLabels}>
-            <span>{minBound ? minBound.toLocaleString('bg-BG') : '0'} {t('buyPage.filters.bgn')}</span>
-            <span>{maxBound ? maxBound.toLocaleString('bg-BG') : '10000'} {t('buyPage.filters.bgn')}</span>
           </div>
         </div>
       )}
+
+      {/* EUR summary row under slider */}
+      <div className={styles.priceSummaryRow}>
+        <span className={styles.priceSummaryLabel}>
+          {(() => {
+            const key = 'buyPage.filters.priceLabel';
+            const translated = t(key);
+            return translated === key ? 'Цена:' : translated;
+          })()}
+        </span>
+        <span className={styles.priceSummaryValue}>
+          {fromEur.toLocaleString('bg-BG', { maximumFractionDigits: 0 })} €&nbsp;–&nbsp;{toEur.toLocaleString('bg-BG', { maximumFractionDigits: 0 })} €
+        </span>
+      </div>
       
-      <div className={styles.inputRow}>
-        <div className={`${styles.inputGroup} ${errors.min ? styles.error : ''}`}>
-          <span className={styles.prefix}>{t('buyPage.filters.from')}</span>
-          <input
-            type="number"
-            value={fromPrice}
-            onChange={handleFromChange}
-            onKeyPress={handleKeyPress}
-            onBlur={validateInputs}
-            placeholder="0"
-            min={minBound}
-            max={maxBound}
-            disabled={disabled}
-            aria-label={`${t('buyPage.filters.priceFrom')} ${t('buyPage.filters.bgn')}`}
-            className={styles.input}
-          />
-          <span className={styles.currency}>{t('buyPage.filters.bgn')}</span>
-        </div>
-
-        <div className={`${styles.inputGroup} ${errors.max ? styles.error : ''}`}>
-          <span className={styles.prefix}>{t('buyPage.filters.to')}</span>
-          <input
-            type="number"
-            value={toPrice}
-            onChange={handleToChange}
-            onKeyPress={handleKeyPress}
-            onBlur={validateInputs}
-            placeholder="3000"
-            min={minBound}
-            max={maxBound}
-            disabled={disabled}
-            aria-label={`${t('buyPage.filters.priceTo')} ${t('buyPage.filters.bgn')}`}
-            className={styles.input}
-          />
-          <span className={styles.currency}>{t('buyPage.filters.bgn')}</span>
-        </div>
-
+      <div className={styles.buttonRow}>
         <button
           className={`${styles.applyBtn} ${!canApply ? styles.disabled : ''}`}
           onClick={handleApply}
           disabled={!canApply}
           aria-label={t('buyPage.filters.apply')}
         >
-          {t('buyPage.filters.apply')}
+          {(() => {
+            const key = 'buyPage.filters.apply';
+            const translated = t(key);
+            return translated === key ? 'ФИЛТЪР' : translated;
+          })()}
         </button>
-
-        {hasChanges && (
-          <button
-            className={styles.resetBtn}
-            onClick={handleReset}
-            disabled={disabled}
-            aria-label={t('buyPage.filters.reset')}
-          >
-            {t('buyPage.filters.reset')}
-          </button>
-        )}
       </div>
 
       {/* Error Messages */}

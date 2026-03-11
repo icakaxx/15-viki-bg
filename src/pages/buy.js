@@ -4,6 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
 import PriceFilter from '../components/PriceFilter';
+import PriceFilterWithSlider from '../components/PriceFilterWithSlider';
 import QuantitySelector from '../components/QuantitySelector';
 import styles from '../styles/Page Styles/Products.module.css';
 import Image from 'next/image';
@@ -468,12 +469,13 @@ const BuyPage = ({
               </div>
             )}
 
-            <PriceFilter
+            <PriceFilterWithSlider
               minValue={currentFilters.priceRange.min}
               maxValue={currentFilters.priceRange.max}
               onPriceChange={priceChangeHandler}
               minBound={priceBounds.min}
               maxBound={priceBounds.max}
+              showSlider
             />
           </div>
         </div>
@@ -921,12 +923,13 @@ const BuyPage = ({
                   </div>
                 )}
                 <div className={styles.filterGroup}>
-                  <PriceFilter
+                  <PriceFilterWithSlider
                     minValue={(tempMobileFilters || filters).priceRange.min}
                     maxValue={(tempMobileFilters || filters).priceRange.max}
                     onPriceChange={handlePriceChangeMobileSafe}
                     minBound={priceBounds.min}
                     maxBound={priceBounds.max}
+                    showSlider
                   />
                 </div>
               </div>
@@ -1014,7 +1017,20 @@ export async function getServerSideProps({ locale, query }) {
     
     allProducts.forEach(product => {
       if (product.Brand) brands.add(product.Brand);
-      if (product.CapacityBTU != null && !isNaN(product.CapacityBTU)) capacities.add(product.CapacityBTU);
+
+      // CapacityBTU is now free text (e.g. "12000 (4.0 KW)" or "9 000 BTU")
+      // For filters we only want the first BTU number (e.g. 12000).
+      if (product.CapacityBTU != null) {
+        const text = String(product.CapacityBTU);
+        const match = text.match(/(\d[\d\s]*)/); // first number segment, allow spaces
+        if (match && match[1]) {
+          const numericBtu = parseInt(match[1].replace(/\s/g, ''), 10);
+          if (!Number.isNaN(numericBtu)) {
+            capacities.add(numericBtu);
+          }
+        }
+      }
+
       if (product.EnergyRating) energyRatings.add(product.EnergyRating);
       if (product.Colour) colors.add(product.Colour);
       if (product.Price != null) prices.push(product.Price);

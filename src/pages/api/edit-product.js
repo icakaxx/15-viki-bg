@@ -36,6 +36,8 @@ export default async function handler(req, res) {
         scop,
         power_consumption_cooling,
         power_consumption_heating,
+        cooling_power_kw,
+        heating_power_kw,
         operating_temp_range,
         // Physical Characteristics
         indoor_dimensions,
@@ -134,6 +136,8 @@ export default async function handler(req, res) {
             scop: scop !== undefined ? (scop ? parseFloat(scop) : null) : null,
             power_consumption_cooling,
             power_consumption_heating,
+            cooling_power_kw,
+            heating_power_kw,
             operating_temp_range,
             // Physical Characteristics
             indoor_dimensions,
@@ -198,6 +202,8 @@ export default async function handler(req, res) {
         if (scop !== undefined) updateData.scop = scop ? parseFloat(scop) : null;
         if (power_consumption_cooling !== undefined) updateData.power_consumption_cooling = power_consumption_cooling;
         if (power_consumption_heating !== undefined) updateData.power_consumption_heating = power_consumption_heating;
+        if (cooling_power_kw !== undefined) updateData.cooling_power_kw = cooling_power_kw;
+        if (heating_power_kw !== undefined) updateData.heating_power_kw = heating_power_kw;
         if (operating_temp_range !== undefined) updateData.operating_temp_range = operating_temp_range;
 
         // Physical Characteristics

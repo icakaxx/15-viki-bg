@@ -1259,25 +1259,41 @@ export default function ProductsManagementTab() {
                                             </div>
                                             <div className={styles.formGroup}>
                                                 <label>
-                                                    {t('admin.products.fields.powerConsumptionCooling')} (kW):
+                                                    {(() => {
+                                                        const key = 'admin.products.fields.powerConsumptionCooling';
+                                                        const translated = t(key);
+                                                        return translated === key ? 'Ел.Консумация - Охлаждане, kW' : translated;
+                                                    })()}:
                                                     <input
                                                         type="text"
                                                         name="power_consumption_cooling"
                                                         value={formData.power_consumption_cooling}
                                                         onChange={handleChange}
-                                                        placeholder={t('admin.products.hints.powerCoolingHint')}
+                                                        placeholder={(() => {
+                                                            const key = 'admin.products.hints.powerCoolingHint';
+                                                            const translated = t(key);
+                                                            return translated === key ? 'напр. \"2,1 kW\" или \"1800W\"' : translated;
+                                                        })()}
                                                     />
                                                 </label>
                                             </div>
                                             <div className={styles.formGroup}>
                                                 <label>
-                                                    {t('admin.products.fields.powerConsumptionHeating')} (kW):
+                                                    {(() => {
+                                                        const key = 'admin.products.fields.powerConsumptionHeating';
+                                                        const translated = t(key);
+                                                        return translated === key ? 'Ел.Консумация - Отопление, kW' : translated;
+                                                    })()}:
                                                     <input
                                                         type="text"
                                                         name="power_consumption_heating"
                                                         value={formData.power_consumption_heating}
                                                         onChange={handleChange}
-                                                        placeholder={t('admin.products.hints.powerHeatingHint')}
+                                                        placeholder={(() => {
+                                                            const key = 'admin.products.hints.powerHeatingHint';
+                                                            const translated = t(key);
+                                                            return translated === key ? 'напр. \"2,1 kW\" или \"1800W\"' : translated;
+                                                        })()}
                                                     />
                                                 </label>
                                             </div>

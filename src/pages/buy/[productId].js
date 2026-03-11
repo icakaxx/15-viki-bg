@@ -1321,6 +1321,8 @@ export async function getServerSideProps({ params, locale }) {
       PowerConsumptionHeating: productData.power_consumption_heating ?? 
                                productData.electricity_heating_kw ?? 
                                null,
+      CoolingPowerKw: productData.cooling_power_kw ?? null,
+      HeatingPowerKw: productData.heating_power_kw ?? null,
       OperatingTempRange: productData.operating_temp_range ?? null,
       IndoorDimensions: productData.indoor_dimensions ?? null,
       OutdoorDimensions: productData.outdoor_dimensions ?? null,
